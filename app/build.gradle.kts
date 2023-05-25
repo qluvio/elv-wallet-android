@@ -68,6 +68,8 @@ dependencies {
     implementation(libs.androidx.tv.material)
 
     implementation (libs.retrofit)
+    implementation (libs.retrofit.moshi)
+    implementation (libs.retrofit.rxjava)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
@@ -77,10 +79,15 @@ dependencies {
     // explicitly depend on RxJava's latest version for bug fixes and new features.
     // (see https://github.com/ReactiveX/RxJava/releases for latest 3.x.x version)
     implementation (libs.rxjava)
+    implementation(libs.rxkotlin)
 
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.hilt.navigation.compose)
+
+    implementation(libs.qrcode.kotlin.android)
+
+    implementation (libs.androidx.lifecycle.process)
 }
 
 // Allow references to generated code

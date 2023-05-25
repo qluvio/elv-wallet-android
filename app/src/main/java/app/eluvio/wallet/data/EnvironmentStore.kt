@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import androidx.core.content.edit
 import app.eluvio.wallet.R
+import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
@@ -42,6 +43,7 @@ class EnvironmentStore @Inject constructor(@ApplicationContext private val conte
             ?.runCatching { Environment.valueOf(this) }
             ?.onSuccess {
                 if (it != selectedEnvSubject.value) {
+                    Log.d("Emitting new selected env: $it")
                     selectedEnvSubject.onNext(it)
                 }
             }
@@ -51,7 +53,10 @@ class EnvironmentStore @Inject constructor(@ApplicationContext private val conte
         selectedEnvSubject.distinctUntilChanged()
 
     fun setSelectedEnvironment(environment: Environment) {
-        prefs.edit { putString(KEY_SELECTED_ENV, environment.name) }
+        prefs.edit {
+            Log.d("Setting env to $environment")
+            putString(KEY_SELECTED_ENV, environment.name)
+        }
     }
 
     companion object {

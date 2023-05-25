@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.eluvio.wallet.navigation.Screen
 import app.eluvio.wallet.ui.envselect.EnvSelect
+import app.eluvio.wallet.ui.mediagallery.MediaGallery
 import app.eluvio.wallet.ui.signin.SignIn
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,7 +27,8 @@ class MainActivity : ComponentActivity() {
             NavHost(navController, startDestination = "/app/home") {
                 composable(Screen.Home.route) { Home(navCallback) }
                 composable(Screen.EnvironmentSelection.route) { EnvSelect(navCallback) }
-                composable(Screen.SignIn.route){ SignIn(navCallback) }
+                composable(Screen.SignIn.route) { SignIn(navCallback) }
+                composable(Screen.MediaGallery.route) { MediaGallery(navCallback) }
             }
         }
     }

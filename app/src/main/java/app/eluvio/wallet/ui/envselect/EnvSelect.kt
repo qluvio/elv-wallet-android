@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rxjava3.subscribeAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,11 +27,11 @@ import app.eluvio.wallet.data.Environment
 import app.eluvio.wallet.navigation.Screen
 import app.eluvio.wallet.ui.util.FocusGroup
 import app.eluvio.wallet.ui.util.onFocused
+import app.eluvio.wallet.ui.util.subscribeToState
 
 @Composable
 fun EnvSelect(navCallback: (Screen) -> Unit = {}) {
-    val vm: EnvSelectViewModel = hiltViewModel()
-    vm.observeState().subscribeAsState(initial = null).value?.let { state ->
+    hiltViewModel<EnvSelectViewModel>().subscribeToState { vm, state ->
         EnvironmentSelection(
             state = state,
             onEnvironmentSelected = { vm.selectEnvironment(it) },
@@ -39,7 +42,7 @@ fun EnvSelect(navCallback: (Screen) -> Unit = {}) {
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvFoundationApi::class)
 @Composable
-fun EnvironmentSelection(
+private fun EnvironmentSelection(
     state: EnvSelectViewModel.State,
     onEnvironmentSelected: (Environment) -> Unit,
     navCallback: (Screen) -> Unit
@@ -52,13 +55,20 @@ fun EnvironmentSelection(
         FocusGroup {
             TvLazyRow {
                 items(state.availableEnvironments) { environment ->
+                    val focusRequester = remember { FocusRequester() }
                     Card(onClick = { /*no-op*/ },
                         Modifier
                             .padding(10.dp)
+                            .focusRequester(focusRequester)
                             .restorableFocus()
                             .onFocused { onEnvironmentSelected(environment) }
                     ) {
                         Text(stringResource(id = environment.envName))
+                    }
+                    LaunchedEffect(Unit) {
+                        if (environment == state.selectedEnvironment) {
+                            focusRequester.requestFocus()
+                        }
                     }
                 }
             }
@@ -71,7 +81,7 @@ fun EnvironmentSelection(
 
 @Preview(device = Devices.TV_1080p)
 @Composable
-private fun EnvSelectPreview(){
+private fun EnvSelectPreview() {
     EnvironmentSelection(
         state = EnvSelectViewModel.State(false, Environment.values().toList(), Environment.Main),
         onEnvironmentSelected = {},
