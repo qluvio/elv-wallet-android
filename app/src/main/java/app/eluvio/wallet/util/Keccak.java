@@ -1,6 +1,7 @@
 package app.eluvio.wallet.util;
 
-import java.nio.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 // copied from https://github.com/jrmelsha/keccak/blob/master/src/main/java/com/joemelsha/crypto/hash/Keccak.java
 
 /**

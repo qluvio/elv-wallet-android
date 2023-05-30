@@ -1,6 +1,5 @@
 package app.eluvio.wallet.data
 
-import app.eluvio.wallet.app.WalletApplication
 import app.eluvio.wallet.network.Auth0Api
 import app.eluvio.wallet.network.DeviceActivationData
 import app.eluvio.wallet.network.GetTokenRequest

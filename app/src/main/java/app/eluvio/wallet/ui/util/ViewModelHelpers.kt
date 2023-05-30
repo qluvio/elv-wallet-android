@@ -7,8 +7,8 @@ import app.eluvio.wallet.app.BaseViewModel
 @Composable
 inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
     block: (VM, State) -> Unit
-){
-    observeState().subscribeAsState(initial = null).value?.let{state->
+) {
+    state.subscribeAsState(initial = null).value?.let { state ->
         block(this, state)
     }
 }

@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -24,16 +25,24 @@ import app.eluvio.wallet.ui.util.subscribeToState
 fun SignIn(navCallback: (Screen) -> Unit = {}) {
     hiltViewModel<SignInViewModel>().subscribeToState { vm, state ->
         DisposableEffect(Unit) {
-            val navigationEvents = vm.observeNavigationEvents().subscribe(navCallback)
+            val navigationEvents = vm.navigationEvents.subscribe(navCallback)
             onDispose { navigationEvents.dispose() }
         }
-        SignIn(state, navCallback)
+        SignIn(
+            state,
+            onRequestNewToken = { vm.requestNewToken() },
+            navCallback
+        )
     }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun SignIn(state: SignInViewModel.State, navCallback: (Screen) -> Unit) {
+private fun SignIn(
+    state: SignInViewModel.State,
+    onRequestNewToken: () -> Unit,
+    navCallback: (Screen) -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -50,8 +59,13 @@ private fun SignIn(state: SignInViewModel.State, navCallback: (Screen) -> Unit) 
             Text(text = state.url)
             Text(text = state.userCode ?: "")
         }
-        Button(onClick = { navCallback(Screen.EnvironmentSelection) }) {
-            Text(text = "Cancel")
+        Row {
+            Button(onClick = { onRequestNewToken() }) {
+                Text("Request New Code")
+            }
+            Button(onClick = { navCallback(Screen.EnvironmentSelection) }) {
+                Text(text = "Cancel")
+            }
         }
     }
 }
@@ -70,6 +84,7 @@ private fun SignInPreview() {
             userCode = "ABC-DEF",
             url = "https://eluv.io",
         ),
+        onRequestNewToken = {},
         navCallback = {}
     )
 }

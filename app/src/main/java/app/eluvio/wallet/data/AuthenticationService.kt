@@ -18,8 +18,8 @@ class AuthenticationService @Inject constructor(
     private val authServicesApi: AuthServicesApi,
     private val fabricConfigStore: FabricConfigStore,
     private val tokenStore: TokenStore,
-){
-     fun getFabricToken(idToken: String): Single<String> {
+) {
+    fun getFabricToken(idToken: String): Single<String> {
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()
             .flatMap { fabricConfig ->
@@ -44,6 +44,7 @@ class AuthenticationService @Inject constructor(
                     }
             }
     }
+
     private fun createFabricToken(tokenString: String, signature: String): String {
         val compressedToken = tokenString.zlibCompress()
         val bytes = signature.hexToByteArray() + compressedToken
@@ -51,6 +52,7 @@ class AuthenticationService @Inject constructor(
             Log.d("fabric token: $it")
         }
     }
+
     private fun createTokenParts(address: String, qspace: String): TokenParts {
         val addressBytes = address.hexToByteArray()
         val base64Address = Base64.encodeToString(addressBytes, Base64.DEFAULT)
@@ -74,7 +76,9 @@ class AuthenticationService @Inject constructor(
         Log.d("eth msg hash: $hash")
         return TokenParts(accountId, hash, tokenString)
     }
+
     data class TokenParts(val accountId: String, val hash: String, val tokenString: String)
+
     /**
      * [accountId] is a base58 encoded string of the address prefixed with "ikms"
      */
@@ -119,7 +123,7 @@ class AuthenticationService @Inject constructor(
         return output.copyOfRange(0, compressedDataLength)
     }
 
-    companion object{
+    companion object {
         private const val WALLET_JWT_LOGIN_PATH = "/wlt/login/jwt"
         private const val WALLET_SIGN_PATH = "/wlt/sign/eth/"
     }
