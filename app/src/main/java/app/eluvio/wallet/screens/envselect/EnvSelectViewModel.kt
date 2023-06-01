@@ -1,4 +1,4 @@
-package app.eluvio.wallet.ui.envselect
+package app.eluvio.wallet.screens.envselect
 
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.Environment

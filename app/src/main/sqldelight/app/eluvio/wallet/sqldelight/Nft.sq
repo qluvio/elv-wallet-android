@@ -1,0 +1,18 @@
+CREATE TABLE Nft (
+  id  INTEGER PRIMARY KEY AUTOINCREMENT,
+  full_name TEXT NOT NULL
+--   @field:Json(name = "block") val block: Int = 0,
+--       @field:Json(name = "created") val created: Int = 0,
+--       @field:Json(name = "cap") val cap: Int = 0,
+--       @field:Json(name = "contract_name") val contractName: String = "",
+--       @field:Json(name = "contract_addr") val contractAddress: String = "",
+--       @field:Json(name = "hold") val hold: Int = 0,
+--       @field:Json(name = "ordinal") val ordinal: Int = 0,
+--       @field:Json(name = "token_id") val tokenId: Int = 0,
+--       @field:Json(name = "token_id_str") val tokenIdStr: String = "",
+--       @field:Json(name = "token_owner") val tokenOwner: String = "",
+--       @field:Json(name = "token_uri") val tokenUri: String = "",
+--   //    @field:Json(name="meta") val meta : NFTMetaResponse = NFTMetaResponse(),
+--   //    @field:Json(name="val meta_full") val metaFull: JSON?,
+--       @field:Json(name = "has_playable_feature") val hasPlayableFeature: Boolean = false,
+);

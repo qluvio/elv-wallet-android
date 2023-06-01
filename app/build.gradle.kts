@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.sqldelight)
     kotlin("kapt")
 }
 
@@ -52,7 +53,6 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.ui)
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -62,10 +62,6 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
-
-    implementation(libs.androidx.tv.foundation)
-    implementation(libs.androidx.tv.material)
 
     implementation (libs.retrofit)
     implementation (libs.retrofit.moshi)
@@ -88,9 +84,19 @@ dependencies {
     implementation(libs.qrcode.kotlin.android)
 
     implementation (libs.androidx.lifecycle.process)
+
+    implementation(libs.sqldelight.androidDriver)
 }
 
 // Allow references to generated code
 kapt {
     correctErrorTypes = true
+}
+
+sqldelight {
+    databases {
+        create("WalletDatabase") {
+            packageName.set("app.eluvio.wallet")
+        }
+    }
 }

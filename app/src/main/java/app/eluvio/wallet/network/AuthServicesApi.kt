@@ -1,8 +1,10 @@
 package app.eluvio.wallet.network
 
+import app.eluvio.wallet.sqldelight.Nft
 import com.squareup.moshi.Json
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Url
 
@@ -18,6 +20,9 @@ interface AuthServicesApi {
         @Url url: String,
         @Body body: SignBody
     ): Single<SignResponse>
+
+    @GET
+    fun getWalletData(@Url url: String): Single<String>
 }
 
 data class LoginBody(
@@ -40,4 +45,9 @@ data class SignResponse(
     //    val v: String,
     //    val s: String,
     //    val r: String,
+)
+
+data class WalletDataResponse(
+    @field:Json(name = "contents") val nfts: List<Nft>,
+//    @field:Json(name = "paging") val paging: Paging,
 )

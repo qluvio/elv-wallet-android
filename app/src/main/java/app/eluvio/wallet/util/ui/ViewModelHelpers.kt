@@ -1,4 +1,4 @@
-package app.eluvio.wallet.ui.util
+package app.eluvio.wallet.util.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rxjava3.subscribeAsState

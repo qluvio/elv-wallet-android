@@ -1,4 +1,4 @@
-package app.eluvio.wallet.ui.mediagallery
+package app.eluvio.wallet.screens.mediagallery
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.Screen
-import app.eluvio.wallet.ui.util.subscribeToState
+import app.eluvio.wallet.util.ui.subscribeToState
 
 @Composable
 fun MediaGallery(navCallback: (Screen) -> Unit) {

@@ -6,6 +6,7 @@ import app.eluvio.wallet.network.SignBody
 import app.eluvio.wallet.util.Base58
 import app.eluvio.wallet.util.Keccak
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.mapNotNull
 import io.reactivex.rxjava3.core.Single
 import java.util.Date
 import java.util.zip.Deflater
@@ -28,7 +29,9 @@ class AuthenticationService @Inject constructor(
                 Log.d("fetching fabric token from: $url  id_token=${idToken}")
                 authServicesApi.authdLogin(url)
                     .doOnSuccess {
+                        Log.d("login response: $it")
                         tokenStore.clusterToken = it.clusterToken
+                        tokenStore.accountId = it.address
                     }
                     .flatMap { jwtResponse ->
                         val (accountId, hash, tokenString) = createTokenParts(
@@ -42,6 +45,20 @@ class AuthenticationService @Inject constructor(
                                 }
                             }
                     }
+            }
+    }
+
+    fun getWalletData() {
+        fabricConfigStore.observeFabricConfiguration()
+            .firstOrError()
+            .mapNotNull { fabricConfig ->
+                tokenStore.accountId?.let { accountId ->
+                    val authBaseUrl = fabricConfig.network.services.authService.first()
+                    "$authBaseUrl$WALLET_DATA_PATH$accountId"
+                }
+            }
+            .flatMapSingle { url ->
+                authServicesApi.getWalletData(url)
             }
     }
 
@@ -126,5 +143,6 @@ class AuthenticationService @Inject constructor(
     companion object {
         private const val WALLET_JWT_LOGIN_PATH = "/wlt/login/jwt"
         private const val WALLET_SIGN_PATH = "/wlt/sign/eth/"
+        private const val WALLET_DATA_PATH = "/wlt/"
     }
 }

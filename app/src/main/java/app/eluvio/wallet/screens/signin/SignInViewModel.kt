@@ -1,4 +1,4 @@
-package app.eluvio.wallet.ui.signin
+package app.eluvio.wallet.screens.signin
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -36,12 +36,7 @@ class SignInViewModel @Inject constructor(
     private var activationDataDisposable: Disposable? = null
     private var activationCompleteDisposable: Disposable? = null
 
-    override fun onStart() {
-        super.onStart()
-        observeActivationData()
-    }
-
-    fun requestNewToken() {
+    fun requestNewToken(qrSize: Int) {
         observeActivationData()
     }
 

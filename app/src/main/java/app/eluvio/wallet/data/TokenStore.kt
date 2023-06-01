@@ -16,4 +16,6 @@ class TokenStore @Inject constructor(
     var idToken by prefs.nullableString("id_token")
     var clusterToken by prefs.nullableString("cluster_token")
     var fabricToken by prefs.nullableString("id_token")
+
+    var accountId by prefs.nullableString("account_id")
 }
