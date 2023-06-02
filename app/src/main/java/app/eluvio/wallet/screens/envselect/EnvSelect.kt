@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -24,7 +23,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +32,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
-import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
@@ -59,12 +56,6 @@ fun EnvSelect(navCallback: NavigationCallback) {
             navCallback
         )
     }
-}
-
-
-@Composable
-fun TextStyle.updateColor(block: Color.() -> Color): TextStyle {
-    return copy(color = color.takeOrElse { LocalContentColor.current }.block())
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvFoundationApi::class)
