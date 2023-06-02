@@ -37,17 +37,17 @@ class SignInViewModel @Inject constructor(
     private var activationCompleteDisposable: Disposable? = null
 
     fun requestNewToken(qrSize: Int) {
-        observeActivationData()
+        observeActivationData(qrSize)
     }
 
-    private fun observeActivationData() {
+    private fun observeActivationData(qrSize: Int) {
         activationDataDisposable?.dispose()
         activationDataDisposable = deviceActivationStore.observeActivationData()
             .doOnNext {
                 observeActivationComplete(it)
             }
             .switchMapSingle { activationData ->
-                generateQrCode(activationData.verificationUriComplete)
+                generateQrCode(activationData.verificationUriComplete, qrSize)
                     .map { qr -> activationData to qr }
             }
             .subscribeBy { (activationData, qrCode) ->
@@ -63,10 +63,14 @@ class SignInViewModel @Inject constructor(
             .addTo(disposables)
     }
 
-    private fun generateQrCode(url: String): Single<Bitmap> {
+    private fun generateQrCode(url: String, size: Int): Single<Bitmap> {
         return Single.create {
             val bytes = ByteArrayOutputStream()
-            QRCode(url).render(margin = 20).writeImage(bytes)
+            val qr = QRCode(url)
+            val rawData = qr.encode()
+            val margin = 20 //(pixels)
+            val cellSize = (size - margin) / rawData.size
+            qr.render(margin = margin, cellSize = cellSize, rawData = rawData).writeImage(bytes)
             val bitmap = BitmapFactory.decodeByteArray(bytes.toByteArray(), 0, bytes.size())
             Log.d("QR generated for url: $url")
             it.onSuccess(bitmap)
