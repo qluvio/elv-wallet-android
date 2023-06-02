@@ -8,6 +8,7 @@ hilt-navigation-compose = "1.0.0"
 lifecycle-process = "2.6.1"
 lifecycle-viewmodel-ktx = "2.6.1"
 navigation-compose = "2.5.3"
+ksp = "1.8.21-1.0.11"
 org-jetbrains-kotlin-android = "1.8.21"
 core-ktx = "1.10.1"
 leanback = "1.0.0"
@@ -22,6 +23,7 @@ rxjava = "3.1.5"
 rxkotlin = "3.0.1"
 compose-compiler = "1.4.7"
 sqldelight = "2.0.0-rc01"
+moshi = "1.15.0"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
@@ -43,6 +45,8 @@ hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", ve
 leanback = { group = "androidx.leanback", name = "leanback", version.ref = "leanback" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity-compose" }
 qrcode-kotlin-android = { module = "io.github.g0dkar:qrcode-kotlin-android", version.ref = "qrcode-kotlin-android" }
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
+moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 retrofit = { module = "com.squareup.retrofit2:retrofit" }
 retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
 retrofit-rxjava = { module = "com.squareup.retrofit2:adapter-rxjava3", version.ref = "retrofit" }
@@ -57,6 +61,7 @@ com-android-application = { id = "com.android.application", version.ref = "agp" 
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 
 [bundles]
 

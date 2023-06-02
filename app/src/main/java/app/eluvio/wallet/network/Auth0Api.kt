@@ -1,6 +1,7 @@
 package app.eluvio.wallet.network
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import io.reactivex.rxjava3.core.Single
 import retrofit2.Response
 import retrofit2.http.Body
@@ -18,11 +19,13 @@ interface Auth0Api {
 
 private const val AUTH0_CLIENT_ID = "***REMOVED***"
 
+@JsonClass(generateAdapter = true)
 data class Auth0Request(
     @field:Json(name = "client_id") val clientId: String = AUTH0_CLIENT_ID,
     @field:Json(name = "scope") val scope: String = "openid profile email",
 )
 
+@JsonClass(generateAdapter = true)
 data class DeviceActivationData(
     @field:Json(name = "device_code") val deviceCode: String,
     @field:Json(name = "user_code") val userCode: String,
@@ -32,12 +35,14 @@ data class DeviceActivationData(
     @field:Json(name = "interval") val intervalSeconds: Long,
 )
 
+@JsonClass(generateAdapter = true)
 data class GetTokenRequest(
     @field:Json(name = "grant_type") val grantType: String = "urn:ietf:params:oauth:grant-type:device_code",
     @field:Json(name = "client_id") val clientId: String = AUTH0_CLIENT_ID,
     @field:Json(name = "device_code") val deviceCode: String,
 )
 
+@JsonClass(generateAdapter = true)
 data class GetTokenResponse(
     @field:Json(name = "id_token") val idToken: String,
 )

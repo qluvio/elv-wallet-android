@@ -5,14 +5,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -28,8 +26,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -43,10 +39,9 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.Screen
+import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.ui.AppLogo
 import app.eluvio.wallet.util.ui.subscribeToState
@@ -78,7 +73,10 @@ private fun SignIn(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        AppLogo(Modifier.align(Alignment.Start).padding(start = 50.dp, top = 20.dp))
+        AppLogo(
+            Modifier
+                .align(Alignment.Start)
+                .padding(start = 50.dp, top = 20.dp))
         Text(text = "Scan QR Code", style = MaterialTheme.typography.title_62)
         Spacer(modifier = Modifier.height(10.dp))
         Text(
@@ -120,7 +118,7 @@ private fun SignIn(
                 Text("Request New Code", Modifier.padding(10.dp))
             }
             Spacer(modifier = Modifier.width(35.dp))
-            Card(onClick = { navCallback(Screen.GoBack) }) {
+            Card(onClick = { navCallback(Screens.GoBack) }) {
                 Text(text = "Cancel", Modifier.padding(10.dp))
             }
         }
@@ -128,7 +126,7 @@ private fun SignIn(
     }
 }
 
-@Preview(device = Devices.TV_1080p)
+@Preview(device = Devices.TV_720p)
 @Composable
 private fun SignInPreview() = EluvioThemePreview {
     val bitmap = BitmapFactory.decodeResource(

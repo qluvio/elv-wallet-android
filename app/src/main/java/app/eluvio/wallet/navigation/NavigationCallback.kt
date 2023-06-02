@@ -8,12 +8,12 @@ import androidx.navigation.NavOptionsBuilder
  * but also make it easy to invoke without providing the NavOptionsBuilder part.
  */
 interface NavigationCallback {
-    operator fun invoke(screen: Screen, options: (NavOptionsBuilder.() -> Unit)? = null)
+    operator fun invoke(screen: Screens, options: (NavOptionsBuilder.() -> Unit)? = null)
 
     companion object {
-        operator fun invoke(block: (Screen, (NavOptionsBuilder.() -> Unit)?) -> Unit): NavigationCallback {
+        operator fun invoke(block: (Screens, (NavOptionsBuilder.() -> Unit)?) -> Unit): NavigationCallback {
             return object : NavigationCallback {
-                override fun invoke(screen: Screen, options: (NavOptionsBuilder.() -> Unit)?) {
+                override fun invoke(screen: Screens, options: (NavOptionsBuilder.() -> Unit)?) {
                     block(screen, options)
                 }
             }

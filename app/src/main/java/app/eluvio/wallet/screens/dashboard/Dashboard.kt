@@ -2,7 +2,7 @@ package app.eluvio.wallet.screens.dashboard
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -23,6 +23,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,7 +38,9 @@ import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.Screen
+import app.eluvio.wallet.navigation.Screens
+import app.eluvio.wallet.screens.dashboard.myitems.MyItems
+import app.eluvio.wallet.screens.dashboard.profile.Profile
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.ui.AppLogo
 import app.eluvio.wallet.util.ui.EluvioTabIndicator
@@ -54,14 +57,18 @@ fun Dashboard(navCallback: NavigationCallback) {
 @Composable
 private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCallback) {
     val tabNavController = rememberNavController()
-    Column {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TopBar(tabNavController, navCallback)
         NavHost(
             navController = tabNavController,
-            startDestination = tabs.first(),
-            modifier = Modifier.fillMaxSize()
+            startDestination = Tabs.MyItems.route, // This doesn't actually matter
+            modifier = Modifier.fillMaxHeight()
         ) {
-            tabs.forEach { tab -> composable(tab) { Temp(tab) } }
+            composable(Tabs.MyItems.route) { MyItems() }
+            composable(Tabs.MyMedia.route) { Temp(Tabs.MyMedia) }
+            composable(Tabs.Profile.route) { Profile() }
+            composable(Tabs.Search.route) { Temp(Tabs.Search) }
+
         }
     }
 }
@@ -73,7 +80,7 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
     FocusGroup(contentAlignment = Alignment.Center, modifier = Modifier.onPreviewKeyEvent {
         // Exit screen when back is pressed while FocusGroup is focused
         if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-            navCallback(Screen.GoBack)
+            navCallback(Screens.GoBack)
             return@onPreviewKeyEvent true
         }
         false
@@ -96,12 +103,12 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
                     .focusRequester(focusRequester)
             ) {
                 LaunchedEffect(Unit) { focusRequester.requestFocus() }
-                tabs.forEachIndexed { index, tab ->
+                Tabs.values().forEachIndexed { index, tab ->
                     Tab(
                         selected = selectedTabIndex == index,
                         onFocus = {
                             selectedTabIndex = index
-                            tabNavController.navigate(tab)
+                            tabNavController.navigate(tab.route)
                             Log.e("Tab focused: $tab")
                         },
                         onClick = { focusManager.moveFocus(FocusDirection.Down) },
@@ -109,7 +116,7 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
                             .padding(10.dp)
                             .restorableFocus(),
                     ) {
-                        Text(text = tab)
+                        Text(text = stringResource(tab.title))
                     }
                 }
             }
@@ -118,14 +125,12 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
 }
 
 @Composable
-fun Temp(tab: String) {
-    Text(text = "Welcome to $tab")
+fun Temp(tab: Tabs) {
+    Text(text = "Welcome to ${stringResource(id = tab.title)}")
 }
 
-private val tabs = listOf("My Items", "My Media", "Profile", "Search")
-
 @Composable
-@Preview(device = Devices.TV_1080p)
+@Preview(device = Devices.TV_720p)
 private fun DashboardPreview() {
     val state = DashboardViewModel.State(0)
     Dashboard(state, NavigationCallback.NoOp)

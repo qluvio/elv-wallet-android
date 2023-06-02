@@ -39,7 +39,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.Environment
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.Screen
+import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
 import app.eluvio.wallet.util.ui.EluvioTabIndicator
@@ -88,7 +88,7 @@ private fun EnvironmentSelection(
         FocusGroup(Modifier.onPreviewKeyEvent {
             // Exit screen when back is pressed while FocusGroup is focused
             if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-                navCallback(Screen.GoBack)
+                navCallback(Screens.GoBack)
                 return@onPreviewKeyEvent true
             }
             false
@@ -121,13 +121,13 @@ private fun EnvironmentSelection(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Card(onClick = { navCallback(Screen.SignIn) }) {
+        Card(onClick = { navCallback(Screens.SignIn) }) {
             Text(stringResource(R.string.sign_in_button), Modifier.padding(10.dp))
         }
     }
 }
 
-@Preview(device = Devices.TV_1080p)
+@Preview(device = Devices.TV_720p)
 @Composable
 private fun EnvSelectPreview() = EluvioThemePreview {
     EnvironmentSelection(

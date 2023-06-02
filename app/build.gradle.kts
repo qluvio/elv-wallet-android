@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.sqldelight)
     kotlin("kapt")
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -86,6 +87,9 @@ dependencies {
     implementation (libs.androidx.lifecycle.process)
 
     implementation(libs.sqldelight.androidDriver)
+
+    ksp(libs.moshi.codegen)
+    implementation(libs.moshi.kotlin)
 }
 
 // Allow references to generated code

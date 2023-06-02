@@ -24,7 +24,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.Screen
+import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.screens.dashboard.Dashboard
 import app.eluvio.wallet.screens.envselect.EnvSelect
 import app.eluvio.wallet.screens.signin.SignIn
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
             val navCallback: NavigationCallback = remember {
                 NavigationCallback { screen, navOptionsBuilder ->
-                    if (screen == Screen.GoBack) {
+                    if (screen == Screens.GoBack) {
                         if (!navController.popBackStack()) {
                             onBackPressedDispatcher.onBackPressed()
                         }
@@ -64,10 +64,10 @@ class MainActivity : ComponentActivity() {
                             navController,
                             startDestination = "/app/home"
                         ) {
-                            composable(Screen.Home.route) { Home(navCallback) }
-                            composable(Screen.EnvironmentSelection.route) { EnvSelect(navCallback) }
-                            composable(Screen.SignIn.route) { SignIn(navCallback) }
-                            composable(Screen.Dashboard.route) { Dashboard(navCallback) }
+                            composable(Screens.Home.route) { Home(navCallback) }
+                            composable(Screens.EnvironmentSelection.route) { EnvSelect(navCallback) }
+                            composable(Screens.SignIn.route) { SignIn(navCallback) }
+                            composable(Screens.Dashboard.route) { Dashboard(navCallback) }
                         }
                     }
                 }
@@ -81,8 +81,8 @@ fun Home(onNavigation: NavigationCallback) {
     //if signed in
     // wallet screen
     //else
-    onNavigation(Screen.EnvironmentSelection) {
-        popUpTo(Screen.Home.route) {
+    onNavigation(Screens.EnvironmentSelection) {
+        popUpTo(Screens.Home.route) {
             inclusive = true
         }
     }
