@@ -9,11 +9,12 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.Text
+import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.Screen
 import app.eluvio.wallet.util.ui.subscribeToState
 
 @Composable
-fun MediaGallery(navCallback: (Screen) -> Unit) {
+fun MediaGallery(navCallback: NavigationCallback) {
     hiltViewModel<MediaGalleryViewModel>().subscribeToState { vm, state ->
         MediaGallery(state)
     }

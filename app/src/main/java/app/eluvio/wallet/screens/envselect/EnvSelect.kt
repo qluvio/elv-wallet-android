@@ -17,6 +17,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -37,6 +42,7 @@ import androidx.tv.material3.TabRowDefaults
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.Environment
+import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.Screen
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
@@ -45,7 +51,7 @@ import app.eluvio.wallet.util.ui.subscribeToState
 import app.eluvio.wallet.util.ui.withAlpha
 
 @Composable
-fun EnvSelect(navCallback: (Screen) -> Unit = {}) {
+fun EnvSelect(navCallback: NavigationCallback) {
     hiltViewModel<EnvSelectViewModel>().subscribeToState { vm, state ->
         EnvironmentSelection(
             state = state,
@@ -66,7 +72,7 @@ fun TextStyle.updateColor(block: Color.() -> Color): TextStyle {
 private fun EnvironmentSelection(
     state: EnvSelectViewModel.State,
     onEnvironmentSelected: (Environment) -> Unit,
-    navCallback: (Screen) -> Unit
+    navCallback: NavigationCallback
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -87,7 +93,15 @@ private fun EnvironmentSelection(
             text = "Media Wallet",
             style = MaterialTheme.typography.header_53.copy(fontSize = 50.sp)
         )
-        FocusGroup {
+
+        FocusGroup(Modifier.onPreviewKeyEvent {
+            // Exit screen when back is pressed while FocusGroup is focused
+            if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
+                navCallback(Screen.GoBack)
+                return@onPreviewKeyEvent true
+            }
+            false
+        }) {
             val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
             TabRow(
                 selectedTabIndex = selectedTabIndex,
@@ -140,6 +154,6 @@ private fun EnvSelectPreview() = EluvioThemePreview {
             Environment.Main
         ),
         onEnvironmentSelected = {},
-        navCallback = {}
+        navCallback = NavigationCallback.NoOp
     )
 }

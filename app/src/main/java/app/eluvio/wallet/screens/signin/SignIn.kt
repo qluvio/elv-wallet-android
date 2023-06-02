@@ -42,6 +42,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.Screen
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
@@ -50,10 +51,10 @@ import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.ui.subscribeToState
 
 @Composable
-fun SignIn(navCallback: (Screen) -> Unit = {}) {
+fun SignIn(navCallback: NavigationCallback) {
     hiltViewModel<SignInViewModel>().subscribeToState { vm, state ->
         DisposableEffect(Unit) {
-            val navigationEvents = vm.navigationEvents.subscribe(navCallback)
+            val navigationEvents = vm.navigationEvents.subscribe { navCallback(it) }
             onDispose { navigationEvents.dispose() }
         }
         SignIn(
@@ -69,7 +70,7 @@ fun SignIn(navCallback: (Screen) -> Unit = {}) {
 private fun SignIn(
     state: SignInViewModel.State,
     onRequestNewToken: (qrSize: Int) -> Unit,
-    navCallback: (Screen) -> Unit
+    navCallback: NavigationCallback
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -163,6 +164,6 @@ private fun SignInPreview() = EluvioThemePreview {
             url = "https://eluv.io",
         ),
         onRequestNewToken = {},
-        navCallback = {}
+        navCallback = NavigationCallback.NoOp
     )
 }
