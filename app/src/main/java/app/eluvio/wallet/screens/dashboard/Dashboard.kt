@@ -66,7 +66,7 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
         ) {
             composable(Tabs.MyItems.route) { MyItems() }
             composable(Tabs.MyMedia.route) { Temp(Tabs.MyMedia) }
-            composable(Tabs.Profile.route) { Profile() }
+            composable(Tabs.Profile.route) { Profile(navCallback) }
             composable(Tabs.Search.route) { Temp(Tabs.Search) }
 
         }

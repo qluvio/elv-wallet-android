@@ -1,6 +1,7 @@
 package app.eluvio.wallet.data
 
 import android.content.Context
+import androidx.core.content.edit
 import app.eluvio.wallet.util.nullableString
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -17,5 +18,7 @@ class TokenStore @Inject constructor(
     var clusterToken by prefs.nullableString("cluster_token")
     var fabricToken by prefs.nullableString("id_token")
 
-    var accountId by prefs.nullableString("account_id")
+    fun wipe() {
+        prefs.edit { clear() }
+    }
 }

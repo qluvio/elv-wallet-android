@@ -44,15 +44,13 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.ui.AppLogo
+import app.eluvio.wallet.util.ui.handleNavigationEvents
 import app.eluvio.wallet.util.ui.subscribeToState
 
 @Composable
 fun SignIn(navCallback: NavigationCallback) {
     hiltViewModel<SignInViewModel>().subscribeToState { vm, state ->
-        DisposableEffect(Unit) {
-            val navigationEvents = vm.navigationEvents.subscribe { navCallback(it) }
-            onDispose { navigationEvents.dispose() }
-        }
+        vm.handleNavigationEvents(navCallback)
         SignIn(
             state,
             onRequestNewToken = { vm.requestNewToken(it) },
@@ -76,7 +74,8 @@ private fun SignIn(
         AppLogo(
             Modifier
                 .align(Alignment.Start)
-                .padding(start = 50.dp, top = 20.dp))
+                .padding(start = 50.dp, top = 20.dp)
+        )
         Text(text = "Scan QR Code", style = MaterialTheme.typography.title_62)
         Spacer(modifier = Modifier.height(10.dp))
         Text(

@@ -27,6 +27,7 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.screens.dashboard.Dashboard
 import app.eluvio.wallet.screens.envselect.EnvSelect
+import app.eluvio.wallet.screens.home.Home
 import app.eluvio.wallet.screens.signin.SignIn
 import app.eluvio.wallet.theme.EluvioTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -72,18 +73,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun Home(onNavigation: NavigationCallback) {
-    //if signed in
-    // wallet screen
-    //else
-    onNavigation(Screens.EnvironmentSelection) {
-        popUpTo(Screens.Home.route) {
-            inclusive = true
         }
     }
 }

@@ -21,21 +21,32 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.Environment
+import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
+import app.eluvio.wallet.util.ui.handleNavigationEvents
 import app.eluvio.wallet.util.ui.subscribeToState
 import app.eluvio.wallet.util.ui.withAlpha
 
 @Composable
-fun Profile() {
+fun Profile(navCallback: NavigationCallback) {
     hiltViewModel<ProfileViewModel>().subscribeToState { vm, state ->
-        Profile(state)
+        vm.handleNavigationEvents(navCallback = NavigationCallback { screen, _ ->
+            navCallback(screen) {
+                //TODO find a better way to handle these nav args
+                popUpTo(Screens.Home.route) {
+                    inclusive = true
+                }
+            }
+        })
+        Profile(state, onSignOut = vm::signOut)
     }
 }
 
 @Composable
 @OptIn(ExperimentalTvMaterial3Api::class)
-fun Profile(state: ProfileViewModel.State) {
+fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxWidth(0.6f)
@@ -56,7 +67,7 @@ fun Profile(state: ProfileViewModel.State) {
 
         Spacer(Modifier.weight(1f)) // take up remaining space
 
-        Card(onClick = { /*TODO*/ }, Modifier.align(Alignment.CenterHorizontally)) {
+        Card(onClick = onSignOut, Modifier.align(Alignment.CenterHorizontally)) {
             Text(text = "Sign Out", Modifier.padding(10.dp))
         }
         Spacer(Modifier.height(20.dp))
@@ -93,6 +104,7 @@ private fun ProfilePreview() = EluvioThemePreview {
             userId = "ius1f1fd2d8d82e21d",
             network = Environment.Demo,
             fabricNode = "https://host-2-2-2-2.cf.io"
-        )
+        ),
+        onSignOut = {}
     )
 }

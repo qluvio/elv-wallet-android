@@ -14,4 +14,8 @@ class UserStore @Inject constructor(
     fun saveUser(walletAddress: String) {
         userQueries.insert(walletAddress)
     }
+
+    fun deleteAll() {
+        userQueries.deleteAll()
+    }
 }

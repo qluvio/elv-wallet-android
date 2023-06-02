@@ -6,7 +6,6 @@ import app.eluvio.wallet.network.SignBody
 import app.eluvio.wallet.util.Base58
 import app.eluvio.wallet.util.Keccak
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.toHexByteArray
 import io.reactivex.rxjava3.core.Single
 import java.util.Date

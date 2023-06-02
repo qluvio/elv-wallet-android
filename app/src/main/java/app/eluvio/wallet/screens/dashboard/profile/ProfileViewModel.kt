@@ -4,7 +4,9 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.Environment
 import app.eluvio.wallet.data.EnvironmentStore
 import app.eluvio.wallet.data.FabricConfigStore
+import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.UserStore
+import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.util.userId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
@@ -17,6 +19,7 @@ class ProfileViewModel @Inject constructor(
     private val userStore: UserStore,
     private val fabricConfigStore: FabricConfigStore,
     private val environmentStore: EnvironmentStore,
+    private val signOutHandler: SignOutHandler,
 ) : BaseViewModel<ProfileViewModel.State>(State()) {
     data class State(
         val address: String = "",
@@ -44,5 +47,11 @@ class ProfileViewModel @Inject constructor(
                 updateState { state }
             }
             .addTo(disposables)
+    }
+
+    fun signOut() {
+        // TODO there's navigation problems to solve here after sign out
+//        signOutHandler.signOut()
+//        navigateTo(Screens.Home)
     }
 }
