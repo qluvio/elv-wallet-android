@@ -4,16 +4,17 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.Environment
 import app.eluvio.wallet.data.EnvironmentStore
 import app.eluvio.wallet.data.FabricConfigStore
-import app.eluvio.wallet.data.TokenStore
+import app.eluvio.wallet.data.UserStore
+import app.eluvio.wallet.util.userId
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.kotlin.withLatestFrom
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val tokenStore: TokenStore,
+    private val userStore: UserStore,
     private val fabricConfigStore: FabricConfigStore,
     private val environmentStore: EnvironmentStore,
 ) : BaseViewModel<ProfileViewModel.State>(State()) {
@@ -27,19 +28,20 @@ class ProfileViewModel @Inject constructor(
     override fun onStart() {
         super.onStart()
 
-        environmentStore
-            .observeSelectedEnvironment()
-            .withLatestFrom(fabricConfigStore.observeFabricConfiguration())
-            .subscribeBy { (env, config) ->
-                updateState {
-                    val address = tokenStore.accountId ?: "MISSING"
-                    State(
-                        address = address,
-                        userId = "TBD",
-                        network = env,
-                        fabricNode = config.endpoint
-                    )
-                }
+        Observable.combineLatest(
+            environmentStore.observeSelectedEnvironment(),
+            fabricConfigStore.observeFabricConfiguration(),
+            userStore.getCurrentUser().toObservable()
+        ) { env, config, user ->
+            State(
+                address = user.address,
+                userId = user.userId,
+                network = env,
+                fabricNode = config.endpoint
+            )
+        }
+            .subscribeBy { state ->
+                updateState { state }
             }
             .addTo(disposables)
     }

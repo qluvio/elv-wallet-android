@@ -54,6 +54,7 @@ rxandroid = { module = "io.reactivex.rxjava3:rxandroid", version.ref = "rxandroi
 rxjava = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava" }
 rxkotlin = { module = "io.reactivex.rxjava3:rxkotlin", version.ref = "rxkotlin" }
 sqldelight-androidDriver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
+sqldelight-rxjava3 = { module = "app.cash.sqldelight:rxjava3-extensions", version.ref = "sqldelight" }
 web3j = { module = "org.web3j:core", version.ref = "web3j" }
 
 [plugins]

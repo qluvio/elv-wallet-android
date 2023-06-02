@@ -1,6 +1,5 @@
 package app.eluvio.wallet.network
 
-import app.eluvio.wallet.sqldelight.Nft
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import io.reactivex.rxjava3.core.Single
@@ -54,8 +53,8 @@ data class SignResponse(
     //    val r: String,
 )
 
-@JsonClass(generateAdapter = true)
-data class WalletDataResponse(
-    @field:Json(name = "contents") val nfts: List<Nft>,
+//@JsonClass(generateAdapter = true)
+//data class WalletDataResponse(
+//    @field:Json(name = "contents") val nfts: List<Nft>,
 //    @field:Json(name = "paging") val paging: Paging,
-)
+//)

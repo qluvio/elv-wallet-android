@@ -7,6 +7,7 @@ import app.eluvio.wallet.util.Base58
 import app.eluvio.wallet.util.Keccak
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
+import app.eluvio.wallet.util.toHexByteArray
 import io.reactivex.rxjava3.core.Single
 import java.util.Date
 import java.util.zip.Deflater
@@ -19,6 +20,7 @@ class AuthenticationService @Inject constructor(
     private val authServicesApi: AuthServicesApi,
     private val fabricConfigStore: FabricConfigStore,
     private val tokenStore: TokenStore,
+    private val userStore: UserStore,
 ) {
     fun getFabricToken(idToken: String): Single<String> {
         return fabricConfigStore.observeFabricConfiguration()
@@ -31,7 +33,7 @@ class AuthenticationService @Inject constructor(
                     .doOnSuccess {
                         Log.d("login response: $it")
                         tokenStore.clusterToken = it.clusterToken
-                        tokenStore.accountId = it.address
+                        userStore.saveUser(it.address)
                     }
                     .flatMap { jwtResponse ->
                         val (accountId, hash, tokenString) = createTokenParts(
@@ -49,29 +51,29 @@ class AuthenticationService @Inject constructor(
     }
 
     fun getWalletData() {
-        fabricConfigStore.observeFabricConfiguration()
-            .firstOrError()
-            .mapNotNull { fabricConfig ->
-                tokenStore.accountId?.let { accountId ->
-                    val authBaseUrl = fabricConfig.network.services.authService.first()
-                    "$authBaseUrl$WALLET_DATA_PATH$accountId"
-                }
-            }
-            .flatMapSingle { url ->
-                authServicesApi.getWalletData(url)
-            }
+//        fabricConfigStore.observeFabricConfiguration()
+//            .firstOrError()
+//            .mapNotNull { fabricConfig ->
+//                tokenStore.accountId?.let { accountId ->
+//                    val authBaseUrl = fabricConfig.network.services.authService.first()
+//                    "$authBaseUrl$WALLET_DATA_PATH$accountId"
+//                }
+//            }
+//            .flatMapSingle { url ->
+//                authServicesApi.getWalletData(url)
+//            }
     }
 
     private fun createFabricToken(tokenString: String, signature: String): String {
         val compressedToken = tokenString.zlibCompress()
-        val bytes = signature.hexToByteArray() + compressedToken
+        val bytes = signature.toHexByteArray() + compressedToken
         return "acspjc${Base58.encode(bytes)}".also {
             Log.d("fabric token: $it")
         }
     }
 
     private fun createTokenParts(address: String, qspace: String): TokenParts {
-        val addressBytes = address.hexToByteArray()
+        val addressBytes = address.toHexByteArray()
         val base64Address = Base64.encodeToString(addressBytes, Base64.DEFAULT)
         val base58Address = Base58.encode(addressBytes)
         val sub = "iusr${base58Address}"
@@ -118,14 +120,6 @@ class AuthenticationService @Inject constructor(
     }
 
     private fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
-
-    private fun String.hexToByteArray(): ByteArray {
-        check(length % 2 == 0) { "Must have an even length" }
-        return removePrefix("0x")
-            .chunked(2)
-            .map { it.toInt(16).toByte() }
-            .toByteArray()
-    }
 
     private fun String.zlibCompress(): ByteArray {
         val input = this.toByteArray()

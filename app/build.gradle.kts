@@ -87,6 +87,7 @@ dependencies {
     implementation (libs.androidx.lifecycle.process)
 
     implementation(libs.sqldelight.androidDriver)
+    implementation(libs.sqldelight.rxjava3)
 
     ksp(libs.moshi.codegen)
     implementation(libs.moshi.kotlin)

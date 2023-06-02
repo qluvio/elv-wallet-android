@@ -4,6 +4,7 @@ import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import app.eluvio.wallet.WalletDatabase
+import app.eluvio.wallet.sqldelight.UserQueries
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +26,11 @@ object SqlDelightModule {
     fun provideDriver(@ApplicationContext context: Context): SqlDriver {
         return AndroidSqliteDriver(WalletDatabase.Schema, context, "media-wallet.db")
     }
+}
+
+@InstallIn(SingletonComponent::class)
+@Module
+object QueriesModule {
+    @Provides
+    fun provideUserQueries(db: WalletDatabase): UserQueries = db.userQueries
 }

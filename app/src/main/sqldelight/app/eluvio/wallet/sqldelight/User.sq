@@ -1,0 +1,12 @@
+CREATE TABLE User (
+  address  TEXT PRIMARY KEY,
+  foo TEXT -- placeholder to make Queries return User instead of String
+);
+
+getCurrentUser:
+SELECT * FROM User
+LIMIT 1 ;
+
+insert:
+INSERT INTO User (address, foo)
+VALUES (?,"foo");
