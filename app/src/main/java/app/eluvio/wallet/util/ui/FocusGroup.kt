@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -54,6 +55,7 @@ import androidx.tv.foundation.ExperimentalTvFoundationApi
 @Composable
 fun FocusGroup(
     modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
     content: @Composable FocusGroupScope.() -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -70,6 +72,7 @@ fun FocusGroup(
     val state = FocusGroupState(previousFocusedItemHash = previousFocusedItemHash)
 
     Box(
+        contentAlignment = contentAlignment,
         modifier = modifier
             .onFocusChanged {
                 if (it.isFocused) {

@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.mediagallery
+package app.eluvio.wallet.screens.dashboard
 
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.network.AuthServicesApi
@@ -6,8 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class MediaGalleryViewModel @Inject constructor(
+class DashboardViewModel @Inject constructor(
     private val authServicesApi: AuthServicesApi
-) : BaseViewModel<MediaGalleryViewModel.State>(State()) {
+) : BaseViewModel<DashboardViewModel.State>(State()) {
     data class State(val f: Int = 0)
 }

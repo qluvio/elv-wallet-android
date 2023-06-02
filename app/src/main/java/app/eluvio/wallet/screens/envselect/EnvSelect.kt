@@ -35,7 +35,6 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
-import androidx.tv.material3.TabRowDefaults
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.Environment
@@ -43,6 +42,7 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.Screen
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
+import app.eluvio.wallet.util.ui.EluvioTabIndicator
 import app.eluvio.wallet.util.ui.FocusGroup
 import app.eluvio.wallet.util.ui.subscribeToState
 import app.eluvio.wallet.util.ui.withAlpha
@@ -97,15 +97,7 @@ private fun EnvironmentSelection(
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 contentColor = Color.White,
-                indicator = { tabPositions ->
-                    tabPositions.getOrNull(selectedTabIndex)?.let {
-                        TabRowDefaults.PillIndicator(
-                            currentTabPosition = it,
-                            activeColor = Color(0xFFDCDCDC),
-                            inactiveColor = Color.Transparent
-                        )
-                    }
-                }
+                indicator = { EluvioTabIndicator(selectedTabIndex, it) }
             ) {
                 state.availableEnvironments.forEach { environment ->
                     val selected = state.selectedEnvironment == environment

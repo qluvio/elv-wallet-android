@@ -48,6 +48,7 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.util.ui.AppLogo
 import app.eluvio.wallet.util.ui.subscribeToState
 
 @Composable
@@ -77,7 +78,7 @@ private fun SignIn(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        AppLogo()
+        AppLogo(Modifier.align(Alignment.Start).padding(start = 50.dp, top = 20.dp))
         Text(text = "Scan QR Code", style = MaterialTheme.typography.title_62)
         Spacer(modifier = Modifier.height(10.dp))
         Text(
@@ -124,27 +125,6 @@ private fun SignIn(
             }
         }
         Spacer(modifier = Modifier.height(50.dp))
-    }
-}
-
-@Composable
-fun ColumnScope.AppLogo() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .align(Alignment.Start)
-            .padding(start = 50.dp, top = 20.dp)
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.elv_logo),
-            contentDescription = "Eluvio Logo",
-            modifier = Modifier.size(50.dp)
-        )
-        Spacer(modifier = Modifier.width(20.dp))
-        Text(
-            text = stringResource(id = R.string.app_name),
-            style = MaterialTheme.typography.label_40
-        )
     }
 }
 

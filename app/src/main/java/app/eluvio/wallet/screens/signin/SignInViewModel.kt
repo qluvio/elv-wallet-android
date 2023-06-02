@@ -11,7 +11,6 @@ import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.g0dkar.qrcode.QRCode
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
@@ -104,34 +103,9 @@ class SignInViewModel @Inject constructor(
                 .subscribeBy(
                     onSuccess = {
                         Log.d("Got a token $it")
-                        navigateTo(Screen.MediaGallery)
+                        navigateTo(Screen.Dashboard)
                     }
                 )
                 .addTo(disposables)
-    }
-
-    private fun awaitActivationComplete(activationData: DeviceActivationData): Completable {
-        return Observable.interval(activationData.intervalSeconds, TimeUnit.SECONDS)
-            .doOnSubscribe {
-                Log.d("starting to poll token for userCode=${activationData.userCode} (intervalSeconds=${activationData.intervalSeconds})")
-            }
-            .flatMapSingle { deviceActivationStore.checkToken(activationData.deviceCode) }
-            .mapNotNull { it.body() }
-            .firstOrError(
-                // stop the interval as soon as [checkToken] returns a non-null value
-            )
-            .flatMap {
-                // Now that we have an idToken, we can get a fabricToken.
-                // this includes some local crypto magic, as well as a sign request from the server.
-                authenticationService.getFabricToken(it.idToken)
-            }
-            .doOnSuccess {
-                Log.d("Got a token $it")
-                navigateTo(Screen.MediaGallery)
-            }
-            .doOnError {
-                Log.e("activation polling error", it)
-            }
-            .ignoreElement()
     }
 }

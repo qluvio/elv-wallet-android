@@ -25,8 +25,8 @@ import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.Screen
+import app.eluvio.wallet.screens.dashboard.Dashboard
 import app.eluvio.wallet.screens.envselect.EnvSelect
-import app.eluvio.wallet.screens.mediagallery.MediaGallery
 import app.eluvio.wallet.screens.signin.SignIn
 import app.eluvio.wallet.theme.EluvioTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
                             composable(Screen.Home.route) { Home(navCallback) }
                             composable(Screen.EnvironmentSelection.route) { EnvSelect(navCallback) }
                             composable(Screen.SignIn.route) { SignIn(navCallback) }
-                            composable(Screen.MediaGallery.route) { MediaGallery(navCallback) }
+                            composable(Screen.Dashboard.route) { Dashboard(navCallback) }
                         }
                     }
                 }
