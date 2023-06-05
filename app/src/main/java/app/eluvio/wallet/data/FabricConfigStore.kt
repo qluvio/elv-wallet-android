@@ -6,6 +6,7 @@ import app.eluvio.wallet.util.asSharedState
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.timeout
 import io.reactivex.rxjava3.core.Observable
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.minutes
@@ -29,7 +30,14 @@ class FabricConfigStore @Inject constructor(
                     }
             }
             // As long as someone is subscribed, this will reset every [configFetchInterval]
+            .doOnError { Log.e("Error fetching config:", it) }
+            .retryWhen {
+                // retry with delay on actual errors
+                //TODO: Make this retry with backoff
+                it.delay(5, TimeUnit.SECONDS)
+            }
             .timeout(configFetchInterval)
+            // retry immediately on fetch interval "error"
             .retry()
             .asSharedState()
 

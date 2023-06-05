@@ -38,7 +38,7 @@ import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.Screens
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.dashboard.myitems.MyItems
 import app.eluvio.wallet.screens.dashboard.profile.Profile
 import app.eluvio.wallet.util.logging.Log
@@ -49,7 +49,7 @@ import app.eluvio.wallet.util.ui.subscribeToState
 
 @Composable
 fun Dashboard(navCallback: NavigationCallback) {
-    hiltViewModel<DashboardViewModel>().subscribeToState { vm, state ->
+    hiltViewModel<DashboardViewModel>().subscribeToState(navCallback) { _, state ->
         Dashboard(state, navCallback)
     }
 }
@@ -80,7 +80,7 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
     FocusGroup(contentAlignment = Alignment.Center, modifier = Modifier.onPreviewKeyEvent {
         // Exit screen when back is pressed while FocusGroup is focused
         if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-            navCallback(Screens.GoBack)
+            navCallback(NavigationEvent.GoBack)
             return@onPreviewKeyEvent true
         }
         false
@@ -133,5 +133,5 @@ fun Temp(tab: Tabs) {
 @Preview(device = Devices.TV_720p)
 private fun DashboardPreview() {
     val state = DashboardViewModel.State(0)
-    Dashboard(state, NavigationCallback.NoOp)
+    Dashboard(state, navCallback = { })
 }

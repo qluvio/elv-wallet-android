@@ -6,6 +6,7 @@ import app.eluvio.wallet.data.EnvironmentStore
 import app.eluvio.wallet.data.FabricConfigStore
 import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.UserStore
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.util.userId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,8 +51,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun signOut() {
-        // TODO there's navigation problems to solve here after sign out
-//        signOutHandler.signOut()
-//        navigateTo(Screens.Home)
+        signOutHandler.signOut()
+        navigateTo(NavigationEvent.ClearStackAndSetRoot(Screens.Home))
     }
 }

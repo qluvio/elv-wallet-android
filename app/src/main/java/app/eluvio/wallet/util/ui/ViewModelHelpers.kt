@@ -7,22 +7,24 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.util.logging.Log
 
+// TODO: this name mention nothing about navigation being handled.. :/
 @Composable
 inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
+    noinline navCallback: NavigationCallback,
     block: (VM, State) -> Unit
 ) {
-    state.subscribeAsState(initial = null).value?.let { state ->
-        block(this, state)
-    }
-}
+    val vm = this
 
-@Composable
-fun BaseViewModel<*>.handleNavigationEvents(navCallback: NavigationCallback) {
+    // Handle navigation events
     DisposableEffect(Unit) {
-        val navigationEvents = navigationEvents.subscribe {
-            Log.d("${this.javaClass.simpleName} navigating to $it")
+        val navigationEvents = vm.navigationEvents.subscribe {
+            Log.d("${vm.javaClass.simpleName} navigating to $it")
             navCallback(it)
         }
         onDispose { navigationEvents.dispose() }
+    }
+
+    vm.state.subscribeAsState(initial = null).value?.let { state ->
+        block(vm, state)
     }
 }

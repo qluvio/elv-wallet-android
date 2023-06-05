@@ -22,24 +22,14 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.Environment
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.util.ui.handleNavigationEvents
 import app.eluvio.wallet.util.ui.subscribeToState
 import app.eluvio.wallet.util.ui.withAlpha
 
 @Composable
 fun Profile(navCallback: NavigationCallback) {
-    hiltViewModel<ProfileViewModel>().subscribeToState { vm, state ->
-        vm.handleNavigationEvents(navCallback = NavigationCallback { screen, _ ->
-            navCallback(screen) {
-                //TODO find a better way to handle these nav args
-                popUpTo(Screens.Home.route) {
-                    inclusive = true
-                }
-            }
-        })
+    hiltViewModel<ProfileViewModel>().subscribeToState(navCallback) { vm, state ->
         Profile(state, onSignOut = vm::signOut)
     }
 }

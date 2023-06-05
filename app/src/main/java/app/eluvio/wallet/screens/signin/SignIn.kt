@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,18 +38,16 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.Screens
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.ui.AppLogo
-import app.eluvio.wallet.util.ui.handleNavigationEvents
 import app.eluvio.wallet.util.ui.subscribeToState
 
 @Composable
 fun SignIn(navCallback: NavigationCallback) {
-    hiltViewModel<SignInViewModel>().subscribeToState { vm, state ->
-        vm.handleNavigationEvents(navCallback)
+    hiltViewModel<SignInViewModel>().subscribeToState(navCallback) { vm, state ->
         SignIn(
             state,
             onRequestNewToken = { vm.requestNewToken(it) },
@@ -117,7 +114,7 @@ private fun SignIn(
                 Text("Request New Code", Modifier.padding(10.dp))
             }
             Spacer(modifier = Modifier.width(35.dp))
-            Card(onClick = { navCallback(Screens.GoBack) }) {
+            Card(onClick = { navCallback(NavigationEvent.GoBack) }) {
                 Text(text = "Cancel", Modifier.padding(10.dp))
             }
         }
@@ -141,6 +138,6 @@ private fun SignInPreview() = EluvioThemePreview {
             url = "https://eluv.io",
         ),
         onRequestNewToken = {},
-        navCallback = NavigationCallback.NoOp
+        navCallback = {},
     )
 }

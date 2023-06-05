@@ -1,7 +1,7 @@
 package app.eluvio.wallet.app
 
 import androidx.lifecycle.ViewModel
-import app.eluvio.wallet.navigation.Screens
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.util.asSharedState
 import app.eluvio.wallet.util.logging.Log
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -12,8 +12,9 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
-    private val _navigationEvents = PublishSubject.create<Screens>()
-    val navigationEvents: Observable<Screens> =
+    // TODO: decouple this from Compose.
+    private val _navigationEvents = PublishSubject.create<NavigationEvent>()
+    val navigationEvents: Observable<NavigationEvent> =
         _navigationEvents.observeOn(AndroidSchedulers.mainThread())
 
     private val _state = BehaviorSubject.createDefault(initialState)
@@ -47,8 +48,8 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
 
     }
 
-    protected fun navigateTo(screen: Screens) {
-        _navigationEvents.onNext(screen)
+    protected fun navigateTo(event: NavigationEvent) {
+        _navigationEvents.onNext(event)
     }
 
     protected fun updateState(mapper: State.() -> State) {

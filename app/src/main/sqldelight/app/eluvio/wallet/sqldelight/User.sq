@@ -8,7 +8,7 @@ SELECT * FROM User
 LIMIT 1 ;
 
 insert:
-INSERT INTO User (address, foo)
+REPLACE INTO User (address, foo)
 VALUES (?,"foo");
 
 deleteAll:
