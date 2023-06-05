@@ -1,18 +1,60 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.tv.foundation.lazy.grid.TvGridCells
+import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
+import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
+import androidx.tv.material3.CardLayoutDefaults
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.StandardCardLayout
 import androidx.tv.material3.Text
+import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.Screens
+import app.eluvio.wallet.navigation.asPushDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.util.ui.subscribeToState
+import coil.compose.AsyncImage
 
 @Composable
-fun MyItems() {
-    Text(text = "hi")
+fun MyItems(navCallback: NavigationCallback) {
+    hiltViewModel<MyItemsViewModel>().subscribeToState(navCallback) { vm, state ->
+        MyItems(state, navCallback)
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallback) {
+    val gridState = rememberTvLazyGridState()
+    TvLazyVerticalGrid(columns = TvGridCells.Adaptive(128.dp), state = gridState) {
+        items(state.media) { media ->
+            StandardCardLayout(
+                modifier = Modifier.padding(10.dp),
+                imageCard = {
+                    CardLayoutDefaults.ImageCard(
+                        onClick = { navCallback(Screens.VideoPlayer.asPushDestination()) },
+                        interactionSource = it
+                    ) {
+                        AsyncImage(model = media.img, contentDescription = "idk")
+                    }
+                },
+                title = {
+                    Text(media.title)
+                }
+            )
+        }
+    }
 }
 
 @Composable
-@Preview(Devices.TV_720p)
+@Preview(device = Devices.TV_720p)
 private fun MyItemsPreview() = EluvioThemePreview {
-    MyItems()
+    MyItems(MyItemsViewModel.State(), navCallback = { })
 }

@@ -24,6 +24,7 @@ rxkotlin = "3.0.1"
 compose-compiler = "1.4.7"
 sqldelight = "2.0.0-rc01"
 moshi = "1.15.0"
+coil = "2.4.0"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
@@ -39,6 +40,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-tv-foundation = { module = "androidx.tv:tv-foundation", version.ref = "compose-tv" }
 androidx-tv-material = { module = "androidx.tv:tv-material", version.ref = "compose-tv" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }

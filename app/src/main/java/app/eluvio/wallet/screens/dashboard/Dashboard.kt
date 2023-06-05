@@ -64,7 +64,7 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
             startDestination = Tabs.MyItems.route, // This doesn't actually matter
             modifier = Modifier.fillMaxHeight()
         ) {
-            composable(Tabs.MyItems.route) { MyItems() }
+            composable(Tabs.MyItems.route) { MyItems(navCallback) }
             composable(Tabs.MyMedia.route) { Temp(Tabs.MyMedia) }
             composable(Tabs.Profile.route) { Profile(navCallback) }
             composable(Tabs.Search.route) { Temp(Tabs.Search) }

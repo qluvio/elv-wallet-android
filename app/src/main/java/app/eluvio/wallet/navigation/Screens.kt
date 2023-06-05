@@ -9,5 +9,6 @@ enum class Screens(val route: String) {
     SignIn("/app/sign_in"),
     // Where a logged in user lands and can start browsing media
     Dashboard("/app/dashboard"),
+    VideoPlayer("/app/video_player"),
     ;
 }

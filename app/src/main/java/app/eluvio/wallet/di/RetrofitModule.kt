@@ -50,11 +50,11 @@ object RetrofitModule {
             .addInterceptor { chain ->
                 val request = chain.request()
                 val builder = request.newBuilder()
-                if (request.url().toString().endsWith("wlt/login/jwt")) {
+                if (request.url.toString().endsWith("wlt/login/jwt")) {
                     tokenStore.idToken?.let { idToken ->
                         builder.header("Authorization", "Bearer $idToken")
                     }
-                } else if (request.url().toString().contains("wlt/sign/eth")) {
+                } else if (request.url.toString().contains("wlt/sign/eth")) {
                     tokenStore.clusterToken?.let { walletToken ->
                         builder.header("Authorization", "Bearer $walletToken")
                     }

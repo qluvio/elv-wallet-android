@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -27,6 +28,7 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.screens.dashboard.Dashboard
+import app.eluvio.wallet.screens.dashboard.videoplayer.VideoPlayerActivity
 import app.eluvio.wallet.screens.envselect.EnvSelect
 import app.eluvio.wallet.screens.home.Home
 import app.eluvio.wallet.screens.signin.SignIn
@@ -65,12 +67,13 @@ class MainActivity : ComponentActivity() {
     private fun navGraph(navCallback: NavigationCallback): (NavGraphBuilder.() -> Unit) = {
         // This is more code than just writing it out line by line, but this way we are forced at compile time to handle new screens.
         Screens.values().forEach { screen ->
-            composable(screen.route) {
-                when (screen) {
-                    Screens.Home -> Home(navCallback)
-                    Screens.EnvironmentSelection -> EnvSelect(navCallback)
-                    Screens.SignIn -> SignIn(navCallback)
-                    Screens.Dashboard -> Dashboard(navCallback)
+            when (screen) {
+                Screens.Home -> composable(screen.route) { Home(navCallback) }
+                Screens.EnvironmentSelection -> composable(screen.route) { EnvSelect(navCallback) }
+                Screens.SignIn -> composable(screen.route) { SignIn(navCallback) }
+                Screens.Dashboard -> composable(screen.route) { Dashboard(navCallback) }
+                Screens.VideoPlayer -> activity(screen.route) {
+                    activityClass = VideoPlayerActivity::class
                 }
             }
         }
