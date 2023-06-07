@@ -25,6 +25,7 @@ compose-compiler = "1.4.7"
 sqldelight = "2.0.0-rc01"
 moshi = "1.15.0"
 coil = "2.4.0"
+media3 = "1.0.2"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
@@ -39,6 +40,12 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
 androidx-tv-foundation = { module = "androidx.tv:tv-foundation", version.ref = "compose-tv" }
 androidx-tv-material = { module = "androidx.tv:tv-material", version.ref = "compose-tv" }
+androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+androidx-media3-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "media3" }
+androidx-media3-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3" }
+androidx-media3-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "media3" }
+androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
+androidx-media3-ui-leanback = { module = "androidx.media3:media3-ui-leanback", version.ref = "media3" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }

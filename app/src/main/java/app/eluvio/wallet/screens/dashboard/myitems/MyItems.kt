@@ -34,7 +34,7 @@ fun MyItems(navCallback: NavigationCallback) {
 private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallback) {
     val gridState = rememberTvLazyGridState()
     TvLazyVerticalGrid(columns = TvGridCells.Adaptive(128.dp), state = gridState) {
-        items(state.media) { media ->
+        items(state.media, key = { it.id }) { media ->
             StandardCardLayout(
                 modifier = Modifier.padding(10.dp),
                 imageCard = {

@@ -23,6 +23,7 @@ android {
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -92,6 +93,13 @@ dependencies {
 
     ksp(libs.moshi.codegen)
     implementation(libs.moshi.kotlin)
+
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.dash)
+    implementation(libs.androidx.media3.hls)
+    implementation(libs.androidx.media3.okhttp)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.ui.leanback)
 }
 
 // Allow references to generated code

@@ -83,6 +83,15 @@ esac
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
+# pick up 'javaHome' from local.properties if set
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source $DIR/local.properties 2>/dev/null
+
+if ! [ -z "$javaHome" ]
+then
+        JAVA_HOME=$javaHome
+fi
+
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
