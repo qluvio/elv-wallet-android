@@ -1,7 +1,6 @@
 package app.eluvio.wallet.theme
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -107,7 +106,6 @@ private fun eluvioTextStlye(size: TextUnit, fontWeight: FontWeight): TextStyle {
         fontSize = size,
         fontFamily = interFontFamily,
         fontWeight = fontWeight,
-        color = Color.White
     )
 }
 

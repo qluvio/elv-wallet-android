@@ -1,4 +1,4 @@
-package app.eluvio.wallet.network
+package app.eluvio.wallet.network.dto
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

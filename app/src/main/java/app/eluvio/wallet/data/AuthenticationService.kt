@@ -49,20 +49,6 @@ class AuthenticationService @Inject constructor(
             }
     }
 
-    fun getWalletData() {
-//        fabricConfigStore.observeFabricConfiguration()
-//            .firstOrError()
-//            .mapNotNull { fabricConfig ->
-//                tokenStore.accountId?.let { accountId ->
-//                    val authBaseUrl = fabricConfig.network.services.authService.first()
-//                    "$authBaseUrl$WALLET_DATA_PATH$accountId"
-//                }
-//            }
-//            .flatMapSingle { url ->
-//                authServicesApi.getWalletData(url)
-//            }
-    }
-
     private fun createFabricToken(tokenString: String, signature: String): String {
         val compressedToken = tokenString.zlibCompress()
         val bytes = signature.toHexByteArray() + compressedToken
@@ -136,6 +122,5 @@ class AuthenticationService @Inject constructor(
     companion object {
         private const val WALLET_JWT_LOGIN_PATH = "/wlt/login/jwt"
         private const val WALLET_SIGN_PATH = "/wlt/sign/eth/"
-        private const val WALLET_DATA_PATH = "/wlt/"
     }
 }

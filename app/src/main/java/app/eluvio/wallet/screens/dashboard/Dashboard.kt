@@ -108,7 +108,9 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
                         selected = selectedTabIndex == index,
                         onFocus = {
                             selectedTabIndex = index
-                            tabNavController.navigate(tab.route)
+                            tabNavController.navigate(tab.route) {
+                                launchSingleTop = true
+                            }
                             Log.e("Tab focused: $tab")
                         },
                         onClick = { focusManager.moveFocus(FocusDirection.Down) },

@@ -66,18 +66,19 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    implementation (libs.retrofit)
-    implementation (libs.retrofit.moshi)
-    implementation (libs.retrofit.rxjava)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.moshi)
+    implementation(libs.retrofit.rxjava)
+    implementation(libs.okhttp.logginginterceptor)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
-    implementation (libs.rxandroid)
+    implementation(libs.rxandroid)
     // Because RxAndroid releases are few and far between, it is recommended you also
     // explicitly depend on RxJava's latest version for bug fixes and new features.
     // (see https://github.com/ReactiveX/RxJava/releases for latest 3.x.x version)
-    implementation (libs.rxjava)
+    implementation(libs.rxjava)
     implementation(libs.rxkotlin)
 
     implementation(libs.androidx.navigation.compose)
@@ -86,7 +87,7 @@ dependencies {
 
     implementation(libs.qrcode.kotlin.android)
 
-    implementation (libs.androidx.lifecycle.process)
+    implementation(libs.androidx.lifecycle.process)
 
     implementation(libs.sqldelight.androidDriver)
     implementation(libs.sqldelight.rxjava3)

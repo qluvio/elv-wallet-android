@@ -4,12 +4,14 @@ import app.eluvio.wallet.data.TokenStore
 import app.eluvio.wallet.network.Auth0Api
 import app.eluvio.wallet.network.AuthServicesApi
 import app.eluvio.wallet.network.FabricConfigApi
+import app.eluvio.wallet.network.GatewayApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -26,6 +28,11 @@ object RetrofitModule {
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://localhost/")
+            .client(
+                OkHttpClient.Builder()
+                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .build()
+            )
             .addConverterFactory(MoshiConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .build()
@@ -37,6 +44,11 @@ object RetrofitModule {
     fun provideAuth0Retrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://prod-elv.us.auth0.com/")
+            .client(
+                OkHttpClient.Builder()
+                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .build()
+            )
             .addConverterFactory(MoshiConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .build()
@@ -65,6 +77,7 @@ object RetrofitModule {
                 }
                 chain.proceed(builder.build())
             }
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .build()
         return Retrofit.Builder()
             .baseUrl("https://localhost")
@@ -76,6 +89,9 @@ object RetrofitModule {
 
     @Provides
     fun provideConfigApi(@Fabric retrofit: Retrofit): FabricConfigApi = retrofit.create()
+
+    @Provides
+    fun provideGatewayApi(@AuthD retrofit: Retrofit): GatewayApi = retrofit.create()
 
     @Provides
     fun provideAuthServicesApi(@AuthD retrofit: Retrofit): AuthServicesApi = retrofit.create()

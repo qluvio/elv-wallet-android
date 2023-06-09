@@ -12,5 +12,7 @@ fun EluvioColorScheme(): ColorScheme {
         surface = Color(0xFF1C1C1C),
         surfaceVariant = Color.White,
         onSurfaceVariant = Color.Black,
+        secondaryContainer = Color(0xFF626262),
+        onSecondaryContainer = Color.White,
     )
 }

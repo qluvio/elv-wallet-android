@@ -19,11 +19,11 @@ fun EluvioTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = EluvioColorScheme(),
         shapes = MaterialTheme.shapes.copy(
-            extraSmall = RoundedCornerShape(0.dp),
-            small = RoundedCornerShape(0.dp),
-            medium = RoundedCornerShape(0.dp),
-            large = RoundedCornerShape(0.dp),
-            extraLarge = RoundedCornerShape(0.dp),
+            extraSmall = RoundedCornerShape(5.dp),
+            small = RoundedCornerShape(16.dp),
+            medium = RoundedCornerShape(5.dp),
+            large = RoundedCornerShape(5.dp),
+            extraLarge = RoundedCornerShape(5.dp),
         ),
         typography = EluvioTypography(),
         content = content
