@@ -4,7 +4,7 @@ There's a lot of boilerplate involved with creating a new Composable/ViewModel p
 Use this [Template with multiple files](https://www.jetbrains.com/help/idea/templates-with-multiple-files.html) to generate the files for you.
 
 ```
-#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME}
+package ${PACKAGE_NAME}
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Devices
@@ -36,7 +36,7 @@ private fun ${NAME}Preview() = EluvioThemePreview {
 And create a Child Template File for the ViewModel
 
 ```
-#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME}
+package ${PACKAGE_NAME}
 
 import app.eluvio.wallet.app.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
