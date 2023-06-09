@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.dashboard
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.Icon
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
@@ -119,7 +119,18 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
                             .padding(10.dp)
                             .restorableFocus(),
                     ) {
-                        Text(text = stringResource(tab.title))
+                        val icon = tab.icon
+                        if (icon != null) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = stringResource(tab.title)
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(tab.title),
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            )
+                        }
                     }
                 }
             }

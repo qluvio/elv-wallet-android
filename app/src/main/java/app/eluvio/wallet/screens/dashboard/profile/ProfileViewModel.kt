@@ -1,10 +1,10 @@
 package app.eluvio.wallet.screens.dashboard.profile
 
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.FabricConfigStore
-import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.Screens

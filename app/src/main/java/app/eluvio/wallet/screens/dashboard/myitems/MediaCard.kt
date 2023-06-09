@@ -28,7 +28,6 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
-import app.eluvio.wallet.util.logging.Log
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalTvMaterial3Api::class)
