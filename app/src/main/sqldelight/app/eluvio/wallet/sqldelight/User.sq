@@ -1,5 +1,5 @@
 CREATE TABLE User (
-  address  TEXT PRIMARY KEY,
+  address TEXT PRIMARY KEY,
   foo TEXT -- placeholder to make Queries return User instead of String
 );
 

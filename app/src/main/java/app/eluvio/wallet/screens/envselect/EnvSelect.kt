@@ -37,7 +37,7 @@ import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.data.Environment
+import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.Screens

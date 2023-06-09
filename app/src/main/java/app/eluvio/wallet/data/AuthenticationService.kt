@@ -1,6 +1,9 @@
 package app.eluvio.wallet.data
 
 import android.util.Base64
+import app.eluvio.wallet.data.stores.FabricConfigStore
+import app.eluvio.wallet.data.stores.TokenStore
+import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.network.AuthServicesApi
 import app.eluvio.wallet.network.SignBody
 import app.eluvio.wallet.util.Base58

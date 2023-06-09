@@ -1,4 +1,4 @@
-package app.eluvio.wallet.data
+package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.network.Auth0Api
 import app.eluvio.wallet.network.DeviceActivationData

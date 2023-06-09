@@ -1,8 +1,10 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.ContentStore
+import app.eluvio.wallet.app.Events
+import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -29,17 +31,23 @@ class MyItemsViewModel @Inject constructor(
 
     override fun onStart() {
         super.onStart()
-        contentStore.getWalletData()
+        contentStore.observeWalletData()
+            .doOnNext {
+                if (it.isFailure) {
+                    fireEvent(Events.NetworkError)
+                }
+            }
+            .mapNotNull { it.getOrNull() }
             .map { response ->
-                response.contents
+                response
                     .groupBy { it.contract_addr }
                     .map { (contractAddress, nfts) ->
                         val sampleNft = nfts.first()
                         State.Media(
                             id = contractAddress,
-                            imageUrl = sampleNft.meta.image,
-                            title = sampleNft.meta.display_name ?: "no desc",
-                            subtitle = sampleNft.meta.edition_name,
+                            imageUrl = sampleNft.imageUrl,
+                            title = sampleNft.display_name ?: "no desc",
+                            subtitle = sampleNft.edition_name,
                             // If there's only one token, we can show the token id
                             tokenId = sampleNft.token_id.takeIf { nfts.size == 1 },
                             tokenCount = nfts.size
@@ -47,7 +55,7 @@ class MyItemsViewModel @Inject constructor(
                     }
             }
             .subscribeBy(
-                onSuccess = {
+                onNext = {
                     updateState { copy(media = it, loading = false) }
                 },
                 onError = {

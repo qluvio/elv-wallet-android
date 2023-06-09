@@ -1,7 +1,7 @@
 package app.eluvio.wallet.screens.home
 
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.TokenStore
+import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.util.logging.Log

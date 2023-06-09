@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import app.eluvio.wallet.data.FabricConfigStore
+import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.HiltAndroidApp
 import io.reactivex.rxjava3.disposables.Disposable

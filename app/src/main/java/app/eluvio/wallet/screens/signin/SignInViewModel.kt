@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.AuthenticationService
-import app.eluvio.wallet.data.DeviceActivationStore
+import app.eluvio.wallet.data.stores.DeviceActivationStore
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.Screens
 import app.eluvio.wallet.network.DeviceActivationData

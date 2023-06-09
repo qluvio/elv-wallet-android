@@ -1,4 +1,4 @@
-package app.eluvio.wallet.data
+package app.eluvio.wallet.data.stores
 
 import android.content.Context
 import android.content.SharedPreferences

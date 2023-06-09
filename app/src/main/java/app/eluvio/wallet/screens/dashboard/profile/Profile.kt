@@ -20,7 +20,7 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import app.eluvio.wallet.data.Environment
+import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30

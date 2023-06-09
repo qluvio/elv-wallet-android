@@ -1,6 +1,6 @@
 package app.eluvio.wallet.di
 
-import app.eluvio.wallet.data.TokenStore
+import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.network.Auth0Api
 import app.eluvio.wallet.network.AuthServicesApi
 import app.eluvio.wallet.network.FabricConfigApi

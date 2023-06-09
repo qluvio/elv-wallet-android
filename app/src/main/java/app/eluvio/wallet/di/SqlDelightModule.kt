@@ -4,6 +4,7 @@ import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import app.eluvio.wallet.WalletDatabase
+import app.eluvio.wallet.sqldelight.NftQueries
 import app.eluvio.wallet.sqldelight.UserQueries
 import dagger.Module
 import dagger.Provides
@@ -33,4 +34,7 @@ object SqlDelightModule {
 object QueriesModule {
     @Provides
     fun provideUserQueries(db: WalletDatabase): UserQueries = db.userQueries
+
+    @Provides
+    fun providerNftQueries(db: WalletDatabase): NftQueries = db.nftQueries
 }

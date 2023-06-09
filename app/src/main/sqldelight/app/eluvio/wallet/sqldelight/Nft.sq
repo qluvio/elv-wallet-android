@@ -1,0 +1,15 @@
+CREATE TABLE Nft (
+  id TEXT PRIMARY KEY,
+  contract_addr TEXT NOT NULL,
+  token_id TEXT NOT NULL,
+  imageUrl TEXT NOT NULL,
+  display_name TEXT,
+  edition_name TEXT NOT NULL
+);
+
+insert:
+REPLACE INTO Nft(id, contract_addr, token_id, imageUrl, display_name, edition_name)
+VALUES ?;
+
+getAll:
+SELECT * FROM Nft;

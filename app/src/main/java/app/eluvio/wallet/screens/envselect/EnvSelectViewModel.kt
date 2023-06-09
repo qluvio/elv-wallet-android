@@ -1,8 +1,8 @@
 package app.eluvio.wallet.screens.envselect
 
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.Environment
-import app.eluvio.wallet.data.EnvironmentStore
+import app.eluvio.wallet.data.stores.Environment
+import app.eluvio.wallet.data.stores.EnvironmentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
 import javax.inject.Inject

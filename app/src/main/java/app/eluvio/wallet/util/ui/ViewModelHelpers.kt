@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rxjava3.subscribeAsState
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.util.logging.Log
 
@@ -11,7 +12,8 @@ import app.eluvio.wallet.util.logging.Log
 @Composable
 inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
     noinline navCallback: NavigationCallback,
-    block: (VM, State) -> Unit
+    crossinline onEvent: (Events) -> Unit = {},
+    onState: (VM, State) -> Unit
 ) {
     val vm = this
 
@@ -21,10 +23,17 @@ inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
             Log.d("${vm.javaClass.simpleName} navigating to $it")
             navCallback(it)
         }
-        onDispose { navigationEvents.dispose() }
+        val events = vm.events.subscribe {
+            Log.d("${vm.javaClass.simpleName} event fired: $it")
+            onEvent(it)
+        }
+        onDispose {
+            navigationEvents.dispose()
+            events.dispose()
+        }
     }
 
     vm.state.subscribeAsState(initial = null).value?.let { state ->
-        block(vm, state)
+        onState(vm, state)
     }
 }

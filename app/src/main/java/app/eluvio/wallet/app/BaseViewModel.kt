@@ -17,6 +17,10 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
     val navigationEvents: Observable<NavigationEvent> =
         _navigationEvents.observeOn(AndroidSchedulers.mainThread())
 
+    private val _events = PublishSubject.create<Events>()
+    val events: Observable<Events> =
+        _events.observeOn(AndroidSchedulers.mainThread())
+
     private val _state = BehaviorSubject.createDefault(initialState)
     val state = _state
         .doOnSubscribe {
@@ -50,6 +54,10 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
 
     protected fun navigateTo(event: NavigationEvent) {
         _navigationEvents.onNext(event)
+    }
+
+    protected fun fireEvent(event: Events) {
+        _events.onNext(event)
     }
 
     protected fun updateState(mapper: State.() -> State) {
