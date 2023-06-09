@@ -1,8 +1,9 @@
 package app.eluvio.wallet.screens.dashboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -62,7 +63,7 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
         NavHost(
             navController = tabNavController,
             startDestination = Tabs.MyItems.route, // This doesn't actually matter
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier.fillMaxSize(),
         ) {
             composable(Tabs.MyItems.route) { MyItems(navCallback) }
             composable(Tabs.MyMedia.route) { Temp(Tabs.MyMedia) }
@@ -128,7 +129,9 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
 
 @Composable
 fun Temp(tab: Tabs) {
-    Text(text = "Welcome to ${stringResource(id = tab.title)}")
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Text(text = "Welcome to ${stringResource(id = tab.title)}")
+    }
 }
 
 @Composable

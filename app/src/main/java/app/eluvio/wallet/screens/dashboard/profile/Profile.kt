@@ -1,8 +1,10 @@
 package app.eluvio.wallet.screens.dashboard.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,30 +39,33 @@ fun Profile(navCallback: NavigationCallback) {
 @Composable
 @OptIn(ExperimentalTvMaterial3Api::class)
 fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.Start,
-        modifier = Modifier.fillMaxWidth(0.6f)
-    ) {
-        Header("PROFILE")
-        Spacer(Modifier.height(10.dp))
-        InfoField("Address: ${state.address}")
-        Spacer(Modifier.height(10.dp))
-        InfoField("User Id: ${state.userId}")
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.fillMaxWidth(0.6f)
+        ) {
+            Spacer(Modifier.weight(1f)) // take up remaining space
+            Header("PROFILE")
+            Spacer(Modifier.height(10.dp))
+            InfoField("Address: ${state.address}")
+            Spacer(Modifier.height(10.dp))
+            InfoField("User Id: ${state.userId}")
 
-        Spacer(Modifier.height(20.dp))
-        Header("FABRIC")
-        Spacer(Modifier.height(10.dp))
-        val network = state.network?.envName?.let { stringResource(it) }
-        InfoField("Network: $network")
-        Spacer(Modifier.height(10.dp))
-        InfoField("Fabric Node: ${state.fabricNode}")
+            Spacer(Modifier.height(20.dp))
+            Header("FABRIC")
+            Spacer(Modifier.height(10.dp))
+            val network = state.network?.envName?.let { stringResource(it) }
+            InfoField("Network: $network")
+            Spacer(Modifier.height(10.dp))
+            InfoField("Fabric Node: ${state.fabricNode}")
 
-        Spacer(Modifier.weight(1f)) // take up remaining space
+            Spacer(Modifier.weight(1f)) // take up remaining space
 
-        Card(onClick = onSignOut, Modifier.align(Alignment.CenterHorizontally)) {
-            Text(text = "Sign Out", Modifier.padding(10.dp))
+            Card(onClick = onSignOut, Modifier.align(Alignment.CenterHorizontally)) {
+                Text(text = "Sign Out", Modifier.padding(10.dp))
+            }
+            Spacer(Modifier.height(20.dp))
         }
-        Spacer(Modifier.height(20.dp))
     }
 }
 
