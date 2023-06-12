@@ -14,6 +14,7 @@ core-ktx = "1.10.1"
 leanback = "1.0.0"
 androidx-activity-compose = "1.7.1"
 compose-tv = "1.0.0-alpha06"
+compose-destinations = "1.9.42-beta"
 qrcode-kotlin-android = "3.3.0"
 retrofit = "2.9.0"
 hilt = "2.46.1"
@@ -48,6 +49,8 @@ androidx-media3-dash = { module = "androidx.media3:media3-exoplayer-dash", versi
 androidx-media3-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "media3" }
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
 androidx-media3-ui-leanback = { module = "androidx.media3:media3-ui-leanback", version.ref = "media3" }
+compose-destinations = { module = "io.github.raamcosta.compose-destinations:core", version.ref = "compose-destinations" }
+compose-destinations-ksp = { module = "io.github.raamcosta.compose-destinations:ksp", version.ref = "compose-destinations" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }

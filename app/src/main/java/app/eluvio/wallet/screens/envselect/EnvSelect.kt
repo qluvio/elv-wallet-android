@@ -38,17 +38,21 @@ import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.stores.Environment
+import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.navigation.Screens
-import app.eluvio.wallet.navigation.asPushDestination
+import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
 import app.eluvio.wallet.util.ui.EluvioTabIndicator
 import app.eluvio.wallet.util.ui.FocusGroup
 import app.eluvio.wallet.util.ui.subscribeToState
 import app.eluvio.wallet.util.ui.withAlpha
+import com.ramcosta.composedestinations.annotation.Destination
 
+@AuthFlowGraph(start = true)
+@Destination
 @Composable
 fun EnvSelect(navCallback: NavigationCallback) {
     hiltViewModel<EnvSelectViewModel>().subscribeToState(navCallback) { vm, state ->
@@ -123,7 +127,7 @@ private fun EnvironmentSelection(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Card(onClick = { navCallback(Screens.SignIn.asPushDestination()) }) {
+        Card(onClick = { navCallback(SignInDestination.asPush()) }) {
             Text(stringResource(R.string.sign_in_button), Modifier.padding(10.dp))
         }
     }

@@ -6,8 +6,8 @@ import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.UserStore
-import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.navigation.Screens
+import app.eluvio.wallet.navigation.asNewRoot
+import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.util.userId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
@@ -52,6 +52,6 @@ class ProfileViewModel @Inject constructor(
 
     fun signOut() {
         signOutHandler.signOut()
-        navigateTo(NavigationEvent.ClearStackAndSetRoot(Screens.Home))
+        navigateTo(NavGraphs.preLaunchGraph.asNewRoot())
     }
 }

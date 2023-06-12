@@ -29,8 +29,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -38,16 +36,23 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
+import app.eluvio.wallet.navigation.DashboardTabsGraph
+import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.screens.dashboard.myitems.MyItems
-import app.eluvio.wallet.screens.dashboard.profile.Profile
+import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.ui.AppLogo
 import app.eluvio.wallet.util.ui.EluvioTabIndicator
 import app.eluvio.wallet.util.ui.FocusGroup
 import app.eluvio.wallet.util.ui.subscribeToState
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.navigation.navigate
 
+@MainGraph(start = true)
+@Destination
 @Composable
 fun Dashboard(navCallback: NavigationCallback) {
     hiltViewModel<DashboardViewModel>().subscribeToState(navCallback) { _, state ->
@@ -60,17 +65,12 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
     val tabNavController = rememberNavController()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TopBar(tabNavController, navCallback)
-        NavHost(
+        DestinationsNavHost(
+            navGraph = NavGraphs.dashboardTabsGraph,
             navController = tabNavController,
-            startDestination = Tabs.MyItems.route, // This doesn't actually matter
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            composable(Tabs.MyItems.route) { MyItems(navCallback) }
-            composable(Tabs.MyMedia.route) { Temp(Tabs.MyMedia) }
-            composable(Tabs.Profile.route) { Profile(navCallback) }
-            composable(Tabs.Search.route) { Temp(Tabs.Search) }
-
-        }
+            dependenciesContainerBuilder = { dependency(navCallback) },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
@@ -109,7 +109,7 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
                         selected = selectedTabIndex == index,
                         onFocus = {
                             selectedTabIndex = index
-                            tabNavController.navigate(tab.route) {
+                            tabNavController.navigate(tab.direction) {
                                 launchSingleTop = true
                             }
                             Log.e("Tab focused: $tab")
@@ -136,6 +136,20 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
             }
         }
     }
+}
+
+@DashboardTabsGraph
+@Destination
+@Composable
+fun MyMedia() {
+    Temp(tab = Tabs.MyMedia)
+}
+
+@DashboardTabsGraph
+@Destination
+@Composable
+fun Search() {
+    Temp(tab = Tabs.MyMedia)
 }
 
 @Composable

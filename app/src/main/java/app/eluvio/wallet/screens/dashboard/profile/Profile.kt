@@ -23,12 +23,16 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.stores.Environment
+import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.ui.subscribeToState
 import app.eluvio.wallet.util.ui.withAlpha
+import com.ramcosta.composedestinations.annotation.Destination
 
+@DashboardTabsGraph
+@Destination
 @Composable
 fun Profile(navCallback: NavigationCallback) {
     hiltViewModel<ProfileViewModel>().subscribeToState(navCallback) { vm, state ->

@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -15,24 +16,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.activity
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.navigation.Screens
-import app.eluvio.wallet.screens.dashboard.Dashboard
-import app.eluvio.wallet.screens.dashboard.videoplayer.VideoPlayerActivity
-import app.eluvio.wallet.screens.envselect.EnvSelect
-import app.eluvio.wallet.screens.home.Home
-import app.eluvio.wallet.screens.signin.SignIn
+import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.theme.EluvioTheme
+import app.eluvio.wallet.util.logging.Log
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.navigation.dependency
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -41,9 +37,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController = rememberNavController()
-
-            val navCallback: NavigationCallback = remember { NavigationHandler(navController) }
             EluvioTheme {
                 Box(
                     modifier = Modifier
@@ -53,27 +46,18 @@ class MainActivity : ComponentActivity() {
                     CompositionLocalProvider(
                         LocalContentColor provides MaterialTheme.colorScheme.onSurface
                     ) {
-                        NavHost(
-                            navController,
-                            startDestination = Screens.Home.route,
-                            builder = navGraph(navCallback)
+                        val navController = rememberNavController()
+                        val navCallback = remember { NavigationHandler(navController) }
+                        DestinationsNavHost(
+                            navGraph = NavGraphs.root,
+                            navController = navController,
+                            dependenciesContainerBuilder = {
+                                dependency(navCallback)
+                            }
                         )
+                        // Print nav backstack for debugging
+                        navController.currentBackStack.collectAsState().value.print()
                     }
-                }
-            }
-        }
-    }
-
-    private fun navGraph(navCallback: NavigationCallback): (NavGraphBuilder.() -> Unit) = {
-        // This is more code than just writing it out line by line, but this way we are forced at compile time to handle new screens.
-        Screens.values().forEach { screen ->
-            when (screen) {
-                Screens.Home -> composable(screen.route) { Home(navCallback) }
-                Screens.EnvironmentSelection -> composable(screen.route) { EnvSelect(navCallback) }
-                Screens.SignIn -> composable(screen.route) { SignIn(navCallback) }
-                Screens.Dashboard -> composable(screen.route) { Dashboard(navCallback) }
-                Screens.VideoPlayer -> activity(screen.route) {
-                    activityClass = VideoPlayerActivity::class
                 }
             }
         }
@@ -90,17 +74,10 @@ class MainActivity : ComponentActivity() {
                 }
 
                 is NavigationEvent.Push -> {
-                    navController.navigate(event.destination.route, event.navOptions)
-                }
-
-                is NavigationEvent.ClearStackAndSetRoot -> {
-                    navController.navigate(event.root.route) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
+                    navController.navigate(event.direction.route, event.navOptions)
                 }
             }
         }
-
     }
 }
 
@@ -113,4 +90,9 @@ private val backgroundBrush: ShaderBrush = object : ShaderBrush() {
             colorStops = listOf(0f, 0.95f)
         )
     }
+}
+
+private fun Collection<NavBackStackEntry>.print(prefix: String = "stack") {
+    val stack = map { it.destination.route }.toTypedArray().contentToString()
+    Log.v("$prefix = $stack")
 }

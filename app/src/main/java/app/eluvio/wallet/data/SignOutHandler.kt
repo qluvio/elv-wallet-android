@@ -10,6 +10,7 @@ class SignOutHandler @Inject constructor(
 ) {
     fun signOut() {
         tokenStore.wipe()
+        // delete entire db?
         userStore.deleteAll()
     }
 }

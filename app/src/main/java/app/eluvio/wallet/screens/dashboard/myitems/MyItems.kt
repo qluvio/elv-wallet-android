@@ -19,12 +19,16 @@ import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
 import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import app.eluvio.wallet.app.Events
+import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.ui.EluvioLoadingSpinner
 import app.eluvio.wallet.util.ui.subscribeToState
+import com.ramcosta.composedestinations.annotation.Destination
 import java.util.UUID
 
+@DashboardTabsGraph(start = true)
+@Destination
 @Composable
 fun MyItems(navCallback: NavigationCallback) {
     val context = LocalContext.current

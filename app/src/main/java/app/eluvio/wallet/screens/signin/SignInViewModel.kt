@@ -5,9 +5,9 @@ import android.graphics.BitmapFactory
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.AuthenticationService
 import app.eluvio.wallet.data.stores.DeviceActivationStore
-import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.navigation.Screens
+import app.eluvio.wallet.navigation.asNewRoot
 import app.eluvio.wallet.network.DeviceActivationData
+import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -104,7 +104,7 @@ class SignInViewModel @Inject constructor(
                 .subscribeBy(
                     onSuccess = {
                         Log.d("Got a token $it")
-                        navigateTo(NavigationEvent.ClearStackAndSetRoot(Screens.Dashboard))
+                        navigateTo(NavGraphs.mainGraph.asNewRoot())
                     }
                 )
                 .addTo(disposables)
