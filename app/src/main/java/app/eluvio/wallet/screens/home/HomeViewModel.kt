@@ -12,8 +12,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val tokenStore: TokenStore
 ) : BaseViewModel<Unit>(Unit) {
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         //TODO, if there's another token but we didn't get all the way to fabricToken, we might want to pick up mid-flow
         if (tokenStore.fabricToken == null) {
             Log.w("User not signed in, navigating to environment selection")

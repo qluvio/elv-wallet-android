@@ -29,8 +29,8 @@ class MyItemsViewModel @Inject constructor(
         )
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         contentStore.observeWalletData()
             .doOnNext {
                 if (it.isFailure) {

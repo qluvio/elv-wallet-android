@@ -1,5 +1,6 @@
 package app.eluvio.wallet.app
 
+import androidx.annotation.CallSuper
 import androidx.lifecycle.ViewModel
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.util.asSharedState
@@ -25,14 +26,6 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
     val state = _state
         .doOnSubscribe {
             Log.d("${this.javaClass.simpleName} has started streaming state")
-            disposables = CompositeDisposable()
-            onStart()
-        }
-        .doFinally {
-            // this is actually a bug, since it'll stop all operations during config changes.
-            // not a problem right now, but we need to find a good way to tell config changes apart from putting the app in bg. Maybe a timeout?
-            Log.d("${this.javaClass.simpleName} has no more subscribers, disposing all disposables")
-            disposables.dispose()
         }
         .doOnNext {
             Log.d("Next state emitted: $it")
@@ -47,9 +40,18 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
         private set
 
 
-    // TODO: is doOnSubscribe really the right starting point?
-    protected open fun onStart() {
+    @CallSuper
+    open fun onResume() {
+        Log.d("${this.javaClass.simpleName} onResume")
+        disposables = CompositeDisposable()
+    }
 
+    @CallSuper
+    open fun onPause() {
+        Log.d("${this.javaClass.simpleName} onPause")
+        // this might be a bug, since it'll stop all operations during config changes(?).
+        // not a problem right now, but we need to find a good way to tell config changes apart from putting the app in bg. Maybe a timeout?
+        disposables.dispose()
     }
 
     protected fun navigateTo(event: NavigationEvent) {

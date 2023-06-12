@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util;
+package app.eluvio.wallet.util.crypto;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

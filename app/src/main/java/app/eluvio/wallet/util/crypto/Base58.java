@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util;
+package app.eluvio.wallet.util.crypto;
 
 /*
  * Copyright 2011 Google Inc.

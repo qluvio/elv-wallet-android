@@ -1,5 +1,7 @@
 package app.eluvio.wallet.util
 
+import app.eluvio.wallet.util.crypto.Base58
+
 fun String.toHexByteArray(): ByteArray {
     check(length % 2 == 0) { "Must have an even length" }
     return removePrefix("0x")

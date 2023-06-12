@@ -6,8 +6,8 @@ import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.network.AuthServicesApi
 import app.eluvio.wallet.network.SignBody
-import app.eluvio.wallet.util.Base58
-import app.eluvio.wallet.util.Keccak
+import app.eluvio.wallet.util.crypto.Base58
+import app.eluvio.wallet.util.crypto.Keccak
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.toHexByteArray
 import io.reactivex.rxjava3.core.Single

@@ -2,7 +2,7 @@ package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.sqldelight.User
 import app.eluvio.wallet.sqldelight.UserQueries
-import app.eluvio.wallet.util.asMaybe
+import app.eluvio.wallet.util.sqldelight.asMaybe
 import io.reactivex.rxjava3.core.Maybe
 import javax.inject.Inject
 

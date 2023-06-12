@@ -17,8 +17,8 @@ class EnvSelectViewModel @Inject constructor(
         val selectedEnvironment: Environment? = null,
     )
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         environmentStore.observeSelectedEnvironment()
             .subscribe { newEnv ->
                 updateState {

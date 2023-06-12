@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util
+package app.eluvio.wallet.util.sqldelight
 
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.rx3.asObservable

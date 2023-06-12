@@ -14,8 +14,8 @@ class NftDetailViewModel @Inject constructor(
 
     private val nftId = NftDetailDestination.argsFrom(savedStateHandle).nftId
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         updateState { copy(id = nftId) }
     }
 }
