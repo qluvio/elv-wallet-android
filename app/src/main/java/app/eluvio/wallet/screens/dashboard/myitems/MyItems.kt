@@ -21,6 +21,8 @@ import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.ui.EluvioLoadingSpinner
 import app.eluvio.wallet.util.ui.subscribeToState
@@ -62,7 +64,9 @@ private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallba
                     .padding(horizontal = 100.dp)
             ) {
                 items(state.media, key = { it.id }) { media ->
-                    MediaCard(media, Modifier.padding(10.dp))
+                    MediaCard(media, onClick = {
+                        navCallback(NftDetailDestination(media.id).asPush())
+                    }, modifier = Modifier.padding(10.dp))
                 }
             }
         }

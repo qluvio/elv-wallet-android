@@ -93,6 +93,13 @@ private val backgroundBrush: ShaderBrush = object : ShaderBrush() {
 }
 
 private fun Collection<NavBackStackEntry>.print(prefix: String = "stack") {
-    val stack = map { it.destination.route }.toTypedArray().contentToString()
+    fun NavBackStackEntry.routeWithArgs(): String {
+        val fallback = destination.route ?: ""
+        return arguments?.keySet()?.fold(fallback) { route, key ->
+            route.replace("{$key}", arguments?.get(key)?.toString() ?: "{$key}")
+        } ?: fallback
+    }
+
+    val stack = map { it.routeWithArgs() }.toTypedArray().contentToString()
     Log.v("$prefix = $stack")
 }

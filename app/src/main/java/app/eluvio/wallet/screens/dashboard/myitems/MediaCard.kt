@@ -32,11 +32,15 @@ import coil.compose.AsyncImage
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun MediaCard(media: MyItemsViewModel.State.Media, modifier: Modifier = Modifier) {
+fun MediaCard(
+    media: MyItemsViewModel.State.Media,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     Surface(
-        onClick = { /*TODO*/ },
+        onClick = onClick,
         interactionSource = interactionSource,
         modifier = modifier.aspectRatio(0.7f),
     ) {
@@ -107,7 +111,8 @@ fun MediaCardPreviewPack() = EluvioThemePreview {
             "Special Edition",
             null,
             23
-        )
+        ),
+        onClick = {},
     )
 }
 
@@ -123,5 +128,6 @@ fun MediaCardPreviewSingle() = EluvioThemePreview {
             "1",
             1
         ),
+        onClick = {},
     )
 }
