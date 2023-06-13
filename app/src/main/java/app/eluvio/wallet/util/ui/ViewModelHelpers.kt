@@ -49,7 +49,7 @@ inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
 fun BaseViewModel<*>.observeLifecycle(lifecycle: Lifecycle) {
     DisposableEffect(lifecycle) {
         val observer = object : DefaultLifecycleObserver {
-            override fun onResume(owner: LifecycleOwner) = onResume()
+            override fun onResume(owner: LifecycleOwner) = onResumeTentative()
             override fun onPause(owner: LifecycleOwner) = onPause()
         }
         lifecycle.addObserver(observer)

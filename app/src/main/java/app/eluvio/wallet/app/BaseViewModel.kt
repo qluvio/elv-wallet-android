@@ -1,6 +1,7 @@
 package app.eluvio.wallet.app
 
 import androidx.annotation.CallSuper
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.util.asSharedState
@@ -39,16 +40,28 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
     protected var disposables = CompositeDisposable().apply { dispose() }
         private set
 
+    private var lastLifecycleEvent: Lifecycle.Event = Lifecycle.Event.ON_PAUSE
+
+    // onResume can be called multiple times from the lifecycleOwner without going through onPause in between.
+    // This is a workaround to make sure we don't dispose the disposables when that happens.
+    fun onResumeTentative() {
+        if (lastLifecycleEvent == Lifecycle.Event.ON_PAUSE) {
+            onResume()
+        }
+        lastLifecycleEvent = Lifecycle.Event.ON_RESUME
+    }
 
     @CallSuper
     open fun onResume() {
         Log.d("${this.javaClass.simpleName} onResume")
+        disposables.dispose()
         disposables = CompositeDisposable()
     }
 
     @CallSuper
     open fun onPause() {
         Log.d("${this.javaClass.simpleName} onPause")
+        lastLifecycleEvent = Lifecycle.Event.ON_PAUSE
         // this might be a bug, since it'll stop all operations during config changes(?).
         // not a problem right now, but we need to find a good way to tell config changes apart from putting the app in bg. Maybe a timeout?
         disposables.dispose()
