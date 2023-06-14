@@ -1,8 +1,6 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,14 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
@@ -37,18 +34,16 @@ fun MediaCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val focused by interactionSource.collectIsFocusedAsState()
     Surface(
         onClick = onClick,
-        interactionSource = interactionSource,
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
         modifier = modifier.aspectRatio(0.7f),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(12.dp)
         ) {
-            Header(media, focused)
+            Header(media)
             AsyncImage(
                 model = media.imageUrl,
                 contentDescription = "NFT image",
@@ -81,7 +76,7 @@ fun MediaCard(
 }
 
 @Composable
-private fun Header(media: MyItemsViewModel.State.Media, focused: Boolean) {
+private fun Header(media: MyItemsViewModel.State.Media) {
     Row(Modifier.padding(12.dp)) {
         // add logo
         // add marketplace name

@@ -2,11 +2,15 @@ package app.eluvio.wallet.screens.dashboard.myitems
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,7 +21,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
-import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.NavigationCallback
@@ -28,6 +31,7 @@ import app.eluvio.wallet.util.ui.EluvioLoadingSpinner
 import app.eluvio.wallet.util.ui.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 import java.util.UUID
+import kotlin.math.roundToInt
 
 @DashboardTabsGraph(start = true)
 @Destination
@@ -49,24 +53,33 @@ fun MyItems(navCallback: NavigationCallback) {
 
 @Composable
 private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallback) {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         if (state.loading) {
             EluvioLoadingSpinner(Modifier.fillMaxHeight())
         } else {
-            val gridState = rememberTvLazyGridState()
+            val width by rememberUpdatedState(maxWidth)
+            val horizontalPadding = 100.dp
+            val cardSpacing = 20.dp
+            val desiredCardWidth = 240.dp
+            val columnCount by remember {
+                derivedStateOf {
+                    val availableWidth = width - horizontalPadding
+                    val cardWidth = desiredCardWidth + cardSpacing
+                    (availableWidth / cardWidth).roundToInt()
+                }
+            }
             TvLazyVerticalGrid(
-                columns = TvGridCells.Adaptive(240.dp),
-                horizontalArrangement = Arrangement.spacedBy(15.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp),
-                state = gridState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 100.dp)
+                columns = TvGridCells.Fixed(columnCount),
+                horizontalArrangement = Arrangement.spacedBy(cardSpacing),
+                verticalArrangement = Arrangement.spacedBy(cardSpacing),
+                contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 20.dp),
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(state.media, key = { it.id }) { media ->
-                    MediaCard(media, onClick = {
-                        navCallback(NftDetailDestination(media.id).asPush())
-                    }, modifier = Modifier.padding(10.dp))
+                    MediaCard(
+                        media,
+                        onClick = { navCallback(NftDetailDestination(media.id).asPush()) },
+                    )
                 }
             }
         }

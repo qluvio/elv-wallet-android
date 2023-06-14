@@ -21,7 +21,7 @@ fun EluvioTheme(content: @Composable () -> Unit) {
         shapes = MaterialTheme.shapes.copy(
             extraSmall = RoundedCornerShape(5.dp),
             small = RoundedCornerShape(16.dp),
-            medium = RoundedCornerShape(5.dp),
+            medium = RoundedCornerShape(8.dp),
             large = RoundedCornerShape(5.dp),
             extraLarge = RoundedCornerShape(5.dp),
         ),

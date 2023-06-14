@@ -8,5 +8,5 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     // Maybe we don't need a view model for this screen?
 ) : BaseViewModel<DashboardViewModel.State>(State()) {
-    data class State(val f: Int = 0)
+    class State
 }

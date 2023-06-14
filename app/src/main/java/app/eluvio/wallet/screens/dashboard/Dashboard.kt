@@ -162,6 +162,6 @@ fun Temp(tab: Tabs) {
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun DashboardPreview() {
-    val state = DashboardViewModel.State(0)
+    val state = DashboardViewModel.State()
     Dashboard(state, navCallback = { })
 }
