@@ -13,6 +13,7 @@ fun NftResponse.toNfts(): List<Nft> {
             imageUrl = dto.meta.image,
             display_name = dto.meta.display_name,
             edition_name = dto.meta.edition_name ?: "",
+            description = dto.meta.description ?: ""
         )
     }
 }

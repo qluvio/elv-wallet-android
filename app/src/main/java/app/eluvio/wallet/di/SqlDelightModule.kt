@@ -29,6 +29,11 @@ object SqlDelightModule {
     }
 }
 
+/**
+ * A module that provides specific query interfaces.
+ * Yes, you could directly depend [WalletDatabase] and use whatever queries you need from it,
+ * but this way stores/repos are more declarative about their actual dependencies.
+ */
 @InstallIn(SingletonComponent::class)
 @Module
 object QueriesModule {

@@ -19,7 +19,7 @@ class MyItemsViewModel @Inject constructor(
         val media: List<Media> = emptyList(),
     ) {
         data class Media(
-            val id: String,
+            val contractAddress: String,
             val imageUrl: String,
             val title: String,
             val subtitle: String? = null,
@@ -44,7 +44,7 @@ class MyItemsViewModel @Inject constructor(
                     .map { (contractAddress, nfts) ->
                         val sampleNft = nfts.first()
                         State.Media(
-                            id = contractAddress,
+                            contractAddress = contractAddress,
                             imageUrl = sampleNft.imageUrl,
                             title = sampleNft.display_name ?: "no desc",
                             subtitle = sampleNft.edition_name,

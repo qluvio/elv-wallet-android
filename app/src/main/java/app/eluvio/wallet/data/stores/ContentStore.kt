@@ -26,6 +26,10 @@ class ContentStore @Inject constructor(
             .mergeWith(fetchWalletData().onErrorReturn { Result.failure(it) })
     }
 
+    fun observeNft(contractAddress: String): Observable<List<Nft>> {
+        return nftQueries.getByContractAddr(contractAddress).asObservable().mapToList()
+    }
+
     private fun fetchWalletData(): Completable {
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()

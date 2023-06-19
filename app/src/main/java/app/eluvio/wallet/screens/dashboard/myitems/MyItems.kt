@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
@@ -73,12 +74,13 @@ private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallba
                 horizontalArrangement = Arrangement.spacedBy(cardSpacing),
                 verticalArrangement = Arrangement.spacedBy(cardSpacing),
                 contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 20.dp),
+                pivotOffsets = PivotOffsets(0.1f),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(state.media, key = { it.id }) { media ->
+                items(state.media, key = { it.contractAddress }) { media ->
                     MediaCard(
                         media,
-                        onClick = { navCallback(NftDetailDestination(media.id).asPush()) },
+                        onClick = { navCallback(NftDetailDestination(media.contractAddress).asPush()) },
                     )
                 }
             }
@@ -110,7 +112,7 @@ private fun MyItemsPreview() = EluvioThemePreview {
     MyItems(MyItemsViewModel.State(
         loading = false,
         // create 10 copies of the original list
-        (1..10).flatMap { items }.map { it.copy(id = UUID.randomUUID().toString()) }
+        (1..10).flatMap { items }.map { it.copy(contractAddress = UUID.randomUUID().toString()) }
     ), navCallback = { })
 }
 
