@@ -1,6 +1,6 @@
 package app.eluvio.wallet.data.converters
 
-import app.eluvio.wallet.network.NftResponse
+import app.eluvio.wallet.network.dto.NftResponse
 import app.eluvio.wallet.sqldelight.Nft
 
 

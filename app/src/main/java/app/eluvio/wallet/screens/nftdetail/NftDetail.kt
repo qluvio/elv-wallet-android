@@ -21,9 +21,9 @@ import app.eluvio.wallet.util.ui.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
 @MainGraph
-@Destination
+@Destination(navArgsDelegate = NftDetailArgs::class)
 @Composable
-fun NftDetail(contractAddress: String, navCallback: NavigationCallback) {
+fun NftDetail(navCallback: NavigationCallback) {
     hiltViewModel<NftDetailViewModel>().subscribeToState(navCallback) { vm, state ->
         NftDetail(state, navCallback)
     }
