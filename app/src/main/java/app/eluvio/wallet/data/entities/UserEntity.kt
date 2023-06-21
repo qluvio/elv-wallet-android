@@ -18,12 +18,12 @@ class UserEntity : RealmObject {
 
     @Ignore
     val userId = "iusr${walletAddress.base58}"
-}
 
-@Module
-@InstallIn(SingletonComponent::class)
-object UserEntityModule {
-    @Provides
-    @IntoSet
-    fun provideEntity(): KClass<out BaseRealmObject> = UserEntity::class
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object EntityModule {
+        @Provides
+        @IntoSet
+        fun provideEntity(): KClass<out BaseRealmObject> = UserEntity::class
+    }
 }

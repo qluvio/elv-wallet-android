@@ -52,6 +52,7 @@ fun List<MediaCollection>.toMediaCollections(): RealmList<MediaCollectionEntity>
 fun List<MediaItem>.toMediaItems(): RealmList<MediaEntity> {
     return map { dto ->
         MediaEntity().apply {
+            id = dto.id
             name = dto.name
             image = dto.image ?: ""
             mediaType = dto.media_type ?: ""

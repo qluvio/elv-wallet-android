@@ -15,6 +15,7 @@ import kotlin.reflect.KClass
 object RealmModule {
     @Provides
     fun provideRealm(realmObjects: Set<@JvmSuppressWildcards KClass<out BaseRealmObject>>): Realm {
+        // TODO: encrypt db
         val config = RealmConfiguration.Builder(realmObjects)
             .deleteRealmIfMigrationNeeded()
             .build()

@@ -26,12 +26,12 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     override fun updateKey() {
         _id = "${contractAddress}_${tokenId}"
     }
-}
 
-@Module
-@InstallIn(SingletonComponent::class)
-object NftEntityModule {
-    @Provides
-    @IntoSet
-    fun provideEntity(): KClass<out BaseRealmObject> = NftEntity::class
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object EntityModule {
+        @Provides
+        @IntoSet
+        fun provideEntity(): KClass<out BaseRealmObject> = NftEntity::class
+    }
 }

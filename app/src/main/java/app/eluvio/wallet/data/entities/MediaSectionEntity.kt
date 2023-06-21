@@ -17,12 +17,12 @@ class MediaSectionEntity : RealmObject {
     var id: String = ""
     var name: String = ""
     var collections: RealmList<MediaCollectionEntity> = realmListOf()
-}
 
-@Module
-@InstallIn(SingletonComponent::class)
-object MediaSectionEntityModule {
-    @Provides
-    @IntoSet
-    fun provideEntity(): KClass<out BaseRealmObject> = MediaSectionEntity::class
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object EntityModule {
+        @Provides
+        @IntoSet
+        fun provideEntity(): KClass<out BaseRealmObject> = MediaSectionEntity::class
+    }
 }

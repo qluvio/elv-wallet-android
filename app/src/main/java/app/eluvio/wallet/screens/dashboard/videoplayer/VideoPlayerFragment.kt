@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.dashboard.videoplayer
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackTransportControlGlue
@@ -14,6 +15,7 @@ import androidx.media3.exoplayer.drm.DefaultDrmSessionManagerProvider
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.ui.leanback.LeanbackPlayerAdapter
+import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 
 @UnstableApi
 class VideoPlayerFragment : VideoSupportFragment() {
@@ -21,7 +23,10 @@ class VideoPlayerFragment : VideoSupportFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val mediaItemId =
+            VideoPlayerActivityDestination.argsFrom(requireActivity().intent).mediaItemId
         val content = buckBunnyDashWidevine // get from args in future
+        Toast.makeText(requireContext(), "loading media $mediaItemId", Toast.LENGTH_SHORT).show()
         val player = ExoPlayer.Builder(requireContext()).build().apply {
             playWhenReady = true
             setMediaSource(makeMediaSource(content))
