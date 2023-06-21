@@ -8,7 +8,6 @@ import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.navigation.asNewRoot
 import app.eluvio.wallet.screens.NavGraphs
-import app.eluvio.wallet.util.sqldelight.userId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -38,7 +37,7 @@ class ProfileViewModel @Inject constructor(
             userStore.getCurrentUser().toObservable()
         ) { env, config, user ->
             State(
-                address = user.address,
+                address = user.walletAddress,
                 userId = user.userId,
                 network = env,
                 fabricNode = config.endpoint

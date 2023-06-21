@@ -40,16 +40,16 @@ class MyItemsViewModel @Inject constructor(
             .mapNotNull { it.getOrNull() }
             .map { response ->
                 response
-                    .groupBy { it.contract_addr }
+                    .groupBy { it.contractAddress }
                     .map { (contractAddress, nfts) ->
                         val sampleNft = nfts.first()
                         State.Media(
                             contractAddress = contractAddress,
                             imageUrl = sampleNft.imageUrl,
-                            title = sampleNft.display_name ?: "no desc",
-                            subtitle = sampleNft.edition_name,
+                            title = sampleNft.displayName,
+                            subtitle = sampleNft.editionName,
                             // If there's only one token, we can show the token id
-                            tokenId = sampleNft.token_id.takeIf { nfts.size == 1 },
+                            tokenId = sampleNft.tokenId.takeIf { nfts.size == 1 },
                             tokenCount = nfts.size
                         )
                     }

@@ -1,32 +1,39 @@
 package app.eluvio.wallet.data.stores
 
-import app.cash.sqldelight.Transacter
-import app.cash.sqldelight.rx3.asObservable
-import app.cash.sqldelight.rx3.mapToList
 import app.eluvio.wallet.data.converters.toNfts
+import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.network.GatewayApi
-import app.eluvio.wallet.sqldelight.Nft
-import app.eluvio.wallet.sqldelight.NftQueries
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.realm.asFlowable
+import app.eluvio.wallet.util.realm.saveTo
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.Flowable
+import io.realm.kotlin.Realm
 import javax.inject.Inject
 
 class ContentStore @Inject constructor(
     private val fabricConfigStore: FabricConfigStore,
     private val gatewayApi: GatewayApi,
-    private val nftQueries: NftQueries,
+    private val realm: Realm,
 ) {
 
-    fun observeWalletData(): Observable<Result<List<Nft>>> {
-        return nftQueries.getAll().asObservable().mapToList()
+    fun observeWalletData(): Flowable<Result<List<NftEntity>>> {
+        return realm.query(NftEntity::class).asFlowable()
             .map { Result.success(it) }
             .mergeWith(fetchWalletData().onErrorReturn { Result.failure(it) })
+            .doOnNext {
+                it.exceptionOrNull()?.let { error ->
+                    Log.e("Error in wallet data stream", error)
+                }
+            }
     }
 
-    fun observeNft(contractAddress: String): Observable<List<Nft>> {
-        return nftQueries.getByContractAddr(contractAddress).asObservable().mapToList()
+    fun observeNft(contractAddress: String): Flowable<List<NftEntity>> {
+        return realm.query(
+            NftEntity::class,
+            "${NftEntity::contractAddress.name} == $0",
+            contractAddress
+        ).asFlowable()
     }
 
     private fun fetchWalletData(): Completable {
@@ -43,20 +50,8 @@ class ContentStore @Inject constructor(
                 gatewayApi.getNfts(url)
             }
             .map { it.toNfts() }
-            .transactOnEach(nftQueries) { insert(it) }
+            .saveTo(realm)
             .ignoreElement()
-    }
-
-    // supposed to help save list of items inside a transaction. maybe i'm over engineering
-    fun <D : Any, T : Transacter> Single<List<D>>.transactOnEach(
-        transacter: T,
-        action: T.(D) -> Unit
-    ): Single<List<D>> {
-        return doOnSuccess { list ->
-            transacter.transaction {
-                list.forEach { action(transacter, it) }
-            }
-        }
     }
 
     companion object {

@@ -1,21 +1,34 @@
 package app.eluvio.wallet.data.stores
 
-import app.eluvio.wallet.sqldelight.User
-import app.eluvio.wallet.sqldelight.UserQueries
-import app.eluvio.wallet.util.sqldelight.asMaybe
+import app.eluvio.wallet.data.entities.UserEntity
+import app.eluvio.wallet.util.mapNotNull
+import app.eluvio.wallet.util.realm.asFlowable
 import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.realm.kotlin.Realm
 import javax.inject.Inject
 
 class UserStore @Inject constructor(
-    private val userQueries: UserQueries
+    private val realm: Realm
 ) {
-    fun getCurrentUser(): Maybe<User> = userQueries.getCurrentUser().asMaybe()
+    fun getCurrentUser(): Maybe<UserEntity> {
+        return realm.query(UserEntity::class).asFlowable().firstOrError()
+            .mapNotNull { it.firstOrNull() }
+    }
 
     fun saveUser(walletAddress: String) {
-        userQueries.insert(walletAddress)
+        Schedulers.io().scheduleDirect {
+            realm.writeBlocking {
+                copyToRealm(UserEntity().apply { this.walletAddress = walletAddress })
+            }
+        }
     }
 
     fun deleteAll() {
-        userQueries.deleteAll()
+        Schedulers.io().scheduleDirect {
+            realm.writeBlocking {
+                delete(UserEntity::class)
+            }
+        }
     }
 }

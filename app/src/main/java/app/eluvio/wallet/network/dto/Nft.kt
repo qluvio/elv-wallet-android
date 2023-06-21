@@ -33,7 +33,7 @@ data class NftMetadata(
 
 @JsonClass(generateAdapter = true)
 data class NftTemplate(
-    val additional_media_custom_css: String?,
+//    val additional_media_custom_css: String?,
 //    val additional_media: List<AdditionalMedia>,
     val additional_media_sections: AdditionalMediaSection,
 )
@@ -57,7 +57,6 @@ data class MediaCollection(
     val name: String?,
     val display: String?,
     val media: List<MediaItem>?,
-    val collections: List<MediaCollection>?,
 )
 
 @JsonClass(generateAdapter = true)
@@ -65,7 +64,8 @@ data class MediaItem(
     val id: String,
     val name: String,
     val display: String?,
-//    val media: List<Media>,
+    val image: String?,
+    val media_type: String?,
 )
 
 @JsonClass(generateAdapter = true)
