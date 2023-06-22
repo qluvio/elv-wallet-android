@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".screens.dashboard.videoplayer.VideoPlayerActivity" />
+        <activity android:name="app.eluvio.wallet.screens.videoplayer.VideoPlayerActivity" />
     </application>
 
 </manifest>

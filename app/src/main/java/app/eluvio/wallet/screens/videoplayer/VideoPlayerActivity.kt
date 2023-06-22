@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.dashboard.videoplayer
+package app.eluvio.wallet.screens.videoplayer
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity

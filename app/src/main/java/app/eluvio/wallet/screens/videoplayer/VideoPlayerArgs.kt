@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.dashboard.videoplayer
+package app.eluvio.wallet.screens.videoplayer
 
 data class VideoPlayerArgs(
     val mediaItemId: String

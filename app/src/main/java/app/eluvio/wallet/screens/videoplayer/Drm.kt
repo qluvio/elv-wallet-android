@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.dashboard.videoplayer
+package app.eluvio.wallet.screens.videoplayer
 
 sealed class DrmContent(val drmProtocol: DrmProtocol) {
     class DASH(
