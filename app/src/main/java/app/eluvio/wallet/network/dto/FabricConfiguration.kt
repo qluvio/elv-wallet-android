@@ -10,8 +10,8 @@ data class FabricConfiguration(
     @field:Json(name = "qspace") val qspace: QSpace,
     @field:Json(name = "fabric_version") val fabricVersion: String,
 ) {
+    val endpoint: String = network.seedNodes.fabricApi.first()
     val space: String = qspace.names.first()
-    val endpoint: String = "https://$space.net${qspace.ethereum.networkId}.contentfabric.io/"
 }
 
 @JsonClass(generateAdapter = true)

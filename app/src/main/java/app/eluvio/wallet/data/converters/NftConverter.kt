@@ -16,7 +16,6 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmList
 
-
 fun NftResponse.toNfts(config: FabricConfiguration): List<NftEntity> {
     return contents.map { dto ->
         NftEntity().apply {
@@ -90,8 +89,8 @@ fun GalleryItemDto.toEntity(config: FabricConfiguration): GalleryItemEntity {
         name = dto.name
         imageUrl = dto.image?.let {
             val hash = it.dot.container
-            val filePath = it.optionsPath.removePrefix(".")
-            "${config.endpoint}s/${config.space}/q/$hash$filePath"
+            val filePath = it.optionsPath.removePrefix("./")
+            "${config.endpoint}/s/${config.space}/q/$hash/$filePath"
         }
     }
 }
