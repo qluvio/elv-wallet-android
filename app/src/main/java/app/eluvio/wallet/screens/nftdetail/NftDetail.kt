@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
@@ -22,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -34,6 +33,7 @@ import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -59,7 +59,7 @@ private fun NftDetail(state: NftDetailViewModel.State, navCallback: NavigationCa
         Text(state.title, style = MaterialTheme.typography.title_62)
         Spacer(Modifier.height(16.dp))
         Text(state.subtitle, style = MaterialTheme.typography.body_32)
-        LazyColumn {
+        TvLazyColumn {
             items(state.collections) { collection ->
                 Spacer(Modifier.height(16.dp))
                 Text(collection.name, style = MaterialTheme.typography.body_32)
@@ -114,6 +114,9 @@ private fun onMediaItemClick(media: MediaEntity, navCallback: NavigationCallback
             navCallback(VideoPlayerActivityDestination(media.id).asPush())
         }
 
+        MediaEntity.MEDIA_TYPE_GALLERY -> {
+            navCallback(ImageGalleryDestination(media.id).asPush())
+        }
         else -> {}
     }
 }

@@ -2,6 +2,7 @@ package app.eluvio.wallet.screens.dashboard
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,11 +29,11 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
@@ -41,6 +42,8 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
+import app.eluvio.wallet.theme.header_30
+import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.ui.AppLogo
 import app.eluvio.wallet.util.ui.EluvioTabIndicator
@@ -64,7 +67,11 @@ fun Dashboard(navCallback: NavigationCallback) {
 private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCallback) {
     val tabNavController = rememberNavController()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TopBar(tabNavController, navCallback)
+        TopBar(onTabSelected = { tab ->
+            tabNavController.navigate(tab.direction) {
+                launchSingleTop = true
+            }
+        }, navCallback)
         DestinationsNavHost(
             navGraph = NavGraphs.dashboardTabsGraph,
             navController = tabNavController,
@@ -76,7 +83,7 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvFoundationApi::class)
 @Composable
-private fun TopBar(tabNavController: NavController, navCallback: NavigationCallback) {
+private fun TopBar(onTabSelected: (Tabs) -> Unit, navCallback: NavigationCallback) {
     // TODO: there's nothing stopping the logo and tabs from overlapping if the screen isn't wide enough
     FocusGroup(contentAlignment = Alignment.Center, modifier = Modifier.onPreviewKeyEvent {
         // Exit screen when back is pressed while FocusGroup is focused
@@ -109,9 +116,7 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
                         selected = selectedTabIndex == index,
                         onFocus = {
                             selectedTabIndex = index
-                            tabNavController.navigate(tab.direction) {
-                                launchSingleTop = true
-                            }
+                            onTabSelected(tab)
                             Log.e("Tab focused: $tab")
                         },
                         onClick = { focusManager.moveFocus(FocusDirection.Down) },
@@ -128,6 +133,7 @@ private fun TopBar(tabNavController: NavController, navCallback: NavigationCallb
                         } else {
                             Text(
                                 text = stringResource(tab.title),
+                                style = MaterialTheme.typography.header_30,
                                 modifier = Modifier.align(Alignment.CenterVertically)
                             )
                         }
@@ -164,4 +170,10 @@ fun Temp(tab: Tabs) {
 private fun DashboardPreview() {
     val state = DashboardViewModel.State()
     Dashboard(state, navCallback = { })
+}
+
+@Composable
+@Preview
+private fun TopBarPreview() {
+    TopBar(onTabSelected = { }, navCallback = { })
 }

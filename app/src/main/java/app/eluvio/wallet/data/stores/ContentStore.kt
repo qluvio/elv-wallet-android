@@ -1,9 +1,11 @@
 package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.data.converters.toNfts
+import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.network.GatewayApi
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import io.reactivex.rxjava3.core.Completable
@@ -36,25 +38,31 @@ class ContentStore @Inject constructor(
         ).asFlowable()
     }
 
+    fun observeMediaItem(mediaId: String): Flowable<MediaEntity> {
+        return realm.query(
+            MediaEntity::class,
+            "${MediaEntity::id.name} == $0",
+            mediaId
+        ).asFlowable()
+            .mapNotNull { it.firstOrNull() }
+    }
+
     private fun fetchWalletData(): Completable {
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()
-            .map { config ->
+            .flatMap { config ->
                 // For unsecured http, add this to the manifest: android:usesCleartextTraffic="true"
-                val authBaseUrl = "http://localhost:6546"
-                // val authBaseUrl = config.network.services.authService.first()
-                "${authBaseUrl}$WALLET_DATA_PATH"
-            }
-            .flatMap { url ->
+                // val authBaseUrl = "http://192.168.90.175:8080/as/"
+                val authBaseUrl = config.endpoint
+                val url = "${authBaseUrl}$WALLET_DATA_PATH"
                 Log.w("tryna get nfts from $url")
-                gatewayApi.getNfts(url)
+                gatewayApi.getNfts(url).map { it.toNfts(config) }
             }
-            .map { it.toNfts() }
             .saveTo(realm)
             .ignoreElement()
     }
 
     companion object {
-        private const val WALLET_DATA_PATH = "/apigw/nfts"
+        private const val WALLET_DATA_PATH = "apigw/nfts"
     }
 }

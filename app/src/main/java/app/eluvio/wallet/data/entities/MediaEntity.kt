@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.types.BaseRealmObject
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
@@ -16,10 +17,13 @@ class MediaEntity : RealmObject {
     var name: String = ""
     var image: String = ""
     var mediaType: String = ""
+    var gallery: RealmList<GalleryItemEntity>? = null
 
     companion object {
         const val MEDIA_TYPE_IMAGE = "Image"
         const val MEDIA_TYPE_VIDEO = "Video"
+        const val MEDIA_TYPE_EBOOK = "Ebook"
+        const val MEDIA_TYPE_GALLERY = "Gallery"
     }
 
     @Module

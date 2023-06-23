@@ -80,7 +80,7 @@ object RetrofitModule {
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .build()
         return Retrofit.Builder()
-            .baseUrl("https://localhost")
+            .baseUrl("https://localhost/")
             .client(httpClient)
             .addConverterFactory(MoshiConverterFactory.create())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))

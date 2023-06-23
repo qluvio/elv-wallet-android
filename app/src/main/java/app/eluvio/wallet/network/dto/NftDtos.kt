@@ -5,25 +5,23 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class NftResponse(
-    val contents: List<Nft>,
+    val contents: List<NftDto>,
     val paging: Paging,
 )
 
 @JsonClass(generateAdapter = true)
-data class Nft(
-//    val id: String?,
+data class NftDto(
     val contract_addr: String,
     val token_id: String,
     val block: Int,
-//    val created:DateTime,
     val cap: Int,
-    val meta: NftMetadata,
+    val meta: NftMetadataDto,
     val token_uri: String?,
-    val nft_template: NftTemplate,
+    val nft_template: NftTemplateDto,
 )
 
 @JsonClass(generateAdapter = true)
-data class NftMetadata(
+data class NftMetadataDto(
     val description: String?,
     val display_name: String?,
     val edition_name: String?,
@@ -32,49 +30,49 @@ data class NftMetadata(
 )
 
 @JsonClass(generateAdapter = true)
-data class NftTemplate(
-//    val additional_media_custom_css: String?,
+data class NftTemplateDto(
 //    val additional_media: List<AdditionalMedia>,
-    val additional_media_sections: AdditionalMediaSection,
+    val additional_media_sections: AdditionalMediaSectionDto,
 )
 
 @JsonClass(generateAdapter = true)
-data class AdditionalMediaSection(
-    val featured_media: List<MediaItem>?,
-    val sections: List<MediaSection>?,
+data class AdditionalMediaSectionDto(
+    val featured_media: List<MediaItemDto>?,
+    val sections: List<MediaSectionDto>?,
 )
 
 @JsonClass(generateAdapter = true)
-data class MediaSection(
+data class MediaSectionDto(
     val id: String,
     val name: String,
-    val collections: List<MediaCollection>,
+    val collections: List<MediaCollectionDto>,
 )
 
 @JsonClass(generateAdapter = true)
-data class MediaCollection(
+data class MediaCollectionDto(
     val id: String?,
     val name: String?,
     val display: String?,
-    val media: List<MediaItem>?,
+    val media: List<MediaItemDto>?,
 )
 
 @JsonClass(generateAdapter = true)
-data class MediaItem(
+data class MediaItemDto(
     val id: String,
     val name: String,
     val display: String?,
     val image: String?,
     val media_type: String?,
+    val gallery: List<GalleryItemDto>?,
 )
 
 @JsonClass(generateAdapter = true)
-data class MediaLink(
-    val sources: MediaSource
+data class MediaLinkDto(
+    val sources: MediaSourceDto
 )
 
 @JsonClass(generateAdapter = true)
-data class MediaSource(
+data class MediaSourceDto(
     val default: TheDefaultThing,
 )
 
@@ -89,13 +87,8 @@ data class TheDotThing(
     val container: String,
 )
 
-@JsonClass(generateAdapter = false)
-enum class MediaType {
-    Video,
-    Audio,
-    Image,
-    Gallery,
-    HTML,
-    Ebook,
-    ;
-}
+@JsonClass(generateAdapter = true)
+data class GalleryItemDto(
+    val name: String,
+    val image: TheDefaultThing?,
+)

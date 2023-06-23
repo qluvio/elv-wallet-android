@@ -23,8 +23,9 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     var description: String = ""
     var mediaSections: RealmList<MediaSectionEntity> = realmListOf()
 
-    override fun updateKey() {
+    override fun updateKey(): String {
         _id = "${contractAddress}_${tokenId}"
+        return _id
     }
 
     @Module
