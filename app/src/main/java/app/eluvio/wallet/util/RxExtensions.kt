@@ -65,5 +65,14 @@ fun <T : Any, R : Any> Single<T>.mapNotNull(mapper: (T) -> R?): Maybe<R> = flatM
     }
 }
 
+fun <T : Any, R : Any> Maybe<T>.mapNotNull(mapper: (T) -> R?): Maybe<R> = flatMap {
+    val result = mapper(it)
+    if (result != null) {
+        Maybe.just(result)
+    } else {
+        Maybe.empty()
+    }
+}
+
 fun <T : Any> Observable<T>.timeout(duration: Duration) =
     timeout(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)

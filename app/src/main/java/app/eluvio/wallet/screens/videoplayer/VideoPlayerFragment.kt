@@ -1,7 +1,6 @@
 package app.eluvio.wallet.screens.videoplayer
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackTransportControlGlue
@@ -15,22 +14,37 @@ import androidx.media3.exoplayer.drm.DefaultDrmSessionManagerProvider
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.ui.leanback.LeanbackPlayerAdapter
+import app.eluvio.wallet.data.VideoOptionsFetcher
+import app.eluvio.wallet.data.entities.VideoOptionsEntity
+import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
+import app.eluvio.wallet.util.logging.Log
+import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import javax.inject.Inject
 
 @UnstableApi
+@AndroidEntryPoint
 class VideoPlayerFragment : VideoSupportFragment() {
+    @Inject
+    lateinit var videoOptionsFetcher: VideoOptionsFetcher
+
+    @Inject
+    lateinit var tokenStore: TokenStore
+
+    private lateinit var player: ExoPlayer
     private lateinit var transportControlGlue: PlaybackTransportControlGlue<LeanbackPlayerAdapter>
+    private var disposable: Disposable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val mediaItemId =
             VideoPlayerActivityDestination.argsFrom(requireActivity().intent).mediaItemId
-        val content = buckBunnyDashWidevine // get from args in future
-        Toast.makeText(requireContext(), "loading media $mediaItemId", Toast.LENGTH_SHORT).show()
-        val player = ExoPlayer.Builder(requireContext()).build().apply {
+        player = ExoPlayer.Builder(requireContext()).build().apply {
             playWhenReady = true
-            setMediaSource(makeMediaSource(content))
-            prepare()
+
         }
         val glueHost = VideoSupportFragmentGlueHost(this)
         transportControlGlue = PlaybackTransportControlGlue(
@@ -40,27 +54,52 @@ class VideoPlayerFragment : VideoSupportFragment() {
 //            isSeekEnabled = true // this break play/pause button?
             host = glueHost
         }
+
+        disposable = videoOptionsFetcher.fetchVideoOptions(mediaItemId)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onSuccess = {
+                    player.setMediaSource(makeMediaSource(it))
+                    player.prepare()
+                },
+                onError = {}
+            )
     }
 
     override fun onPause() {
         super.onPause()
         transportControlGlue.pause()
+        disposable?.dispose()
     }
 
-    private fun makeMediaSource(content: DrmContent): MediaSource {
+    private fun makeMediaSource(videoOptionsEntity: VideoOptionsEntity): MediaSource {
+        val fabricToken = tokenStore.fabricToken ?: throw RuntimeException("No fabric token found")
+        val tokenHeader = mapOf("Authorization" to "Bearer $fabricToken")
         val dataSourceFactory = DefaultHttpDataSource.Factory()
-        val drmConfiguration = content.drmProtocol.toDrmConfig()
-        val (mediaItem, mediaSourceFactory) = when (content) {
-            is DrmContent.DASH -> {
-                val mediaItem = makeMediaItem(content.manifestUri, drmConfiguration)
-                mediaItem to DashMediaSource.Factory(dataSourceFactory)
+            .setDefaultRequestProperties(tokenHeader)
+        val drmBuilder = MediaItem.DrmConfiguration.Builder(C.UUID_NIL)
+            .setLicenseRequestHeaders(tokenHeader)
+        when (videoOptionsEntity.drm) {
+            VideoOptionsEntity.DRM_WIDEVINE -> {
+                drmBuilder.setScheme(C.WIDEVINE_UUID)
+                    .setLicenseUri(videoOptionsEntity.licenseUri)
+                    .setMultiSession(true)
             }
 
-            is DrmContent.HLS -> {
-                val mediaItem = makeMediaItem(content.playlistUri, drmConfiguration)
-                mediaItem to HlsMediaSource.Factory(dataSourceFactory)
+            VideoOptionsEntity.DRM_CLEAR -> {
+                drmBuilder.setScheme(C.CLEARKEY_UUID)
+                    .setMultiSession(true)
             }
+
+            else -> throw RuntimeException("Unsupported DRM type ${videoOptionsEntity.drm}")
         }
+        val mediaItem = makeMediaItem(videoOptionsEntity.uri, drmBuilder.build())
+        val mediaSourceFactory = when (videoOptionsEntity.protocol) {
+            VideoOptionsEntity.PROTOCOL_DASH -> DashMediaSource.Factory(dataSourceFactory)
+            VideoOptionsEntity.PROTOCOL_HLS -> HlsMediaSource.Factory(dataSourceFactory)
+            else -> throw RuntimeException("Unsupported protocol ${videoOptionsEntity.protocol}")
+        }
+        Log.i("loading ${videoOptionsEntity.protocol}-${videoOptionsEntity.drm}")
         return mediaSourceFactory
             .setDrmSessionManagerProvider(DefaultDrmSessionManagerProvider())
             .createMediaSource(mediaItem)
@@ -74,18 +113,5 @@ class VideoPlayerFragment : VideoSupportFragment() {
             .setUri(uri)
             .setDrmConfiguration(drmConfiguration)
             .build()
-    }
-
-    private fun DrmProtocol.toDrmConfig(): MediaItem.DrmConfiguration {
-        return when (this) {
-            is DrmProtocol.Widevine -> {
-                MediaItem.DrmConfiguration.Builder(C.WIDEVINE_UUID)
-                    .setLicenseUri(licenseUri)
-                    .setMultiSession(true)
-                    .build()
-            }
-
-            DrmProtocol.ClearKey -> MediaItem.DrmConfiguration.Builder(C.CLEARKEY_UUID).build()
-        }
     }
 }

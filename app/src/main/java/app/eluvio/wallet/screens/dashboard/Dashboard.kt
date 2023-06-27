@@ -2,7 +2,6 @@ package app.eluvio.wallet.screens.dashboard
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,7 +42,6 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.ui.AppLogo
 import app.eluvio.wallet.util.ui.EluvioTabIndicator

@@ -117,6 +117,7 @@ private fun onMediaItemClick(media: MediaEntity, navCallback: NavigationCallback
         MediaEntity.MEDIA_TYPE_GALLERY -> {
             navCallback(ImageGalleryDestination(media.id).asPush())
         }
+
         else -> {}
     }
 }

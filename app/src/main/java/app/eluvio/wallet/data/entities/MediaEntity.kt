@@ -17,6 +17,7 @@ class MediaEntity : RealmObject {
     var name: String = ""
     var image: String = ""
     var mediaType: String = ""
+    var mediaLink: String? = null
     var gallery: RealmList<GalleryItemEntity>? = null
 
     companion object {

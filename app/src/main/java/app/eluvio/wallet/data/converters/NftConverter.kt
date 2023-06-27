@@ -79,6 +79,7 @@ fun MediaItemDto.toEntity(config: FabricConfiguration): MediaEntity {
         name = dto.name
         image = dto.image ?: ""
         mediaType = dto.media_type ?: ""
+        mediaLink = dto.media_link?.toFullLink(config)
         gallery = dto.gallery?.map { it.toEntity(config) }?.toRealmList()
     }
 }
@@ -87,10 +88,6 @@ fun GalleryItemDto.toEntity(config: FabricConfiguration): GalleryItemEntity {
     val dto = this
     return GalleryItemEntity().apply {
         name = dto.name
-        imageUrl = dto.image?.let {
-            val hash = it.dot.container
-            val filePath = it.optionsPath.removePrefix("./")
-            "${config.endpoint}/s/${config.space}/q/$hash/$filePath"
-        }
+        imageUrl = dto.image?.toFullLink(config)
     }
 }

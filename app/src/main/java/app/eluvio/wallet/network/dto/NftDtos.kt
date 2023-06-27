@@ -63,21 +63,22 @@ data class MediaItemDto(
     val display: String?,
     val image: String?,
     val media_type: String?,
+    val media_link: MediaLinkDto?,
     val gallery: List<GalleryItemDto>?,
 )
 
 @JsonClass(generateAdapter = true)
 data class MediaLinkDto(
-    val sources: MediaSourceDto
+    val sources: MediaSourceDto?
 )
 
 @JsonClass(generateAdapter = true)
 data class MediaSourceDto(
-    val default: TheDefaultThing,
+    val default: AssetLinkDto,
 )
 
 @JsonClass(generateAdapter = true)
-data class TheDefaultThing(
+data class AssetLinkDto(
     @field:Json(name = ".") val dot: TheDotThing,
     @field:Json(name = "/") val optionsPath: String,
 )
@@ -90,5 +91,5 @@ data class TheDotThing(
 @JsonClass(generateAdapter = true)
 data class GalleryItemDto(
     val name: String,
-    val image: TheDefaultThing?,
+    val image: AssetLinkDto?,
 )
