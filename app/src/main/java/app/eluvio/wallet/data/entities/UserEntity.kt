@@ -17,7 +17,7 @@ class UserEntity : RealmObject {
     var walletAddress: String = ""
 
     @Ignore
-    val userId = "iusr${walletAddress.base58}"
+    val userId get() = "iusr${walletAddress.base58}"
 
     @Module
     @InstallIn(SingletonComponent::class)
