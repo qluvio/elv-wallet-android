@@ -12,7 +12,9 @@ import app.eluvio.wallet.network.dto.MediaCollectionDto
 import app.eluvio.wallet.network.dto.MediaItemDto
 import app.eluvio.wallet.network.dto.MediaSectionDto
 import app.eluvio.wallet.network.dto.NftResponse
+import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.ext.toRealmDictionary
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmList
 
@@ -79,7 +81,10 @@ fun MediaItemDto.toEntity(config: FabricConfiguration): MediaEntity {
         name = dto.name
         image = dto.image ?: ""
         mediaType = dto.media_type ?: ""
-        mediaLink = dto.media_link?.toFullLink(config)
+        mediaLinks = dto.media_link?.sources
+            ?.mapValues { (_, link) -> link.toFullLink(config) }
+            ?.toRealmDictionary()
+            ?: realmDictionaryOf()
         gallery = dto.gallery?.map { it.toEntity(config) }?.toRealmList()
     }
 }

@@ -4,6 +4,8 @@ import android.util.Base64
 import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.data.stores.UserStore
+import app.eluvio.wallet.di.ApiProvider
+import app.eluvio.wallet.di.getApi
 import app.eluvio.wallet.network.AuthServicesApi
 import app.eluvio.wallet.network.SignBody
 import app.eluvio.wallet.util.crypto.Base58
@@ -19,12 +21,16 @@ import kotlin.time.Duration.Companion.days
 
 @Singleton
 class AuthenticationService @Inject constructor(
-    private val authServicesApi: AuthServicesApi,
+    private val apiProvider: ApiProvider,
     private val fabricConfigStore: FabricConfigStore,
     private val tokenStore: TokenStore,
     private val userStore: UserStore,
 ) {
     fun getFabricToken(idToken: String): Single<String> {
+        return apiProvider.getApi<AuthServicesApi>().flatMap { api -> getFabricToken(idToken, api) }
+    }
+
+    private fun getFabricToken(idToken: String, authServicesApi: AuthServicesApi): Single<String> {
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()
             .flatMap { fabricConfig ->
@@ -42,7 +48,7 @@ class AuthenticationService @Inject constructor(
                             jwtResponse.address,
                             fabricConfig.qspace.id
                         )
-                        remoteSign(hash, accountId, authBaseUrl)
+                        remoteSign(hash, accountId, authBaseUrl, authServicesApi)
                             .map { signature ->
                                 createFabricToken(tokenString, signature).also {
                                     tokenStore.fabricToken = it
@@ -92,7 +98,8 @@ class AuthenticationService @Inject constructor(
     private fun remoteSign(
         hash: String,
         accountId: String,
-        authServiceUrl: String
+        authServiceUrl: String,
+        authServicesApi: AuthServicesApi
     ): Single<String> {
         val url = "$authServiceUrl$WALLET_SIGN_PATH$accountId"
         Log.d("remote signing hash: $hash  url: $url token: ${tokenStore.clusterToken}")

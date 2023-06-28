@@ -1,6 +1,5 @@
 package app.eluvio.wallet.network.dto
 
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -31,7 +30,6 @@ data class NftMetadataDto(
 
 @JsonClass(generateAdapter = true)
 data class NftTemplateDto(
-//    val additional_media: List<AdditionalMedia>,
     val additional_media_sections: AdditionalMediaSectionDto,
 )
 
@@ -69,23 +67,7 @@ data class MediaItemDto(
 
 @JsonClass(generateAdapter = true)
 data class MediaLinkDto(
-    val sources: MediaSourceDto?
-)
-
-@JsonClass(generateAdapter = true)
-data class MediaSourceDto(
-    val default: AssetLinkDto,
-)
-
-@JsonClass(generateAdapter = true)
-data class AssetLinkDto(
-    @field:Json(name = ".") val dot: TheDotThing,
-    @field:Json(name = "/") val optionsPath: String,
-)
-
-@JsonClass(generateAdapter = true)
-data class TheDotThing(
-    val container: String,
+    val sources: Map<String, AssetLinkDto>?
 )
 
 @JsonClass(generateAdapter = true)

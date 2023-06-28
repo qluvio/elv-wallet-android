@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Url
 
 interface GatewayApi {
-    @GET
+    @GET //TODO: @GET("apigw/nfts") instead of @Url
     fun getNfts(@Url url: String): Single<NftResponse>
 
     @GET

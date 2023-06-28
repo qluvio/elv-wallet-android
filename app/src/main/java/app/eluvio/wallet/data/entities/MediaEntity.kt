@@ -5,7 +5,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.types.BaseRealmObject
+import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -17,7 +19,7 @@ class MediaEntity : RealmObject {
     var name: String = ""
     var image: String = ""
     var mediaType: String = ""
-    var mediaLink: String? = null
+    var mediaLinks: RealmDictionary<String> = realmDictionaryOf()
     var gallery: RealmList<GalleryItemEntity>? = null
 
     companion object {

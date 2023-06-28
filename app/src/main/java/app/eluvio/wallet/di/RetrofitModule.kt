@@ -2,9 +2,8 @@ package app.eluvio.wallet.di
 
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.network.Auth0Api
-import app.eluvio.wallet.network.AuthServicesApi
 import app.eluvio.wallet.network.FabricConfigApi
-import app.eluvio.wallet.network.GatewayApi
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,9 +21,47 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
+    @Provides
+    @TokenAwareHttpClient
+    fun provideHttpClient(tokenStore: TokenStore): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request()
+                val builder = request.newBuilder()
+                builder.header("Accept", "*/*") // needed for link/file resolution from the fabric
+                if (request.url.toString().endsWith("wlt/login/jwt")) {
+                    tokenStore.idToken?.let { idToken ->
+                        builder.header("Authorization", "Bearer $idToken")
+                    }
+                } else if (request.url.toString().contains("wlt/sign/eth")) {
+                    tokenStore.clusterToken?.let { walletToken ->
+                        builder.header("Authorization", "Bearer $walletToken")
+                    }
+                } else {
+                    tokenStore.fabricToken?.let { fabricToken ->
+                        builder.header("Authorization", "Bearer $fabricToken")
+                    }
+                }
+                chain.proceed(builder.build())
+            }
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .build()
+    }
+
+    @Provides
+    fun provideRetrofitBuilder(@TokenAwareHttpClient httpClient: OkHttpClient): Retrofit.Builder {
+        val moshi = Moshi.Builder()
+            .add(AssetLinkAdapter())
+            .build()
+        return Retrofit.Builder()
+            .client(httpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
+    }
+
     @Singleton
     @Provides
-    @Fabric
+    @FabricConfig
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://localhost/")
@@ -57,44 +94,12 @@ object RetrofitModule {
     @Singleton
     @Provides
     @AuthD
-    fun provideAuthDRetrofit(tokenStore: TokenStore): Retrofit {
-        val httpClient = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                val request = chain.request()
-                val builder = request.newBuilder()
-                if (request.url.toString().endsWith("wlt/login/jwt")) {
-                    tokenStore.idToken?.let { idToken ->
-                        builder.header("Authorization", "Bearer $idToken")
-                    }
-                } else if (request.url.toString().contains("wlt/sign/eth")) {
-                    tokenStore.clusterToken?.let { walletToken ->
-                        builder.header("Authorization", "Bearer $walletToken")
-                    }
-                } else {
-                    tokenStore.fabricToken?.let { fabricToken ->
-                        builder.header("Authorization", "Bearer $fabricToken")
-                    }
-                }
-                chain.proceed(builder.build())
-            }
-            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            .build()
-        return Retrofit.Builder()
-            .baseUrl("https://localhost/")
-            .client(httpClient)
-            .addConverterFactory(MoshiConverterFactory.create())
-            .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
-            .build()
+    fun provideAuthDRetrofit(retrofitBuilder: Retrofit.Builder): Retrofit {
+        return retrofitBuilder.baseUrl("https://localhost/").build()
     }
 
     @Provides
-    fun provideConfigApi(@Fabric retrofit: Retrofit): FabricConfigApi = retrofit.create()
-
-    @Provides
-    fun provideGatewayApi(@AuthD retrofit: Retrofit): GatewayApi = retrofit.create()
-
-    @Provides
-    fun provideAuthServicesApi(@AuthD retrofit: Retrofit): AuthServicesApi = retrofit.create()
+    fun provideConfigApi(@FabricConfig retrofit: Retrofit): FabricConfigApi = retrofit.create()
 
     @Provides
     fun provideAuth0Api(@Auth0 retrofit: Retrofit): Auth0Api = retrofit.create()
@@ -107,4 +112,7 @@ annotation class Auth0
 annotation class AuthD
 
 @Qualifier
-annotation class Fabric
+annotation class FabricConfig
+
+@Qualifier
+annotation class TokenAwareHttpClient
