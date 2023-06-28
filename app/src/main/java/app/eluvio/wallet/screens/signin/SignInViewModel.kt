@@ -35,8 +35,17 @@ class SignInViewModel @Inject constructor(
 
     private var activationDataDisposable: Disposable? = null
     private var activationCompleteDisposable: Disposable? = null
+    private var lastQrSizeRequested: Int? = null
+
+    override fun onResume() {
+        super.onResume()
+        lastQrSizeRequested?.let {
+            observeActivationData(it)
+        }
+    }
 
     fun requestNewToken(qrSize: Int) {
+        lastQrSizeRequested = qrSize
         observeActivationData(qrSize)
     }
 

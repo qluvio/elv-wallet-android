@@ -44,6 +44,7 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.ui.AppLogo
+import app.eluvio.wallet.util.ui.EluvioLoadingSpinner
 import app.eluvio.wallet.util.ui.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -86,22 +87,16 @@ private fun SignIn(
             modifier = Modifier.fillMaxWidth(0.3f)
         )
         Spacer(modifier = Modifier.height(10.dp))
-        if (state.loading) {
-//            CircularProgressIndicator() // is this non-tv material stuff?
-        }
-        Text(
-            text = state.userCode ?: "",
-            style = MaterialTheme.typography.title_62.copy(fontSize = 24.sp)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
         var size by remember { mutableStateOf(0.dp) }
-        BoxWithConstraints(Modifier.weight(1f)) {
+        BoxWithConstraints(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.weight(1f)
+        ) {
             size = maxHeight
-            if (state.qrCode != null) {
-                Image(
-                    bitmap = state.qrCode.asImageBitmap(),
-                    contentDescription = "qr code",
-                )
+            if (state.loading) {
+                EluvioLoadingSpinner()
+            } else {
+                QrData(state)
             }
         }
         val sizePx = with(LocalDensity.current) { size.toPx().toInt() }
@@ -123,6 +118,27 @@ private fun SignIn(
             }
         }
         Spacer(modifier = Modifier.height(50.dp))
+    }
+}
+
+@Composable
+private fun QrData(state: SignInViewModel.State) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(
+            text = state.userCode ?: "",
+            style = MaterialTheme.typography.title_62.copy(fontSize = 24.sp)
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        if (state.qrCode != null) {
+            Image(
+                bitmap = state.qrCode.asImageBitmap(),
+                contentDescription = "qr code",
+            )
+        }
     }
 }
 
