@@ -3,6 +3,7 @@ package app.eluvio.wallet.di
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.network.Auth0Api
 import app.eluvio.wallet.network.FabricConfigApi
+import app.eluvio.wallet.network.adapters.AssetLinkAdapter
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
