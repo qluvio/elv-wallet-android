@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -21,6 +23,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -91,6 +94,7 @@ private fun EnvironmentSelection(
             style = MaterialTheme.typography.header_53.copy(fontSize = 50.sp)
         )
 
+        val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
         FocusGroup(Modifier.onPreviewKeyEvent {
             // Exit screen when back is pressed while FocusGroup is focused
             if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
@@ -99,29 +103,34 @@ private fun EnvironmentSelection(
             }
             false
         }) {
-            val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 contentColor = Color.White,
                 indicator = { EluvioTabIndicator(selectedTabIndex, it) }
             ) {
-                state.availableEnvironments.forEach { environment ->
-                    val selected = state.selectedEnvironment == environment
-                    val focusRequester = remember { FocusRequester() }
-                    Tab(
-                        selected = selected,
-                        onFocus = { onEnvironmentSelected(environment) },
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .restorableFocus()
-                            .focusRequester(focusRequester),
-                    ) {
-                        Text(stringResource(id = environment.envName))
-                    }
-                    LaunchedEffect(Unit) {
-                        if (selected) {
-                            focusRequester.requestFocus()
+                val tabFocusRequesters = remember {
+                    List(size = state.availableEnvironments.size, init = { FocusRequester() })
+                }
+                val focusManager = LocalFocusManager.current
+                state.availableEnvironments.forEachIndexed { index, environment ->
+                    key(index) {
+                        Tab(
+                            selected = index == selectedTabIndex,
+                            onFocus = { onEnvironmentSelected(environment) },
+                            onClick = { focusManager.moveFocus(FocusDirection.Down) },
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .restorableFocus()
+                                .focusRequester(tabFocusRequesters[index]),
+                        ) {
+                            Text(stringResource(id = environment.envName))
                         }
+                    }
+                }
+                if (selectedTabIndex != -1) {
+                    // Once we have a non-empty state (and only once), request focus on the selected tab
+                    LaunchedEffect(Unit) {
+                        tabFocusRequesters[selectedTabIndex].requestFocus()
                     }
                 }
             }
