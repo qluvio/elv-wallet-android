@@ -43,9 +43,9 @@ import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
-import app.eluvio.wallet.util.ui.AppLogo
-import app.eluvio.wallet.util.ui.EluvioLoadingSpinner
-import app.eluvio.wallet.util.ui.subscribeToState
+import app.eluvio.wallet.ui.AppLogo
+import app.eluvio.wallet.ui.EluvioLoadingSpinner
+import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
 @AuthFlowGraph

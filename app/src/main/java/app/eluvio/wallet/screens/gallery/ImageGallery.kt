@@ -30,7 +30,7 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
-import app.eluvio.wallet.util.ui.subscribeToState
+import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 

@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util.ui
+package app.eluvio.wallet.ui
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged

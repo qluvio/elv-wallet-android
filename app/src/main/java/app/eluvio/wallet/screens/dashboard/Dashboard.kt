@@ -43,10 +43,10 @@ import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.ui.AppLogo
-import app.eluvio.wallet.util.ui.EluvioTabIndicator
-import app.eluvio.wallet.util.ui.FocusGroup
-import app.eluvio.wallet.util.ui.subscribeToState
+import app.eluvio.wallet.ui.AppLogo
+import app.eluvio.wallet.ui.EluvioTabIndicator
+import app.eluvio.wallet.ui.FocusGroup
+import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.dependency
@@ -142,18 +142,12 @@ private fun TopBar(onTabSelected: (Tabs) -> Unit, navCallback: NavigationCallbac
     }
 }
 
-@DashboardTabsGraph
-@Destination
-@Composable
-fun MyMedia() {
-    Temp(tab = Tabs.MyMedia)
-}
 
 @DashboardTabsGraph
 @Destination
 @Composable
 fun Search() {
-    Temp(tab = Tabs.MyMedia)
+    Temp(tab = Tabs.Search)
 }
 
 @Composable

@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.util.ui.subscribeToState
+import app.eluvio.wallet.util.subscribeToState
 
 @Composable
 fun ${NAME}(navCallback: NavigationCallback) {

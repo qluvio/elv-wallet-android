@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util.ui
+package app.eluvio.wallet.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpRect

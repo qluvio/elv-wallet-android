@@ -41,6 +41,10 @@ class ContentStore @Inject constructor(
         ).asFlowable()
     }
 
+    fun observeMediaItems(): Flowable<List<MediaEntity>> {
+        return realm.query(MediaEntity::class).asFlowable()
+    }
+
     fun observeMediaItem(mediaId: String): Flowable<MediaEntity> {
         return realm.query(
             MediaEntity::class,

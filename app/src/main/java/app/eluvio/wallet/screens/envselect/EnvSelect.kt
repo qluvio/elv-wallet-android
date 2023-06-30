@@ -48,10 +48,10 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
-import app.eluvio.wallet.util.ui.EluvioTabIndicator
-import app.eluvio.wallet.util.ui.FocusGroup
-import app.eluvio.wallet.util.ui.subscribeToState
-import app.eluvio.wallet.util.ui.withAlpha
+import app.eluvio.wallet.ui.EluvioTabIndicator
+import app.eluvio.wallet.ui.FocusGroup
+import app.eluvio.wallet.util.subscribeToState
+import app.eluvio.wallet.ui.withAlpha
 import com.ramcosta.composedestinations.annotation.Destination
 
 @AuthFlowGraph(start = true)

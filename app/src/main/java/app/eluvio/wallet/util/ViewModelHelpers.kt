@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util.ui
+package app.eluvio.wallet.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util.ui
+package app.eluvio.wallet.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.CircularProgressIndicator
