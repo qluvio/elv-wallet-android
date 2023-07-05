@@ -1,10 +1,13 @@
 package app.eluvio.wallet.screens.dashboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -23,7 +27,10 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,10 +49,11 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.ui.AppLogo
 import app.eluvio.wallet.ui.EluvioTabIndicator
 import app.eluvio.wallet.ui.FocusGroup
+import app.eluvio.wallet.ui.FocusGroupScope
+import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
@@ -70,12 +78,22 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
                 launchSingleTop = true
             }
         }, navCallback)
-        DestinationsNavHost(
-            navGraph = NavGraphs.dashboardTabsGraph,
-            navController = tabNavController,
-            dependenciesContainerBuilder = { dependency(navCallback) },
-            modifier = Modifier.fillMaxSize()
-        )
+        val modifier = Modifier.fillMaxSize()
+        if (LocalInspectionMode.current) {
+            // Don't load real content in preview mode
+            Text(
+                text = "Dashboard page content",
+                textAlign = TextAlign.Center,
+                modifier = modifier.background(Color.Red.copy(alpha = 0.5f))
+            )
+        } else {
+            DestinationsNavHost(
+                navGraph = NavGraphs.dashboardTabsGraph,
+                navController = tabNavController,
+                dependenciesContainerBuilder = { dependency(navCallback) },
+                modifier = modifier
+            )
+        }
     }
 }
 
@@ -100,41 +118,32 @@ private fun TopBar(onTabSelected: (Tabs) -> Unit, navCallback: NavigationCallbac
         ) {
             AppLogo()
             val focusRequester = remember { FocusRequester() }
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                contentColor = Color.White,
-                indicator = { EluvioTabIndicator(selectedTabIndex, it) },
+            Box(
                 modifier = Modifier
+                    .clip(RoundedCornerShape(40.dp))
+                    .background(Color.White.copy(alpha = 0.1f))
+                    .padding(5.dp)
                     .align(Alignment.Center)
-                    .focusRequester(focusRequester)
             ) {
-                LaunchedEffect(Unit) { focusRequester.requestFocus() }
-                Tabs.values().forEachIndexed { index, tab ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onFocus = {
-                            selectedTabIndex = index
-                            onTabSelected(tab)
-                            Log.e("Tab focused: $tab")
-                        },
-                        onClick = { focusManager.moveFocus(FocusDirection.Down) },
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .restorableFocus(),
-                    ) {
-                        val icon = tab.icon
-                        if (icon != null) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = stringResource(tab.title)
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(tab.title),
-                                style = MaterialTheme.typography.header_30,
-                                modifier = Modifier.align(Alignment.CenterVertically)
-                            )
-                        }
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    contentColor = Color.White,
+                    indicator = { EluvioTabIndicator(selectedTabIndex, it) },
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                ) {
+                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                    Tabs.values().forEachIndexed { index, tab ->
+                        DashboardTab(
+                            tab,
+                            selected = selectedTabIndex == index,
+                            onFocus = {
+                                selectedTabIndex = index
+                                onTabSelected(tab)
+                                Log.e("Tab focused: $tab")
+                            },
+                            onClick = { focusManager.moveFocus(FocusDirection.Down) },
+                        )
                     }
                 }
             }
@@ -142,6 +151,41 @@ private fun TopBar(onTabSelected: (Tabs) -> Unit, navCallback: NavigationCallbac
     }
 }
 
+@OptIn(ExperimentalTvFoundationApi::class, ExperimentalTvMaterial3Api::class)
+@Composable
+private fun FocusGroupScope.DashboardTab(
+    tab: Tabs,
+    selected: Boolean,
+    onFocus: () -> Unit,
+    onClick: () -> Unit
+) {
+    Tab(
+        selected = selected,
+        onFocus = onFocus,
+        onClick = onClick,
+        modifier = Modifier
+            .padding(10.dp)
+            .restorableFocus(),
+    ) {
+        val icon = tab.icon
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = stringResource(tab.title),
+                modifier = Modifier
+                    .size(20.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        } else {
+            Text(
+                text = stringResource(tab.title),
+                // TODO: use standard font
+                style = MaterialTheme.typography.header_30.copy(fontWeight = FontWeight.W600),
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+        }
+    }
+}
 
 @DashboardTabsGraph
 @Destination
@@ -158,14 +202,14 @@ fun Temp(tab: Tabs) {
 }
 
 @Composable
+@Preview(widthDp = 900)
+private fun TopBarPreview() {
+    TopBar(onTabSelected = { }, navCallback = { })
+}
+
+@Composable
 @Preview(device = Devices.TV_720p)
 private fun DashboardPreview() {
     val state = DashboardViewModel.State()
     Dashboard(state, navCallback = { })
-}
-
-@Composable
-@Preview
-private fun TopBarPreview() {
-    TopBar(onTabSelected = { }, navCallback = { })
 }
