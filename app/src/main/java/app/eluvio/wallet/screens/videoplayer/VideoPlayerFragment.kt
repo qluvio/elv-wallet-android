@@ -51,7 +51,7 @@ class VideoPlayerFragment : VideoSupportFragment() {
             requireContext(),
             LeanbackPlayerAdapter(requireContext(), player, 50)
         ).apply {
-//            isSeekEnabled = true // this break play/pause button?
+            isSeekEnabled = true
             host = glueHost
         }
 

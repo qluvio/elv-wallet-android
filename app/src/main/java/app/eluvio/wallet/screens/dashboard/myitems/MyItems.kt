@@ -77,7 +77,7 @@ private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallba
                 pivotOffsets = PivotOffsets(0.1f),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(state.media, key = { it.contractAddress }) { media ->
+                items(state.media, key = { it.key }) { media ->
                     MediaCard(
                         media,
                         onClick = { navCallback(NftDetailDestination(media.contractAddress).asPush()) },
@@ -93,7 +93,8 @@ private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallba
 private fun MyItemsPreview() = EluvioThemePreview {
     val items = listOf(
         MyItemsViewModel.State.Media(
-            "id",
+            "key",
+            "contract_address",
             "https://x",
             "Single Token",
             "Special Edition",
@@ -101,7 +102,8 @@ private fun MyItemsPreview() = EluvioThemePreview {
             1
         ),
         MyItemsViewModel.State.Media(
-            "id",
+            "key",
+            "contract_address",
             "https://x",
             "Token Pack",
             "Pleab Edition",
@@ -112,7 +114,7 @@ private fun MyItemsPreview() = EluvioThemePreview {
     MyItems(MyItemsViewModel.State(
         loading = false,
         // create 10 copies of the original list
-        (1..10).flatMap { items }.map { it.copy(contractAddress = UUID.randomUUID().toString()) }
+        (1..10).flatMap { items }.map { it.copy(key = UUID.randomUUID().toString()) }
     ), navCallback = { })
 }
 

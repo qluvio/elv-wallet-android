@@ -100,6 +100,7 @@ private fun Header(media: MyItemsViewModel.State.Media) {
 fun MediaCardPreviewPack() = EluvioThemePreview {
     MediaCard(
         MyItemsViewModel.State.Media(
+            "key",
             "id1",
             "https://x",
             "Goat Pack",
@@ -116,6 +117,7 @@ fun MediaCardPreviewPack() = EluvioThemePreview {
 fun MediaCardPreviewSingle() = EluvioThemePreview {
     MediaCard(
         MyItemsViewModel.State.Media(
+            "key",
             "id1",
             "https://x",
             "Single Token",
