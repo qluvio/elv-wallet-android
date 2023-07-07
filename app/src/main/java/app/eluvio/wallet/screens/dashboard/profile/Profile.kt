@@ -28,7 +28,7 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.subscribeToState
-import app.eluvio.wallet.ui.withAlpha
+import app.eluvio.wallet.screens.common.withAlpha
 import com.ramcosta.composedestinations.annotation.Destination
 
 @DashboardTabsGraph

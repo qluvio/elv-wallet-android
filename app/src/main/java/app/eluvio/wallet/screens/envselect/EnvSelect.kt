@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,13 +44,14 @@ import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.common.EluvioTabIndicator
+import app.eluvio.wallet.screens.common.FocusGroup
+import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
-import app.eluvio.wallet.ui.EluvioTabIndicator
-import app.eluvio.wallet.ui.FocusGroup
 import app.eluvio.wallet.util.subscribeToState
-import app.eluvio.wallet.ui.withAlpha
 import com.ramcosta.composedestinations.annotation.Destination
 
 @AuthFlowGraph(start = true)
@@ -129,9 +129,7 @@ private fun EnvironmentSelection(
                 }
                 if (selectedTabIndex != -1) {
                     // Once we have a non-empty state (and only once), request focus on the selected tab
-                    LaunchedEffect(Unit) {
-                        tabFocusRequesters[selectedTabIndex].requestFocus()
-                    }
+                    tabFocusRequesters[selectedTabIndex].requestOnce()
                 }
             }
         }

@@ -17,7 +17,7 @@ import app.eluvio.wallet.util.logging.Log
 inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
     noinline navCallback: NavigationCallback,
     crossinline onEvent: (Events) -> Unit = {},
-    onState: (VM, State) -> Unit
+    onState: @Composable (VM, State) -> Unit
 ) {
     val vm = this
 

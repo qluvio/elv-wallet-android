@@ -43,8 +43,9 @@ import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
-import app.eluvio.wallet.ui.AppLogo
-import app.eluvio.wallet.ui.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.AppLogo
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -109,7 +110,7 @@ private fun SignIn(
         Row {
             val focusRequester = remember { FocusRequester() }
             Card(onClick = { onRequestNewToken(sizePx) }, Modifier.focusRequester(focusRequester)) {
-                LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                focusRequester.requestOnce()
                 Text("Request New Code", Modifier.padding(10.dp))
             }
             Spacer(modifier = Modifier.width(35.dp))

@@ -28,7 +28,7 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.ui.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 import java.util.UUID

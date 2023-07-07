@@ -1,4 +1,4 @@
-package app.eluvio.wallet.ui
+package app.eluvio.wallet.screens.common
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -23,8 +23,10 @@ import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
+import app.eluvio.wallet.screens.destinations.QrDialogDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.theme.body_32
+import app.eluvio.wallet.util.logging.Log
 import coil.compose.AsyncImage
 
 /**
@@ -99,6 +101,12 @@ fun defaultMediaItemClickHandler(navCallback: NavigationCallback): (media: Media
                 navCallback(ImageGalleryDestination(media.id).asPush())
             }
 
-            else -> {}
+            else -> {
+                if (media.mediaFile.isNotEmpty() || media.mediaLinks.isNotEmpty()) {
+                    navCallback(QrDialogDestination(media.id).asPush())
+                } else {
+                    Log.w("Tried to open unsupported media with no links: $media")
+                }
+            }
         }
     }

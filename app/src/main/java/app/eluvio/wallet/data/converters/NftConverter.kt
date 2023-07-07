@@ -81,6 +81,7 @@ fun MediaItemDto.toEntity(config: FabricConfiguration): MediaEntity {
         name = dto.name
         image = dto.image ?: ""
         mediaType = dto.media_type ?: ""
+        mediaFile = dto.media_file?.toFullLink(config) ?: ""
         mediaLinks = dto.media_link?.sources
             ?.mapValues { (_, link) -> link.toFullLink(config) }
             ?.toRealmDictionary()

@@ -8,6 +8,7 @@ import app.eluvio.wallet.data.stores.DeviceActivationStore
 import app.eluvio.wallet.navigation.asNewRoot
 import app.eluvio.wallet.network.DeviceActivationData
 import app.eluvio.wallet.screens.NavGraphs
+import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -70,20 +71,6 @@ class SignInViewModel @Inject constructor(
                 }
             }
             .addTo(disposables)
-    }
-
-    private fun generateQrCode(url: String, size: Int): Single<Bitmap> {
-        return Single.create {
-            val bytes = ByteArrayOutputStream()
-            val qr = QRCode(url)
-            val rawData = qr.encode()
-            val margin = 20 //(pixels)
-            val cellSize = (size - margin) / rawData.size
-            qr.render(margin = margin, cellSize = cellSize, rawData = rawData).writeImage(bytes)
-            val bitmap = BitmapFactory.decodeByteArray(bytes.toByteArray(), 0, bytes.size())
-            Log.d("QR generated for url: $url")
-            it.onSuccess(bitmap)
-        }
     }
 
     private fun observeActivationComplete(activationData: DeviceActivationData) {

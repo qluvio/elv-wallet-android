@@ -49,10 +49,11 @@ import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.ui.AppLogo
-import app.eluvio.wallet.ui.EluvioTabIndicator
-import app.eluvio.wallet.ui.FocusGroup
-import app.eluvio.wallet.ui.FocusGroupScope
+import app.eluvio.wallet.screens.common.AppLogo
+import app.eluvio.wallet.screens.common.EluvioTabIndicator
+import app.eluvio.wallet.screens.common.FocusGroup
+import app.eluvio.wallet.screens.common.FocusGroupScope
+import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -132,7 +133,7 @@ private fun TopBar(onTabSelected: (Tabs) -> Unit, navCallback: NavigationCallbac
                     modifier = Modifier
                         .focusRequester(focusRequester)
                 ) {
-                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                    focusRequester.requestOnce()
                     Tabs.values().forEachIndexed { index, tab ->
                         DashboardTab(
                             tab,

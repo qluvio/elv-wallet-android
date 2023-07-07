@@ -16,7 +16,7 @@
 
 // Copied from:
 // https://github.com/android/tv-samples/blob/main/JetStreamCompose/jetstream/src/main/java/com/google/jetstream/presentation/utils/FocusGroup.kt
-package app.eluvio.wallet.ui
+package app.eluvio.wallet.screens.common
 
 import android.annotation.SuppressLint
 import android.util.Log

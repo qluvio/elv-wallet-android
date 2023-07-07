@@ -19,14 +19,22 @@ class MediaEntity : RealmObject {
     var name: String = ""
     var image: String = ""
     var mediaType: String = ""
+    var mediaFile: String = ""
     var mediaLinks: RealmDictionary<String> = realmDictionaryOf()
     var gallery: RealmList<GalleryItemEntity>? = null
 
+    override fun toString(): String {
+        return "MediaEntity(id='$id', name='$name', image='$image', mediaType='$mediaType', mediaFile='$mediaFile', mediaLinks=$mediaLinks, gallery=$gallery)"
+    }
+
     companion object {
-        const val MEDIA_TYPE_IMAGE = "Image"
-        const val MEDIA_TYPE_VIDEO = "Video"
+        const val MEDIA_TYPE_AUDIO = "Audio"
         const val MEDIA_TYPE_EBOOK = "Ebook"
         const val MEDIA_TYPE_GALLERY = "Gallery"
+        const val MEDIA_TYPE_HTML = "HTML"
+        const val MEDIA_TYPE_IMAGE = "Image"
+        const val MEDIA_TYPE_LIVE = "Live"
+        const val MEDIA_TYPE_VIDEO = "Video"
     }
 
     @Module

@@ -61,6 +61,7 @@ data class MediaItemDto(
     val display: String?,
     val image: String?,
     val media_type: String?,
+    val media_file: AssetLinkDto?,
     val media_link: MediaLinkDto?,
     val gallery: List<GalleryItemDto>?,
 )
