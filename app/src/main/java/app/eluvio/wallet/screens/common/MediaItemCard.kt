@@ -97,6 +97,7 @@ fun defaultMediaItemClickHandler(navCallback: NavigationCallback): (media: Media
                 navCallback(VideoPlayerActivityDestination(media.id).asPush())
             }
 
+            MediaEntity.MEDIA_TYPE_IMAGE,
             MediaEntity.MEDIA_TYPE_GALLERY -> {
                 navCallback(ImageGalleryDestination(media.id).asPush())
             }

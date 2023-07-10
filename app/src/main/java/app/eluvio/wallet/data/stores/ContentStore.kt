@@ -13,6 +13,7 @@ import app.eluvio.wallet.util.realm.saveTo
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.realm.kotlin.Realm
+import io.realm.kotlin.ext.query
 import javax.inject.Inject
 
 
@@ -23,7 +24,7 @@ class ContentStore @Inject constructor(
 ) {
 
     fun observeWalletData(): Flowable<Result<List<NftEntity>>> {
-        return realm.query(NftEntity::class).asFlowable()
+        return realm.query<NftEntity>().asFlowable()
             .map { Result.success(it) }
             .mergeWith(fetchWalletData().onErrorReturn { Result.failure(it) })
             .doOnNext {
@@ -34,20 +35,18 @@ class ContentStore @Inject constructor(
     }
 
     fun observeNft(contractAddress: String): Flowable<List<NftEntity>> {
-        return realm.query(
-            NftEntity::class,
+        return realm.query<NftEntity>(
             "${NftEntity::contractAddress.name} == $0",
             contractAddress
         ).asFlowable()
     }
 
     fun observeMediaItems(): Flowable<List<MediaEntity>> {
-        return realm.query(MediaEntity::class).asFlowable()
+        return realm.query<MediaEntity>().asFlowable()
     }
 
     fun observeMediaItem(mediaId: String): Flowable<MediaEntity> {
-        return realm.query(
-            MediaEntity::class,
+        return realm.query<MediaEntity>(
             "${MediaEntity::id.name} == $0",
             mediaId
         ).asFlowable()
