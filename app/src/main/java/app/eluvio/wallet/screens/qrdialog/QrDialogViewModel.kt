@@ -21,7 +21,7 @@ class QrDialogViewModel @Inject constructor(
     private val contentStore: ContentStore,
     private val tokenStore: TokenStore,
 ) : BaseViewModel<QrDialogViewModel.State>(State()) {
-    data class State(val qrCode: Bitmap? = null)
+    data class State(val qrCode: Bitmap? = null, val error: Boolean = false)
 
     private val mediaId = QrDialogDestination.argsFrom(savedStateHandle).mediaItemId
     override fun onResume() {
@@ -32,9 +32,10 @@ class QrDialogViewModel @Inject constructor(
             }
             .subscribeBy(
                 onNext = {
-                    updateState { copy(qrCode = it) }
+                    updateState { copy(qrCode = it, error = false) }
                 },
                 onError = {
+                    updateState { copy(error = true) }
                     Log.e("Error loading QR for media item:$mediaId", it)
                 }
             )

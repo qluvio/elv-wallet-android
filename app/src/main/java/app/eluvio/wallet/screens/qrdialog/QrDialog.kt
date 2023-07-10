@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.qrdialog
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.FullscreenDialogStyle
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.title_62
@@ -45,28 +47,61 @@ private fun QrDialog(state: QrDialogViewModel.State) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        if (state.qrCode != null) {
-            Text(
-                text = "Point your camera to the QR Code below for content",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.title_62,
-                modifier = Modifier.fillMaxWidth(0.5f),
-            )
-            Spacer(Modifier.size(20.dp))
-            Image(
-                bitmap = state.qrCode.asImageBitmap(),
-                contentDescription = "QR Code",
-            )
+        if (state.error) {
+            ErrorView()
+        } else {
+            QrView(state.qrCode)
         }
     }
 }
 
 @Composable
+private fun QrView(qrCode: Bitmap?) {
+    Text(
+        text = "Point your camera to the QR Code below for content",
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.title_62,
+        modifier = Modifier.fillMaxWidth(0.5f),
+    )
+    Spacer(Modifier.size(20.dp))
+    if (qrCode != null) {
+        Image(
+            bitmap = qrCode.asImageBitmap(),
+            contentDescription = "QR Code",
+        )
+    } else {
+        EluvioLoadingSpinner()
+    }
+}
+
+@Composable
+private fun ErrorView() {
+    Text(
+        text = "Unable to load QR Code. Please try again later.",
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.title_62,
+        modifier = Modifier.fillMaxWidth(0.5f),
+    )
+}
+
+@Composable
 @Preview(device = Devices.TV_720p)
-private fun QrDialogPreview() = EluvioThemePreview {
+private fun QrDialogPreviewSuccess() = EluvioThemePreview {
     val bitmap = BitmapFactory.decodeResource(
         LocalContext.current.resources,
         R.mipmap.ic_launcher
     )
     QrDialog(QrDialogViewModel.State(bitmap))
+}
+
+@Composable
+@Preview(device = Devices.TV_720p)
+private fun QrDialogPreviewLoading() = EluvioThemePreview {
+    QrDialog(QrDialogViewModel.State(null))
+}
+
+@Composable
+@Preview(device = Devices.TV_720p)
+private fun QrDialogPreviewError() = EluvioThemePreview {
+    QrDialog(QrDialogViewModel.State(null, error = true))
 }
