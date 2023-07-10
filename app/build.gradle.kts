@@ -6,6 +6,7 @@ plugins {
     kotlin("kapt")
     alias(libs.plugins.ksp)
     alias(libs.plugins.realm)
+    alias(libs.plugins.gradle.secrets)
 }
 
 android {
@@ -40,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
@@ -110,4 +112,8 @@ dependencies {
 // Allow references to generated code
 kapt {
     correctErrorTypes = true
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
 }
