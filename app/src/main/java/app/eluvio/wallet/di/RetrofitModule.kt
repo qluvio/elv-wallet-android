@@ -2,6 +2,7 @@ package app.eluvio.wallet.di
 
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.network.adapters.AssetLinkAdapter
+import app.eluvio.wallet.network.adapters.FalsyObjectAdapter
 import app.eluvio.wallet.network.api.Auth0Api
 import app.eluvio.wallet.network.api.FabricConfigApi
 import com.squareup.moshi.Moshi
@@ -52,6 +53,7 @@ object RetrofitModule {
     @Provides
     fun provideRetrofitBuilder(@TokenAwareHttpClient httpClient: OkHttpClient): Retrofit.Builder {
         val moshi = Moshi.Builder()
+            .add(FalsyObjectAdapter.Factory())
             .add(AssetLinkAdapter())
             .build()
         return Retrofit.Builder()
