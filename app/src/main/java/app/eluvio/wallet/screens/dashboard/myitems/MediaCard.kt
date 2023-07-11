@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ClickableSurfaceDefaults
@@ -23,6 +25,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
 import coil.compose.AsyncImage
@@ -36,8 +39,8 @@ fun MediaCard(
 ) {
     Surface(
         onClick = onClick,
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
-        modifier = modifier.aspectRatio(0.7f),
+        scale = LocalSurfaceScale.current,
+        modifier = modifier.aspectRatio(0.65f),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -52,7 +55,13 @@ fun MediaCard(
                     .fillMaxWidth()
                     .aspectRatio(1f)
             )
-            Text(text = media.title, style = MaterialTheme.typography.carousel_36)
+            Text(
+                text = media.title,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.carousel_36
+            )
             Spacer(modifier = Modifier.height(4.dp))
             if (media.tokenCount > 1) {
                 Text(
@@ -68,7 +77,7 @@ fun MediaCard(
                 )
             } else {
                 media.subtitle?.let {
-                    Text(text = it, style = MaterialTheme.typography.label_24)
+                    Text(text = it.uppercase(), style = MaterialTheme.typography.label_24)
                 }
             }
         }

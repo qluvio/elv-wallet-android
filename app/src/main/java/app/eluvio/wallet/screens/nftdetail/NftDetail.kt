@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.screens.common.MediaItemCard
@@ -45,13 +47,23 @@ private fun NftDetail(state: NftDetailViewModel.State, navCallback: NavigationCa
         Spacer(Modifier.height(16.dp))
         Text(state.subtitle, style = MaterialTheme.typography.body_32)
         TvLazyColumn {
-            items(state.collections) { collection ->
-                Spacer(Modifier.height(16.dp))
-                Text(collection.name, style = MaterialTheme.typography.body_32)
-                MediaItems(
-                    collection.media,
-                    navCallback
-                )
+            state.sections.forEach { section ->
+                section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
+                    item(key = sectionName) {
+                        Spacer(Modifier.height(16.dp))
+                        Text(sectionName, style = MaterialTheme.typography.body_32)
+                    }
+                }
+                items(section.collections) { collection ->
+                    if (collection.name.isNotEmpty()) {
+                        Spacer(Modifier.height(16.dp))
+                        Text(collection.name, style = MaterialTheme.typography.body_32)
+                    }
+                    MediaItems(
+                        collection.media,
+                        navCallback
+                    )
+                }
             }
         }
     }
@@ -59,7 +71,10 @@ private fun NftDetail(state: NftDetailViewModel.State, navCallback: NavigationCa
 
 @Composable
 private fun MediaItems(media: RealmList<MediaEntity>, navCallback: NavigationCallback) {
-    TvLazyRow(contentPadding = PaddingValues(16.dp)) {
+    TvLazyRow(
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         items(media) { media ->
             MediaItemCard(media, navCallback)
         }
@@ -78,33 +93,37 @@ private fun NftDetailPreview() = EluvioThemePreview {
             Curated image galleries • Hidden digital easter eggs
             A Voucher Code** for DC3 Super Power Pack: Series Superman from DC NFT Marketplace
         """.trimIndent(),
-        collections = listOf(
-            MediaCollectionEntity().apply {
-                name = "Movies"
-                media = realmListOf(
-                    MediaEntity().apply {
-                        name = "Superman 1"
-                        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+        sections = listOf(
+            MediaSectionEntity().apply {
+                name = "Section 1"
+                collections = realmListOf(
+                    MediaCollectionEntity().apply {
+                        name = "Movies"
+                        media = realmListOf(
+                            MediaEntity().apply {
+                                name = "Superman 1"
+                                mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+                            },
+                            MediaEntity().apply {
+                                name = "Superman 2"
+                                mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+                            },
+                        )
                     },
-                    MediaEntity().apply {
-                        name = "Superman 2"
-                        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-                    },
+                    MediaCollectionEntity().apply {
+                        name = "Extras"
+                        media = realmListOf(
+                            MediaEntity().apply {
+                                name = "Superman 2052 Poster"
+                                mediaType = MediaEntity.MEDIA_TYPE_IMAGE
+                            },
+                            MediaEntity().apply {
+                                name = "Man of Steel Trailer"
+                                mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+                            },
+                        )
+                    }
                 )
-            },
-            MediaCollectionEntity().apply {
-                name = "Extras"
-                media = realmListOf(
-                    MediaEntity().apply {
-                        name = "Superman 2052 Poster"
-                        mediaType = MediaEntity.MEDIA_TYPE_IMAGE
-                    },
-                    MediaEntity().apply {
-                        name = "Man of Steel Trailer"
-                        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-                    },
-                )
-            }
-        )
+            })
     ), navCallback = { })
 }

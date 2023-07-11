@@ -19,6 +19,10 @@ class MediaCollectionEntity : RealmObject {
     var display: String = ""
     var media: RealmList<MediaEntity> = realmListOf()
 
+    override fun toString(): String {
+        return "MediaCollectionEntity(id='$id', name='$name', display='$display', media=$media)"
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {

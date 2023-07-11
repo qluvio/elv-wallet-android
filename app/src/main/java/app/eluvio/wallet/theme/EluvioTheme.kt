@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
@@ -40,8 +42,13 @@ fun EluvioThemePreview(content: @Composable () -> Unit) {
         ) {
             CompositionLocalProvider(
                 LocalContentColor provides MaterialTheme.colorScheme.onSurface,
+                LocalSurfaceScale provides LocalSurfaceScale.current,
                 content = content
             )
         }
     }
 }
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+val LocalSurfaceScale =
+    staticCompositionLocalOf { ClickableSurfaceDefaults.scale(focusedScale = 1.05f) }

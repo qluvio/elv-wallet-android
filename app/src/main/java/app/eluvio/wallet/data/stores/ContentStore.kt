@@ -17,7 +17,6 @@ import javax.inject.Inject
 
 
 class ContentStore @Inject constructor(
-    private val fabricConfigStore: FabricConfigStore,
     private val apiProvider: ApiProvider,
     private val realm: Realm,
 ) {
@@ -53,13 +52,9 @@ class ContentStore @Inject constructor(
     }
 
     private fun fetchWalletData(): Completable {
-        return fabricConfigStore.observeFabricConfiguration()
-            .firstOrError()
-            .flatMap { config ->
-                apiProvider.getApi(GatewayApi::class)
-                    .flatMap { api -> api.getNfts() }
-                    .map { response -> response.toNfts(config) }
-            }
+        return apiProvider.getApi(GatewayApi::class)
+            .flatMap { api -> api.getNfts() }
+            .map { response -> response.toNfts() }
             .saveTo(realm)
             .ignoreElement()
     }

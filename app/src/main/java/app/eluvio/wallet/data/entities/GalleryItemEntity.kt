@@ -13,6 +13,10 @@ class GalleryItemEntity : EmbeddedRealmObject {
     var name: String = ""
     var imagePath: String? = null
 
+    override fun toString(): String {
+        return "GalleryItemEntity(name='$name', imagePath=$imagePath)"
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {
