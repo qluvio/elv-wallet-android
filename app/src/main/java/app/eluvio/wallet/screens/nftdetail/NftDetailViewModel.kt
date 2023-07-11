@@ -3,7 +3,6 @@ package app.eluvio.wallet.screens.nftdetail
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
