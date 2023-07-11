@@ -1,4 +1,4 @@
-package app.eluvio.wallet.network
+package app.eluvio.wallet.network.api
 
 import app.eluvio.wallet.network.dto.FabricConfiguration
 import io.reactivex.rxjava3.core.Single

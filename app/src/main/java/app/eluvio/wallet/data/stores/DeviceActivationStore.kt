@@ -1,9 +1,9 @@
 package app.eluvio.wallet.data.stores
 
-import app.eluvio.wallet.network.Auth0Api
-import app.eluvio.wallet.network.DeviceActivationData
-import app.eluvio.wallet.network.GetTokenRequest
-import app.eluvio.wallet.network.GetTokenResponse
+import app.eluvio.wallet.network.api.Auth0Api
+import app.eluvio.wallet.network.api.DeviceActivationData
+import app.eluvio.wallet.network.api.GetTokenRequest
+import app.eluvio.wallet.network.api.GetTokenResponse
 import app.eluvio.wallet.util.logging.Log
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single

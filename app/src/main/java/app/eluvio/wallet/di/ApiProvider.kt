@@ -1,11 +1,15 @@
 package app.eluvio.wallet.di
 
 import app.eluvio.wallet.data.stores.FabricConfigStore
+import app.eluvio.wallet.network.api.authd.AuthdApi
+import app.eluvio.wallet.network.api.fabric.FabricApi
 import app.eluvio.wallet.network.dto.FabricConfiguration
 import io.reactivex.rxjava3.core.Single
 import retrofit2.Retrofit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 /**
  * The base url we are hitting is dynamic and can change at any time.
@@ -19,12 +23,14 @@ class ApiProvider @Inject constructor(
     private val fabricRetrofitFactory = RetrofitCachedFactory { it.fabricEndpoint }
     private val authdRetrofitFactory = RetrofitCachedFactory { it.authdEndpoint }
 
-    fun <T : Any> getFabricApi(clazz: Class<T>): Single<T> {
-        return fabricRetrofitFactory.get().map { it.create(clazz) }
+    @JvmName("getFabricApi")
+    fun <T : FabricApi> getApi(clazz: KClass<T>): Single<T> {
+        return fabricRetrofitFactory.get().map { it.create(clazz.java) }
     }
 
-    fun <T : Any> getAuthdApi(clazz: Class<T>): Single<T> {
-        return authdRetrofitFactory.get().map { it.create(clazz) }
+    @JvmName("getAuthdApi")
+    fun <T : AuthdApi> getApi(clazz: KClass<T>): Single<T> {
+        return authdRetrofitFactory.get().map { it.create(clazz.java) }
     }
 
     // temp place for a way to get the current fabric endpoint
@@ -49,12 +55,4 @@ class ApiProvider @Inject constructor(
                 }
         }
     }
-}
-
-inline fun <reified Api : Any> ApiProvider.getFabricApi(): Single<Api> {
-    return getFabricApi(Api::class.java)
-}
-
-inline fun <reified Api : Any> ApiProvider.getAuthdApi(): Single<Api> {
-    return getAuthdApi(Api::class.java)
 }

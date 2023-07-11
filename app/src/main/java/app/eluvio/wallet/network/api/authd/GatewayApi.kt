@@ -1,12 +1,10 @@
-package app.eluvio.wallet.network
+package app.eluvio.wallet.network.api.authd
 
 import app.eluvio.wallet.network.dto.NftResponse
-import app.eluvio.wallet.network.dto.VideoOptionsDto
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
-import retrofit2.http.Url
 
-interface GatewayApi {
+interface GatewayApi : AuthdApi {
     @GET("apigw/nfts")
     fun getNfts(): Single<NftResponse>
 }

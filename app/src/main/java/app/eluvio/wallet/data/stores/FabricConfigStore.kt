@@ -1,6 +1,6 @@
 package app.eluvio.wallet.data.stores
 
-import app.eluvio.wallet.network.FabricConfigApi
+import app.eluvio.wallet.network.api.FabricConfigApi
 import app.eluvio.wallet.network.dto.FabricConfiguration
 import app.eluvio.wallet.util.asSharedState
 import app.eluvio.wallet.util.logging.Log

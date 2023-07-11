@@ -1,4 +1,4 @@
-package app.eluvio.wallet.network
+package app.eluvio.wallet.network.api.authd
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -6,9 +6,8 @@ import io.reactivex.rxjava3.core.Single
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Url
 
-interface AuthServicesApi {
+interface AuthServicesApi : AuthdApi {
     @POST("wlt/login/jwt")
     fun authdLogin(
         @Body body: LoginBody = LoginBody()

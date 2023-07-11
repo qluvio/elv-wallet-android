@@ -4,8 +4,7 @@ import app.eluvio.wallet.data.converters.toNfts
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.di.getAuthdApi
-import app.eluvio.wallet.network.GatewayApi
+import app.eluvio.wallet.network.api.authd.GatewayApi
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable
@@ -57,7 +56,7 @@ class ContentStore @Inject constructor(
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()
             .flatMap { config ->
-                apiProvider.getAuthdApi<GatewayApi>()
+                apiProvider.getApi(GatewayApi::class)
                     .flatMap { api -> api.getNfts() }
                     .map { response -> response.toNfts(config) }
             }

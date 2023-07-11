@@ -5,10 +5,8 @@ import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.di.getAuthdApi
-import app.eluvio.wallet.di.getFabricApi
-import app.eluvio.wallet.network.AuthServicesApi
-import app.eluvio.wallet.network.SignBody
+import app.eluvio.wallet.network.api.authd.AuthServicesApi
+import app.eluvio.wallet.network.api.authd.SignBody
 import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.crypto.Keccak
 import app.eluvio.wallet.util.logging.Log
@@ -28,7 +26,7 @@ class AuthenticationService @Inject constructor(
     private val userStore: UserStore,
 ) {
     fun getFabricToken(): Single<String> {
-        return apiProvider.getAuthdApi<AuthServicesApi>().flatMap { api -> getFabricToken(api) }
+        return apiProvider.getApi(AuthServicesApi::class).flatMap { api -> getFabricToken(api) }
     }
 
     private fun getFabricToken(authServicesApi: AuthServicesApi): Single<String> {

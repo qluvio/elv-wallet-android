@@ -4,8 +4,7 @@ import app.eluvio.wallet.data.converters.toEntity
 import app.eluvio.wallet.data.entities.VideoOptionsEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.di.getFabricApi
-import app.eluvio.wallet.network.AssetFetcherApi
+import app.eluvio.wallet.network.api.fabric.AssetFetcherApi
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
@@ -14,7 +13,7 @@ class VideoOptionsFetcher @Inject constructor(
     private val contentStore: ContentStore,
 ) {
     fun fetchVideoOptions(mediaItemId: String): Single<VideoOptionsEntity> {
-        return apiProvider.getFabricApi<AssetFetcherApi>()
+        return apiProvider.getApi(AssetFetcherApi::class)
             .flatMap { api -> fetchVideoOptions(api, mediaItemId) }
     }
 

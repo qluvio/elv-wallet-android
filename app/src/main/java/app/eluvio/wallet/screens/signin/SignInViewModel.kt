@@ -1,24 +1,20 @@
 package app.eluvio.wallet.screens.signin
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.AuthenticationService
 import app.eluvio.wallet.data.stores.DeviceActivationStore
 import app.eluvio.wallet.navigation.asNewRoot
-import app.eluvio.wallet.network.DeviceActivationData
+import app.eluvio.wallet.network.api.DeviceActivationData
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.g0dkar.qrcode.QRCode
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
