@@ -1,5 +1,6 @@
 package app.eluvio.wallet.di
 
+import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.network.adapters.AssetLinkAdapter
 import app.eluvio.wallet.network.adapters.FalsyObjectAdapter
@@ -30,6 +31,7 @@ object RetrofitModule {
             .addInterceptor { chain ->
                 val request = chain.request()
                 val builder = request.newBuilder()
+                builder.header("User-Agent", "${BuildConfig.APPLICATION_ID} AndroidTV v${BuildConfig.VERSION_NAME} (tenant hack: tvos)")
                 builder.header("Accept", "*/*") // needed for link/file resolution from the fabric
                 if (request.url.toString().endsWith("wlt/login/jwt")) {
                     tokenStore.idToken?.let { idToken ->

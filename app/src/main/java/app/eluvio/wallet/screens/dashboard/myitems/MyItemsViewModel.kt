@@ -52,7 +52,6 @@ class MyItemsViewModel @Inject constructor(
                 onNext = { newMedia ->
                     storeEmissions++
                     val loading = storeEmissions < 2 && newMedia.isEmpty()
-                    Log.e("stav: storeEmisions: $storeEmissions, newMedia.isempty: ${newMedia.isEmpty()}, loading=${loading}")
                     updateState { copy(media = newMedia, loading = loading) }
                 },
                 onError = {

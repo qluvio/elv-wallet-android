@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Devices
@@ -28,6 +30,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.subscribeToState
@@ -61,7 +64,6 @@ private fun ImageGallery(state: ImageGalleryViewModel.State, navCallback: Naviga
                     )
                 }
             }
-            Text(text = "Index=$index, listHasFocus=$listHasFocus")
         },
         list = {
             TvLazyRow(
@@ -71,6 +73,7 @@ private fun ImageGallery(state: ImageGalleryViewModel.State, navCallback: Naviga
                 itemsIndexed(state.images) { index, image ->
                     val interactionSource = remember { MutableInteractionSource() }
                     val isFocused by interactionSource.collectIsFocusedAsState()
+                    val focusRequester = remember { FocusRequester() }
                     Surface(
                         onClick = { /*TODO*/ },
                         interactionSource = interactionSource,
@@ -80,6 +83,7 @@ private fun ImageGallery(state: ImageGalleryViewModel.State, navCallback: Naviga
                         ),
                         modifier = Modifier
                             .immersiveListItem(index)
+                            .focusRequester(focusRequester)
                             .size(100.dp)
                     ) {
                         val imageAlpha by remember { derivedStateOf { if (isFocused) 1f else 0.5f } }
@@ -99,6 +103,9 @@ private fun ImageGallery(state: ImageGalleryViewModel.State, navCallback: Naviga
                                 modifier = Modifier.align(Alignment.BottomCenter)
                             )
                         }
+                    }
+                    if (index == 0) {
+                        focusRequester.requestOnce()
                     }
                 }
             }

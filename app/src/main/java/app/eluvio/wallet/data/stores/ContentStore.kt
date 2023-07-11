@@ -55,7 +55,7 @@ class ContentStore @Inject constructor(
         return apiProvider.getApi(GatewayApi::class)
             .flatMap { api -> api.getNfts() }
             .map { response -> response.toNfts() }
-            .saveTo(realm)
+            .saveTo(realm, clearTable = true)
             .ignoreElement()
     }
 }

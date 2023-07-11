@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.delete
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.rx3.rxFlowable
@@ -18,31 +19,41 @@ fun <T : RealmObject> RealmQuery<T>.asFlowable(): Flowable<List<T>> {
         .subscribeOn(Schedulers.io())
 }
 
-fun <T : RealmObject> Single<T>.saveTo(
+inline fun <reified T : RealmObject> Single<T>.saveTo(
     realm: Realm,
+    clearTable: Boolean = false,
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ): Single<T> {
     return doOnSuccess { entity ->
-        saveBlocking(realm, listOf(entity), updatePolicy)
+        saveBlocking(realm, listOf(entity), clearTable, updatePolicy)
     }
 }
 
+/**
+ * Saves a list of entities to the database.
+ * @param clearTable If true, the table will be cleared before inserting the new entities.
+ */
 @JvmName("saveListTo") // prevent clash with non-list version
-fun <T : RealmObject> Single<List<T>>.saveTo(
+inline fun <reified T : RealmObject> Single<List<T>>.saveTo(
     realm: Realm,
+    clearTable: Boolean = false,
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ): Single<List<T>> {
     return doOnSuccess { list ->
-        saveBlocking(realm, list, updatePolicy)
+        saveBlocking(realm, list, clearTable, updatePolicy)
     }
 }
 
-private fun saveBlocking(
+inline fun <reified T : RealmObject> saveBlocking(
     realm: Realm,
-    list: List<RealmObject>,
+    list: List<T>,
+    clearTable: Boolean = false,
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ) {
     realm.writeBlocking {
+        if (clearTable) {
+            delete<T>()
+        }
         list.forEach { entity ->
             (entity as? CompositeKeyEntity)?.updateKey()
             copyToRealm(entity, updatePolicy)

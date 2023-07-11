@@ -10,8 +10,8 @@ import androidx.compose.ui.focus.FocusRequester
  */
 @SuppressLint("ComposableNaming")
 @Composable
-inline fun FocusRequester.requestOnce() {
-    LaunchedEffect(Unit) {
+inline fun FocusRequester.requestOnce(key: Any? = Unit) {
+    LaunchedEffect(key) {
         requestFocus()
     }
 }
