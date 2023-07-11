@@ -10,21 +10,17 @@ data class FabricConfiguration(
     @field:Json(name = "qspace") val qspace: QSpace,
     @field:Json(name = "fabric_version") val fabricVersion: String,
 ) {
-    val endpoint: String = network.seedNodes.fabricApi.first()
-    val space: String = qspace.names.first()
+    // TODO: replace with failover logic (probably in a new component)
+    val fabricEndpoint: String = network.services.fabricApi.first()
+
+    // TODO: replace with failover logic (probably in a new component)
+    val authdEndpoint: String = network.services.authService.first()
 }
 
 @JsonClass(generateAdapter = true)
 data class Network(
-    @field:Json(name = "seed_nodes") val seedNodes: SeedNodes,
     @field:Json(name = "api_versions") val apiVersions: List<Int>,
     @field:Json(name = "services") val services: Services
-)
-
-@JsonClass(generateAdapter = true)
-data class SeedNodes(
-    @field:Json(name = "fabric_api") val fabricApi: List<String>,
-    @field:Json(name = "ethereum_api") val ethereumApi: List<String>
 )
 
 @JsonClass(generateAdapter = true)

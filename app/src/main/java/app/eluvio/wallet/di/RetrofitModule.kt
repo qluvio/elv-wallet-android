@@ -92,13 +92,6 @@ object RetrofitModule {
             .build()
     }
 
-    @Singleton
-    @Provides
-    @AuthD
-    fun provideAuthDRetrofit(retrofitBuilder: Retrofit.Builder): Retrofit {
-        return retrofitBuilder.baseUrl("https://localhost/").build()
-    }
-
     @Provides
     fun provideConfigApi(@FabricConfig retrofit: Retrofit): FabricConfigApi = retrofit.create()
 
@@ -108,9 +101,6 @@ object RetrofitModule {
 
 @Qualifier
 annotation class Auth0
-
-@Qualifier
-annotation class AuthD
 
 @Qualifier
 annotation class FabricConfig

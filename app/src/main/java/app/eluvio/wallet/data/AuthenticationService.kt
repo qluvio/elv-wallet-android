@@ -5,7 +5,8 @@ import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.di.getApi
+import app.eluvio.wallet.di.getAuthdApi
+import app.eluvio.wallet.di.getFabricApi
 import app.eluvio.wallet.network.AuthServicesApi
 import app.eluvio.wallet.network.SignBody
 import app.eluvio.wallet.util.crypto.Base58
@@ -26,18 +27,15 @@ class AuthenticationService @Inject constructor(
     private val tokenStore: TokenStore,
     private val userStore: UserStore,
 ) {
-    fun getFabricToken(idToken: String): Single<String> {
-        return apiProvider.getApi<AuthServicesApi>().flatMap { api -> getFabricToken(idToken, api) }
+    fun getFabricToken(): Single<String> {
+        return apiProvider.getAuthdApi<AuthServicesApi>().flatMap { api -> getFabricToken(api) }
     }
 
-    private fun getFabricToken(idToken: String, authServicesApi: AuthServicesApi): Single<String> {
+    private fun getFabricToken(authServicesApi: AuthServicesApi): Single<String> {
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()
             .flatMap { fabricConfig ->
-                val authBaseUrl = fabricConfig.network.services.authService.first()
-                val url = "$authBaseUrl$WALLET_JWT_LOGIN_PATH"
-                Log.d("fetching fabric token from: $url  id_token=${idToken}")
-                authServicesApi.authdLogin(url)
+                authServicesApi.authdLogin()
                     .doOnSuccess {
                         Log.d("login response: $it")
                         tokenStore.clusterToken = it.clusterToken
@@ -48,7 +46,7 @@ class AuthenticationService @Inject constructor(
                             jwtResponse.address,
                             fabricConfig.qspace.id
                         )
-                        remoteSign(hash, accountId, authBaseUrl, authServicesApi)
+                        remoteSign(hash, accountId, authServicesApi)
                             .map { signature ->
                                 createFabricToken(tokenString, signature).also {
                                     tokenStore.fabricToken = it
@@ -98,12 +96,9 @@ class AuthenticationService @Inject constructor(
     private fun remoteSign(
         hash: String,
         accountId: String,
-        authServiceUrl: String,
         authServicesApi: AuthServicesApi
     ): Single<String> {
-        val url = "$authServiceUrl$WALLET_SIGN_PATH$accountId"
-        Log.d("remote signing hash: $hash  url: $url token: ${tokenStore.clusterToken}")
-        return authServicesApi.authdSign(url, SignBody(hash))
+        return authServicesApi.authdSign(accountId, SignBody(hash))
             .map { it.signature }
             .doOnSuccess { Log.d("Signature obtained: $it") }
     }
@@ -127,10 +122,5 @@ class AuthenticationService @Inject constructor(
         val compressedDataLength = compressor.deflate(output)
         compressor.end()
         return output.copyOfRange(0, compressedDataLength)
-    }
-
-    companion object {
-        private const val WALLET_JWT_LOGIN_PATH = "/wlt/login/jwt"
-        private const val WALLET_SIGN_PATH = "/wlt/sign/eth/"
     }
 }

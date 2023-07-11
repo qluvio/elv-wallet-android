@@ -5,18 +5,18 @@ import com.squareup.moshi.JsonClass
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Url
 
 interface AuthServicesApi {
-    @POST
+    @POST("wlt/login/jwt")
     fun authdLogin(
-        @Url url: String,
         @Body body: LoginBody = LoginBody()
     ): Single<AuthTokenResponse>
 
-    @POST
+    @POST("wlt/sign/eth/{accountId}")
     fun authdSign(
-        @Url url: String,
+        @Path("accountId") accountId: String,
         @Body body: SignBody
     ): Single<SignResponse>
 }

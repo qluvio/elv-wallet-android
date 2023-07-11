@@ -4,8 +4,8 @@ import app.eluvio.wallet.data.converters.toEntity
 import app.eluvio.wallet.data.entities.VideoOptionsEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.di.getApi
-import app.eluvio.wallet.network.GatewayApi
+import app.eluvio.wallet.di.getFabricApi
+import app.eluvio.wallet.network.AssetFetcherApi
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
@@ -14,22 +14,24 @@ class VideoOptionsFetcher @Inject constructor(
     private val contentStore: ContentStore,
 ) {
     fun fetchVideoOptions(mediaItemId: String): Single<VideoOptionsEntity> {
-        return apiProvider.getApi<GatewayApi>()
+        return apiProvider.getFabricApi<AssetFetcherApi>()
             .flatMap { api -> fetchVideoOptions(api, mediaItemId) }
     }
 
     private fun fetchVideoOptions(
-        api: GatewayApi,
+        api: AssetFetcherApi,
         mediaItemId: String
     ): Single<VideoOptionsEntity> {
         return contentStore.observeMediaItem(mediaItemId)
             .firstOrError()
             .flatMap { mediaItem ->
                 // TODO this gets the first "offering" (default?)
-                val url = mediaItem.mediaLinks.values.firstOrNull()
+                val path = mediaItem.mediaLinks.values.firstOrNull()
                     ?: throw RuntimeException("No media link found for $mediaItemId")
-                api.getVideoOptions(url).map {
-                    it.toEntity(url.substringBeforeLast("/"))
+                api.getVideoOptions(path).map { response ->
+                    val url = response.raw().request.url.toString()
+                    val pathDelimiter = if (url.contains("%2F")) "%2F" else "/"
+                    response.body()?.toEntity(url.substringBeforeLast(pathDelimiter))
                         ?: throw RuntimeException("No supported video formats found from $url")
                 }
             }

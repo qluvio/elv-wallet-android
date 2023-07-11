@@ -4,7 +4,7 @@ import app.eluvio.wallet.data.converters.toNfts
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.di.getApi
+import app.eluvio.wallet.di.getAuthdApi
 import app.eluvio.wallet.network.GatewayApi
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
@@ -57,20 +57,11 @@ class ContentStore @Inject constructor(
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()
             .flatMap { config ->
-                // For unsecured http, add this to the manifest: android:usesCleartextTraffic="true"
-                // val authBaseUrl = "http://192.168.90.175:8080/as"
-                val authBaseUrl = config.endpoint
-                val url = "${authBaseUrl}/$WALLET_DATA_PATH"
-                Log.w("tryna get nfts from $url")
-                apiProvider.getApi<GatewayApi>()
-                    .flatMap { api -> api.getNfts(url) }
+                apiProvider.getAuthdApi<GatewayApi>()
+                    .flatMap { api -> api.getNfts() }
                     .map { response -> response.toNfts(config) }
             }
             .saveTo(realm)
             .ignoreElement()
-    }
-
-    companion object {
-        private const val WALLET_DATA_PATH = "apigw/nfts"
     }
 }

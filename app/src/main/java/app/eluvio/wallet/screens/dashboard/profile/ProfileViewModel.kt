@@ -40,7 +40,7 @@ class ProfileViewModel @Inject constructor(
                 address = user.walletAddress,
                 userId = user.userId,
                 network = env,
-                fabricNode = config.endpoint
+                fabricNode = config.fabricEndpoint
             )
         }
             .subscribeBy { state ->

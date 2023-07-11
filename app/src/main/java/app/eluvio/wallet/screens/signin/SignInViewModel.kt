@@ -86,9 +86,9 @@ class SignInViewModel @Inject constructor(
                     // stop the interval as soon as [checkToken] returns a non-null value
                 )
                 .flatMap {
-                    // Now that we have an idToken, we can get a fabricToken.
+                    // Now that we have an idToken (embedded in headers by retrofit interceptors), we can get a fabricToken.
                     // this includes some local crypto magic, as well as a sign request from the server.
-                    authenticationService.getFabricToken(it.idToken)
+                    authenticationService.getFabricToken()
                 }
                 .doOnError {
                     Log.e(

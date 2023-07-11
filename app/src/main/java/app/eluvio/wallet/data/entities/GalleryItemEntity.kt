@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 
 class GalleryItemEntity : EmbeddedRealmObject {
     var name: String = ""
-    var imageUrl: String? = null
+    var imagePath: String? = null
 
     @Module
     @InstallIn(SingletonComponent::class)

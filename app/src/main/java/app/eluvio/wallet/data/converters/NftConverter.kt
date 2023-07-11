@@ -19,16 +19,19 @@ import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmList
 
 fun NftResponse.toNfts(config: FabricConfiguration): List<NftEntity> {
-    return contents.map { dto ->
-        NftEntity().apply {
-            contractAddress = dto.contract_addr
-            tokenId = dto.token_id
-            imageUrl = dto.meta.image
-            displayName = dto.meta.display_name!!
-            editionName = dto.meta.edition_name ?: ""
-            description = dto.meta.description ?: ""
-            mediaSections =
-                dto.nft_template.additional_media_sections.toEntity(updateKey(), config)
+    return contents.mapNotNull { dto ->
+        // Currently, additional_media_sections is required. In the future we'll probably have
+        // to support additional_media for backwards compatibility.
+        dto.nft_template.additional_media_sections?.let { mediaSectionsDto ->
+            NftEntity().apply {
+                contractAddress = dto.contract_addr
+                tokenId = dto.token_id
+                imageUrl = dto.meta.image
+                displayName = dto.meta.display_name!!
+                editionName = dto.meta.edition_name ?: ""
+                description = dto.meta.description ?: ""
+                mediaSections = mediaSectionsDto.toEntity(updateKey(), config)
+            }
         }
     }
 }
@@ -81,9 +84,9 @@ fun MediaItemDto.toEntity(config: FabricConfiguration): MediaEntity {
         name = dto.name
         image = dto.image ?: ""
         mediaType = dto.media_type ?: ""
-        mediaFile = dto.media_file?.toFullLink(config) ?: ""
+        mediaFile = dto.media_file?.path ?: ""
         mediaLinks = dto.media_link?.sources
-            ?.mapValues { (_, link) -> link.toFullLink(config) }
+            ?.mapValues { (_, link) -> link.path }
             ?.toRealmDictionary()
             ?: realmDictionaryOf()
         gallery = dto.gallery?.map { it.toEntity(config) }?.toRealmList()
@@ -94,6 +97,6 @@ fun GalleryItemDto.toEntity(config: FabricConfiguration): GalleryItemEntity {
     val dto = this
     return GalleryItemEntity().apply {
         name = dto.name
-        imageUrl = dto.image?.toFullLink(config)
+        imagePath = dto.image?.path
     }
 }

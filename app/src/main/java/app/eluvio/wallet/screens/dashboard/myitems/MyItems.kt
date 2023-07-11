@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.dashboard.myitems
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,13 +23,14 @@ import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.material3.Text
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 import java.util.UUID
@@ -57,33 +59,45 @@ private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallba
     BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         if (state.loading) {
             EluvioLoadingSpinner(Modifier.fillMaxHeight())
+        } else if (state.media.isEmpty()) {
+            Text("No items to display")
         } else {
-            val width by rememberUpdatedState(maxWidth)
-            val horizontalPadding = 100.dp
-            val cardSpacing = 20.dp
-            val desiredCardWidth = 240.dp
-            val columnCount by remember {
-                derivedStateOf {
-                    val availableWidth = width - horizontalPadding
-                    val cardWidth = desiredCardWidth + cardSpacing
-                    (availableWidth / cardWidth).roundToInt()
-                }
-            }
-            TvLazyVerticalGrid(
-                columns = TvGridCells.Fixed(columnCount),
-                horizontalArrangement = Arrangement.spacedBy(cardSpacing),
-                verticalArrangement = Arrangement.spacedBy(cardSpacing),
-                contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 20.dp),
-                pivotOffsets = PivotOffsets(0.1f),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(state.media, key = { it.key }) { media ->
-                    MediaCard(
-                        media,
-                        onClick = { navCallback(NftDetailDestination(media.contractAddress).asPush()) },
-                    )
-                }
-            }
+            MyItemsGrid(state.media, onItemClick = {
+                navCallback(NftDetailDestination(it.contractAddress).asPush())
+            })
+        }
+    }
+}
+
+@Composable
+private fun BoxWithConstraintsScope.MyItemsGrid(
+    media: List<MyItemsViewModel.State.Media>,
+    onItemClick: (MyItemsViewModel.State.Media) -> Unit
+) {
+    val width by rememberUpdatedState(maxWidth)
+    val horizontalPadding = 100.dp
+    val cardSpacing = 20.dp
+    val desiredCardWidth = 240.dp
+    val columnCount by remember {
+        derivedStateOf {
+            val availableWidth = width - horizontalPadding
+            val cardWidth = desiredCardWidth + cardSpacing
+            (availableWidth / cardWidth).roundToInt()
+        }
+    }
+    TvLazyVerticalGrid(
+        columns = TvGridCells.Fixed(columnCount),
+        horizontalArrangement = Arrangement.spacedBy(cardSpacing),
+        verticalArrangement = Arrangement.spacedBy(cardSpacing),
+        contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 20.dp),
+        pivotOffsets = PivotOffsets(0.1f),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(media, key = { it.key }) { mediaItem ->
+            MediaCard(
+                mediaItem,
+                onClick = { onItemClick(mediaItem) },
+            )
         }
     }
 }

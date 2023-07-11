@@ -30,7 +30,7 @@ data class NftMetadataDto(
 
 @JsonClass(generateAdapter = true)
 data class NftTemplateDto(
-    val additional_media_sections: AdditionalMediaSectionDto,
+    val additional_media_sections: AdditionalMediaSectionDto?,
 )
 
 @JsonClass(generateAdapter = true)

@@ -19,7 +19,9 @@ class MediaEntity : RealmObject {
     var name: String = ""
     var image: String = ""
     var mediaType: String = ""
+    // Relative path to file
     var mediaFile: String = ""
+    // Relative paths to offerings
     var mediaLinks: RealmDictionary<String> = realmDictionaryOf()
     var gallery: RealmList<GalleryItemEntity>? = null
 

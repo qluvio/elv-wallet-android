@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.stores.ContentStore
+import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class ImageGalleryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val contentStore: ContentStore,
+    private val apiProvider: ApiProvider,
 ) : BaseViewModel<ImageGalleryViewModel.State>(State()) {
     data class State(val images: List<GalleryImage> = emptyList()) {
         data class GalleryImage(val url: String, val name: String)
@@ -22,20 +24,24 @@ class ImageGalleryViewModel @Inject constructor(
     private val mediaEntityId = ImageGalleryDestination.argsFrom(savedStateHandle).mediaEntityId
     override fun onResume() {
         super.onResume()
-        contentStore.observeMediaItem(mediaEntityId)
-            .map { media ->
+        apiProvider.getFabricEndpoint()
+            .flatMapPublisher { endpoint ->
+                contentStore.observeMediaItem(mediaEntityId)
+                    .map { media -> media to endpoint }
+            }
+            .map { (media, endpoint) ->
                 when (media.mediaType) {
                     MediaEntity.MEDIA_TYPE_GALLERY -> {
                         media.gallery?.mapNotNull { galleryItem ->
-                            galleryItem.imageUrl?.let { url ->
-                                State.GalleryImage(url, galleryItem.name)
+                            galleryItem.imagePath?.let { path ->
+                                State.GalleryImage("$endpoint$path", galleryItem.name)
                             }
                         } ?: emptyList()
                     }
 
                     MediaEntity.MEDIA_TYPE_IMAGE -> {
                         val image = media.mediaFile.takeIf { it.isNotEmpty() }
-                            ?.let { State.GalleryImage(it, media.name) }
+                            ?.let { path -> State.GalleryImage("$endpoint$path", media.name) }
                         listOfNotNull(image)
                     }
 
