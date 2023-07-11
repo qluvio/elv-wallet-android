@@ -31,6 +31,13 @@ class MyItemsViewModel @Inject constructor(
         )
     }
 
+    //TODO: this is a HACK. The ContentStore needs to emit information about whether the
+    // list is empty because we haven't populated our cache yet and are still fetching from network,
+    // or it's truly empty.
+    // The hacks checks if this is the second time the store has responded with an empty list,
+    // so the second one probably means the api actually returned an empty list.
+    private var storeEmissions = 0
+
     override fun onResume() {
         super.onResume()
         contentStore.observeWalletData()
@@ -42,8 +49,11 @@ class MyItemsViewModel @Inject constructor(
             .mapNotNull { it.getOrNull() }
             .map { response -> response.map { nft -> nft.toMediaState() } }
             .subscribeBy(
-                onNext = {
-                    updateState { copy(media = it, loading = false) }
+                onNext = { newMedia ->
+                    storeEmissions++
+                    val loading = storeEmissions < 2 && newMedia.isEmpty()
+                    Log.e("stav: storeEmisions: $storeEmissions, newMedia.isempty: ${newMedia.isEmpty()}, loading=${loading}")
+                    updateState { copy(media = newMedia, loading = loading) }
                 },
                 onError = {
                     Log.e("Error getting wallet data", it)
