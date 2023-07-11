@@ -9,7 +9,6 @@ import retrofit2.Retrofit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 /**
  * The base url we are hitting is dynamic and can change at any time.

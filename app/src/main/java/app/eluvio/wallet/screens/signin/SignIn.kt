@@ -40,12 +40,12 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.header_30
+import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 

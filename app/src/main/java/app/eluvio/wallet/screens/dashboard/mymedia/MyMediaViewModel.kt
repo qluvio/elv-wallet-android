@@ -4,8 +4,6 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject

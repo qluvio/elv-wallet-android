@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -48,12 +47,12 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
-import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.FocusGroupScope
 import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.DestinationsNavHost

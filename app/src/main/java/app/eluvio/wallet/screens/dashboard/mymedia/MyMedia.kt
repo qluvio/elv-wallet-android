@@ -10,8 +10,8 @@ import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
 import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.screens.common.MediaItemCard
+import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
