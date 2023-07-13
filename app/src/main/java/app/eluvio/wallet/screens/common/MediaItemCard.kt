@@ -4,7 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
@@ -25,7 +26,6 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
-import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
@@ -37,6 +37,7 @@ import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.logging.Log
 import coil.compose.AsyncImage
+
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -67,25 +68,24 @@ fun MediaItemCard(
             model = media.image,
             contentScale = ContentScale.Crop,
             contentDescription = media.name,
-            modifier = modifier
-                .align(Alignment.Center)
+            modifier = modifier.align(Alignment.Center)
         )
         if (isFocused) {
-            Box(
-                modifier
+            BoxWithConstraints(
+                contentAlignment = Alignment.BottomCenter,
+                modifier = modifier
                     .fillMaxSize()
                     // TODO: get this from theme
                     .background(Color.Black.copy(alpha = 0.8f))
+                    .padding(horizontal = 10.dp, vertical = 20.dp)
             ) {
-                Text(
-                    media.name,
+                WrapContentText(
+                    text = media.name,
                     style = MaterialTheme.typography.body_32,
                     // TODO: get this from theme
                     color = Color.White,
                     maxLines = 3,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(10.dp)
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         } else if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
