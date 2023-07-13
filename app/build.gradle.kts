@@ -107,6 +107,10 @@ dependencies {
     implementation(libs.androidx.media3.okhttp)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.ui.leanback)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.junit)
+    testImplementation(libs.reflections)
 }
 
 // Allow references to generated code

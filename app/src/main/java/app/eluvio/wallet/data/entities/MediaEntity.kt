@@ -31,6 +31,34 @@ class MediaEntity : RealmObject {
         return "MediaEntity(id='$id', name='$name', image='$image', mediaType='$mediaType', mediaFile='$mediaFile', mediaLinks=$mediaLinks, gallery=$gallery)"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MediaEntity
+
+        if (id != other.id) return false
+        if (name != other.name) return false
+        if (image != other.image) return false
+        if (mediaType != other.mediaType) return false
+        if (mediaFile != other.mediaFile) return false
+        if (mediaLinks != other.mediaLinks) return false
+        if (gallery != other.gallery) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + image.hashCode()
+        result = 31 * result + mediaType.hashCode()
+        result = 31 * result + mediaFile.hashCode()
+        result = 31 * result + mediaLinks.hashCode()
+        result = 31 * result + (gallery?.hashCode() ?: 0)
+        return result
+    }
+
     companion object {
         const val MEDIA_TYPE_AUDIO = "Audio"
         const val MEDIA_TYPE_EBOOK = "Ebook"

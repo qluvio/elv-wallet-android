@@ -28,6 +28,40 @@ class NftEntity : RealmObject, CompositeKeyEntity {
         return _id
     }
 
+    override fun toString(): String {
+        return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', mediaSections=$mediaSections)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as NftEntity
+
+        if (_id != other._id) return false
+        if (contractAddress != other.contractAddress) return false
+        if (tokenId != other.tokenId) return false
+        if (imageUrl != other.imageUrl) return false
+        if (displayName != other.displayName) return false
+        if (editionName != other.editionName) return false
+        if (description != other.description) return false
+        if (mediaSections.toList() != other.mediaSections.toList()) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = _id.hashCode()
+        result = 31 * result + contractAddress.hashCode()
+        result = 31 * result + tokenId.hashCode()
+        result = 31 * result + imageUrl.hashCode()
+        result = 31 * result + displayName.hashCode()
+        result = 31 * result + editionName.hashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + mediaSections.hashCode()
+        return result
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {

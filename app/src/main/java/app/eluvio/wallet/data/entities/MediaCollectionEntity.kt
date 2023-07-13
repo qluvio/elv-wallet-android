@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
@@ -21,6 +22,28 @@ class MediaCollectionEntity : RealmObject {
 
     override fun toString(): String {
         return "MediaCollectionEntity(id='$id', name='$name', display='$display', media=$media)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MediaCollectionEntity
+
+        if (id != other.id) return false
+        if (name != other.name) return false
+        if (display != other.display) return false
+        if (media.toList() != other.media.toList()) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + display.hashCode()
+        result = 31 * result + media.hashCode()
+        return result
     }
 
     @Module

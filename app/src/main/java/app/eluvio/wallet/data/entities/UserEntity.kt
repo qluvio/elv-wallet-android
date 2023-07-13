@@ -19,6 +19,25 @@ class UserEntity : RealmObject {
     @Ignore
     val userId get() = "iusr${walletAddress.base58}"
 
+    override fun toString(): String {
+        return "UserEntity(walletAddress='$walletAddress')"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserEntity
+
+        if (walletAddress != other.walletAddress) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return walletAddress.hashCode()
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {

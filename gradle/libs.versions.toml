@@ -12,6 +12,7 @@ core-ktx = "1.10.1"
 leanback = "1.0.0"
 androidx-activity-compose = "1.7.2"
 androidx-lifecycle = "2.6.1"
+androidx-junit = "1.1.5"
 compose-tv = "1.0.0-alpha07"
 compose-destinations = "1.9.42-beta"
 qrcode-kotlin-android = "3.3.0"
@@ -29,6 +30,8 @@ okhttp = "4.11.0"
 realm = "1.9.1"
 kotlinx-coroutines-rx3 = "1.7.1"
 gradle-secrets = "2.0.1"
+junit = "4.13.2"
+reflections = "0.10.2"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
@@ -73,6 +76,9 @@ gradle-secrets = { module = "com.google.android.libraries.mapsplatform.secrets-g
 web3j = { module = "org.web3j:core", version.ref = "web3j" }
 realm = { module = "io.realm.kotlin:library-base", version.ref = "realm" }
 kotlinx-coroutines-rx3 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-rx3", version.ref = "kotlinx-coroutines-rx3" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
+reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
