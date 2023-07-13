@@ -26,7 +26,7 @@ import androidx.tv.foundation.lazy.grid.items
 import androidx.tv.material3.Text
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.DashboardTabsGraph
-import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
@@ -39,31 +39,35 @@ import kotlin.math.roundToInt
 @DashboardTabsGraph(start = true)
 @Destination
 @Composable
-fun MyItems(navCallback: NavigationCallback) {
+fun MyItems() {
     val context = LocalContext.current
-    hiltViewModel<MyItemsViewModel>().subscribeToState(navCallback, onEvent = {
-        when (it) {
-            Events.NetworkError -> Toast.makeText(
-                context,
-                "Network error. Please try again later.",
-                Toast.LENGTH_SHORT
-            ).show()
+    hiltViewModel<MyItemsViewModel>().subscribeToState(
+        onEvent = {
+            when (it) {
+                Events.NetworkError -> Toast.makeText(
+                    context,
+                    "Network error. Please try again later.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        },
+        onState = { vm, state ->
+            MyItems(state)
         }
-    }) { vm, state ->
-        MyItems(state, navCallback)
-    }
+    )
 }
 
 @Composable
-private fun MyItems(state: MyItemsViewModel.State, navCallback: NavigationCallback) {
+private fun MyItems(state: MyItemsViewModel.State) {
     BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         if (state.loading) {
             EluvioLoadingSpinner(Modifier.fillMaxHeight())
         } else if (state.media.isEmpty()) {
             Text("No items to display")
         } else {
+            val navigator = LocalNavigator.current
             MyItemsGrid(state.media, onItemClick = {
-                navCallback(NftDetailDestination(it.contractAddress).asPush())
+                navigator(NftDetailDestination(it.contractAddress).asPush())
             })
         }
     }
@@ -129,11 +133,11 @@ private fun MyItemsPreview() = EluvioThemePreview {
         loading = false,
         // create 10 copies of the original list
         (1..10).flatMap { items }.map { it.copy(key = UUID.randomUUID().toString()) }
-    ), navCallback = { })
+    ))
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun MyItemsPreviewLoading() = EluvioThemePreview {
-    MyItems(MyItemsViewModel.State(loading = true), navCallback = { })
+    MyItems(MyItemsViewModel.State(loading = true))
 }

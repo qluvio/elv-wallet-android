@@ -41,7 +41,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.navigation.AuthFlowGraph
-import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
@@ -57,12 +57,11 @@ import com.ramcosta.composedestinations.annotation.Destination
 @AuthFlowGraph(start = true)
 @Destination
 @Composable
-fun EnvSelect(navCallback: NavigationCallback) {
-    hiltViewModel<EnvSelectViewModel>().subscribeToState(navCallback) { vm, state ->
+fun EnvSelect() {
+    hiltViewModel<EnvSelectViewModel>().subscribeToState { vm, state ->
         EnvironmentSelection(
             state = state,
             onEnvironmentSelected = { vm.selectEnvironment(it) },
-            navCallback
         )
     }
 }
@@ -72,7 +71,6 @@ fun EnvSelect(navCallback: NavigationCallback) {
 private fun EnvironmentSelection(
     state: EnvSelectViewModel.State,
     onEnvironmentSelected: (Environment) -> Unit,
-    navCallback: NavigationCallback
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -94,11 +92,12 @@ private fun EnvironmentSelection(
             style = MaterialTheme.typography.header_53.copy(fontSize = 50.sp)
         )
 
+        val navigator = LocalNavigator.current
         val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
         FocusGroup(Modifier.onPreviewKeyEvent {
             // Exit screen when back is pressed while FocusGroup is focused
             if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-                navCallback(NavigationEvent.GoBack)
+                navigator(NavigationEvent.GoBack)
                 return@onPreviewKeyEvent true
             }
             false
@@ -134,7 +133,7 @@ private fun EnvironmentSelection(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Card(onClick = { navCallback(SignInDestination.asPush()) }) {
+        Card(onClick = { navigator(SignInDestination.asPush()) }) {
             Text(stringResource(R.string.sign_in_button), Modifier.padding(10.dp))
         }
     }
@@ -150,6 +149,5 @@ private fun EnvSelectPreview() = EluvioThemePreview {
             Environment.Main
         ),
         onEnvironmentSelected = {},
-        navCallback = { }
     )
 }

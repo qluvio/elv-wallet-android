@@ -27,7 +27,8 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
-import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.LocalNavigator
+import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import app.eluvio.wallet.screens.destinations.QrDialogDestination
@@ -37,33 +38,13 @@ import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.logging.Log
 import coil.compose.AsyncImage
 
-/**
- * A card that displays a media item. On click, it navigates to the appropriate destination.
- * For custom click handling, use the overload that doesn't take a [NavigationCallback].
- */
-@Composable
-fun MediaItemCard(
-    media: MediaEntity,
-    navCallback: NavigationCallback,
-    modifier: Modifier = Modifier,
-    cardHeight: Dp = 150.dp,
-) {
-    MediaItemCard(
-        media = media,
-        onMediaItemClick = defaultMediaItemClickHandler(navCallback),
-        modifier = modifier,
-        cardHeight = cardHeight,
-    )
-}
-
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-@JvmName("MediaItemCardWithCustomOnClick")
 fun MediaItemCard(
     media: MediaEntity,
-    onMediaItemClick: (MediaEntity) -> Unit,
     modifier: Modifier = Modifier,
-    cardHeight: Dp,
+    onMediaItemClick: (MediaEntity) -> Unit = defaultMediaItemClickHandler(LocalNavigator.current),
+    cardHeight: Dp = 150.dp,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -122,21 +103,21 @@ fun MediaItemCard(
 /**
  * Navigates to the appropriate destination based on the media type.
  */
-fun defaultMediaItemClickHandler(navCallback: NavigationCallback): (media: MediaEntity) -> Unit =
+fun defaultMediaItemClickHandler(navigator: Navigator): (media: MediaEntity) -> Unit =
     { media ->
         when (media.mediaType) {
             MediaEntity.MEDIA_TYPE_VIDEO -> {
-                navCallback(VideoPlayerActivityDestination(media.id).asPush())
+                navigator(VideoPlayerActivityDestination(media.id).asPush())
             }
 
             MediaEntity.MEDIA_TYPE_IMAGE,
             MediaEntity.MEDIA_TYPE_GALLERY -> {
-                navCallback(ImageGalleryDestination(media.id).asPush())
+                navigator(ImageGalleryDestination(media.id).asPush())
             }
 
             else -> {
                 if (media.mediaFile.isNotEmpty() || media.mediaLinks.isNotEmpty()) {
-                    navCallback(QrDialogDestination(media.id).asPush())
+                    navigator(QrDialogDestination(media.id).asPush())
                 } else {
                     Log.w("Tried to open unsupported media with no links: $media")
                 }

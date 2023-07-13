@@ -29,7 +29,6 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.MainGraph
-import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -40,15 +39,15 @@ import com.ramcosta.composedestinations.annotation.Destination
 @MainGraph
 @Destination(navArgsDelegate = ImageGalleryNavArgs::class)
 @Composable
-fun ImageGallery(navCallback: NavigationCallback) {
-    hiltViewModel<ImageGalleryViewModel>().subscribeToState(navCallback) { vm, state ->
-        ImageGallery(state, navCallback)
+fun ImageGallery() {
+    hiltViewModel<ImageGalleryViewModel>().subscribeToState { vm, state ->
+        ImageGallery(state)
     }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun ImageGallery(state: ImageGalleryViewModel.State, navCallback: NavigationCallback) {
+private fun ImageGallery(state: ImageGalleryViewModel.State) {
     // TODO make first item focused on launch
     ImmersiveList(
         modifier = Modifier.fillMaxSize(),
@@ -116,5 +115,5 @@ private fun ImageGallery(state: ImageGalleryViewModel.State, navCallback: Naviga
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun ImageGalleryPreview() = EluvioThemePreview {
-    ImageGallery(ImageGalleryViewModel.State(), navCallback = { })
+    ImageGallery(ImageGalleryViewModel.State())
 }

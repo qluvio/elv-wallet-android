@@ -13,8 +13,6 @@ sealed interface NavigationEvent {
     ) : NavigationEvent
 }
 
-typealias NavigationCallback = (NavigationEvent) -> Unit
-
 fun Direction.asPush() =
     NavigationEvent.Push(this)
 

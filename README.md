@@ -1,3 +1,20 @@
+### Persistence 
+We use [Realm](https://www.mongodb.com/docs/realm/sdk/kotlin/) for persistence.
+Entities that need to be persisted must:
+1. Implement the `RealmObject` interface
+2. Have a proper implementation of `equals`/`hashCode`.
+   * Due to a [bug in Realm](https://github.com/realm/realm-kotlin/issues/1448), call `.toList/Set()` before comparing `RealmLists/Sets`.
+3. Include a Dagger module that provides them into a set of all Realm classes, otherwise Realm won't be aware they exist.
+
+A sensible toString() implementation is encouraged, since `RealmObjects` can't be data classes. 
+
+#### Composite Keys
+The Realm Kotlin SDK doesn't support composite keys, so to achieve that, implement the `CompositeKeyEntity` interface.
+
+### Navigation
+A LocalNavigator is provided as a composition local to allow for navigation between destinations.
+This defaults to "fullscreen/top-level" navigation. For nested navigation, provide your own implementation of Navigator/NavController.
+
 ### File template
 
 There's a lot of boilerplate involved with creating a new Composable/ViewModel pair.
@@ -10,26 +27,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
+import com.ramcosta.composedestinations.annotation.Destination
 
+@MainGraph
+@Destination(navArgsDelegate = ${NAME}NavArgs::class)
 @Composable
-fun ${NAME}(navCallback: NavigationCallback) {
-    hiltViewModel<${NAME}ViewModel>().subscribeToState(navCallback) { vm, state ->
-        ${NAME}(state, navCallback)
+fun ${NAME}() {
+    hiltViewModel<${NAME}ViewModel>().subscribeToState { vm, state ->
+        ${NAME}(state)
     }
 }
 
 @Composable
-private fun ${NAME}(state: ${NAME}ViewModel.State, navCallback: NavigationCallback) {
+private fun ${NAME}(state: ${NAME}ViewModel.State) {
 
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun ${NAME}Preview() = EluvioThemePreview {
-    ${NAME}(${NAME}ViewModel.State(), navCallback = { })
+    ${NAME}(${NAME}ViewModel.State())
 }
 ```
 
@@ -47,4 +67,12 @@ class ${NAME}ViewModel @Inject constructor(
 ) : BaseViewModel<${NAME}ViewModel.State>(State()) {
     data class State(val tmp: Int = 0)
 }
+```
+
+And for the NavArgs. Not every screen will need this, but it's easier to delete when not needed, than write it out when it is.
+
+```
+package ${PACKAGE_NAME}
+
+data class ${NAME}NavArgs(val arg1: String)
 ```

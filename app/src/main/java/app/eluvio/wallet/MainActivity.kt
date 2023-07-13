@@ -17,18 +17,16 @@ import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
-import app.eluvio.wallet.navigation.NavigationCallback
-import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.navigation.ComposeNavigator
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.theme.EluvioTheme
 import app.eluvio.wallet.util.logging.Log
 import com.ramcosta.composedestinations.DestinationsNavHost
-import com.ramcosta.composedestinations.navigation.dependency
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -43,38 +41,24 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(backgroundBrush)
                 ) {
+                    val navController = rememberNavController()
+                    val navigator = remember {
+                        ComposeNavigator(
+                            navController,
+                            onBackPressedDispatcherOwner = this@MainActivity
+                        )
+                    }
                     CompositionLocalProvider(
+                        LocalNavigator provides navigator,
                         LocalContentColor provides MaterialTheme.colorScheme.onSurface
                     ) {
-                        val navController = rememberNavController()
-                        val navCallback = remember { NavigationHandler(navController) }
                         DestinationsNavHost(
                             navGraph = NavGraphs.root,
                             navController = navController,
-                            dependenciesContainerBuilder = {
-                                dependency(navCallback)
-                            }
                         )
                         // Print nav backstack for debugging
                         navController.currentBackStack.collectAsState().value.print()
                     }
-                }
-            }
-        }
-    }
-
-    private inner class NavigationHandler(private val navController: NavController) :
-        NavigationCallback {
-        override fun invoke(event: NavigationEvent) {
-            when (event) {
-                NavigationEvent.GoBack -> {
-                    if (!navController.popBackStack()) {
-                        onBackPressedDispatcher.onBackPressed()
-                    }
-                }
-
-                is NavigationEvent.Push -> {
-                    navController.navigate(event.direction.route, event.navOptions)
                 }
             }
         }

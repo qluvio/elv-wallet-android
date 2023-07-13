@@ -43,8 +43,8 @@ import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.DashboardTabsGraph
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
-import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.AppLogo
@@ -57,27 +57,26 @@ import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
 
 @MainGraph(start = true)
 @Destination
 @Composable
-fun Dashboard(navCallback: NavigationCallback) {
-    hiltViewModel<DashboardViewModel>().subscribeToState(navCallback) { _, state ->
-        Dashboard(state, navCallback)
+fun Dashboard() {
+    hiltViewModel<DashboardViewModel>().subscribeToState { _, state ->
+        Dashboard(state)
     }
 }
 
 @Composable
-private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCallback) {
+private fun Dashboard(state: DashboardViewModel.State) {
     val tabNavController = rememberNavController()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TopBar(onTabSelected = { tab ->
             tabNavController.navigate(tab.direction) {
                 launchSingleTop = true
             }
-        }, navCallback)
+        })
         val modifier = Modifier.fillMaxSize()
         if (LocalInspectionMode.current) {
             // Don't load real content in preview mode
@@ -90,7 +89,6 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
             DestinationsNavHost(
                 navGraph = NavGraphs.dashboardTabsGraph,
                 navController = tabNavController,
-                dependenciesContainerBuilder = { dependency(navCallback) },
                 modifier = modifier
             )
         }
@@ -99,12 +97,13 @@ private fun Dashboard(state: DashboardViewModel.State, navCallback: NavigationCa
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvFoundationApi::class)
 @Composable
-private fun TopBar(onTabSelected: (Tabs) -> Unit, navCallback: NavigationCallback) {
+private fun TopBar(onTabSelected: (Tabs) -> Unit) {
+    val navigator = LocalNavigator.current
     // TODO: there's nothing stopping the logo and tabs from overlapping if the screen isn't wide enough
     FocusGroup(contentAlignment = Alignment.Center, modifier = Modifier.onPreviewKeyEvent {
         // Exit screen when back is pressed while FocusGroup is focused
         if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-            navCallback(NavigationEvent.GoBack)
+            navigator(NavigationEvent.GoBack)
             return@onPreviewKeyEvent true
         }
         false
@@ -204,12 +203,12 @@ fun Temp(tab: Tabs) {
 @Composable
 @Preview(widthDp = 900)
 private fun TopBarPreview() {
-    TopBar(onTabSelected = { }, navCallback = { })
+    TopBar(onTabSelected = { })
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun DashboardPreview() {
     val state = DashboardViewModel.State()
-    Dashboard(state, navCallback = { })
+    Dashboard(state)
 }

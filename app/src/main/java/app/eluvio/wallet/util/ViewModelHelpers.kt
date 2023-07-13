@@ -9,23 +9,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
-import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.util.logging.Log
 
 // TODO: this name mention nothing about navigation/events/lifecycle being handled.. :/
 @Composable
 inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
-    noinline navCallback: NavigationCallback,
     crossinline onEvent: (Events) -> Unit = {},
     onState: @Composable (VM, State) -> Unit
 ) {
     val vm = this
-
+    val navigator = LocalNavigator.current
     // Handle navigation events
     DisposableEffect(Unit) {
         val navigationEvents = vm.navigationEvents.subscribe {
             Log.d("${vm.javaClass.simpleName} navigating to $it")
-            navCallback(it)
+            navigator(it)
         }
         val events = vm.events.subscribe {
             Log.d("${vm.javaClass.simpleName} event fired: $it")

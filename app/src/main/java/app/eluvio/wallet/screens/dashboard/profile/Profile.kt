@@ -24,7 +24,6 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.navigation.DashboardTabsGraph
-import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
@@ -34,8 +33,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 @DashboardTabsGraph
 @Destination
 @Composable
-fun Profile(navCallback: NavigationCallback) {
-    hiltViewModel<ProfileViewModel>().subscribeToState(navCallback) { vm, state ->
+fun Profile() {
+    hiltViewModel<ProfileViewModel>().subscribeToState { vm, state ->
         Profile(state, onSignOut = vm::signOut)
     }
 }

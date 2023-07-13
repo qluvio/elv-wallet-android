@@ -9,7 +9,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
 import app.eluvio.wallet.navigation.DashboardTabsGraph
-import app.eluvio.wallet.navigation.NavigationCallback
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
@@ -18,17 +17,17 @@ import com.ramcosta.composedestinations.annotation.Destination
 @DashboardTabsGraph
 @Destination
 @Composable
-fun MyMedia(navCallback: NavigationCallback) {
-    hiltViewModel<MyMediaViewModel>().subscribeToState(navCallback) { vm, state ->
-        MyMedia(state, navCallback)
+fun MyMedia() {
+    hiltViewModel<MyMediaViewModel>().subscribeToState { vm, state ->
+        MyMedia(state)
     }
 }
 
 @Composable
-private fun MyMedia(state: MyMediaViewModel.State, navCallback: NavigationCallback) {
+private fun MyMedia(state: MyMediaViewModel.State) {
     TvLazyRow(contentPadding = PaddingValues(16.dp)) {
         items(state.mediaItems) { media ->
-            MediaItemCard(media, navCallback)
+            MediaItemCard(media)
         }
     }
 }
@@ -36,5 +35,5 @@ private fun MyMedia(state: MyMediaViewModel.State, navCallback: NavigationCallba
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun MyMediaPreview() = EluvioThemePreview {
-    MyMedia(MyMediaViewModel.State(), navCallback = { })
+    MyMedia(MyMediaViewModel.State())
 }

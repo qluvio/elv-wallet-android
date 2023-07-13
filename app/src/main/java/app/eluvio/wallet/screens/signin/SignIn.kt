@@ -38,7 +38,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.navigation.AuthFlowGraph
-import app.eluvio.wallet.navigation.NavigationCallback
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -52,12 +52,11 @@ import com.ramcosta.composedestinations.annotation.Destination
 @AuthFlowGraph
 @Destination
 @Composable
-fun SignIn(navCallback: NavigationCallback) {
-    hiltViewModel<SignInViewModel>().subscribeToState(navCallback) { vm, state ->
+fun SignIn() {
+    hiltViewModel<SignInViewModel>().subscribeToState { vm, state ->
         SignIn(
             state,
-            onRequestNewToken = { vm.requestNewToken(it) },
-            navCallback
+            onRequestNewToken = { vm.requestNewToken(it) }
         )
     }
 }
@@ -67,7 +66,6 @@ fun SignIn(navCallback: NavigationCallback) {
 private fun SignIn(
     state: SignInViewModel.State,
     onRequestNewToken: (qrSize: Int) -> Unit,
-    navCallback: NavigationCallback
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -114,7 +112,8 @@ private fun SignIn(
                 Text("Request New Code", Modifier.padding(10.dp))
             }
             Spacer(modifier = Modifier.width(35.dp))
-            Card(onClick = { navCallback(NavigationEvent.GoBack) }) {
+            val navigator = LocalNavigator.current
+            Card(onClick = { navigator(NavigationEvent.GoBack) }) {
                 Text(text = "Cancel", Modifier.padding(10.dp))
             }
         }
@@ -159,6 +158,5 @@ private fun SignInPreview() = EluvioThemePreview {
             url = "https://eluv.io",
         ),
         onRequestNewToken = {},
-        navCallback = {},
     )
 }
