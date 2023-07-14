@@ -1,11 +1,14 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +26,7 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.subscribeToState
+import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 import io.realm.kotlin.ext.realmListOf
 
@@ -37,24 +41,37 @@ fun NftDetail() {
 
 @Composable
 private fun NftDetail(state: NftDetailViewModel.State) {
-    Column(Modifier.padding(32.dp)) {
-        Text(state.title, style = MaterialTheme.typography.title_62)
-        Spacer(Modifier.height(16.dp))
-        Text(state.subtitle, style = MaterialTheme.typography.body_32)
-        TvLazyColumn {
-            state.sections.forEach { section ->
-                section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
-                    item(key = sectionName) {
-                        Spacer(Modifier.height(16.dp))
-                        Text(sectionName, style = MaterialTheme.typography.body_32)
-                    }
+    Box {
+        if (state.backgroundImage != null) {
+            AsyncImage(
+                model = state.backgroundImage,
+                contentScale = ContentScale.Crop,
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        Column(Modifier.padding(horizontal = 32.dp)) {
+            TvLazyColumn {
+                item {
+                    Spacer(Modifier.height(32.dp))
+                    Text(state.title, style = MaterialTheme.typography.title_62)
+                    Spacer(Modifier.height(16.dp))
+                    Text(state.subtitle, style = MaterialTheme.typography.body_32)
                 }
-                items(section.collections) { collection ->
-                    if (collection.name.isNotEmpty()) {
-                        Spacer(Modifier.height(16.dp))
-                        Text(collection.name, style = MaterialTheme.typography.body_32)
+                state.sections.forEach { section ->
+                    section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
+                        item(key = sectionName) {
+                            Spacer(Modifier.height(16.dp))
+                            Text(sectionName, style = MaterialTheme.typography.body_32)
+                        }
                     }
-                    MediaItemsRow(collection.media)
+                    items(section.collections) { collection ->
+                        if (collection.name.isNotEmpty()) {
+                            Spacer(Modifier.height(16.dp))
+                            Text(collection.name, style = MaterialTheme.typography.body_32)
+                        }
+                        MediaItemsRow(collection.media)
+                    }
                 }
             }
         }

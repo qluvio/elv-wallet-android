@@ -25,6 +25,9 @@ class MediaEntity : RealmObject {
 
     // Relative paths to offerings
     var mediaLinks: RealmDictionary<String> = realmDictionaryOf()
+
+    var tvBackgroundImage: String = ""
+
     var gallery: RealmList<GalleryItemEntity>? = null
 
     override fun toString(): String {

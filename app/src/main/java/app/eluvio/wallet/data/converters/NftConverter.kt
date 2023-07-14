@@ -85,6 +85,7 @@ fun MediaItemDto.toEntity(): MediaEntity {
             ?.mapValues { (_, link) -> link.path }
             ?.toRealmDictionary()
             ?: realmDictionaryOf()
+        tvBackgroundImage = dto.background_image_tv?.path ?: ""
         gallery = dto.gallery?.map { it.toEntity() }?.toRealmList()
     }
 }
