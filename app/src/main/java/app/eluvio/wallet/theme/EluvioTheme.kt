@@ -15,6 +15,7 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
+import app.eluvio.wallet.navigation.LocalNavigator
 
 @Composable
 fun EluvioTheme(content: @Composable () -> Unit) {
@@ -41,6 +42,7 @@ fun EluvioThemePreview(content: @Composable () -> Unit) {
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             CompositionLocalProvider(
+                LocalNavigator provides {},
                 LocalContentColor provides MaterialTheme.colorScheme.onSurface,
                 LocalSurfaceScale provides LocalSurfaceScale.current,
                 content = content
