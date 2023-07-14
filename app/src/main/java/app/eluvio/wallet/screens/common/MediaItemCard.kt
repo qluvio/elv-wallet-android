@@ -4,7 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
@@ -26,6 +28,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
+import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
@@ -33,6 +36,7 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import app.eluvio.wallet.screens.destinations.QrDialogDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
+import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.logging.Log
@@ -68,10 +72,11 @@ fun MediaItemCard(
             model = media.image,
             contentScale = ContentScale.Crop,
             contentDescription = media.name,
+            placeholder = debugPlaceholder(R.drawable.elv_logo),
             modifier = modifier.align(Alignment.Center)
         )
         if (isFocused) {
-            BoxWithConstraints(
+            Box(
                 contentAlignment = Alignment.BottomCenter,
                 modifier = modifier
                     .fillMaxSize()
@@ -124,3 +129,23 @@ fun defaultMediaItemClickHandler(navigator: Navigator): (media: MediaEntity) -> 
             }
         }
     }
+
+@Preview(device = Devices.TV_720p)
+@Composable
+private fun MediaItemCardPreview() = EluvioThemePreview {
+    MediaItemCard(media = MediaEntity().apply {
+        id = "id"
+        name = "NFT Media Item"
+        mediaType = MediaEntity.MEDIA_TYPE_IMAGE
+    })
+}
+
+@Preview(device = Devices.TV_720p)
+@Composable
+private fun VideoItemCardPreview() = EluvioThemePreview {
+    MediaItemCard(media = MediaEntity().apply {
+        id = "id"
+        name = "NFT Media Item"
+        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+    })
+}
