@@ -1,6 +1,7 @@
 package app.eluvio.wallet.network.dto
 
 import com.squareup.moshi.JsonClass
+import java.util.Date
 
 @JsonClass(generateAdapter = true)
 data class NftResponse(
@@ -31,6 +32,7 @@ data class NftMetadataDto(
 @JsonClass(generateAdapter = true)
 data class NftTemplateDto(
     val additional_media_sections: AdditionalMediaSectionDto?,
+    val redeemable_offers: List<RedeemableOfferDto>?,
 )
 
 @JsonClass(generateAdapter = true)
@@ -76,4 +78,14 @@ data class MediaLinkDto(
 data class GalleryItemDto(
     val name: String,
     val image: AssetLinkDto?,
+)
+
+@JsonClass(generateAdapter = true)
+data class RedeemableOfferDto(
+    val name: String,
+    val offer_id: String,
+    val image: AssetLinkDto?,
+    val poster_image: AssetLinkDto?,
+    val available_at: Date?,
+    val expires_at: Date?,
 )

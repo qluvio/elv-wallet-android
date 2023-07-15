@@ -21,7 +21,9 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     var displayName: String = ""
     var editionName: String = ""
     var description: String = ""
+    var featuredMedia: RealmList<MediaEntity> = realmListOf()
     var mediaSections: RealmList<MediaSectionEntity> = realmListOf()
+    var redeemableOffers: RealmList<RedeemableOfferEntity> = realmListOf()
 
     override fun updateKey(): String {
         _id = "${contractAddress}_${tokenId}"
@@ -29,7 +31,7 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     }
 
     override fun toString(): String {
-        return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', mediaSections=$mediaSections)"
+        return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', featuredMedia=$featuredMedia, mediaSections=$mediaSections, redeemableOffers=$redeemableOffers)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -45,7 +47,9 @@ class NftEntity : RealmObject, CompositeKeyEntity {
         if (displayName != other.displayName) return false
         if (editionName != other.editionName) return false
         if (description != other.description) return false
+        if (featuredMedia.toList() != other.featuredMedia.toList()) return false
         if (mediaSections.toList() != other.mediaSections.toList()) return false
+        if (redeemableOffers.toList() != other.redeemableOffers.toList()) return false
 
         return true
     }
@@ -58,7 +62,9 @@ class NftEntity : RealmObject, CompositeKeyEntity {
         result = 31 * result + displayName.hashCode()
         result = 31 * result + editionName.hashCode()
         result = 31 * result + description.hashCode()
+        result = 31 * result + featuredMedia.hashCode()
         result = 31 * result + mediaSections.hashCode()
+        result = 31 * result + redeemableOffers.hashCode()
         return result
     }
 

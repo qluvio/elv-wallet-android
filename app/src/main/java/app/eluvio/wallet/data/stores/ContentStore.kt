@@ -1,10 +1,10 @@
 package app.eluvio.wallet.data.stores
 
-import app.eluvio.wallet.data.converters.toNfts
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
+import app.eluvio.wallet.network.converters.toNfts
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable

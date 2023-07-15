@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.nftdetail
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.di.ApiProvider
@@ -22,9 +23,13 @@ class NftDetailViewModel @Inject constructor(
     data class State(
         val title: String = "",
         val subtitle: String = "",
+        val featuredMedia: List<MediaEntity> = emptyList(),
         val sections: List<MediaSectionEntity> = emptyList(),
+        val redeemableOffers: List<Offer> = emptyList(),
         val backgroundImage: String? = null,
-    )
+    ) {
+        data class Offer(val name: String, val imageUrl: String)
+    }
 
     private val contractAddress = NftDetailDestination.argsFrom(savedStateHandle).contractAddress
 
@@ -42,11 +47,16 @@ class NftDetailViewModel @Inject constructor(
                         nft.mediaSections.firstOrNull()?.collections?.firstOrNull()?.media?.firstOrNull()?.tvBackgroundImage?.let {
                             "$endpoint$it"
                         }
+                    val offers = nft.redeemableOffers.map {
+                        State.Offer(it.name, "${endpoint}${it.imagePath}")
+                    }
                     updateState {
                         State(
                             title = nft.displayName,
                             subtitle = nft.description,
+                            featuredMedia = nft.featuredMedia,
                             sections = nft.mediaSections,
+                            redeemableOffers = offers,
                             backgroundImage = bg,
                         )
                     }
@@ -55,5 +65,6 @@ class NftDetailViewModel @Inject constructor(
 
                 })
             .addTo(disposables)
+        //TODO: prefetch /nft/info
     }
 }

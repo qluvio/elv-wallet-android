@@ -31,7 +31,7 @@ class MediaEntity : RealmObject {
     var gallery: RealmList<GalleryItemEntity>? = null
 
     override fun toString(): String {
-        return "MediaEntity(id='$id', name='$name', image='$image', mediaType='$mediaType', mediaFile='$mediaFile', mediaLinks=$mediaLinks, gallery=$gallery)"
+        return "MediaEntity(id='$id', name='$name', image='$image', mediaType='$mediaType', mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -46,6 +46,7 @@ class MediaEntity : RealmObject {
         if (mediaType != other.mediaType) return false
         if (mediaFile != other.mediaFile) return false
         if (mediaLinks != other.mediaLinks) return false
+        if (tvBackgroundImage != other.tvBackgroundImage) return false
         if (gallery != other.gallery) return false
 
         return true
@@ -58,6 +59,7 @@ class MediaEntity : RealmObject {
         result = 31 * result + mediaType.hashCode()
         result = 31 * result + mediaFile.hashCode()
         result = 31 * result + mediaLinks.hashCode()
+        result = 31 * result + tvBackgroundImage.hashCode()
         result = 31 * result + (gallery?.hashCode() ?: 0)
         return result
     }

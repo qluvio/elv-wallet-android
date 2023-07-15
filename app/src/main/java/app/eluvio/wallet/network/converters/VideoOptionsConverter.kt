@@ -1,4 +1,4 @@
-package app.eluvio.wallet.data.converters
+package app.eluvio.wallet.network.converters
 
 import app.eluvio.wallet.data.entities.VideoOptionsEntity
 import app.eluvio.wallet.network.dto.PlayoutConfigDto

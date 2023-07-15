@@ -1,37 +1,79 @@
-package app.eluvio.wallet.data.converters
+package app.eluvio.wallet.network.converters
 
 import app.eluvio.wallet.data.entities.GalleryItemEntity
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.data.entities.NftEntity
+import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.network.dto.AdditionalMediaSectionDto
 import app.eluvio.wallet.network.dto.GalleryItemDto
 import app.eluvio.wallet.network.dto.MediaCollectionDto
 import app.eluvio.wallet.network.dto.MediaItemDto
 import app.eluvio.wallet.network.dto.MediaSectionDto
 import app.eluvio.wallet.network.dto.NftResponse
+import app.eluvio.wallet.network.dto.RedeemableOfferDto
+import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmDictionary
 import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmList
 
 fun NftResponse.toNfts(): List<NftEntity> {
     return contents.mapNotNull { dto ->
-        // Currently, additional_media_sections is required. In the future we'll probably have
-        // to support additional_media for backwards compatibility.
-        dto.nft_template.additional_media_sections?.let { mediaSectionsDto ->
-            NftEntity().apply {
-                contractAddress = dto.contract_addr
-                tokenId = dto.token_id
-                imageUrl = dto.meta.image
-                displayName = dto.meta.display_name!!
-                editionName = dto.meta.edition_name ?: ""
-                description = dto.meta.description ?: ""
-                mediaSections = mediaSectionsDto.toEntity(updateKey())
-            }
+        NftEntity().apply {
+            contractAddress = dto.contract_addr
+            tokenId = dto.token_id
+            imageUrl = dto.meta.image
+            displayName = dto.meta.display_name!!
+            editionName = dto.meta.edition_name ?: ""
+            description = dto.meta.description ?: ""
+            // Currently, additional_media_sections is required. In the future we'll probably have
+            // to support additional_media for backwards compatibility.
+            val additionalMediaSections =
+                dto.nft_template.additional_media_sections ?: return@mapNotNull null
+            featuredMedia =
+                additionalMediaSections.featured_media?.map { it.toEntity() }.toRealmListOrEmpty()
+            mediaSections =
+                additionalMediaSections.sections?.map { it.toEntity() }.toRealmListOrEmpty()
+
+            redeemableOffers =
+                dto.nft_template.redeemable_offers?.map { it.toEntity(dto.contract_addr) }
+                    .toRealmListOrEmpty()
         }
+    }
+}
+
+private fun RedeemableOfferDto.toEntity(contractAddress: String): RedeemableOfferEntity {
+    val dto = this
+    return RedeemableOfferEntity().apply {
+        name = dto.name
+        this.contractAddress = contractAddress
+        offerId = dto.offer_id
+        updateKey()
+        imagePath = dto.image?.path ?: ""
+        posterImagePath = dto.poster_image?.path ?: ""
+        availableAt = dto.available_at?.let { RealmInstant.from(it.time, 0) }
+        expiresAt = dto.expires_at?.let { RealmInstant.from(it.time, 0) }
+    }
+}
+
+private fun parseFeaturedMedia(
+    mediaSectionsDto: AdditionalMediaSectionDto,
+    nftKey: String
+): MediaSectionEntity? {
+    val featuredMediaItems = mediaSectionsDto.featured_media?.map { it.toEntity() } ?: return null
+    return MediaSectionEntity().apply {
+        id = "featured_media-$nftKey"
+        name = ""
+        collections =
+            realmListOf(MediaCollectionEntity().apply {
+                id = "featured_media-$nftKey"
+                name = ""
+                media = featuredMediaItems.toRealmList()
+            })
     }
 }
 
@@ -69,7 +111,7 @@ fun MediaCollectionDto.toEntity(): MediaCollectionEntity {
         id = dto.id ?: ""
         name = dto.name ?: ""
         display = dto.display ?: ""
-        media = dto.media?.map { it.toEntity() }?.toRealmList() ?: realmListOf()
+        media = dto.media?.map { it.toEntity() }.toRealmListOrEmpty()
     }
 }
 

@@ -1,11 +1,14 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -14,13 +17,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.list.TvLazyColumn
+import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
+import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.navigation.MainGraph
+import app.eluvio.wallet.screens.common.ImageCard
+import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.MediaItemsRow
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -58,6 +65,10 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                     Spacer(Modifier.height(16.dp))
                     Text(state.subtitle, style = MaterialTheme.typography.body_32)
                 }
+                item {
+                    FeaturedMediaAndOffersRow(state)
+                }
+
                 state.sections.forEach { section ->
                     section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
                         item(key = sectionName) {
@@ -73,6 +84,27 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                         MediaItemsRow(collection.media)
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
+    TvLazyRow(
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(state.featuredMedia + state.redeemableOffers) { item ->
+            when (item) {
+                is MediaEntity -> MediaItemCard(item)
+                is NftDetailViewModel.State.Offer -> ImageCard(
+                    imageUrl = item.imageUrl,
+                    title = item.name,
+                    onClick = {},
+                    modifier = Modifier.size(150.dp)
+                )
             }
         }
     }

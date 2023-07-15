@@ -100,6 +100,7 @@ dependencies {
 
     ksp(libs.moshi.codegen)
     implementation(libs.moshi.kotlin)
+    implementation(libs.moshi.adapters)
 
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.dash)

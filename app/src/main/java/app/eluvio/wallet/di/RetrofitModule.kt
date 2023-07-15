@@ -7,6 +7,8 @@ import app.eluvio.wallet.network.adapters.FalsyObjectAdapter
 import app.eluvio.wallet.network.api.Auth0Api
 import app.eluvio.wallet.network.api.FabricConfigApi
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
+import com.squareup.moshi.addAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -55,10 +57,12 @@ object RetrofitModule {
             .build()
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     @Provides
     fun provideRetrofitBuilder(@TokenAwareHttpClient httpClient: OkHttpClient): Retrofit.Builder {
         val moshi = Moshi.Builder()
             .add(FalsyObjectAdapter.Factory())
+            .addAdapter(Rfc3339DateJsonAdapter())
             .add(AssetLinkAdapter())
             .build()
         return Retrofit.Builder()

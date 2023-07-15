@@ -64,6 +64,7 @@ leanback = { group = "androidx.leanback", name = "leanback", version.ref = "lean
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity-compose" }
 qrcode-kotlin-android = { module = "io.github.g0dkar:qrcode-kotlin-android", version.ref = "qrcode-kotlin-android" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
+moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 retrofit = { module = "com.squareup.retrofit2:retrofit" }
 retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }

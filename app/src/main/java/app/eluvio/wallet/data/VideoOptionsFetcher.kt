@@ -1,10 +1,10 @@
 package app.eluvio.wallet.data
 
-import app.eluvio.wallet.data.converters.toEntity
 import app.eluvio.wallet.data.entities.VideoOptionsEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.fabric.AssetFetcherApi
+import app.eluvio.wallet.network.converters.toEntity
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
