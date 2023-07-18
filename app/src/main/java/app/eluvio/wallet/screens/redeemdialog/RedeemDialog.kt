@@ -23,8 +23,11 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
+import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.debugPlaceholder
+import app.eluvio.wallet.screens.destinations.FulfillmentQrDialogDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.redeemTagSurface
@@ -52,12 +55,14 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State) {
                 .fillMaxWidth(0.8f)
                 .align(Alignment.Center)
         ) {
-            AsyncImage(
-                model = state.image,
-                contentDescription = state.title,
-                placeholder = debugPlaceholder(R.drawable.elv_logo),
-                modifier = Modifier.fillMaxHeight()
-            )
+            if (!state.image.isNullOrEmpty()) {
+                AsyncImage(
+                    model = state.image,
+                    contentDescription = state.title,
+                    placeholder = debugPlaceholder(R.drawable.elv_logo),
+                    modifier = Modifier.fillMaxHeight()
+                )
+            }
             Spacer(Modifier.width(40.dp))
             Column {
                 Text(text = state.title, style = MaterialTheme.typography.title_62)
@@ -74,9 +79,10 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State) {
                     Text(text = state.dateRange, style = MaterialTheme.typography.body_32)
                 }
                 Spacer(Modifier.height(40.dp))
+                val navigator = LocalNavigator.current
                 // Should be a Card, but TV-Card can't be disabled yet.
                 Surface(
-                    onClick = { /*TODO*/ },
+                    onClick = { navigator(FulfillmentQrDialogDestination(state.transaction!!).asPush()) },
                     enabled = state.offerStatus != RedeemDialogViewModel.State.Status.REDEEMING,
                 ) {
                     val text = remember(state.offerStatus) {
@@ -99,7 +105,7 @@ private fun RedeemedOfferPreview() = EluvioThemePreview {
     RedeemDialog(
         RedeemDialogViewModel.State(
             "Nft reward offer #1",
-            "",
+            "http://foo",
             true,
             "January 1, 1970 - January 1, 2042"
         )
@@ -112,7 +118,7 @@ private fun UnRedeemedOfferPreview() = EluvioThemePreview {
     RedeemDialog(
         RedeemDialogViewModel.State(
             "Nft reward offer #1",
-            "",
+            null,
             false,
             "January 1, 1970 - January 1, 2042"
         )

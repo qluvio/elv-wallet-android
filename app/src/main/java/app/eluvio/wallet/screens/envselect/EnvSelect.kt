@@ -122,7 +122,7 @@ private fun EnvironmentSelection(
                                 .restorableFocus()
                                 .focusRequester(tabFocusRequesters[index]),
                         ) {
-                            Text(stringResource(id = environment.envName))
+                            Text(stringResource(id = environment.prettyEnvName))
                         }
                     }
                 }

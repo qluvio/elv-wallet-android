@@ -24,6 +24,7 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     var featuredMedia: RealmList<MediaEntity> = realmListOf()
     var mediaSections: RealmList<MediaSectionEntity> = realmListOf()
     var redeemableOffers: RealmList<RedeemableOfferEntity> = realmListOf()
+
     // Info that can be null until fetched separately from nft/info/{contractAddress}/{tokenId}
     var redeemStates: RealmList<RedeemStateEntity> = realmListOf()
     var tenant: String? = null

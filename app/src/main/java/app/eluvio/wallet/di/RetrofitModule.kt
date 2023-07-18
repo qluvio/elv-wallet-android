@@ -72,8 +72,8 @@ object RetrofitModule {
     @Provides
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
-            .addAdapter(Rfc3339DateJsonAdapter())
             .add(FalsyObjectAdapter.Factory())
+            .addAdapter(Rfc3339DateJsonAdapter())
             .add(AssetLinkAdapter())
             .build()
     }

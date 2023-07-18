@@ -57,7 +57,7 @@ fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
             Spacer(Modifier.height(20.dp))
             Header("FABRIC")
             Spacer(Modifier.height(10.dp))
-            val network = state.network?.envName?.let { stringResource(it) }
+            val network = state.network?.prettyEnvName?.let { stringResource(it) }
             InfoField("Network: $network")
             Spacer(Modifier.height(10.dp))
             InfoField("Fabric Node: ${state.fabricNode}")

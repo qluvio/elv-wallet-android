@@ -7,7 +7,10 @@ import io.github.g0dkar.qrcode.QRCode
 import io.reactivex.rxjava3.core.Single
 import java.io.ByteArrayOutputStream
 
-fun generateQrCode(url: String, size: Int): Single<Bitmap> {
+// TODO: evey time we generate a QR code, we need to use a real size and not this hardcoded hack
+const val DEFAULT_QR_SIZE = 512
+
+fun generateQrCode(url: String, size: Int = DEFAULT_QR_SIZE): Single<Bitmap> {
     return Single.create {
         val bytes = ByteArrayOutputStream()
         val qr = QRCode(url)

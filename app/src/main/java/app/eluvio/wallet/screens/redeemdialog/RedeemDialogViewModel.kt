@@ -5,6 +5,7 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.data.stores.ContentStore
+import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.util.logging.Log
@@ -23,6 +24,7 @@ class RedeemDialogViewModel @Inject constructor(
     stateHandle: SavedStateHandle,
     private val contentStore: ContentStore,
     private val apiProvider: ApiProvider,
+    private val fulfillmentStore: FulfillmentStore,
 ) : BaseViewModel<RedeemDialogViewModel.State>(State()) {
     data class State(
         val title: String = "",
@@ -30,6 +32,8 @@ class RedeemDialogViewModel @Inject constructor(
         val offerValid: Boolean = false,
         val dateRange: String = "",
         val offerStatus: Status = Status.UNREDEEMED,
+        // If offer is redeemed, this is the transaction hash
+        val transaction: String? = null,
     ) {
         enum class Status {
             UNREDEEMED, REDEEMED, REDEEMING
@@ -41,10 +45,10 @@ class RedeemDialogViewModel @Inject constructor(
     private val offerId = RedeemDialogDestination.argsFrom(stateHandle).offerId
 
     private var refreshDisposable: Disposable? = null
+    private var fulfillmentDataDisposable: Disposable? = null
 
     override fun onResume() {
         super.onResume()
-
         apiProvider.getFabricEndpoint().flatMapPublisher { endpoint ->
             contentStore.observeNft(contractAddress, tokenId)
                 .doOnNext {
@@ -57,22 +61,31 @@ class RedeemDialogViewModel @Inject constructor(
             .map { (nft, endpoint) ->
                 val offer = nft.redeemableOffers.firstOrNull { it.offerId == offerId }
                     ?: error("Offer not found")
-                val status = nft.redeemStates.firstOrNull { it.offerId == offerId }?.let {
-                    if (it.redeemed == null) {
-                        State.Status.UNREDEEMED
-                    } else {
-                        State.Status.REDEEMED
-                    }
-                }
+                val redeemState = nft.redeemStates.firstOrNull { it.offerId == offerId }
                     ?: error("Offer state not found")
+                val status = if (redeemState.redeemed == null) {
+                    State.Status.UNREDEEMED
+                } else {
+                    State.Status.REDEEMED
+                }
+                val transaction = redeemState.transaction
+                prefetchFulfillmentData(transaction)
                 val image = (offer.posterImagePath ?: offer.imagePath)?.let { "$endpoint$it" }
-                State(offer.name, image, offer.isValid, offer.dateRange, offerStatus = status)
+                State(
+                    offer.name,
+                    image,
+                    offer.isValid,
+                    offer.dateRange,
+                    offerStatus = status,
+                    transaction = transaction
+                )
             }
             .subscribeBy(
                 onNext = { updateState { it } },
                 onError = {}
             )
             .addTo(disposables)
+
     }
 
     /**
@@ -87,6 +100,21 @@ class RedeemDialogViewModel @Inject constructor(
                     Log.e("prefetched failed and not retrying!")
                 })
                 .addTo(disposables)
+        }
+    }
+
+    private fun prefetchFulfillmentData(transaction: String?) {
+        if (fulfillmentDataDisposable == null && transaction != null) {
+            fulfillmentDataDisposable =
+                fulfillmentStore.prefetchFulfillmentData(transaction)
+                    .retry(1)
+                    .subscribeBy(onError = {
+                        Log.e(
+                            "prefetch fulfillment data failed and not retrying! transaction=$transaction",
+                            it
+                        )
+                    })
+                    .addTo(disposables)
         }
     }
 

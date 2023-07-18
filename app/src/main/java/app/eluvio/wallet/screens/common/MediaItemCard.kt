@@ -21,8 +21,8 @@ import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.destinations.ExternalMediaQrDialogDestination
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
-import app.eluvio.wallet.screens.destinations.QrDialogDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -92,7 +92,7 @@ fun defaultMediaItemClickHandler(navigator: Navigator): (media: MediaEntity) -> 
 
             else -> {
                 if (media.mediaFile.isNotEmpty() || media.mediaLinks.isNotEmpty()) {
-                    navigator(QrDialogDestination(media.id).asPush())
+                    navigator(ExternalMediaQrDialogDestination(media.id).asPush())
                 } else {
                     Log.w("Tried to open unsupported media with no links: $media")
                 }

@@ -1,6 +1,7 @@
 package app.eluvio.wallet.network.adapters
 
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
@@ -20,6 +21,19 @@ class FalsyObjectAdapter(
         return when (reader.peek()) {
             JsonReader.Token.BEGIN_ARRAY,
             JsonReader.Token.BEGIN_OBJECT -> delegate.fromJson(reader)
+
+            // Hack to get around the server sending "" for Dates.
+            JsonReader.Token.STRING -> {
+                try {
+                    delegate.fromJson(reader)
+                } catch (e: JsonDataException) {
+                    if (e.message?.contains("Not an RFC 3339 date") == true) {
+                        null
+                    } else {
+                        throw e
+                    }
+                }
+            }
 
             else -> {
                 reader.skipValue()

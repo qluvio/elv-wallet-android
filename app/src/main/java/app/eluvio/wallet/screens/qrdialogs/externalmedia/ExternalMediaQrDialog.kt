@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.qrdialog
+package app.eluvio.wallet.screens.qrdialogs.externalmedia
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -31,17 +31,17 @@ import com.ramcosta.composedestinations.annotation.Destination
 
 @Destination(
     style = FullscreenDialogStyle::class,
-    navArgsDelegate = QrDialogNavArgs::class
+    navArgsDelegate = ExternalMediaQrDialogNavArgs::class
 )
 @Composable
-fun QrDialog() {
-    hiltViewModel<QrDialogViewModel>().subscribeToState({ }) { vm, state ->
-        QrDialog(state)
+fun ExternalMediaQrDialog() {
+    hiltViewModel<ExternalMediaQrDialogViewModel>().subscribeToState({ }) { vm, state ->
+        ExternalMediaQrDialog(state)
     }
 }
 
 @Composable
-private fun QrDialog(state: QrDialogViewModel.State) {
+private fun ExternalMediaQrDialog(state: ExternalMediaQrDialogViewModel.State) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -91,17 +91,17 @@ private fun QrDialogPreviewSuccess() = EluvioThemePreview {
         LocalContext.current.resources,
         R.mipmap.ic_launcher
     )
-    QrDialog(QrDialogViewModel.State(bitmap))
+    ExternalMediaQrDialog(ExternalMediaQrDialogViewModel.State(bitmap))
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun QrDialogPreviewLoading() = EluvioThemePreview {
-    QrDialog(QrDialogViewModel.State(null))
+    ExternalMediaQrDialog(ExternalMediaQrDialogViewModel.State(null))
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun QrDialogPreviewError() = EluvioThemePreview {
-    QrDialog(QrDialogViewModel.State(null, error = true))
+    ExternalMediaQrDialog(ExternalMediaQrDialogViewModel.State(null, error = true))
 }

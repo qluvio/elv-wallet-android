@@ -66,10 +66,11 @@ class EnvironmentStore @Inject constructor(@ApplicationContext private val conte
 
 // todo proguard rules?
 enum class Environment(
-    @StringRes val envName: Int,
+    @StringRes val prettyEnvName: Int,
+    val properEnvName: String,
     val configUrl: String
 ) {
-    Main(R.string.env_main_name, "https://main.net955305.contentfabric.io/config"),
-    Demo(R.string.env_demo_name, "https://demov3.net955210.contentfabric.io/config"),
+    Main(R.string.env_main_name, "main", "https://main.net955305.contentfabric.io/config"),
+    Demo(R.string.env_demo_name, "demov3", "https://demov3.net955210.contentfabric.io/config"),
     ;
 }
