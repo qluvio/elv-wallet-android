@@ -5,10 +5,13 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
+import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
+import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
@@ -28,27 +31,38 @@ class NftDetailViewModel @Inject constructor(
         val redeemableOffers: List<Offer> = emptyList(),
         val backgroundImage: String? = null,
     ) {
-        data class Offer(val name: String, val imageUrl: String)
+        data class Offer(
+            val offerId: String,
+            val name: String,
+            val imageUrl: String?,
+            val contractAddress: String,
+            val tokenId: String
+        )
     }
 
     private val contractAddress = NftDetailDestination.argsFrom(savedStateHandle).contractAddress
+    private val tokenId = NftDetailDestination.argsFrom(savedStateHandle).tokenId
+    private var prefetchDisposable: Disposable? = null
 
     override fun onResume() {
         super.onResume()
         apiProvider.getFabricEndpoint()
             .flatMapPublisher { endpoint ->
-                contentStore.observeNft(contractAddress)
+                contentStore.observeNft(contractAddress, tokenId)
+                    .doOnNext { prefetchNftInfoOnce(it) }
                     .map { it to endpoint }
             }
             .subscribeBy(
-                onNext = { (nfts, endpoint) ->
-                    val nft = nfts.first()
+                onNext = { (nft, endpoint) ->
                     val bg =
                         nft.mediaSections.firstOrNull()?.collections?.firstOrNull()?.media?.firstOrNull()?.tvBackgroundImage?.let {
                             "$endpoint$it"
                         }
                     val offers = nft.redeemableOffers.map {
-                        State.Offer(it.name, "${endpoint}${it.imagePath}")
+                        val imageUrl = (it.posterImagePath ?: it.imagePath)?.let { path ->
+                            "${endpoint}${path}"
+                        }
+                        State.Offer(it.offerId, it.name, imageUrl, nft.contractAddress, nft.tokenId)
                     }
                     updateState {
                         State(
@@ -65,6 +79,20 @@ class NftDetailViewModel @Inject constructor(
 
                 })
             .addTo(disposables)
-        //TODO: prefetch /nft/info
+    }
+
+    /**
+     * Immediately returns the nft, but won't complete until nft info is fetched from network if nft as redeemable offers.
+     */
+    private fun prefetchNftInfoOnce(nft: NftEntity) {
+        if (prefetchDisposable == null) {
+            prefetchDisposable = contentStore.refreshRedeemedOffers(nft)
+                .doOnError { Log.w("prefetch offer info failed. This could cause problems in viewing offer $it") }
+                .retry(2)
+                .subscribeBy(onError = {
+                    Log.e("prefetched failed and not retrying!")
+                })
+                .addTo(disposables)
+        }
     }
 }

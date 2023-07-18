@@ -66,8 +66,14 @@ private fun MyItems(state: MyItemsViewModel.State) {
             Text("No items to display")
         } else {
             val navigator = LocalNavigator.current
+            val context = LocalContext.current
             MyItemsGrid(state.media, onItemClick = {
-                navigator(NftDetailDestination(it.contractAddress).asPush())
+                if (it.tokenId == null) {
+                    Toast.makeText(context, "NFT Packs not supported yet", Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    navigator(NftDetailDestination(it.contractAddress, it.tokenId).asPush())
+                }
             })
         }
     }

@@ -1,21 +1,19 @@
 package app.eluvio.wallet.screens.common
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
@@ -23,16 +21,20 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import app.eluvio.wallet.R
+import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
-import app.eluvio.wallet.theme.body_32
 import coil.compose.AsyncImage
 
+/**
+ * An image card with a focus border. Image is darkened when focused.
+ */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ImageCard(
-    imageUrl: String,
-    title: String,
+    imageUrl: String?,
+    contentDescription: String,
     modifier: Modifier = Modifier,
+    focusedOverlay: @Composable (BoxScope.() -> Unit)? = null,
     unFocusedOverlay: @Composable (BoxScope.() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
@@ -50,30 +52,28 @@ fun ImageCard(
         AsyncImage(
             model = imageUrl,
             contentScale = ContentScale.Crop,
-            contentDescription = title,
+            contentDescription = contentDescription,
             placeholder = debugPlaceholder(R.drawable.elv_logo),
-            modifier = modifier.align(Alignment.Center)
+            modifier = modifier
+                .align(Alignment.Center)
+                .drawWithContent {
+                    drawContent()
+                    if (isFocused) {
+                        // TODO: get this from theme
+                        drawRect(Color.Black.copy(alpha = 0.8f))
+                    }
+                }
         )
         if (isFocused) {
-            Box(
-                contentAlignment = Alignment.BottomCenter,
-                modifier = modifier
-                    .fillMaxSize()
-                    // TODO: get this from theme
-                    .background(Color.Black.copy(alpha = 0.8f))
-                    .padding(horizontal = 10.dp, vertical = 20.dp)
-            ) {
-                WrapContentText(
-                    text = title,
-                    style = MaterialTheme.typography.body_32,
-                    // TODO: get this from theme
-                    color = Color.White,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            focusedOverlay?.invoke(parentScope)
         } else {
             unFocusedOverlay?.invoke(parentScope)
         }
     }
+}
+
+@Preview(device = Devices.TV_720p)
+@Composable
+private fun ImageCardPreview() = EluvioThemePreview {
+    ImageCard(imageUrl = "", contentDescription = "Card Title", onClick = {})
 }

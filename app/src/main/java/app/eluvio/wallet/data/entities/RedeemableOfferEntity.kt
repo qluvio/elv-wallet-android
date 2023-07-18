@@ -6,29 +6,20 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.types.BaseRealmObject
+import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmInstant
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class RedeemableOfferEntity : RealmObject, CompositeKeyEntity {
-    @PrimaryKey
-    var _id: String = ""
+class RedeemableOfferEntity : EmbeddedRealmObject {
     var name: String = ""
-    var contractAddress: String = ""
     var offerId: String = ""
-    var imagePath: String = ""
-    var posterImagePath: String = ""
+    var imagePath: String? = null
+    var posterImagePath: String? = null
     var availableAt: RealmInstant? = null
     var expiresAt: RealmInstant? = null
 
-    override fun updateKey(): String {
-        _id = "${contractAddress}_$offerId"
-        return _id
-    }
-
     override fun toString(): String {
-        return "RedeemableOfferEntity(_id='$_id', name='$name', contractAddress='$contractAddress', offerId='$offerId', imagePath='$imagePath', posterImagePath='$posterImagePath', availableAt=$availableAt, expiresAt=$expiresAt)"
+        return "RedeemableOfferEntity(name='$name', offerId='$offerId', imagePath='$imagePath', posterImagePath='$posterImagePath', availableAt=$availableAt, expiresAt=$expiresAt)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -37,9 +28,7 @@ class RedeemableOfferEntity : RealmObject, CompositeKeyEntity {
 
         other as RedeemableOfferEntity
 
-        if (_id != other._id) return false
         if (name != other.name) return false
-        if (contractAddress != other.contractAddress) return false
         if (offerId != other.offerId) return false
         if (imagePath != other.imagePath) return false
         if (posterImagePath != other.posterImagePath) return false
@@ -50,9 +39,7 @@ class RedeemableOfferEntity : RealmObject, CompositeKeyEntity {
     }
 
     override fun hashCode(): Int {
-        var result = _id.hashCode()
-        result = 31 * result + name.hashCode()
-        result = 31 * result + contractAddress.hashCode()
+        var result = name.hashCode()
         result = 31 * result + offerId.hashCode()
         result = 31 * result + imagePath.hashCode()
         result = 31 * result + posterImagePath.hashCode()

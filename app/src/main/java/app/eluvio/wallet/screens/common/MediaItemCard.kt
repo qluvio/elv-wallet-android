@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.common
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -7,12 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
@@ -21,6 +25,7 @@ import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import app.eluvio.wallet.screens.destinations.QrDialogDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.logging.Log
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -40,7 +45,20 @@ fun MediaItemCard(
     }
     ImageCard(
         imageUrl = media.image,
-        title = media.name,
+        contentDescription = media.name,
+        focusedOverlay = {
+            WrapContentText(
+                text = media.name,
+                style = MaterialTheme.typography.body_32,
+                // TODO: get this from theme
+                color = Color.White,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 10.dp, vertical = 20.dp)
+            )
+        },
         unFocusedOverlay = {
             if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
                 Icon(

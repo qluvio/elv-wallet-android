@@ -17,7 +17,7 @@ data class NftInfoDto(
 data class NftRedeemableOfferDto(
     val id: String,
     val active: Boolean,
-    val redeemer: String,
-    val redeemed: Date,
-    val transaction: String,
+    val redeemer: String?,
+    val redeemed: Date?,
+    val transaction: String?,
 )

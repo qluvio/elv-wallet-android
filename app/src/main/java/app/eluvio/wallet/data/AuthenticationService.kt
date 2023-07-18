@@ -37,7 +37,10 @@ class AuthenticationService @Inject constructor(
                     .doOnSuccess {
                         Log.d("login response: $it")
                         tokenStore.clusterToken = it.clusterToken
+                    }
+                    .flatMap {
                         userStore.saveUser(it.address)
+                            .andThen(Single.just(it))
                     }
                     .flatMap { jwtResponse ->
                         val (accountId, hash, tokenString) = createTokenParts(

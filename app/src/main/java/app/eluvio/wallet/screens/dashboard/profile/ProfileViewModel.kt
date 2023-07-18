@@ -51,6 +51,7 @@ class ProfileViewModel @Inject constructor(
 
     fun signOut() {
         signOutHandler.signOut()
-        navigateTo(NavGraphs.preLaunchGraph.asNewRoot())
+            .subscribeBy { navigateTo(NavGraphs.preLaunchGraph.asNewRoot()) }
+            .addTo(disposables)
     }
 }

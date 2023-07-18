@@ -28,16 +28,17 @@ fun WrapContentText(
     textAlign: TextAlign? = null,
 ) {
     val measurer = rememberTextMeasurer()
-    Layout(content = {
-        Text(
-            text = text,
-            style = style,
-            color = color,
-            maxLines = maxLines,
-            overflow = overflow,
-            modifier = modifier,
-        )
-    }) { measurables, constraints ->
+    Layout(
+        modifier = modifier,
+        content = {
+            Text(
+                text = text,
+                style = style,
+                color = color,
+                maxLines = maxLines,
+                overflow = overflow,
+            )
+        }) { measurables, constraints ->
         // Measure the actual width the text will take up
         val textWidthPx = measurer.measure(
             text,

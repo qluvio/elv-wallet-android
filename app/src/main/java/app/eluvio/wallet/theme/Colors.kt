@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTvMaterial3Api::class)
+
 package app.eluvio.wallet.theme
 
 import androidx.compose.ui.graphics.Color
@@ -6,7 +8,6 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.darkColorScheme
 
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 fun EluvioColorScheme(): ColorScheme {
     return darkColorScheme(
         surface = Color(0xFF1C1C1C),
@@ -16,3 +17,6 @@ fun EluvioColorScheme(): ColorScheme {
         onSecondaryContainer = Color.White,
     )
 }
+
+val ColorScheme.redeemTagSurface: Color get() = Color(0xFFFFD541)
+val ColorScheme.onRedeemTagSurface: Color get() = Color.Black

@@ -24,6 +24,9 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     var featuredMedia: RealmList<MediaEntity> = realmListOf()
     var mediaSections: RealmList<MediaSectionEntity> = realmListOf()
     var redeemableOffers: RealmList<RedeemableOfferEntity> = realmListOf()
+    // Info that can be null until fetched separately from nft/info/{contractAddress}/{tokenId}
+    var redeemStates: RealmList<RedeemStateEntity> = realmListOf()
+    var tenant: String? = null
 
     override fun updateKey(): String {
         _id = "${contractAddress}_${tokenId}"
@@ -31,7 +34,7 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     }
 
     override fun toString(): String {
-        return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', featuredMedia=$featuredMedia, mediaSections=$mediaSections, redeemableOffers=$redeemableOffers)"
+        return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', featuredMedia=$featuredMedia, mediaSections=$mediaSections, redeemableOffers=$redeemableOffers, redeemStates=$redeemStates)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -50,6 +53,7 @@ class NftEntity : RealmObject, CompositeKeyEntity {
         if (featuredMedia.toList() != other.featuredMedia.toList()) return false
         if (mediaSections.toList() != other.mediaSections.toList()) return false
         if (redeemableOffers.toList() != other.redeemableOffers.toList()) return false
+        if (redeemStates.toList() != other.redeemStates.toList()) return false
 
         return true
     }
@@ -65,6 +69,7 @@ class NftEntity : RealmObject, CompositeKeyEntity {
         result = 31 * result + featuredMedia.hashCode()
         result = 31 * result + mediaSections.hashCode()
         result = 31 * result + redeemableOffers.hashCode()
+        result = 31 * result + redeemStates.hashCode()
         return result
     }
 

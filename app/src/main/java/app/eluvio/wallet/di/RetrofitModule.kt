@@ -57,24 +57,31 @@ object RetrofitModule {
             .build()
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     @Provides
-    fun provideRetrofitBuilder(@TokenAwareHttpClient httpClient: OkHttpClient): Retrofit.Builder {
-        val moshi = Moshi.Builder()
-            .add(FalsyObjectAdapter.Factory())
-            .addAdapter(Rfc3339DateJsonAdapter())
-            .add(AssetLinkAdapter())
-            .build()
+    fun provideRetrofitBuilder(
+        @TokenAwareHttpClient httpClient: OkHttpClient,
+        moshi: Moshi
+    ): Retrofit.Builder {
         return Retrofit.Builder()
             .client(httpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
+    @Provides
+    fun provideMoshi(): Moshi {
+        return Moshi.Builder()
+            .addAdapter(Rfc3339DateJsonAdapter())
+            .add(FalsyObjectAdapter.Factory())
+            .add(AssetLinkAdapter())
+            .build()
+    }
+
     @Singleton
     @Provides
     @FabricConfig
-    fun provideRetrofit(): Retrofit {
+    fun provideRetrofit(moshi: Moshi): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://localhost/")
             .client(
@@ -82,7 +89,7 @@ object RetrofitModule {
                     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build()
             )
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .build()
     }
@@ -90,7 +97,7 @@ object RetrofitModule {
     @Singleton
     @Provides
     @Auth0
-    fun provideAuth0Retrofit(): Retrofit {
+    fun provideAuth0Retrofit(moshi: Moshi): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://prod-elv.us.auth0.com/")
             .client(
@@ -98,7 +105,7 @@ object RetrofitModule {
                     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .build()
             )
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .build()
     }

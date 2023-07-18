@@ -1,6 +1,7 @@
 package app.eluvio.wallet.util.realm
 
 import app.eluvio.wallet.data.entities.CompositeKeyEntity
+import app.eluvio.wallet.util.logging.Log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -52,6 +53,7 @@ inline fun <reified T : RealmObject> saveBlocking(
 ) {
     realm.writeBlocking {
         if (clearTable) {
+            Log.w("Clearing table ${T::class.simpleName}")
             delete<T>()
         }
         list.forEach { entity ->

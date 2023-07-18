@@ -11,6 +11,6 @@ fun TextStyle.withAlpha(alpha: Float) =
     copy(color = color.takeOrElse { LocalContentColor.current }.copy(alpha = alpha))
 
 @Composable
-fun TextStyle.updateColor(block: Color.() -> Color): TextStyle {
+fun TextStyle.updateColor(block: @Composable Color.() -> Color): TextStyle {
     return copy(color = color.takeOrElse { LocalContentColor.current }.block())
 }

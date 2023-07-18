@@ -6,20 +6,17 @@ import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
-import app.eluvio.wallet.network.dto.AdditionalMediaSectionDto
 import app.eluvio.wallet.network.dto.GalleryItemDto
 import app.eluvio.wallet.network.dto.MediaCollectionDto
 import app.eluvio.wallet.network.dto.MediaItemDto
 import app.eluvio.wallet.network.dto.MediaSectionDto
 import app.eluvio.wallet.network.dto.NftResponse
 import app.eluvio.wallet.network.dto.RedeemableOfferDto
+import app.eluvio.wallet.util.realm.toRealmInstant
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import io.realm.kotlin.ext.realmDictionaryOf
-import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmDictionary
 import io.realm.kotlin.ext.toRealmList
-import io.realm.kotlin.types.RealmInstant
-import io.realm.kotlin.types.RealmList
 
 fun NftResponse.toNfts(): List<NftEntity> {
     return contents.mapNotNull { dto ->
@@ -40,60 +37,22 @@ fun NftResponse.toNfts(): List<NftEntity> {
                 additionalMediaSections.sections?.map { it.toEntity() }.toRealmListOrEmpty()
 
             redeemableOffers =
-                dto.nft_template.redeemable_offers?.map { it.toEntity(dto.contract_addr) }
+                dto.nft_template.redeemable_offers?.map { it.toEntity() }
                     .toRealmListOrEmpty()
         }
     }
 }
 
-private fun RedeemableOfferDto.toEntity(contractAddress: String): RedeemableOfferEntity {
+private fun RedeemableOfferDto.toEntity(): RedeemableOfferEntity {
     val dto = this
     return RedeemableOfferEntity().apply {
         name = dto.name
-        this.contractAddress = contractAddress
         offerId = dto.offer_id
-        updateKey()
-        imagePath = dto.image?.path ?: ""
-        posterImagePath = dto.poster_image?.path ?: ""
-        availableAt = dto.available_at?.let { RealmInstant.from(it.time, 0) }
-        expiresAt = dto.expires_at?.let { RealmInstant.from(it.time, 0) }
+        imagePath = dto.image?.path
+        posterImagePath = dto.poster_image?.path
+        availableAt = dto.available_at?.toRealmInstant()
+        expiresAt = dto.expires_at?.toRealmInstant()
     }
-}
-
-private fun parseFeaturedMedia(
-    mediaSectionsDto: AdditionalMediaSectionDto,
-    nftKey: String
-): MediaSectionEntity? {
-    val featuredMediaItems = mediaSectionsDto.featured_media?.map { it.toEntity() } ?: return null
-    return MediaSectionEntity().apply {
-        id = "featured_media-$nftKey"
-        name = ""
-        collections =
-            realmListOf(MediaCollectionEntity().apply {
-                id = "featured_media-$nftKey"
-                name = ""
-                media = featuredMediaItems.toRealmList()
-            })
-    }
-}
-
-private fun AdditionalMediaSectionDto.toEntity(nftKey: String): RealmList<MediaSectionEntity> {
-    val featuredMedia = listOfNotNull(
-        featured_media?.map { it.toEntity() }
-            ?.let { mediaItems ->
-                MediaSectionEntity().apply {
-                    id = "featured_media-$nftKey"
-                    name = ""
-                    collections =
-                        realmListOf(MediaCollectionEntity().apply {
-                            id = "featured_media-$nftKey"
-                            name = ""
-                            media = mediaItems.toRealmList()
-                        })
-                }
-            })
-    val sections = sections?.map { it.toEntity() } ?: emptyList()
-    return (featuredMedia + sections).toRealmList()
 }
 
 fun MediaSectionDto.toEntity(): MediaSectionEntity {
