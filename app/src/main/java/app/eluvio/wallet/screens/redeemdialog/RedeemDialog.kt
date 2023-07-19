@@ -23,11 +23,9 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.navigation.LocalNavigator
+import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.navigation.MainGraph
-import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.debugPlaceholder
-import app.eluvio.wallet.screens.destinations.FulfillmentQrDialogDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.redeemTagSurface
@@ -41,13 +39,16 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Composable
 fun RedeemDialog() {
     hiltViewModel<RedeemDialogViewModel>().subscribeToState { vm, state ->
-        RedeemDialog(state)
+        if (state.title.isNotEmpty()) {
+            // ignore empty state
+            RedeemDialog(state, onRedeemClicked = { vm.redeemOrShowOffer() })
+        }
     }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun RedeemDialog(state: RedeemDialogViewModel.State) {
+private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: () -> Unit) {
     Box(Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -79,17 +80,17 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State) {
                     Text(text = state.dateRange, style = MaterialTheme.typography.body_32)
                 }
                 Spacer(Modifier.height(40.dp))
-                val navigator = LocalNavigator.current
                 // Should be a Card, but TV-Card can't be disabled yet.
                 Surface(
-                    onClick = { navigator(FulfillmentQrDialogDestination(state.transaction!!).asPush()) },
-                    enabled = state.offerStatus != RedeemDialogViewModel.State.Status.REDEEMING,
+                    onClick = onRedeemClicked,
+                    enabled = state.offerStatus != RedeemStateEntity.Status.REDEEMING,
                 ) {
                     val text = remember(state.offerStatus) {
                         when (state.offerStatus) {
-                            RedeemDialogViewModel.State.Status.UNREDEEMED -> "Redeem Now"
-                            RedeemDialogViewModel.State.Status.REDEEMED -> "View"
-                            RedeemDialogViewModel.State.Status.REDEEMING -> "Redeeming..."
+                            RedeemStateEntity.Status.REDEEMED -> "View"
+                            RedeemStateEntity.Status.REDEEMING -> "Redeeming..."
+                            RedeemStateEntity.Status.REDEEM_FAILED,
+                            RedeemStateEntity.Status.UNREDEEMED -> "Redeem Now"
                         }
                     }
                     Text(text, Modifier.padding(10.dp))
@@ -108,7 +109,8 @@ private fun RedeemedOfferPreview() = EluvioThemePreview {
             "http://foo",
             true,
             "January 1, 1970 - January 1, 2042"
-        )
+        ),
+        onRedeemClicked = {}
     )
 }
 
@@ -121,6 +123,7 @@ private fun UnRedeemedOfferPreview() = EluvioThemePreview {
             null,
             false,
             "January 1, 1970 - January 1, 2042"
-        )
+        ),
+        onRedeemClicked = {}
     )
 }

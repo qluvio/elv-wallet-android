@@ -4,14 +4,11 @@ import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
-import app.eluvio.wallet.network.api.authd.NftInfoApi
-import app.eluvio.wallet.network.converters.toEntity
 import app.eluvio.wallet.network.converters.toNfts
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
-import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.realm.kotlin.Realm
@@ -42,22 +39,6 @@ class ContentStore @Inject constructor(
             tokenId
         ).asFlowable()
             .mapNotNull { it.firstOrNull() }
-    }
-
-    fun refreshRedeemedOffers(nft: NftEntity): Completable {
-        return apiProvider.getApi(NftInfoApi::class).flatMap { api ->
-            api.getNftInfo(nft.contractAddress, nft.tokenId)
-        }
-            .doOnSuccess { nftInfo ->
-                val redeemStates = nftInfo.offers?.map { offer -> offer.toEntity() }
-                realm.writeBlocking {
-                    findLatest(nft)?.let {
-                        it.redeemStates = redeemStates.toRealmListOrEmpty()
-                        it.tenant = nftInfo.tenant
-                    }
-                }
-            }
-            .ignoreElement()
     }
 
     fun observeMediaItem(mediaId: String): Flowable<MediaEntity> {

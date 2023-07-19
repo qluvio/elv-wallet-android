@@ -7,6 +7,7 @@ import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.stores.ContentStore
+import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.util.logging.Log
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class NftDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val contentStore: ContentStore,
+    private val fulfillmentStore: FulfillmentStore,
     private val apiProvider: ApiProvider,
 ) : BaseViewModel<NftDetailViewModel.State>(State()) {
     @Immutable
@@ -86,7 +88,8 @@ class NftDetailViewModel @Inject constructor(
      */
     private fun prefetchNftInfoOnce(nft: NftEntity) {
         if (prefetchDisposable == null) {
-            prefetchDisposable = contentStore.refreshRedeemedOffers(nft)
+            prefetchDisposable = fulfillmentStore.refreshRedeemedOffers(nft)
+                .ignoreElement()
                 .doOnError { Log.w("prefetch offer info failed. This could cause problems in viewing offer $it") }
                 .retry(2)
                 .subscribeBy(onError = {

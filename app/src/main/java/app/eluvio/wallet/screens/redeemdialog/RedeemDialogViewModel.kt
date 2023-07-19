@@ -3,21 +3,29 @@ package app.eluvio.wallet.screens.redeemdialog
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.NftEntity
+import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.di.ApiProvider
+import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.destinations.FulfillmentQrDialogDestination
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
+import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.realm.kotlin.types.RealmInstant
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class RedeemDialogViewModel @Inject constructor(
@@ -31,14 +39,12 @@ class RedeemDialogViewModel @Inject constructor(
         val image: String? = null,
         val offerValid: Boolean = false,
         val dateRange: String = "",
-        val offerStatus: Status = Status.UNREDEEMED,
+        val offerStatus: RedeemStateEntity.Status = RedeemStateEntity.Status.UNREDEEMED,
+        // Only needed by VM, View should not use this
+        val _nftEntity: NftEntity? = null,
         // If offer is redeemed, this is the transaction hash
-        val transaction: String? = null,
-    ) {
-        enum class Status {
-            UNREDEEMED, REDEEMED, REDEEMING
-        }
-    }
+        val _transaction: String? = null,
+    )
 
     private val contractAddress = RedeemDialogDestination.argsFrom(stateHandle).contractAddress
     private val tokenId = RedeemDialogDestination.argsFrom(stateHandle).tokenId
@@ -63,21 +69,17 @@ class RedeemDialogViewModel @Inject constructor(
                     ?: error("Offer not found")
                 val redeemState = nft.redeemStates.firstOrNull { it.offerId == offerId }
                     ?: error("Offer state not found")
-                val status = if (redeemState.redeemed == null) {
-                    State.Status.UNREDEEMED
-                } else {
-                    State.Status.REDEEMED
-                }
                 val transaction = redeemState.transaction
                 prefetchFulfillmentData(transaction)
                 val image = (offer.posterImagePath ?: offer.imagePath)?.let { "$endpoint$it" }
                 State(
-                    offer.name,
-                    image,
-                    offer.isValid,
-                    offer.dateRange,
-                    offerStatus = status,
-                    transaction = transaction
+                    title = offer.name,
+                    image = image,
+                    offerValid = offer.isValid,
+                    dateRange = offer.dateRange,
+                    offerStatus = redeemState.status,
+                    _transaction = transaction,
+                    _nftEntity = nft,
                 )
             }
             .subscribeBy(
@@ -88,12 +90,52 @@ class RedeemDialogViewModel @Inject constructor(
 
     }
 
+    fun redeemOrShowOffer() {
+        state.firstOrError().flatMapCompletable {
+            if (it._transaction != null) {
+                // offer already redeemed, show fulfillment dialog
+                Completable.fromAction {
+                    navigateTo(FulfillmentQrDialogDestination(it._transaction).asPush())
+                }
+            } else {
+                redeemOffer(it)
+                    .andThen(pollRedemptionStatusUntilComplete(it))
+            }
+        }
+            .subscribe()
+            .addTo(disposables)
+    }
+
+    private fun redeemOffer(state: State): Completable {
+        state._nftEntity ?: error("nft is null")
+        val reference = Base58.encode(Random.nextBytes(16))
+        return fulfillmentStore.initiateRedemption(
+            state._nftEntity,
+            offerId,
+            reference,
+        )
+    }
+
+    private fun pollRedemptionStatusUntilComplete(state: State): Completable {
+        state._nftEntity ?: error("nft is null")
+        return Flowable.interval(0, 2, TimeUnit.SECONDS)
+            .flatMapSingle {
+                fulfillmentStore.refreshRedeemedOffers(state._nftEntity)
+            }
+            .takeUntil { nft ->
+                val status = nft.redeemStates.firstOrNull { it.offerId == offerId }?.status
+                status != RedeemStateEntity.Status.REDEEMING
+            }
+            .ignoreElements()
+    }
+
     /**
      * Immediately returns the nft, but won't complete until nft info is fetched from network if nft as redeemable offers.
      */
     private fun refreshNftInfoOnce(nft: NftEntity) {
         if (refreshDisposable == null) {
-            refreshDisposable = contentStore.refreshRedeemedOffers(nft)
+            refreshDisposable = fulfillmentStore.refreshRedeemedOffers(nft)
+                .ignoreElement()
                 .doOnError { Log.w("prefetch offer info failed. This could cause problems in viewing offer $it") }
                 .retry(2)
                 .subscribeBy(onError = {

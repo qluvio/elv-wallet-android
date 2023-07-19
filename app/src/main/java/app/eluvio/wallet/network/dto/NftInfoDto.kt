@@ -6,7 +6,6 @@ import java.util.Date
 @JsonClass(generateAdapter = true)
 data class NftInfoDto(
     val contract_addr: String,
-    val contract_name: String,
     val offers: List<NftRedeemableOfferDto>?,
     val tenant: String,//e.g. "iten4TXq2en3qtu3JREnE5tSLRf9zLod"
     val token_id_str: String,
