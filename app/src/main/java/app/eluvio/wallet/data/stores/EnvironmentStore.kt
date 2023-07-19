@@ -26,10 +26,10 @@ class EnvironmentStore @Inject constructor(@ApplicationContext private val conte
     init {
         // there's a bug here. make sure the env also has the correct value
         if (KEY_SELECTED_ENV !in prefs) {
-            prefs.edit { putString(KEY_SELECTED_ENV, Environment.Main.name) }
+            prefs.edit { putString(KEY_SELECTED_ENV, Environment.Main.properEnvName) }
         }
         onEnvChanged()
-        listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+        listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
                 KEY_SELECTED_ENV -> onEnvChanged()
             }
@@ -40,11 +40,11 @@ class EnvironmentStore @Inject constructor(@ApplicationContext private val conte
     private fun onEnvChanged() {
         // hidden bug -> if the key is removed, we will ignore it and our Subject will still contain the old value
         prefs.getString(KEY_SELECTED_ENV, null)
-            ?.runCatching { Environment.valueOf(this) }
-            ?.onSuccess {
-                if (it != selectedEnvSubject.value) {
-                    Log.d("Emitting new selected env: $it")
-                    selectedEnvSubject.onNext(it)
+            ?.runCatching { Environment.fromProperName(this) }
+            ?.onSuccess { env ->
+                if (env != null && env != selectedEnvSubject.value) {
+                    Log.d("Emitting new selected env: $env")
+                    selectedEnvSubject.onNext(env)
                 }
             }
     }
@@ -55,7 +55,7 @@ class EnvironmentStore @Inject constructor(@ApplicationContext private val conte
     fun setSelectedEnvironment(environment: Environment) {
         prefs.edit {
             Log.d("Setting env to $environment")
-            putString(KEY_SELECTED_ENV, environment.name)
+            putString(KEY_SELECTED_ENV, environment.properEnvName)
         }
     }
 
@@ -64,7 +64,6 @@ class EnvironmentStore @Inject constructor(@ApplicationContext private val conte
     }
 }
 
-// todo proguard rules?
 enum class Environment(
     @StringRes val prettyEnvName: Int,
     val properEnvName: String,
@@ -73,4 +72,10 @@ enum class Environment(
     Main(R.string.env_main_name, "main", "https://main.net955305.contentfabric.io/config"),
     Demo(R.string.env_demo_name, "demov3", "https://demov3.net955210.contentfabric.io/config"),
     ;
+
+    companion object {
+        fun fromProperName(properName: String): Environment? =
+            // TODO: replace [values()] with [entries] when using Kotlin >= 1.9
+            values().find { it.properEnvName == properName }
+    }
 }

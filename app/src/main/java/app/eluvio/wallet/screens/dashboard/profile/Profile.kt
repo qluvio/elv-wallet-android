@@ -94,7 +94,7 @@ private fun InfoField(text: String) {
 }
 
 @Composable
-@Preview(Devices.TV_720p)
+@Preview(device = Devices.TV_720p)
 private fun ProfilePreview() = EluvioThemePreview {
     Profile(
         ProfileViewModel.State(
