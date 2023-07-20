@@ -48,7 +48,7 @@ class MediaEntity : RealmObject {
         if (mediaFile != other.mediaFile) return false
         if (mediaLinks != other.mediaLinks) return false
         if (tvBackgroundImage != other.tvBackgroundImage) return false
-        if (gallery != other.gallery) return false
+        if (gallery.toList() != other.gallery.toList()) return false
 
         return true
     }
