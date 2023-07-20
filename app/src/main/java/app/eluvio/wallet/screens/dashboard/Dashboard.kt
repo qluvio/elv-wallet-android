@@ -42,7 +42,6 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
-import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
@@ -186,19 +185,14 @@ private fun FocusGroupScope.DashboardTab(
     }
 }
 
-@DashboardTabsGraph
-@Destination
-@Composable
-fun Search() {
-    Temp(tab = Tabs.Search)
-}
-
-@Composable
-fun Temp(tab: Tabs) {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        Text(text = "Welcome to ${stringResource(id = tab.title)}")
-    }
-}
+//@DashboardTabsGraph
+//@Destination
+//@Composable
+//fun Search() {
+//    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+//        Text(text = "Welcome to ${stringResource(id = Tabs.Search.title)}")
+//    }
+//}
 
 @Composable
 @Preview(widthDp = 900)
