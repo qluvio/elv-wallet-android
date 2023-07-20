@@ -9,8 +9,8 @@ import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Single
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import javax.inject.Inject
@@ -24,7 +24,15 @@ class ContentStore @Inject constructor(
     fun observeWalletData(): Flowable<Result<List<NftEntity>>> {
         return realm.query<NftEntity>().asFlowable()
             .map { Result.success(it) }
-            .mergeWith(fetchWalletData().onErrorReturn { Result.failure(it) })
+            .mergeWith(
+                fetchWalletData()
+                    .mapNotNull { nfts ->
+                        // TODO: this is a hack to double-emit an empty list when network returns empty so that the viewmodel can stop the loading state.
+                        // fetchWalletData() should be a completable that doesn't emit items.
+                        Result.success(nfts).takeIf { nfts.isEmpty() }
+                    }
+                    .onErrorReturn { Result.failure(it) }
+            )
             .doOnNext {
                 it.exceptionOrNull()?.let { error ->
                     Log.e("Error in wallet data stream", error)
@@ -49,11 +57,10 @@ class ContentStore @Inject constructor(
             .mapNotNull { it.firstOrNull() }
     }
 
-    private fun fetchWalletData(): Completable {
+    private fun fetchWalletData(): Single<List<NftEntity>> {
         return apiProvider.getApi(GatewayApi::class)
             .flatMap { api -> api.getNfts() }
             .map { response -> response.toNfts() }
             .saveTo(realm, clearTable = true)
-            .ignoreElement()
     }
 }
