@@ -204,20 +204,23 @@ internal fun InfiniteTransition.fractionTransition(
                 this.durationMillis = durationMillis
                 this.delayMillis = delayMillis
                 initialValue at 0 with easing
-                when(fraction){
-                    1 ->{
+                when (fraction) {
+                    1 -> {
                         targetValue at durationMillis with easing
                     }
-                    2 ->{
+
+                    2 -> {
                         targetValue / fraction at durationMillis / fraction with easing
                         targetValue at durationMillis with easing
                     }
-                    3 ->{
+
+                    3 -> {
                         targetValue / fraction at durationMillis / fraction with easing
                         targetValue / fraction * 2 at durationMillis / fraction * 2 with easing
                         targetValue at durationMillis with easing
                     }
-                    4 ->{
+
+                    4 -> {
                         targetValue / fraction at durationMillis / fraction with easing
                         targetValue / fraction * 2 at durationMillis / fraction * 2 with easing
                         targetValue / fraction * 3 at durationMillis / fraction * 3 with easing

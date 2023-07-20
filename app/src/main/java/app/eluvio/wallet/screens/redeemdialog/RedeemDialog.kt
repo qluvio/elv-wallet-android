@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.navigation.MainGraph
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.debugPlaceholder
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -95,22 +98,40 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: ()
                     Text(text = state.dateRange, style = MaterialTheme.typography.body_32)
                 }
                 Spacer(Modifier.height(40.dp))
-                // Should be a Card, but TV-Card can't be disabled yet.
-                Surface(
-                    onClick = onRedeemClicked,
-                    enabled = state.offerStatus != RedeemStateEntity.Status.REDEEMING,
-                ) {
-                    val text = remember(state.offerStatus) {
-                        when (state.offerStatus) {
-                            RedeemStateEntity.Status.REDEEMED -> "View"
-                            RedeemStateEntity.Status.REDEEMING -> "Redeeming..."
-                            RedeemStateEntity.Status.REDEEM_FAILED,
-                            RedeemStateEntity.Status.UNREDEEMED -> "Redeem Now"
-                        }
-                    }
-                    Text(text, Modifier.padding(10.dp))
+                RedeemButton(state.offerStatus, onRedeemClicked)
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalTvMaterial3Api::class)
+private fun RedeemButton(
+    offerStatus: RedeemStateEntity.Status,
+    onRedeemClicked: () -> Unit
+) {
+    val isRedeeming by remember(offerStatus) {
+        derivedStateOf { offerStatus == RedeemStateEntity.Status.REDEEMING }
+    }
+    Row {
+        // Should be a Card, but TV-Card can't be disabled yet.
+        Surface(
+            onClick = onRedeemClicked,
+            enabled = !isRedeeming,
+        ) {
+            val text = remember(offerStatus) {
+                when (offerStatus) {
+                    RedeemStateEntity.Status.REDEEMED -> "View"
+                    RedeemStateEntity.Status.REDEEMING -> "Redeeming..."
+                    RedeemStateEntity.Status.REDEEM_FAILED,
+                    RedeemStateEntity.Status.UNREDEEMED -> "Redeem Now"
                 }
             }
+            Text(text, Modifier.padding(10.dp))
+        }
+        if (isRedeeming) {
+            Spacer(Modifier.width(16.dp))
+            EluvioLoadingSpinner()
         }
     }
 }
