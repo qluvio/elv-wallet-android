@@ -17,6 +17,7 @@ object RealmModule {
     fun provideRealm(realmObjects: Set<@JvmSuppressWildcards KClass<out BaseRealmObject>>): Realm {
         // TODO: encrypt db
         val config = RealmConfiguration.Builder(realmObjects)
+            .schemaVersion(1)
             .deleteRealmIfMigrationNeeded()
             .build()
         return Realm.open(config)

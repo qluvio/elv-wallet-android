@@ -35,7 +35,7 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     }
 
     override fun toString(): String {
-        return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', featuredMedia=$featuredMedia, mediaSections=$mediaSections, redeemableOffers=$redeemableOffers, redeemStates=$redeemStates)"
+        return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', featuredMedia=$featuredMedia, mediaSections=$mediaSections, redeemableOffers=$redeemableOffers, redeemStates=$redeemStates, tenant=$tenant)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -55,6 +55,7 @@ class NftEntity : RealmObject, CompositeKeyEntity {
         if (mediaSections.toList() != other.mediaSections.toList()) return false
         if (redeemableOffers.toList() != other.redeemableOffers.toList()) return false
         if (redeemStates.toList() != other.redeemStates.toList()) return false
+        if (tenant != other.tenant) return false
 
         return true
     }

@@ -6,6 +6,7 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import org.junit.Test
 import org.reflections.Reflections
 import org.reflections.util.ClasspathHelper
@@ -136,6 +137,7 @@ class EntityEqualityTest {
             "io.realm.kotlin.types.RealmDictionary" -> {
                 realmDictionaryOf<Any>("foo" to "bar")
             }
+
             "io.realm.kotlin.types.RealmInstant" -> {
                 RealmInstant.now()
             }
@@ -168,6 +170,10 @@ class EntityEqualityTest {
                 "io_realm_kotlin_objectReference"
             )
             return declaredFields
-                .filter { !Modifier.isStatic(it.modifiers) && it.name !in excludedFields }
+                .filter {
+                    !Modifier.isStatic(it.modifiers) &&
+                            it.name !in excludedFields &&
+                            it.isAnnotationPresent(Ignore::class.java)
+                }
         }
 }

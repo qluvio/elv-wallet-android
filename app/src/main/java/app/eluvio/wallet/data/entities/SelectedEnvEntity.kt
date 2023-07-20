@@ -13,17 +13,9 @@ import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
-import org.mongodb.kbson.ObjectId
 import kotlin.reflect.KClass
 
 class SelectedEnvEntity : RealmObject {
-    @PrimaryKey
-    var id: ObjectId = ObjectId()
-    private var selectedEnvStr: String = Environment.Main.value
-
-    @Ignore
-    var selectedEnv: Environment by realmEnum(::selectedEnvStr)
-
     enum class Environment(
         override val value: String,
         @StringRes val prettyEnvName: Int,
@@ -33,6 +25,36 @@ class SelectedEnvEntity : RealmObject {
         Main("main", R.string.env_main_name, "https://main.net955305.contentfabric.io/config"),
         Demo("demov3", R.string.env_demo_name, "https://demov3.net955210.contentfabric.io/config"),
         ;
+    }
+
+    @PrimaryKey
+    var id: String = "singleton"
+    private var selectedEnvStr: String = Environment.Main.value
+
+    @Ignore
+    var selectedEnv: Environment by realmEnum(::selectedEnvStr)
+
+
+    override fun toString(): String {
+        return "SelectedEnvEntity(id=$id, selectedEnvStr='$selectedEnvStr')"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SelectedEnvEntity
+
+        if (id != other.id) return false
+        if (selectedEnvStr != other.selectedEnvStr) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + selectedEnvStr.hashCode()
+        return result
     }
 
     @Module
