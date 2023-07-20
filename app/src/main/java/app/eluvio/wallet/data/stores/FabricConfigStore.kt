@@ -5,7 +5,7 @@ import app.eluvio.wallet.network.dto.FabricConfiguration
 import app.eluvio.wallet.util.asSharedState
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.timeout
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Flowable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +21,7 @@ class FabricConfigStore @Inject constructor(
 
     // Effectively an in-memory cache of the config, that will self-refresh as long as someone is subscribed
     // TODO: add persistence?
-    private val config: Observable<FabricConfiguration> =
+    private val config: Flowable<FabricConfiguration> =
         environmentStore.observeSelectedEnvironment()
             .switchMapSingle { currentEnv ->
                 fabricConfigApi.getConfig(currentEnv.configUrl)
@@ -41,6 +41,6 @@ class FabricConfigStore @Inject constructor(
             .retry()
             .asSharedState()
 
-    fun observeFabricConfiguration(): Observable<FabricConfiguration> = config
+    fun observeFabricConfiguration(): Flowable<FabricConfiguration> = config
 }
 

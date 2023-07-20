@@ -22,7 +22,7 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import app.eluvio.wallet.data.stores.Environment
+import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -100,7 +100,7 @@ private fun ProfilePreview() = EluvioThemePreview {
         ProfileViewModel.State(
             address = "0x00f9f89f8f98",
             userId = "ius1f1fd2d8d82e21d",
-            network = Environment.Demo,
+            network = SelectedEnvEntity.Environment.Demo,
             fabricNode = "https://host-2-2-2-2.cf.io"
         ),
         onSignOut = {}

@@ -55,7 +55,7 @@ class FulfillmentStore @Inject constructor(
         return apiProvider.getApi(RedeemableOffersApi::class)
             .zipWith(envStore.observeSelectedEnvironment().firstOrError())
             .flatMap { (api, env) ->
-                api.getFulfillmentData(env.properEnvName, transactionHash)
+                api.getFulfillmentData(env.networkName, transactionHash)
             }
             .map { it.toEntity(transactionHash) }
             .saveTo(realm)

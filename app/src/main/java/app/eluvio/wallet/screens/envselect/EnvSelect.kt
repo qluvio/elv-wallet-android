@@ -39,7 +39,7 @@ import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.data.stores.Environment
+import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
@@ -70,7 +70,7 @@ fun EnvSelect() {
 @Composable
 private fun EnvironmentSelection(
     state: EnvSelectViewModel.State,
-    onEnvironmentSelected: (Environment) -> Unit,
+    onEnvironmentSelected: (SelectedEnvEntity.Environment) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -145,8 +145,8 @@ private fun EnvSelectPreview() = EluvioThemePreview {
     EnvironmentSelection(
         state = EnvSelectViewModel.State(
             false,
-            Environment.values().toList(),
-            Environment.Main
+            SelectedEnvEntity.Environment.values().toList(),
+            SelectedEnvEntity.Environment.Main
         ),
         onEnvironmentSelected = {},
     )

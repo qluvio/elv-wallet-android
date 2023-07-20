@@ -1,7 +1,7 @@
 package app.eluvio.wallet.screens.envselect
 
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.stores.Environment
+import app.eluvio.wallet.data.entities.SelectedEnvEntity.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
@@ -13,7 +13,8 @@ class EnvSelectViewModel @Inject constructor(
 ) : BaseViewModel<EnvSelectViewModel.State>(State()) {
     data class State(
         val loading: Boolean = true,
-        val availableEnvironments: List<Environment> = Environment.values().toList(),
+        val availableEnvironments: List<Environment> = Environment.values()
+            .toList(),
         val selectedEnvironment: Environment? = null,
     )
 
@@ -30,5 +31,7 @@ class EnvSelectViewModel @Inject constructor(
 
     fun selectEnvironment(environment: Environment) {
         environmentStore.setSelectedEnvironment(environment)
+            .subscribe()
+            .addTo(disposables)
     }
 }

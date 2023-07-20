@@ -2,14 +2,14 @@ package app.eluvio.wallet.screens.dashboard.profile
 
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.SignOutHandler
-import app.eluvio.wallet.data.stores.Environment
+import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.navigation.asNewRoot
 import app.eluvio.wallet.screens.NavGraphs
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
@@ -24,17 +24,17 @@ class ProfileViewModel @Inject constructor(
     data class State(
         val address: String = "",
         val userId: String = "",
-        val network: Environment? = null,
+        val network: SelectedEnvEntity.Environment? = null,
         val fabricNode: String = ""
     )
 
     override fun onResume() {
         super.onResume()
 
-        Observable.combineLatest(
+        Flowable.combineLatest(
             environmentStore.observeSelectedEnvironment(),
             fabricConfigStore.observeFabricConfiguration(),
-            userStore.getCurrentUser().toObservable()
+            userStore.getCurrentUser().toFlowable()
         ) { env, config, user ->
             State(
                 address = user.walletAddress,

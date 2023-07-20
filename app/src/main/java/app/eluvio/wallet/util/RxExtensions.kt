@@ -7,10 +7,8 @@ import io.reactivex.rxjava3.core.Single
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 
-/**
- *
- */
 fun <T : Any> Observable<T>.asSharedState() = replay(1).refCount().distinctUntilChanged()
+fun <T : Any> Flowable<T>.asSharedState() = replay(1).refCount().distinctUntilChanged()
 
 /**
  * Returns an Observable that applies a specified function to each item emitted by the source
@@ -75,4 +73,7 @@ fun <T : Any, R : Any> Maybe<T>.mapNotNull(mapper: (T) -> R?): Maybe<R> = flatMa
 }
 
 fun <T : Any> Observable<T>.timeout(duration: Duration) =
+    timeout(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+
+fun <T : Any> Flowable<T>.timeout(duration: Duration) =
     timeout(duration.inWholeMilliseconds, TimeUnit.MILLISECONDS)
