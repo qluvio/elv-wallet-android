@@ -2,7 +2,9 @@ package app.eluvio.wallet.screens.dashboard.mymedia
 
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.data.stores.ContentStore
+import app.eluvio.wallet.util.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -12,18 +14,23 @@ import javax.inject.Inject
 class MyMediaViewModel @Inject constructor(
     private val contentStore: ContentStore
 ) : BaseViewModel<MyMediaViewModel.State>(State()) {
-    data class State(val mediaItems: List<MediaEntity> = emptyList())
+    data class State(
+        val featuredMedia: List<MediaEntity> = emptyList(),
+        val mediaSections: List<MediaSectionEntity> = emptyList()
+    )
 
     override fun onResume() {
         super.onResume()
-        contentStore.observeMediaItems()
-            .map { list ->
-                list.filter { isMediaPlayable(it) }
+
+        contentStore.observeWalletData()
+            .mapNotNull { it.getOrNull() }
+            .map { nfts ->
+                val featuredMedia = nfts.flatMap { it.featuredMedia }.distinct()
+                val mediaSections = nfts.flatMap { it.mediaSections }.distinct()
+                State(featuredMedia, mediaSections)
             }
             .subscribeBy(
-                onNext = { next ->
-                    updateState { copy(mediaItems = next) }
-                },
+                onNext = { newState -> updateState { newState } },
                 onError = { }
             )
             .addTo(disposables)
