@@ -29,6 +29,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.MainGraph
+import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -86,7 +87,7 @@ private fun ImageGallery(state: ImageGalleryViewModel.State) {
                             .size(100.dp)
                     ) {
                         val imageAlpha by remember { derivedStateOf { if (isFocused) 1f else 0.5f } }
-                        AsyncImage(
+                        ShimmerImage(
                             model = image.url,
                             contentDescription = image.name,
                             alpha = imageAlpha,

@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.rxjava3)
 
+    implementation(libs.accompanist.placeholder.material)
+
     implementation(libs.compose.destinations)
     ksp(libs.compose.destinations.ksp)
 

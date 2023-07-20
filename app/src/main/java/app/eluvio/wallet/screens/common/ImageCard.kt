@@ -20,10 +20,8 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
-import app.eluvio.wallet.R
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
-import coil.compose.AsyncImage
 
 /**
  * An image card with a focus border. Image is darkened when focused.
@@ -49,11 +47,10 @@ fun ImageCard(
         modifier = modifier
     ) {
         val parentScope = this
-        AsyncImage(
+        ShimmerImage(
             model = imageUrl,
             contentScale = ContentScale.Crop,
             contentDescription = contentDescription,
-            placeholder = debugPlaceholder(R.drawable.elv_logo),
             modifier = modifier
                 .align(Alignment.Center)
                 .drawWithContent {

@@ -27,19 +27,17 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
-import app.eluvio.wallet.R
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.screens.common.VideoPlayer
-import app.eluvio.wallet.screens.common.debugPlaceholder
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.redeemTagSurface
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.subscribeToState
-import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 
 @MainGraph
@@ -79,10 +77,9 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: ()
             if (state.animation != null) {
                 VideoPlayer(state.animation, modifier = Modifier.widthIn(max = 270.dp))
             } else if (!state.image.isNullOrEmpty()) {
-                AsyncImage(
+                ShimmerImage(
                     model = state.image,
                     contentDescription = state.title,
-                    placeholder = debugPlaceholder(R.drawable.elv_logo),
                     modifier = Modifier.fillMaxHeight()
                 )
             }

@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,12 +21,11 @@ import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
-import app.eluvio.wallet.R
+import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
-import coil.compose.AsyncImage
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -46,10 +44,9 @@ fun MediaCard(
             modifier = Modifier.padding(12.dp)
         ) {
             Header(media)
-            AsyncImage(
+            ShimmerImage(
                 model = media.imageUrl,
                 contentDescription = "NFT image",
-                placeholder = painterResource(id = R.drawable.elv_logo),
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)

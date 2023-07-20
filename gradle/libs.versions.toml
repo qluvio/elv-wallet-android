@@ -80,6 +80,7 @@ kotlinx-coroutines-rx3 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-rx
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version = "0.30.1" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }

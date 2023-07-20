@@ -61,7 +61,7 @@ class MediaEntity : RealmObject {
         result = 31 * result + mediaFile.hashCode()
         result = 31 * result + mediaLinks.hashCode()
         result = 31 * result + tvBackgroundImage.hashCode()
-        result = 31 * result + (gallery?.hashCode() ?: 0)
+        result = 31 * result + gallery.hashCode()
         return result
     }
 
