@@ -5,8 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.EmbeddedRealmObject
+import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmInstant
 import kotlin.reflect.KClass
 
@@ -17,6 +19,9 @@ class RedeemableOfferEntity : EmbeddedRealmObject {
     var posterImagePath: String? = null
     var availableAt: RealmInstant? = null
     var expiresAt: RealmInstant? = null
+
+    // Relative paths to offer animations
+    var animation: RealmDictionary<String> = realmDictionaryOf()
 
     override fun toString(): String {
         return "RedeemableOfferEntity(name='$name', offerId='$offerId', imagePath='$imagePath', posterImagePath='$posterImagePath', availableAt=$availableAt, expiresAt=$expiresAt)"

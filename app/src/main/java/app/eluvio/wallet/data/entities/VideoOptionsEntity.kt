@@ -5,7 +5,8 @@ data class VideoOptionsEntity(
     val protocol: String,
     val uri: String,
     val drm: String,
-    val licenseUri: String?
+    val licenseUri: String?,
+    val tokenHeader: Map<String, String>
 ) {
     companion object {
         const val PROTOCOL_DASH = "dash"

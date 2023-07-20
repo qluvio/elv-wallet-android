@@ -88,4 +88,8 @@ data class RedeemableOfferDto(
     val poster_image: AssetLinkDto?,
     val available_at: Date?,
     val expires_at: Date?,
+    // Display while showing offer.
+    val animation: MediaLinkDto?,
+    // Display only while redeeming.
+    val redeem_animation: MediaLinkDto?,
 )

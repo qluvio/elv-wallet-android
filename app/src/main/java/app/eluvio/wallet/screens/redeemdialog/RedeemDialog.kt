@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.VideoPlayer
 import app.eluvio.wallet.screens.common.debugPlaceholder
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -74,7 +76,9 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: ()
                 .fillMaxWidth(0.8f)
                 .align(Alignment.Center)
         ) {
-            if (!state.image.isNullOrEmpty()) {
+            if (state.animation != null) {
+                VideoPlayer(state.animation, modifier = Modifier.widthIn(max = 270.dp))
+            } else if (!state.image.isNullOrEmpty()) {
                 AsyncImage(
                     model = state.image,
                     contentDescription = state.title,
@@ -143,6 +147,7 @@ private fun RedeemedOfferPreview() = EluvioThemePreview {
         RedeemDialogViewModel.State(
             "Nft reward offer #1",
             "http://foo",
+            null,
             true,
             "January 1, 1970 - January 1, 2042"
         ),
@@ -156,6 +161,7 @@ private fun UnRedeemedOfferPreview() = EluvioThemePreview {
     RedeemDialog(
         RedeemDialogViewModel.State(
             "Nft reward offer #1",
+            null,
             null,
             false,
             "January 1, 1970 - January 1, 2042"

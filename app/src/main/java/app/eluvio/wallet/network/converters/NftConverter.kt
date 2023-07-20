@@ -9,14 +9,15 @@ import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.network.dto.GalleryItemDto
 import app.eluvio.wallet.network.dto.MediaCollectionDto
 import app.eluvio.wallet.network.dto.MediaItemDto
+import app.eluvio.wallet.network.dto.MediaLinkDto
 import app.eluvio.wallet.network.dto.MediaSectionDto
 import app.eluvio.wallet.network.dto.NftResponse
 import app.eluvio.wallet.network.dto.RedeemableOfferDto
+import app.eluvio.wallet.util.realm.toRealmDictionaryOrEmpty
 import app.eluvio.wallet.util.realm.toRealmInstant
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
-import io.realm.kotlin.ext.realmDictionaryOf
-import io.realm.kotlin.ext.toRealmDictionary
 import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.types.RealmDictionary
 
 fun NftResponse.toNfts(): List<NftEntity> {
     return contents.mapNotNull { dto ->
@@ -52,6 +53,7 @@ private fun RedeemableOfferDto.toEntity(): RedeemableOfferEntity {
         posterImagePath = dto.poster_image?.path
         availableAt = dto.available_at?.toRealmInstant()
         expiresAt = dto.expires_at?.toRealmInstant()
+        animation = dto.animation.toPathMap()
     }
 }
 
@@ -84,10 +86,7 @@ fun MediaItemDto.toEntity(): MediaEntity {
         image = dto.image ?: ""
         mediaType = dto.media_type ?: ""
         mediaFile = dto.media_file?.path ?: ""
-        mediaLinks = dto.media_link?.sources
-            ?.mapValues { (_, link) -> link.path }
-            ?.toRealmDictionary()
-            ?: realmDictionaryOf()
+        mediaLinks = dto.media_link.toPathMap()
         tvBackgroundImage = dto.background_image_tv?.path ?: ""
         gallery = dto.gallery?.map { it.toEntity() }.toRealmListOrEmpty()
     }
@@ -99,4 +98,10 @@ fun GalleryItemDto.toEntity(): GalleryItemEntity {
         name = dto.name
         imagePath = dto.image?.path
     }
+}
+
+fun MediaLinkDto?.toPathMap(): RealmDictionary<String> {
+    return this?.sources
+        ?.mapValues { (_, link) -> link.path }
+        .toRealmDictionaryOrEmpty()
 }
