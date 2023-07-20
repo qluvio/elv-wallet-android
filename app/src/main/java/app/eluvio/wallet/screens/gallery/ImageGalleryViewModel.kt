@@ -18,7 +18,7 @@ class ImageGalleryViewModel @Inject constructor(
     private val apiProvider: ApiProvider,
 ) : BaseViewModel<ImageGalleryViewModel.State>(State()) {
     data class State(val images: List<GalleryImage> = emptyList()) {
-        data class GalleryImage(val url: String, val name: String)
+        data class GalleryImage(val url: String, val name: String?)
     }
 
     private val mediaEntityId = ImageGalleryDestination.argsFrom(savedStateHandle).mediaEntityId
@@ -32,11 +32,11 @@ class ImageGalleryViewModel @Inject constructor(
             .map { (media, endpoint) ->
                 when (media.mediaType) {
                     MediaEntity.MEDIA_TYPE_GALLERY -> {
-                        media.gallery?.mapNotNull { galleryItem ->
+                        media.gallery.mapNotNull { galleryItem ->
                             galleryItem.imagePath?.let { path ->
                                 State.GalleryImage("$endpoint$path", galleryItem.name)
                             }
-                        } ?: emptyList()
+                        }
                     }
 
                     MediaEntity.MEDIA_TYPE_IMAGE -> {

@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmDictionaryOf
+import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmList
@@ -28,7 +29,7 @@ class MediaEntity : RealmObject {
 
     var tvBackgroundImage: String = ""
 
-    var gallery: RealmList<GalleryItemEntity>? = null
+    var gallery: RealmList<GalleryItemEntity> = realmListOf()
 
     override fun toString(): String {
         return "MediaEntity(id='$id', name='$name', image='$image', mediaType='$mediaType', mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery)"

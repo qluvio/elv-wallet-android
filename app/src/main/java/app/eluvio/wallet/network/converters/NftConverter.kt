@@ -34,7 +34,7 @@ fun NftResponse.toNfts(): List<NftEntity> {
             featuredMedia =
                 additionalMediaSections.featured_media?.map { it.toEntity() }.toRealmListOrEmpty()
             mediaSections =
-                additionalMediaSections.sections?.map { it.toEntity() }.toRealmListOrEmpty()
+                additionalMediaSections.sections?.mapNotNull { it.toEntity() }.toRealmListOrEmpty()
 
             redeemableOffers =
                 dto.nft_template.redeemable_offers?.map { it.toEntity() }
@@ -55,8 +55,10 @@ private fun RedeemableOfferDto.toEntity(): RedeemableOfferEntity {
     }
 }
 
-fun MediaSectionDto.toEntity(): MediaSectionEntity {
+fun MediaSectionDto.toEntity(): MediaSectionEntity? {
     val dto = this
+    // Ignore sections with no collections
+    dto.collections ?: return null
     return MediaSectionEntity().apply {
         id = dto.id
         name = dto.name
@@ -78,7 +80,7 @@ fun MediaItemDto.toEntity(): MediaEntity {
     val dto = this
     return MediaEntity().apply {
         id = dto.id
-        name = dto.name
+        name = dto.name ?: ""
         image = dto.image ?: ""
         mediaType = dto.media_type ?: ""
         mediaFile = dto.media_file?.path ?: ""
@@ -87,7 +89,7 @@ fun MediaItemDto.toEntity(): MediaEntity {
             ?.toRealmDictionary()
             ?: realmDictionaryOf()
         tvBackgroundImage = dto.background_image_tv?.path ?: ""
-        gallery = dto.gallery?.map { it.toEntity() }?.toRealmList()
+        gallery = dto.gallery?.map { it.toEntity() }.toRealmListOrEmpty()
     }
 }
 

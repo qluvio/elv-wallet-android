@@ -45,7 +45,7 @@ data class AdditionalMediaSectionDto(
 data class MediaSectionDto(
     val id: String,
     val name: String,
-    val collections: List<MediaCollectionDto>,
+    val collections: List<MediaCollectionDto>?,
 )
 
 @JsonClass(generateAdapter = true)
@@ -59,7 +59,7 @@ data class MediaCollectionDto(
 @JsonClass(generateAdapter = true)
 data class MediaItemDto(
     val id: String,
-    val name: String,
+    val name: String?,
     val display: String?,
     val image: String?,
     val media_type: String?,
@@ -76,7 +76,7 @@ data class MediaLinkDto(
 
 @JsonClass(generateAdapter = true)
 data class GalleryItemDto(
-    val name: String,
+    val name: String?,
     val image: AssetLinkDto?,
 )
 

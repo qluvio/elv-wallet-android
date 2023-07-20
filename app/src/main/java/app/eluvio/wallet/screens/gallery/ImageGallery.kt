@@ -95,7 +95,7 @@ private fun ImageGallery(state: ImageGalleryViewModel.State) {
                                 .align(Alignment.Center)
                                 .fillMaxSize()
                         )
-                        if (isFocused) {
+                        if (isFocused && image.name != null) {
                             Text(
                                 image.name,
                                 style = MaterialTheme.typography.body_32,

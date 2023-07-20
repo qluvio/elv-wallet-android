@@ -10,7 +10,7 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 import kotlin.reflect.KClass
 
 class GalleryItemEntity : EmbeddedRealmObject {
-    var name: String = ""
+    var name: String? = null
     var imagePath: String? = null
 
     override fun toString(): String {
