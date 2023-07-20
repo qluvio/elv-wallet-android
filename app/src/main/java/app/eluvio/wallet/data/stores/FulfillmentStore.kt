@@ -44,6 +44,8 @@ class FulfillmentStore @Inject constructor(
             .map { (tenant, redeemStates) ->
                 realm.writeBlocking {
                     findLatest(nft)?.also {
+                        // Filter any offers that don't have valid redeem states
+                        it.redeemableOffers.removeAll { offer -> redeemStates.none { redeemState -> redeemState.offerId == offer.offerId } }
                         it.redeemStates = redeemStates.toRealmListOrEmpty()
                         it.tenant = tenant
                     }

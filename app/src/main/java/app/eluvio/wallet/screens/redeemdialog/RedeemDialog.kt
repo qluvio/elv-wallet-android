@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.redeemdialog
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +25,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.debugPlaceholder
@@ -38,12 +41,24 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Destination(navArgsDelegate = RedeemDialogNavArgs::class)
 @Composable
 fun RedeemDialog() {
-    hiltViewModel<RedeemDialogViewModel>().subscribeToState { vm, state ->
-        if (state.title.isNotEmpty()) {
-            // ignore empty state
-            RedeemDialog(state, onRedeemClicked = { vm.redeemOrShowOffer() })
+    val context = LocalContext.current
+    hiltViewModel<RedeemDialogViewModel>().subscribeToState(
+        onEvent = {
+            when (it) {
+                Events.NetworkError -> Toast.makeText(
+                    context,
+                    "Network error. Please try again.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        },
+        onState = { vm, state ->
+            if (state.title.isNotEmpty()) {
+                // ignore empty state
+                RedeemDialog(state, onRedeemClicked = { vm.redeemOrShowOffer() })
+            }
         }
-    }
+    )
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)

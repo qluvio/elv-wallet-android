@@ -27,11 +27,10 @@ class FalsyObjectAdapter(
                 try {
                     delegate.fromJson(reader)
                 } catch (e: JsonDataException) {
-                    if (e.message?.contains("Not an RFC 3339 date") == true) {
-                        null
-                    } else {
-                        throw e
+                    if (e.message?.contains("Not an RFC 3339 date") != true) {
+                        reader.skipValue()
                     }
+                    null
                 }
             }
 

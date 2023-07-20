@@ -2,6 +2,7 @@ package app.eluvio.wallet.screens.redeemdialog
 
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
@@ -84,7 +85,9 @@ class RedeemDialogViewModel @Inject constructor(
             }
             .subscribeBy(
                 onNext = { updateState { it } },
-                onError = {}
+                onError = {
+                    Log.e("Error loading offer ", it)
+                }
             )
             .addTo(disposables)
 
@@ -102,7 +105,10 @@ class RedeemDialogViewModel @Inject constructor(
                     .andThen(pollRedemptionStatusUntilComplete(it))
             }
         }
-            .subscribe()
+            .subscribeBy(onError = {
+                fireEvent(Events.NetworkError)
+                Log.e("Error redeeming offer", it)
+            })
             .addTo(disposables)
     }
 
