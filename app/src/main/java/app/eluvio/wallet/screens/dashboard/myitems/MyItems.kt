@@ -61,7 +61,7 @@ fun MyItems() {
 private fun MyItems(state: MyItemsViewModel.State) {
     BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         if (state.loading) {
-            EluvioLoadingSpinner(Modifier.fillMaxHeight())
+            EluvioLoadingSpinner()
         } else if (state.media.isEmpty()) {
             Text("No items to display")
         } else {

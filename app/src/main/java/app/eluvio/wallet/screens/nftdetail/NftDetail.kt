@@ -2,7 +2,6 @@ package app.eluvio.wallet.screens.nftdetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -61,41 +60,39 @@ fun NftDetail() {
 
 @Composable
 private fun NftDetail(state: NftDetailViewModel.State) {
-    Box {
-        if (state.backgroundImage != null) {
-            AsyncImage(
-                model = state.backgroundImage,
-                contentScale = ContentScale.Crop,
-                contentDescription = "Background",
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        Column(Modifier.padding(horizontal = 32.dp)) {
-            TvLazyColumn {
-                item {
-                    Spacer(Modifier.height(32.dp))
-                    Text(state.title, style = MaterialTheme.typography.title_62)
-                    Spacer(Modifier.height(16.dp))
-                    Text(state.subtitle, style = MaterialTheme.typography.body_32)
-                }
-                item {
-                    FeaturedMediaAndOffersRow(state)
-                }
+    if (state.backgroundImage != null) {
+        AsyncImage(
+            model = state.backgroundImage,
+            contentScale = ContentScale.Crop,
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+    Column(Modifier.padding(horizontal = 32.dp)) {
+        TvLazyColumn {
+            item {
+                Spacer(Modifier.height(32.dp))
+                Text(state.title, style = MaterialTheme.typography.title_62)
+                Spacer(Modifier.height(16.dp))
+                Text(state.subtitle, style = MaterialTheme.typography.body_32)
+            }
+            item {
+                FeaturedMediaAndOffersRow(state)
+            }
 
-                state.sections.forEach { section ->
-                    section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
-                        item(key = sectionName) {
-                            Spacer(Modifier.height(16.dp))
-                            Text(sectionName, style = MaterialTheme.typography.body_32)
-                        }
+            state.sections.forEach { section ->
+                section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
+                    item(key = sectionName) {
+                        Spacer(Modifier.height(16.dp))
+                        Text(sectionName, style = MaterialTheme.typography.body_32)
                     }
-                    items(section.collections) { collection ->
-                        if (collection.name.isNotEmpty()) {
-                            Spacer(Modifier.height(16.dp))
-                            Text(collection.name, style = MaterialTheme.typography.body_32)
-                        }
-                        MediaItemsRow(collection.media)
+                }
+                items(section.collections) { collection ->
+                    if (collection.name.isNotEmpty()) {
+                        Spacer(Modifier.height(16.dp))
+                        Text(collection.name, style = MaterialTheme.typography.body_32)
                     }
+                    MediaItemsRow(collection.media)
                 }
             }
         }
