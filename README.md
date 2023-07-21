@@ -8,9 +8,6 @@ Entities that need to be persisted must:
 
 A sensible toString() implementation is encouraged, since `RealmObjects` can't be data classes. 
 
-#### Composite Keys
-The Realm Kotlin SDK doesn't support composite keys, so to achieve that, implement the `CompositeKeyEntity` interface.
-
 ### Navigation
 A LocalNavigator is provided as a composition local to allow for navigation between destinations.
 This defaults to "fullscreen/top-level" navigation. For nested navigation, provide your own implementation of Navigator/NavController.

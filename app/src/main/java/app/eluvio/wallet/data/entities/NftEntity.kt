@@ -12,7 +12,7 @@ import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class NftEntity : RealmObject, CompositeKeyEntity {
+class NftEntity : RealmObject {
     @PrimaryKey
     var _id: String = ""
     var contractAddress: String = ""
@@ -28,11 +28,6 @@ class NftEntity : RealmObject, CompositeKeyEntity {
     // Info that can be null until fetched separately from nft/info/{contractAddress}/{tokenId}
     var redeemStates: RealmList<RedeemStateEntity> = realmListOf()
     var tenant: String? = null
-
-    override fun updateKey(): String {
-        _id = "${contractAddress}_${tokenId}"
-        return _id
-    }
 
     override fun toString(): String {
         return "NftEntity(_id='$_id', contractAddress='$contractAddress', tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', editionName='$editionName', description='$description', featuredMedia=$featuredMedia, mediaSections=$mediaSections, redeemableOffers=$redeemableOffers, redeemStates=$redeemStates, tenant=$tenant)"

@@ -1,6 +1,5 @@
 package app.eluvio.wallet.util.realm
 
-import app.eluvio.wallet.data.entities.CompositeKeyEntity
 import app.eluvio.wallet.util.logging.Log
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -57,7 +56,6 @@ inline fun <reified T : RealmObject> saveBlocking(
             delete<T>()
         }
         list.forEach { entity ->
-            (entity as? CompositeKeyEntity)?.updateKey()
             copyToRealm(entity, updatePolicy)
         }
     }

@@ -21,7 +21,12 @@ import io.realm.kotlin.types.RealmDictionary
 
 fun NftResponse.toNfts(): List<NftEntity> {
     return contents.mapNotNull { dto ->
+        // What makes this token truly unique is the combination of contract address and token id.
+        // This is needed because the internal entities (sections, collections, media) have their own ID, but it's not actually unique.
+        // Two MediaItems with the same ID can point to different assets, so we need to persist them differently.
+        val tokenUniqueId = "${dto.contract_addr}_${dto.token_id}"
         NftEntity().apply {
+            _id = tokenUniqueId
             contractAddress = dto.contract_addr
             tokenId = dto.token_id
             imageUrl = dto.meta.image
@@ -33,9 +38,10 @@ fun NftResponse.toNfts(): List<NftEntity> {
             val additionalMediaSections =
                 dto.nft_template.additional_media_sections ?: return@mapNotNull null
             featuredMedia =
-                additionalMediaSections.featured_media?.map { it.toEntity() }.toRealmListOrEmpty()
+                additionalMediaSections.featured_media?.map { it.toEntity(tokenUniqueId) }
+                    .toRealmListOrEmpty()
             mediaSections =
-                additionalMediaSections.sections?.mapNotNull { it.toEntity() }.toRealmListOrEmpty()
+                additionalMediaSections.sections?.mapNotNull { it.toEntity(tokenUniqueId) }.toRealmListOrEmpty()
 
             redeemableOffers =
                 dto.nft_template.redeemable_offers?.map { it.toEntity() }
@@ -57,31 +63,31 @@ private fun RedeemableOfferDto.toEntity(): RedeemableOfferEntity {
     }
 }
 
-fun MediaSectionDto.toEntity(): MediaSectionEntity? {
+fun MediaSectionDto.toEntity(idPrefix: String): MediaSectionEntity? {
     val dto = this
     // Ignore sections with no collections
     dto.collections ?: return null
     return MediaSectionEntity().apply {
-        id = dto.id
+        id = "${idPrefix}_${dto.id}"
         name = dto.name
-        collections = dto.collections.map { it.toEntity() }.toRealmList()
+        collections = dto.collections.map { it.toEntity(idPrefix) }.toRealmList()
     }
 }
 
-fun MediaCollectionDto.toEntity(): MediaCollectionEntity {
+fun MediaCollectionDto.toEntity(idPrefix: String): MediaCollectionEntity {
     val dto = this
     return MediaCollectionEntity().apply {
-        id = dto.id ?: ""
+        id = "${idPrefix}_${dto.id}"
         name = dto.name ?: ""
         display = dto.display ?: ""
-        media = dto.media?.map { it.toEntity() }.toRealmListOrEmpty()
+        media = dto.media?.map { it.toEntity(idPrefix) }.toRealmListOrEmpty()
     }
 }
 
-fun MediaItemDto.toEntity(): MediaEntity {
+fun MediaItemDto.toEntity(idPrefix: String): MediaEntity {
     val dto = this
     return MediaEntity().apply {
-        id = dto.id
+        id = "${idPrefix}_${dto.id}"
         name = dto.name ?: ""
         image = dto.image ?: ""
         mediaType = dto.media_type ?: ""
