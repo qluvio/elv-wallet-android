@@ -6,9 +6,9 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
 import app.eluvio.wallet.network.converters.toNfts
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
+import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.realm.kotlin.Realm

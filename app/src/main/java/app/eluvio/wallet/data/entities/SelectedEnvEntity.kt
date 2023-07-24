@@ -20,10 +20,21 @@ class SelectedEnvEntity : RealmObject {
         override val value: String,
         @StringRes val prettyEnvName: Int,
         val configUrl: String,
+        val walletUrl: String,
         val networkName: String = value
     ) : RealmEnum {
-        Main("main", R.string.env_main_name, "https://main.net955305.contentfabric.io/config"),
-        Demo("demov3", R.string.env_demo_name, "https://demov3.net955210.contentfabric.io/config"),
+        Main(
+            "main",
+            R.string.env_main_name,
+            "https://main.net955305.contentfabric.io/config",
+            "https://wallet.contentfabric.io?action=login&mode=login&response=code&source=code#/login"
+        ),
+        Demo(
+            "demov3",
+            R.string.env_demo_name,
+            "https://demov3.net955210.contentfabric.io/config",
+            "https://wallet.demov3.contentfabric.io?action=login&mode=login&response=code&source=code#/login"
+        ),
         ;
     }
 

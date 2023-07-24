@@ -6,7 +6,7 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.screens.destinations.FulfillmentQrDialogDestination
-import app.eluvio.wallet.util.mapNotNull
+import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy

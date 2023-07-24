@@ -5,7 +5,7 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.mapNotNull
+import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy

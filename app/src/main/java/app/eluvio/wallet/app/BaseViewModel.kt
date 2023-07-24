@@ -4,8 +4,8 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.util.asSharedState
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.asSharedState
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable

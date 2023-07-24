@@ -20,6 +20,7 @@ import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmDictionary
 
 fun NftResponse.toNfts(): List<NftEntity> {
+    val contents = contents ?: emptyList()
     return contents.mapNotNull { dto ->
         // What makes this token truly unique is the combination of contract address and token id.
         // This is needed because the internal entities (sections, collections, media) have their own ID, but it's not actually unique.

@@ -2,9 +2,9 @@ package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.network.api.FabricConfigApi
 import app.eluvio.wallet.network.dto.FabricConfiguration
-import app.eluvio.wallet.util.asSharedState
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.timeout
+import app.eluvio.wallet.util.rx.asSharedState
+import app.eluvio.wallet.util.rx.timeout
 import io.reactivex.rxjava3.core.Flowable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

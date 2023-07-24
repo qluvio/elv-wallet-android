@@ -9,10 +9,10 @@ import app.eluvio.wallet.network.converters.toEntity
 import app.eluvio.wallet.network.converters.toRedeemStateEntities
 import app.eluvio.wallet.network.dto.InitiateRedemptionRequest
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
+import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.zipWith

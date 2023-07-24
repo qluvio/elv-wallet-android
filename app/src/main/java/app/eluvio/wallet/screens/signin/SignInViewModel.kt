@@ -9,7 +9,7 @@ import app.eluvio.wallet.network.api.DeviceActivationData
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.mapNotNull
+import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -27,7 +27,6 @@ class SignInViewModel @Inject constructor(
         val loading: Boolean = true,
         val qrCode: Bitmap? = null,
         val userCode: String? = null,
-        val url: String? = null,
     )
 
     private var activationDataDisposable: Disposable? = null
@@ -60,7 +59,6 @@ class SignInViewModel @Inject constructor(
                 updateState {
                     copy(
                         qrCode = qrCode,
-                        url = activationData.verificationUri,
                         userCode = activationData.userCode,
                         loading = false
                     )

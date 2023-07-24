@@ -2,8 +2,8 @@ package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.data.entities.UserEntity
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.mapNotNull
 import app.eluvio.wallet.util.realm.asFlowable
+import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.realm.kotlin.Realm

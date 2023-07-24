@@ -1,7 +1,6 @@
 package app.eluvio.wallet.screens.signin
 
 import android.graphics.BitmapFactory
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -29,12 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -44,10 +43,12 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.screens.destinations.MetamaskSignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
@@ -61,7 +62,7 @@ fun SignIn() {
     hiltViewModel<SignInViewModel>().subscribeToState { vm, state ->
         SignIn(
             state,
-            onRequestNewToken = { vm.requestNewToken(it) }
+            onRequestNewToken = vm::requestNewToken
         )
     }
 }
@@ -114,7 +115,7 @@ private fun SignIn(
             Row {
                 val focusRequester = remember { FocusRequester() }
                 TvButton(
-                    "Request New Code",
+                    stringResource(R.string.request_new_code),
                     onClick = { onRequestNewToken(sizePx) },
                     contentPadding = PaddingValues(horizontal = 40.dp, vertical = 5.dp),
                     modifier = Modifier.focusRequester(focusRequester)
@@ -126,10 +127,10 @@ private fun SignIn(
                     onClick = { navigator(NavigationEvent.GoBack) })
             }
             Spacer(modifier = Modifier.height(6.dp))
-            val context = LocalContext.current
+            val navigator = LocalNavigator.current
             TvButton(
-                text = "-Or- Sign On With Metamask",
-                onClick = { Toast.makeText(context, "not impl yet", Toast.LENGTH_SHORT).show() },
+                text = "-Or- Sign On With MetaMask",
+                onClick = { navigator(MetamaskSignInDestination.asPush()) },
                 colors = ClickableSurfaceDefaults.colors(
                     containerColor = Color.Transparent,
                     contentColor = Color(0xFF7B7B7B)
@@ -142,7 +143,7 @@ private fun SignIn(
 }
 
 @Composable
-private fun QrData(state: SignInViewModel.State) {
+fun QrData(state: SignInViewModel.State) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -150,7 +151,7 @@ private fun QrData(state: SignInViewModel.State) {
     ) {
         Text(
             text = state.userCode ?: "",
-            style = MaterialTheme.typography.title_62.copy(fontSize = 24.sp)
+            style = MaterialTheme.typography.title_62
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (state.qrCode != null) {
@@ -175,7 +176,6 @@ private fun SignInPreview() = EluvioThemePreview {
             loading = false,
             qrCode = bitmap,
             userCode = "ABC-DEF",
-            url = "https://eluv.io",
         ),
         onRequestNewToken = {},
     )

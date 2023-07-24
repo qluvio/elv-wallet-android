@@ -5,7 +5,7 @@ import java.util.Date
 
 @JsonClass(generateAdapter = true)
 data class NftResponse(
-    val contents: List<NftDto>,
+    val contents: List<NftDto>?,
     val paging: Paging,
 )
 
