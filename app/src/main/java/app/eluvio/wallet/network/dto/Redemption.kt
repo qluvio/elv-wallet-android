@@ -20,18 +20,18 @@ data class RedemptionStatusDto(
     @field:Json(name = "op") val operationKey: String,
     val status: String?,
 ) {
-    val operation: String
-    val contract: String
-    val tokenId: String
-    val offerId: String
-    val clientRef: String
+    val operation: String?
+    val contract: String?
+    val tokenId: String?
+    val offerId: String?
+    val clientRef: String?
 
     init {
-        val (operation, contract, tokenId, offerId, clientRef) = operationKey.split(":")
-        this.operation = operation
-        this.contract = contract
-        this.tokenId = tokenId
-        this.offerId = offerId
-        this.clientRef = clientRef
+        val split = operationKey.split(":")
+        this.operation = split.getOrNull(0)
+        this.contract = split.getOrNull(1)
+        this.tokenId = split.getOrNull(2)
+        this.offerId = split.getOrNull(3)
+        this.clientRef = split.getOrNull(4)
     }
 }
