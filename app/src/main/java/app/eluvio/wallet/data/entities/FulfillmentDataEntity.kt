@@ -5,8 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
@@ -49,6 +49,6 @@ class FulfillmentDataEntity : RealmObject {
     object EntityModule {
         @Provides
         @IntoSet
-        fun provideEntity(): KClass<out BaseRealmObject> = FulfillmentDataEntity::class
+        fun provideEntity(): KClass<out TypedRealmObject> = FulfillmentDataEntity::class
     }
 }

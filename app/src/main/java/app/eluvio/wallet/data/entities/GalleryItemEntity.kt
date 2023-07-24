@@ -5,8 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.EmbeddedRealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import kotlin.reflect.KClass
 
 class GalleryItemEntity : EmbeddedRealmObject {
@@ -22,6 +22,6 @@ class GalleryItemEntity : EmbeddedRealmObject {
     object EntityModule {
         @Provides
         @IntoSet
-        fun provideEntity(): KClass<out BaseRealmObject> = GalleryItemEntity::class
+        fun provideEntity(): KClass<out TypedRealmObject> = GalleryItemEntity::class
     }
 }

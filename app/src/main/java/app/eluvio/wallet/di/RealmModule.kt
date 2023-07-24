@@ -7,14 +7,14 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import io.realm.kotlin.types.BaseRealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import kotlin.reflect.KClass
 
 @InstallIn(SingletonComponent::class)
 @Module
 object RealmModule {
     @Provides
-    fun provideRealm(realmObjects: Set<@JvmSuppressWildcards KClass<out BaseRealmObject>>): Realm {
+    fun provideRealm(realmObjects: Set<@JvmSuppressWildcards KClass<out TypedRealmObject>>): Realm {
         // TODO: encrypt db
         val config = RealmConfiguration.Builder(realmObjects)
             .schemaVersion(1)
@@ -25,5 +25,5 @@ object RealmModule {
 
     @Provides
     @ElementsIntoSet
-    fun provideRealmObjects(): Set<KClass<out BaseRealmObject>> = emptySet()
+    fun provideRealmObjects(): Set<KClass<out TypedRealmObject>> = emptySet()
 }

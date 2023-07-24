@@ -3,7 +3,6 @@ We use [Realm](https://www.mongodb.com/docs/realm/sdk/kotlin/) for persistence.
 Entities that need to be persisted must:
 1. Implement the `RealmObject` interface
 2. Have a proper implementation of `equals`/`hashCode`.
-   * Due to a [bug in Realm](https://github.com/realm/realm-kotlin/issues/1448), call `.toList/Set()` before comparing `RealmLists/Sets`.
 3. Include a Dagger module that provides them into a set of all Realm classes, otherwise Realm won't be aware they exist.
 
 A sensible toString() implementation is encouraged, since `RealmObjects` can't be data classes. 

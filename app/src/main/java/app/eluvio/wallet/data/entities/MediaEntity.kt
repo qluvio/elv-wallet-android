@@ -7,10 +7,10 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
@@ -48,7 +48,7 @@ class MediaEntity : RealmObject {
         if (mediaFile != other.mediaFile) return false
         if (mediaLinks != other.mediaLinks) return false
         if (tvBackgroundImage != other.tvBackgroundImage) return false
-        if (gallery.toList() != other.gallery.toList()) return false
+        if (gallery != other.gallery) return false
 
         return true
     }
@@ -80,6 +80,6 @@ class MediaEntity : RealmObject {
     object EntityModule {
         @Provides
         @IntoSet
-        fun provideEntity(): KClass<out BaseRealmObject> = MediaEntity::class
+        fun provideEntity(): KClass<out TypedRealmObject> = MediaEntity::class
     }
 }

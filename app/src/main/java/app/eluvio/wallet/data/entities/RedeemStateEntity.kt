@@ -7,9 +7,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmInstant
+import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import kotlin.reflect.KClass
 
@@ -36,6 +36,6 @@ class RedeemStateEntity : EmbeddedRealmObject {
     object EntityModule {
         @Provides
         @IntoSet
-        fun provideEntity(): KClass<out BaseRealmObject> = RedeemStateEntity::class
+        fun provideEntity(): KClass<out TypedRealmObject> = RedeemStateEntity::class
     }
 }

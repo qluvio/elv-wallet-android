@@ -41,7 +41,8 @@ fun NftResponse.toNfts(): List<NftEntity> {
                 additionalMediaSections.featured_media?.map { it.toEntity(tokenUniqueId) }
                     .toRealmListOrEmpty()
             mediaSections =
-                additionalMediaSections.sections?.mapNotNull { it.toEntity(tokenUniqueId) }.toRealmListOrEmpty()
+                additionalMediaSections.sections?.mapNotNull { it.toEntity(tokenUniqueId) }
+                    .toRealmListOrEmpty()
 
             redeemableOffers =
                 dto.nft_template.redeemable_offers?.map { it.toEntity() }

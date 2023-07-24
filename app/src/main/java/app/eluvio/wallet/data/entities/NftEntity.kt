@@ -6,9 +6,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
@@ -46,10 +46,10 @@ class NftEntity : RealmObject {
         if (displayName != other.displayName) return false
         if (editionName != other.editionName) return false
         if (description != other.description) return false
-        if (featuredMedia.toList() != other.featuredMedia.toList()) return false
-        if (mediaSections.toList() != other.mediaSections.toList()) return false
-        if (redeemableOffers.toList() != other.redeemableOffers.toList()) return false
-        if (redeemStates.toList() != other.redeemStates.toList()) return false
+        if (featuredMedia != other.featuredMedia) return false
+        if (mediaSections != other.mediaSections) return false
+        if (redeemableOffers != other.redeemableOffers) return false
+        if (redeemStates != other.redeemStates) return false
         if (tenant != other.tenant) return false
 
         return true
@@ -75,6 +75,6 @@ class NftEntity : RealmObject {
     object EntityModule {
         @Provides
         @IntoSet
-        fun provideEntity(): KClass<out BaseRealmObject> = NftEntity::class
+        fun provideEntity(): KClass<out TypedRealmObject> = NftEntity::class
     }
 }

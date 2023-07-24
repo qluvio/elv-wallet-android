@@ -6,9 +6,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
@@ -30,7 +30,7 @@ class MediaSectionEntity : RealmObject {
 
         if (id != other.id) return false
         if (name != other.name) return false
-        if (collections.toList() != other.collections.toList()) return false
+        if (collections != other.collections) return false
 
         return true
     }
@@ -47,6 +47,6 @@ class MediaSectionEntity : RealmObject {
     object EntityModule {
         @Provides
         @IntoSet
-        fun provideEntity(): KClass<out BaseRealmObject> = MediaSectionEntity::class
+        fun provideEntity(): KClass<out TypedRealmObject> = MediaSectionEntity::class
     }
 }

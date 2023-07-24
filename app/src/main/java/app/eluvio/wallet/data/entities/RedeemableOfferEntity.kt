@@ -6,10 +6,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmDictionaryOf
-import io.realm.kotlin.types.BaseRealmObject
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmInstant
+import io.realm.kotlin.types.TypedRealmObject
 import kotlin.reflect.KClass
 
 class RedeemableOfferEntity : EmbeddedRealmObject {
@@ -58,6 +58,6 @@ class RedeemableOfferEntity : EmbeddedRealmObject {
     object EntityModule {
         @Provides
         @IntoSet
-        fun provideEntity(): KClass<out BaseRealmObject> = RedeemableOfferEntity::class
+        fun provideEntity(): KClass<out TypedRealmObject> = RedeemableOfferEntity::class
     }
 }
