@@ -10,7 +10,10 @@ import androidx.tv.material3.darkColorScheme
 
 fun EluvioColorScheme(): ColorScheme {
     return darkColorScheme(
-        surface = Color(0xFF1C1C1C),
+        surface = Color(0xFF3E3F40),
+        onSurface = Color.White,
+        inverseSurface = Color(0xFFD4D4D4),
+        inverseOnSurface = Color.Black,
         surfaceVariant = Color.White,
         onSurfaceVariant = Color.Black,
         secondaryContainer = Color(0xFF626262),

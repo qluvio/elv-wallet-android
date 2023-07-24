@@ -1,6 +1,9 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,18 +12,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import app.eluvio.wallet.R
 import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
@@ -34,27 +45,51 @@ fun MediaCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val focused by interactionSource.collectIsFocusedAsState()
+    @DrawableRes val bgResource: Int = remember(focused) {
+        if (focused) R.drawable.item_card_bg_focused else R.drawable.item_card_bg
+    }
     Surface(
         onClick = onClick,
+        interactionSource = interactionSource,
         scale = LocalSurfaceScale.current,
-        modifier = modifier.aspectRatio(0.65f),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color.Transparent,
+            contentColor = Color(0xFF7A7A7A),
+            focusedContainerColor = Color.Transparent,
+            focusedContentColor = Color.Black,
+            pressedContentColor = Color.Black,
+        ),
+        modifier = modifier.aspectRatio(0.65f)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier
+                // TODO: convert to drawWithCache and a gradient brush?
+                //red: https://github.com/HedvigInsurance/android/blob/cc66f77f617c8ddf09790f8a0d50383febfbb1ff/app/app/src/main/kotlin/com/hedvig/app/feature/loggedin/ui/LoggedInActivity.kt#L297C27-L297C49
+                .paint(
+                    painterResource(id = bgResource),
+                    contentScale = ContentScale.FillBounds
+                )
+                .padding(12.dp)
         ) {
             Header(media)
+            Spacer(Modifier.height(14.dp))
             ShimmerImage(
                 model = media.imageUrl,
                 contentDescription = "NFT image",
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
+                    .shadow(2.dp)
             )
+            Spacer(Modifier.height(18.dp))
             Text(
                 text = media.title,
+                color = if (focused) LocalContentColor.current else titleUnfocusedColor,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.carousel_36
             )
@@ -73,7 +108,10 @@ fun MediaCard(
                 )
             } else {
                 media.subtitle?.let {
-                    Text(text = it.uppercase(), style = MaterialTheme.typography.label_24)
+                    Text(
+                        text = it.uppercase(), style = MaterialTheme.typography.label_24,
+                        color = if (focused) subtitleFocusedColor else LocalContentColor.current
+                    )
                 }
             }
         }
@@ -82,15 +120,10 @@ fun MediaCard(
 
 @Composable
 private fun Header(media: MyItemsViewModel.State.Media) {
-    Row(Modifier.padding(12.dp)) {
+    Row(Modifier.padding(horizontal = 6.dp, vertical = 6.dp)) {
         // add logo
         // add marketplace name
         Spacer(modifier = Modifier.weight(1f))
-        val c = when (val current = LocalContentColor.current) {
-            Color.Blue -> "blue"
-            Color.Red -> "red"
-            else -> current.toString()
-        }
         media.tokenId?.let {
             Text(
                 text = "#$it",
@@ -99,6 +132,9 @@ private fun Header(media: MyItemsViewModel.State.Media) {
         }
     }
 }
+
+private val titleUnfocusedColor = Color.White
+private val subtitleFocusedColor = Color(0xFF646464)
 
 @Composable
 @Preview

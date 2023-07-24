@@ -32,10 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.ExperimentalTvFoundationApi
-import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
@@ -44,8 +42,10 @@ import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.FocusGroup
+import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.screens.destinations.SignInDestination
@@ -113,7 +113,7 @@ private fun EnvironmentSelection(
                 val focusManager = LocalFocusManager.current
                 state.availableEnvironments.forEachIndexed { index, environment ->
                     key(index) {
-                        Tab(
+                        EluvioTab(
                             selected = index == selectedTabIndex,
                             onFocus = { onEnvironmentSelected(environment) },
                             onClick = { focusManager.moveFocus(FocusDirection.Down) },
@@ -133,9 +133,9 @@ private fun EnvironmentSelection(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Card(onClick = { navigator(SignInDestination.asPush()) }) {
-            Text(stringResource(R.string.sign_in_button), Modifier.padding(10.dp))
-        }
+        TvButton(
+            stringResource(R.string.sign_in_button),
+            onClick = { navigator(SignInDestination.asPush()) })
     }
 }
 

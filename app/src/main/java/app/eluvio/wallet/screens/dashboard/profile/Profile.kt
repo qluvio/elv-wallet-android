@@ -18,12 +18,12 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.navigation.DashboardTabsGraph
+import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
@@ -35,7 +35,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Composable
 fun Profile() {
     hiltViewModel<ProfileViewModel>().subscribeToState { vm, state ->
-        Profile(state, onSignOut = vm::signOut)
+        if (state.network != null) {
+            // Ignore empty state
+            Profile(state, onSignOut = vm::signOut)
+        }
     }
 }
 
@@ -64,9 +67,11 @@ fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
 
             Spacer(Modifier.weight(1f)) // take up remaining space
 
-            Card(onClick = onSignOut, Modifier.align(Alignment.CenterHorizontally)) {
-                Text(text = "Sign Out", Modifier.padding(10.dp))
-            }
+            TvButton(
+                text = "Sign Out",
+                onClick = onSignOut,
+                Modifier.align(Alignment.CenterHorizontally)
+            )
             Spacer(Modifier.height(20.dp))
         }
     }

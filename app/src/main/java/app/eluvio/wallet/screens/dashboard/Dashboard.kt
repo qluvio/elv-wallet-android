@@ -39,7 +39,6 @@ import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.LocalNavigator
@@ -47,6 +46,7 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.AppLogo
+import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.FocusGroupScope
@@ -157,7 +157,7 @@ private fun FocusGroupScope.DashboardTab(
     onFocus: () -> Unit,
     onClick: () -> Unit
 ) {
-    Tab(
+    EluvioTab(
         selected = selected,
         onFocus = onFocus,
         onClick = onClick,

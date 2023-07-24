@@ -10,12 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RadialGradientShader
-import androidx.compose.ui.graphics.Shader
-import androidx.compose.ui.graphics.ShaderBrush
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -39,7 +34,7 @@ class MainActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(backgroundBrush)
+                        .background(Color(0xFF050505))
                 ) {
                     val navController = rememberNavController()
                     val navigator = remember {
@@ -65,16 +60,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val backgroundBrush: ShaderBrush = object : ShaderBrush() {
-    override fun createShader(size: Size): Shader {
-        return RadialGradientShader(
-            colors = listOf(Color(0xff202020), Color.Black),
-            center = size.toRect().topCenter,
-            radius = size.width / 4f,
-            colorStops = listOf(0f, 0.95f)
-        )
-    }
-}
+//private val backgroundBrush: ShaderBrush = object : ShaderBrush() {
+//    override fun createShader(size: Size): Shader {
+//        return RadialGradientShader(
+//            colors = listOf(Color(0xff202020), Color.Black),
+//            center = size.toRect().topCenter,
+//            radius = size.width / 4f,
+//            colorStops = listOf(0f, 0.95f)
+//        )
+//    }
+//}
 
 private fun Collection<NavBackStackEntry>.print(prefix: String = "stack") {
     fun NavBackStackEntry.routeWithArgs(): String {

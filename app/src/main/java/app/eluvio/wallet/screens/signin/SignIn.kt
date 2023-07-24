@@ -1,10 +1,13 @@
 package app.eluvio.wallet.screens.signin
 
 import android.graphics.BitmapFactory
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -32,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.material3.Card
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -42,6 +46,7 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
@@ -105,19 +110,34 @@ private fun SignIn(
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
-        Row {
-            val focusRequester = remember { FocusRequester() }
-            Card(onClick = { onRequestNewToken(sizePx) }, Modifier.focusRequester(focusRequester)) {
+        Column(Modifier.width(IntrinsicSize.Max)) {
+            Row {
+                val focusRequester = remember { FocusRequester() }
+                TvButton(
+                    "Request New Code",
+                    onClick = { onRequestNewToken(sizePx) },
+                    contentPadding = PaddingValues(horizontal = 40.dp, vertical = 5.dp),
+                    modifier = Modifier.focusRequester(focusRequester)
+                )
                 focusRequester.requestOnce()
-                Text("Request New Code", Modifier.padding(10.dp))
+                Spacer(modifier = Modifier.width(10.dp))
+                val navigator = LocalNavigator.current
+                TvButton(text = "Back",
+                    onClick = { navigator(NavigationEvent.GoBack) })
             }
-            Spacer(modifier = Modifier.width(35.dp))
-            val navigator = LocalNavigator.current
-            Card(onClick = { navigator(NavigationEvent.GoBack) }) {
-                Text(text = "Cancel", Modifier.padding(10.dp))
-            }
+            Spacer(modifier = Modifier.height(6.dp))
+            val context = LocalContext.current
+            TvButton(
+                text = "-Or- Sign On With Metamask",
+                onClick = { Toast.makeText(context, "not impl yet", Toast.LENGTH_SHORT).show() },
+                colors = ClickableSurfaceDefaults.colors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xFF7B7B7B)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 
