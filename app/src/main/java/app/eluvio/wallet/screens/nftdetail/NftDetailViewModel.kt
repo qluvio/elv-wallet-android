@@ -57,9 +57,12 @@ class NftDetailViewModel @Inject constructor(
             .subscribeBy(
                 onNext = { (nft, endpoint) ->
                     val bg =
-                        nft.mediaSections.firstOrNull()?.collections?.firstOrNull()?.media?.firstOrNull()?.tvBackgroundImage?.let {
-                            "$endpoint$it"
-                        }
+                        nft.featuredMedia
+                            .map { it.tvBackgroundImage }
+                            .firstOrNull { it.isNotEmpty() }
+                            ?.let { "$endpoint$it" }
+                    // Theoretically we could keep looking for tvBackgroundImage in [mediaSections],
+                    // but we don't need to for now (I think).
                     val offers = nft.redeemableOffers.map {
                         val imageUrl = (it.posterImagePath ?: it.imagePath)?.let { path ->
                             "${endpoint}${path}"
