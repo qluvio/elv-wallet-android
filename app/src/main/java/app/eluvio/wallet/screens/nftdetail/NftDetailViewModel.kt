@@ -56,19 +56,22 @@ class NftDetailViewModel @Inject constructor(
             }
             .subscribeBy(
                 onNext = { (nft, endpoint) ->
+                    // Theoretically we could keep looking for tvBackgroundImage in [mediaSections],
+                    // but we don't need to for now (I think).
                     val bg =
                         nft.featuredMedia
                             .map { it.tvBackgroundImage }
                             .firstOrNull { it.isNotEmpty() }
                             ?.let { "$endpoint$it" }
-                    // Theoretically we could keep looking for tvBackgroundImage in [mediaSections],
-                    // but we don't need to for now (I think).
+                    // Offers we don't have redeemState for aren't confirmed to valid to show to the user
+                    val validOfferIds = nft.redeemStates.map { it.offerId }.toSet()
                     val offers = nft.redeemableOffers.map {
                         val imageUrl = (it.posterImagePath ?: it.imagePath)?.let { path ->
                             "${endpoint}${path}"
                         }
                         State.Offer(it.offerId, it.name, imageUrl, nft.contractAddress, nft.tokenId)
                     }
+                        .filter { validOfferIds.contains(it.offerId) }
                     updateState {
                         State(
                             title = nft.displayName,
