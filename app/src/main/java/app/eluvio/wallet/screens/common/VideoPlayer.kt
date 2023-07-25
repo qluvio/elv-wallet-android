@@ -1,6 +1,8 @@
 package app.eluvio.wallet.screens.common
 
 import android.annotation.SuppressLint
+import android.os.HandlerThread
+import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -25,12 +27,15 @@ fun VideoPlayer(mediaSource: MediaSource, modifier: Modifier = Modifier) {
 
     // Do not recreate the player everytime this Composable commits
     val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaSource(mediaSource)
-            repeatMode = Player.REPEAT_MODE_ALL
-            playWhenReady = true
-            prepare()
-        }
+        ExoPlayer.Builder(context)
+            .setPlaybackLooper(videoPlayerLooper)
+            .build()
+            .apply {
+                setMediaSource(mediaSource)
+                repeatMode = Player.REPEAT_MODE_ALL
+                playWhenReady = true
+                prepare()
+            }
     }
     var lifecycle by remember {
         mutableStateOf(Lifecycle.Event.ON_CREATE)
@@ -70,3 +75,10 @@ fun VideoPlayer(mediaSource: MediaSource, modifier: Modifier = Modifier) {
         }
     }
 }
+
+/**
+ * Share a single Looper for all ExoPlayer instances.
+ */
+private val videoPlayerLooper: Looper = HandlerThread("videoPlayerLooper")
+    .apply { start() }
+    .looper

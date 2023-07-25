@@ -125,19 +125,17 @@ private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(state.featuredMedia + state.redeemableOffers) { item ->
+        items(state.featuredMedia) { item -> MediaItemCard(item) }
+        items(state.redeemableOffers) { item ->
             val navigator = LocalNavigator.current
-            when (item) {
-                is MediaEntity -> MediaItemCard(item)
-                is NftDetailViewModel.State.Offer -> OfferCard(item) {
-                    navigator(
-                        RedeemDialogDestination(
-                            item.contractAddress,
-                            item.tokenId,
-                            item.offerId
-                        ).asPush()
-                    )
-                }
+            OfferCard(item) {
+                navigator(
+                    RedeemDialogDestination(
+                        item.contractAddress,
+                        item.tokenId,
+                        item.offerId
+                    ).asPush()
+                )
             }
         }
     }
