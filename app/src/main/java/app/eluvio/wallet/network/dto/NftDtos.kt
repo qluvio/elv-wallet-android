@@ -22,15 +22,15 @@ data class NftDto(
 
 @JsonClass(generateAdapter = true)
 data class NftMetadataDto(
-    val description: String?,
-    val display_name: String?,
-    val edition_name: String?,
     val image: String,
-    val playable: Boolean,
 )
 
 @JsonClass(generateAdapter = true)
 data class NftTemplateDto(
+    val description: String?,
+    val description_rich_text: String?,
+    val display_name: String?,
+    val edition_name: String?,
     val additional_media_sections: AdditionalMediaSectionDto?,
     val redeemable_offers: List<RedeemableOfferDto>?,
 )

@@ -33,9 +33,10 @@ fun NftResponse.toNfts(): List<NftEntity> {
             contractAddress = dto.contract_addr
             tokenId = dto.token_id
             imageUrl = dto.meta.image
-            displayName = dto.meta.display_name!!
-            editionName = dto.meta.edition_name ?: ""
-            description = dto.meta.description ?: ""
+            displayName = dto.nft_template.display_name!!
+            editionName = dto.nft_template.edition_name ?: ""
+            description = dto.nft_template.description ?: ""
+            descriptionRichText = dto.nft_template.description_rich_text
             // Currently, additional_media_sections is required. In the future we'll probably have
             // to support additional_media for backwards compatibility.
             val additionalMediaSections =
@@ -64,6 +65,7 @@ private fun RedeemableOfferDto.toEntity(): RedeemableOfferEntity {
         availableAt = dto.available_at?.toRealmInstant()
         expiresAt = dto.expires_at?.toRealmInstant()
         animation = dto.animation.toPathMap()
+        redeemAnimation = dto.redeem_animation.toPathMap()
     }
 }
 

@@ -15,6 +15,7 @@ import kotlin.reflect.KClass
 class NftEntity : RealmObject {
     @PrimaryKey
     var _id: String = ""
+
     // Which order this item was returned from the server. Helpful to keep items sorted in the UI.
     // This isn't the MOST stable sorting, but it's the best I got right now.
     var serverIndex: Int = 0
@@ -24,6 +25,7 @@ class NftEntity : RealmObject {
     var displayName: String = ""
     var editionName: String = ""
     var description: String = ""
+    var descriptionRichText: String? = null
     var featuredMedia: RealmList<MediaEntity> = realmListOf()
     var mediaSections: RealmList<MediaSectionEntity> = realmListOf()
     var redeemableOffers: RealmList<RedeemableOfferEntity> = realmListOf()
@@ -50,6 +52,7 @@ class NftEntity : RealmObject {
         if (displayName != other.displayName) return false
         if (editionName != other.editionName) return false
         if (description != other.description) return false
+        if (descriptionRichText != other.descriptionRichText) return false
         if (featuredMedia != other.featuredMedia) return false
         if (mediaSections != other.mediaSections) return false
         if (redeemableOffers != other.redeemableOffers) return false
@@ -68,6 +71,7 @@ class NftEntity : RealmObject {
         result = 31 * result + displayName.hashCode()
         result = 31 * result + editionName.hashCode()
         result = 31 * result + description.hashCode()
+        result = 31 * result + (descriptionRichText?.hashCode() ?: 0)
         result = 31 * result + featuredMedia.hashCode()
         result = 31 * result + mediaSections.hashCode()
         result = 31 * result + redeemableOffers.hashCode()

@@ -22,6 +22,7 @@ class RedeemableOfferEntity : EmbeddedRealmObject {
 
     // Relative paths to offer animations
     var animation: RealmDictionary<String> = realmDictionaryOf()
+    var redeemAnimation: RealmDictionary<String> = realmDictionaryOf()
 
     override fun toString(): String {
         return "RedeemableOfferEntity(name='$name', offerId='$offerId', imagePath='$imagePath', posterImagePath='$posterImagePath', availableAt=$availableAt, expiresAt=$expiresAt)"

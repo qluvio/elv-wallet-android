@@ -2,6 +2,7 @@ package app.eluvio.wallet.screens.nftdetail
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,7 +88,13 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                 Spacer(Modifier.height(32.dp))
                 Text(state.title, style = MaterialTheme.typography.title_62)
                 Spacer(Modifier.height(16.dp))
-                Text(state.subtitle, style = MaterialTheme.typography.body_32)
+                var expanded by remember { mutableStateOf(false) }
+                Text(
+                    state.subtitle,
+                    style = MaterialTheme.typography.body_32,
+                    maxLines = if (expanded) Int.MAX_VALUE else 10,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.clickable { expanded = !expanded })
             }
             item {
                 FeaturedMediaAndOffersRow(state)
@@ -216,13 +226,15 @@ private fun NftDetailPreview() = EluvioThemePreview {
     NftDetail(
         NftDetailViewModel.State(
             title = "Superman",
-            subtitle = """
+            subtitle = AnnotatedString(
+                """
             Superman Web3 Movie Experience includes:
             Immersive menus featuring Fortress of Solitude, Metropolis, and Lex Luthor’s Lair
             Superman The Movie (Theatrical version) • Hours of special features*
             Curated image galleries • Hidden digital easter eggs
             A Voucher Code** for DC3 Super Power Pack: Series Superman from DC NFT Marketplace
-        """.trimIndent(),
+        """.trimIndent()
+            ),
             featuredMedia = listOf(
                 MediaEntity().apply {
                     name = "Feature Film"

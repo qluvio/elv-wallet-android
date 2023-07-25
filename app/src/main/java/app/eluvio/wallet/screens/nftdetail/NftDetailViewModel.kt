@@ -1,6 +1,19 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import android.graphics.Typeface
+import android.text.Html
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
+import android.text.style.UnderlineSpan
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.SavedStateHandle
 import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.app.BaseViewModel
@@ -33,7 +46,7 @@ class NftDetailViewModel @Inject constructor(
     @Immutable
     data class State(
         val title: String = "",
-        val subtitle: String = "",
+        val subtitle: AnnotatedString = AnnotatedString(""),
         val featuredMedia: List<MediaEntity> = emptyList(),
         val sections: List<MediaSectionEntity> = emptyList(),
         val redeemableOffers: List<Offer> = emptyList(),
@@ -77,7 +90,10 @@ class NftDetailViewModel @Inject constructor(
                     updateState {
                         copy(
                             title = nft.displayName,
-                            subtitle = nft.description,
+                            subtitle = nft.descriptionRichText?.let {
+                                Html.fromHtml(it).toAnnotatedString()
+                            }
+                                ?: AnnotatedString(nft.description),
                             featuredMedia = nft.featuredMedia,
                             sections = nft.mediaSections,
                             backgroundImage = backgroundImage,
@@ -153,6 +169,44 @@ class NftDetailViewModel @Inject constructor(
                     Log.e("prefetched failed and not retrying!")
                 })
                 .addTo(disposables)
+        }
+    }
+}
+
+/**
+ * Converts a [Spanned] into an [AnnotatedString] trying to keep as much formatting as possible.
+ *
+ * Currently supports `bold`, `italic`, `underline` and `color`.
+ */
+private fun Spanned.toAnnotatedString(): AnnotatedString = buildAnnotatedString {
+    val spanned = this@toAnnotatedString
+    append(spanned.toString())
+    getSpans(0, spanned.length, Any::class.java).forEach { span ->
+        val start = getSpanStart(span)
+        val end = getSpanEnd(span)
+        when (span) {
+            is StyleSpan -> when (span.style) {
+                Typeface.BOLD -> addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
+                Typeface.ITALIC -> addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
+                Typeface.BOLD_ITALIC -> addStyle(
+                    SpanStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontStyle = FontStyle.Italic
+                    ), start, end
+                )
+            }
+
+            is UnderlineSpan -> addStyle(
+                SpanStyle(textDecoration = TextDecoration.Underline),
+                start,
+                end
+            )
+
+            is ForegroundColorSpan -> addStyle(
+                SpanStyle(color = Color(span.foregroundColor)),
+                start,
+                end
+            )
         }
     }
 }
