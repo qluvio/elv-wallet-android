@@ -129,7 +129,7 @@ private fun SignIn(
             Spacer(modifier = Modifier.height(6.dp))
             val navigator = LocalNavigator.current
             TvButton(
-                text = "-Or- Sign On With MetaMask",
+                text = stringResource(R.string.metamask_sign_on_button),
                 onClick = { navigator(MetamaskSignInDestination.asPush()) },
                 colors = ClickableSurfaceDefaults.colors(
                     containerColor = Color.Transparent,

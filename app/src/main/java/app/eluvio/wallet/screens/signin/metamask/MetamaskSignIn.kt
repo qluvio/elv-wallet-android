@@ -49,7 +49,7 @@ private fun MetamaskSignIn(state: SignInViewModel.State, onRequestNewToken: () -
                 .align(Alignment.Start)
                 .padding(start = 50.dp, top = 20.dp)
         )
-        Text("Sign On with MetaMask", style = MaterialTheme.typography.title_62)
+        Text(stringResource(R.string.metamask_sign_on_title), style = MaterialTheme.typography.title_62)
         Image(
             painterResource(R.drawable.metamask_fox),
             contentDescription = "MetaMask Logo",
