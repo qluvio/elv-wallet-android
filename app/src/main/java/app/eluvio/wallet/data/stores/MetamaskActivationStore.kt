@@ -68,7 +68,7 @@ class MetamaskActivationStore @Inject constructor(
                 }
             }
             .doOnSuccess {
-                val token = it.clusterToken
+                val token = it.token
                 tokenStore.fabricToken = token
             }
             .flatMap {

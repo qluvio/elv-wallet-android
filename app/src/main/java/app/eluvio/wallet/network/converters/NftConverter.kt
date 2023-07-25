@@ -21,13 +21,15 @@ import io.realm.kotlin.types.RealmDictionary
 
 fun NftResponse.toNfts(): List<NftEntity> {
     val contents = contents ?: emptyList()
-    return contents.mapNotNull { dto ->
+    val page = paging.start * 1000
+    return contents.mapIndexedNotNull { index, dto ->
         // What makes this token truly unique is the combination of contract address and token id.
         // This is needed because the internal entities (sections, collections, media) have their own ID, but it's not actually unique.
         // Two MediaItems with the same ID can point to different assets, so we need to persist them differently.
         val tokenUniqueId = "${dto.contract_addr}_${dto.token_id}"
         NftEntity().apply {
             _id = tokenUniqueId
+            serverIndex = page + index
             contractAddress = dto.contract_addr
             tokenId = dto.token_id
             imageUrl = dto.meta.image
@@ -37,7 +39,7 @@ fun NftResponse.toNfts(): List<NftEntity> {
             // Currently, additional_media_sections is required. In the future we'll probably have
             // to support additional_media for backwards compatibility.
             val additionalMediaSections =
-                dto.nft_template.additional_media_sections ?: return@mapNotNull null
+                dto.nft_template.additional_media_sections ?: return@mapIndexedNotNull null
             featuredMedia =
                 additionalMediaSections.featured_media?.map { it.toEntity(tokenUniqueId) }
                     .toRealmListOrEmpty()

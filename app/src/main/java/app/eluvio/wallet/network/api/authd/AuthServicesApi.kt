@@ -45,9 +45,10 @@ data class Ext(
 @JsonClass(generateAdapter = true)
 data class AuthTokenResponse(
     @field:Json(name = "addr") val address: String,
-    // Custodial wallets will return a cluster token, and there will be additional steps to create a fabric token from it.
-    // Metamask will return a fabric token directly.
-    @field:Json(name = "token") val clusterToken: String,
+    // Custodial wallets will return a "cluster token", and there will be additional steps to
+    // create a fabric token from it.
+    // Metamask will return a "fabric token" directly.
+    @field:Json(name = "token") val token: String,
 )
 
 @JsonClass(generateAdapter = true)

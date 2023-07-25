@@ -22,7 +22,9 @@ class ContentStore @Inject constructor(
 ) {
 
     fun observeWalletData(): Flowable<Result<List<NftEntity>>> {
-        return realm.query<NftEntity>().asFlowable()
+        return realm.query<NftEntity>()
+            .sort(NftEntity::serverIndex.name)
+            .asFlowable()
             .map { Result.success(it) }
             .mergeWith(
                 fetchWalletData()

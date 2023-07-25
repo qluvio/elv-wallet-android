@@ -36,7 +36,7 @@ class AuthenticationService @Inject constructor(
                 authServicesApi.authdLogin()
                     .doOnSuccess {
                         Log.d("login response: $it")
-                        tokenStore.clusterToken = it.clusterToken
+                        tokenStore.clusterToken = it.token
                     }
                     .flatMap {
                         userStore.saveUser(it.address)
