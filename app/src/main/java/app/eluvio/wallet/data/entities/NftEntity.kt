@@ -16,9 +16,9 @@ class NftEntity : RealmObject {
     @PrimaryKey
     var _id: String = ""
 
-    // Which order this item was returned from the server. Helpful to keep items sorted in the UI.
-    // This isn't the MOST stable sorting, but it's the best I got right now.
-    var serverIndex: Int = 0
+    // This is actually the Template creation date, so multiple tokens from the same template will
+    // still have unstable sorting. AFAIK there's no way to get the actual token creation date currently.
+    var createdAt: Long = 0
     var contractAddress: String = ""
     var tokenId: String = ""
     var imageUrl: String = ""
@@ -45,7 +45,7 @@ class NftEntity : RealmObject {
         other as NftEntity
 
         if (_id != other._id) return false
-        if (serverIndex != other.serverIndex) return false
+        if (createdAt != other.createdAt) return false
         if (contractAddress != other.contractAddress) return false
         if (tokenId != other.tokenId) return false
         if (imageUrl != other.imageUrl) return false
@@ -64,7 +64,7 @@ class NftEntity : RealmObject {
 
     override fun hashCode(): Int {
         var result = _id.hashCode()
-        result = 31 * result + serverIndex
+        result = 31 * result + createdAt.hashCode()
         result = 31 * result + contractAddress.hashCode()
         result = 31 * result + tokenId.hashCode()
         result = 31 * result + imageUrl.hashCode()

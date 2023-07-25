@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,15 +33,18 @@ fun ImageCard(
     modifier: Modifier = Modifier,
     focusedOverlay: @Composable (BoxScope.() -> Unit)? = null,
     unFocusedOverlay: @Composable (BoxScope.() -> Unit)? = null,
+    shape: Shape = MaterialTheme.shapes.medium,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val focusedBorder = Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer))
+    val focusedBorder =
+        Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer), shape = shape)
     Surface(
         onClick = onClick,
         border = ClickableSurfaceDefaults.border(focusedBorder = focusedBorder),
         scale = LocalSurfaceScale.current,
+        shape = ClickableSurfaceDefaults.shape(shape),
         interactionSource = interactionSource,
         modifier = modifier
     ) {

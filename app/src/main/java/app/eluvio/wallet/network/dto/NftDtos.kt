@@ -13,8 +13,7 @@ data class NftResponse(
 data class NftDto(
     val contract_addr: String,
     val token_id: String,
-    val block: Int,
-    val cap: Int,
+    val created: Long?,
     val meta: NftMetadataDto,
     val token_uri: String?,
     val nft_template: NftTemplateDto,
@@ -63,6 +62,8 @@ data class MediaItemDto(
     val display: String?,
     val image: String?,
     val media_type: String?,
+    val image_aspect_ratio: String?,
+    val poster_image: AssetLinkDto?,
     val media_file: AssetLinkDto?,
     val media_link: MediaLinkDto?,
     val background_image_tv: AssetLinkDto?,

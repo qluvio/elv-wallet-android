@@ -13,6 +13,7 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.Sort
 import javax.inject.Inject
 
 
@@ -23,7 +24,7 @@ class ContentStore @Inject constructor(
 
     fun observeWalletData(): Flowable<Result<List<NftEntity>>> {
         return realm.query<NftEntity>()
-            .sort(NftEntity::serverIndex.name)
+            .sort(NftEntity::createdAt.name, Sort.DESCENDING)
             .asFlowable()
             .map { Result.success(it) }
             .mergeWith(

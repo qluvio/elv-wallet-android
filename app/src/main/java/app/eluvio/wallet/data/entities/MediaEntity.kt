@@ -19,7 +19,9 @@ class MediaEntity : RealmObject {
     var id: String = ""
     var name: String = ""
     var image: String = ""
+    var posterImagePath: String? = null
     var mediaType: String = ""
+    var imageAspectRatio: Float? = null
 
     // Relative path to file
     var mediaFile: String = ""
@@ -73,6 +75,10 @@ class MediaEntity : RealmObject {
         const val MEDIA_TYPE_IMAGE = "Image"
         const val MEDIA_TYPE_LIVE = "Live"
         const val MEDIA_TYPE_VIDEO = "Video"
+
+        const val ASPECT_RATIO_SQUARE = 1f
+        const val ASPECT_RATIO_WIDE = 16f / 9f
+        const val ASPECT_RATIO_POSTER = 2f / 3f
     }
 
     @Module

@@ -50,15 +50,18 @@ fun MyItems() {
                 ).show()
             }
         },
-        onState = { vm, state ->
+        onState = { _, state ->
             MyItems(state)
         }
     )
 }
 
 @Composable
-private fun MyItems(state: MyItemsViewModel.State) {
-    BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+private fun MyItems(state: AllMediaProvider.State) {
+    BoxWithConstraints(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
         if (state.loading) {
             EluvioLoadingSpinner()
         } else if (state.media.isEmpty()) {
@@ -80,8 +83,8 @@ private fun MyItems(state: MyItemsViewModel.State) {
 
 @Composable
 private fun BoxWithConstraintsScope.MyItemsGrid(
-    media: List<MyItemsViewModel.State.Media>,
-    onItemClick: (MyItemsViewModel.State.Media) -> Unit
+    media: List<AllMediaProvider.State.Media>,
+    onItemClick: (AllMediaProvider.State.Media) -> Unit
 ) {
     val width by rememberUpdatedState(maxWidth)
     val horizontalPadding = 100.dp
@@ -115,7 +118,7 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
 @Preview(device = Devices.TV_720p)
 private fun MyItemsPreview() = EluvioThemePreview {
     val items = listOf(
-        MyItemsViewModel.State.Media(
+        AllMediaProvider.State.Media(
             "key",
             "contract_address",
             "https://x",
@@ -124,7 +127,7 @@ private fun MyItemsPreview() = EluvioThemePreview {
             "1",
             1
         ),
-        MyItemsViewModel.State.Media(
+        AllMediaProvider.State.Media(
             "key",
             "contract_address",
             "https://x",
@@ -134,7 +137,7 @@ private fun MyItemsPreview() = EluvioThemePreview {
             53
         )
     )
-    MyItems(MyItemsViewModel.State(
+    MyItems(AllMediaProvider.State(
         loading = false,
         // create 10 copies of the original list
         (1..10).flatMap { items }.map { it.copy(key = UUID.randomUUID().toString()) }
@@ -144,5 +147,5 @@ private fun MyItemsPreview() = EluvioThemePreview {
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun MyItemsPreviewLoading() = EluvioThemePreview {
-    MyItems(MyItemsViewModel.State(loading = true))
+    MyItems(AllMediaProvider.State(loading = true))
 }

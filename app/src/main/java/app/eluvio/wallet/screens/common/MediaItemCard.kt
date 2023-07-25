@@ -1,14 +1,16 @@
 package app.eluvio.wallet.screens.common
 
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,19 +35,16 @@ import app.eluvio.wallet.util.logging.Log
 fun MediaItemCard(
     media: MediaEntity,
     modifier: Modifier = Modifier,
+    imageUrl: String = media.image,
     onMediaItemClick: (MediaEntity) -> Unit = defaultMediaItemClickHandler(LocalNavigator.current),
     cardHeight: Dp = 150.dp,
+    aspectRatio: Float = media.imageAspectRatio ?: MediaEntity.ASPECT_RATIO_SQUARE,
+    shape: Shape = MaterialTheme.shapes.medium,
 ) {
-    val width = remember {
-        if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
-            cardHeight * 16f / 9f
-        } else {
-            cardHeight
-        }
-    }
     ImageCard(
-        imageUrl = media.image,
+        imageUrl = imageUrl,
         contentDescription = media.name,
+        shape = shape,
         focusedOverlay = {
             WrapContentText(
                 text = media.name,
@@ -71,7 +70,9 @@ fun MediaItemCard(
             }
         },
         onClick = { onMediaItemClick(media) },
-        modifier = modifier.size(width, cardHeight)
+        modifier = modifier
+            .height(cardHeight)
+            .aspectRatio(aspectRatio, matchHeightConstraintsFirst = true)
     )
 }
 

@@ -41,7 +41,7 @@ import app.eluvio.wallet.theme.label_24
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun MediaCard(
-    media: MyItemsViewModel.State.Media,
+    media: AllMediaProvider.State.Media,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -119,7 +119,7 @@ fun MediaCard(
 }
 
 @Composable
-private fun Header(media: MyItemsViewModel.State.Media) {
+private fun Header(media: AllMediaProvider.State.Media) {
     Row(Modifier.padding(horizontal = 6.dp, vertical = 6.dp)) {
         // add logo
         // add marketplace name
@@ -140,7 +140,7 @@ private val subtitleFocusedColor = Color(0xFF646464)
 @Preview
 fun MediaCardPreviewPack() = EluvioThemePreview {
     MediaCard(
-        MyItemsViewModel.State.Media(
+        AllMediaProvider.State.Media(
             "key",
             "id1",
             "https://x",
@@ -157,7 +157,7 @@ fun MediaCardPreviewPack() = EluvioThemePreview {
 @Preview
 fun MediaCardPreviewSingle() = EluvioThemePreview {
     MediaCard(
-        MyItemsViewModel.State.Media(
+        AllMediaProvider.State.Media(
             "key",
             "id1",
             "https://x",
