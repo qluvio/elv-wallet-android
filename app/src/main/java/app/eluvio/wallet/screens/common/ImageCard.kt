@@ -9,8 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,13 +51,7 @@ fun ImageCard(
             contentDescription = contentDescription,
             modifier = modifier
                 .align(Alignment.Center)
-                .drawWithContent {
-                    drawContent()
-                    if (isFocused) {
-                        // TODO: get this from theme
-                        drawRect(Color.Black.copy(alpha = 0.8f))
-                    }
-                }
+                .dimContent(dim = isFocused)
         )
         if (isFocused) {
             focusedOverlay?.invoke(parentScope)

@@ -3,10 +3,16 @@ package app.eluvio.wallet.screens.common
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
@@ -26,7 +32,9 @@ fun VideoPlayer(mediaSource: MediaSource, modifier: Modifier = Modifier) {
             prepare()
         }
     }
-
+    var lifecycle by remember {
+        mutableStateOf(Lifecycle.Event.ON_CREATE)
+    }
     // Gateway to traditional Android Views
     AndroidView(
         modifier = modifier,
@@ -35,10 +43,29 @@ fun VideoPlayer(mediaSource: MediaSource, modifier: Modifier = Modifier) {
                 useController = false
                 player = exoPlayer
             }
+        },
+        update = {
+            when (lifecycle) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    it.onPause()
+                    exoPlayer.pause()
+                }
+
+                Lifecycle.Event.ON_RESUME -> {
+                    it.onResume()
+                }
+
+                else -> {}
+            }
         }
     )
+    val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(Unit) {
+        val observer = LifecycleEventObserver { _, event ->
+            lifecycle = event
+        }
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             exoPlayer.release()
         }
     }

@@ -1,6 +1,9 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +28,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
+import androidx.tv.material3.Border
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -36,9 +43,12 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.MediaItemsRow
+import app.eluvio.wallet.screens.common.VideoPlayer
 import app.eluvio.wallet.screens.common.WrapContentText
+import app.eluvio.wallet.screens.common.dimContent
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.onRedeemTagSurface
@@ -130,7 +140,7 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
     // https://issuetracker.google.com/issues/291642442), but then it won't scale right when
     // the card is focused.
     // So instead we draw it both in the focused overlay, and unfocused overlay.
-    val rewardText = remember<@Composable BoxScope.() -> Unit> {
+    val rewardTag = remember<@Composable BoxScope.() -> Unit> {
         {
             Text(
                 text = "REWARD",
@@ -142,17 +152,13 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
                         MaterialTheme.colorScheme.redeemTagSurface,
                         MaterialTheme.shapes.extraSmall
                     )
-                    .padding(horizontal = 8.dp, vertical = 5.dp)
+                    .padding(horizontal = 6.dp, vertical = 0.dp)
                     .align(Alignment.BottomCenter)
             )
         }
     }
-    ImageCard(
-        imageUrl = item.imageUrl,
-        contentDescription = item.name,
-        onClick = onClick,
-        modifier = Modifier.size(150.dp),
-        focusedOverlay = {
+    val offerTitle = remember<@Composable BoxScope.() -> Unit> {
+        {
             WrapContentText(
                 text = item.name,
                 style = MaterialTheme.typography.body_32,
@@ -164,10 +170,44 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
                     .align(Alignment.CenterStart)
                     .padding(horizontal = 10.dp, vertical = 20.dp)
             )
-            rewardText()
-        },
-        unFocusedOverlay = rewardText
-    )
+        }
+    }
+    if (item.animation != null) {
+        val interactionSource = remember { MutableInteractionSource() }
+        val focused by interactionSource.collectIsFocusedAsState()
+        val focusedBorder =
+            Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer))
+        Surface(
+            onClick = onClick,
+            interactionSource = interactionSource,
+            border = ClickableSurfaceDefaults.border(focusedBorder = focusedBorder),
+            scale = LocalSurfaceScale.current,
+            modifier = Modifier.size(150.dp)
+        ) {
+            VideoPlayer(
+                mediaSource = item.animation,
+                modifier = Modifier
+                    .size(150.dp)
+                    .dimContent(dim = focused)
+            )
+            if (focused) {
+                offerTitle()
+            }
+            rewardTag()
+        }
+    } else {
+        ImageCard(
+            imageUrl = item.imageUrl,
+            contentDescription = item.name,
+            onClick = onClick,
+            modifier = Modifier.size(150.dp),
+            focusedOverlay = {
+                offerTitle()
+                rewardTag()
+            },
+            unFocusedOverlay = rewardTag
+        )
+    }
 }
 
 @Composable
@@ -195,7 +235,8 @@ private fun NftDetailPreview() = EluvioThemePreview {
                     "NFT reward",
                     "https://via.placeholder.com/150",
                     "contractAddr",
-                    "token_1"
+                    "token_1",
+                    animation = null,
                 )
             ),
             sections = listOf(
@@ -243,7 +284,8 @@ private fun OfferCardPreview() = EluvioThemePreview {
             "NFT reward",
             "https://via.placeholder.com/150",
             "contractAddr",
-            "token_1"
+            "token_1",
+            animation = null,
         ),
         onClick = {}
     )

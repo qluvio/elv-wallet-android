@@ -1,10 +1,8 @@
 package app.eluvio.wallet.screens.redeemdialog
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
-import app.eluvio.wallet.data.VideoOptionsFetcher
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
@@ -14,14 +12,12 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.FulfillmentQrDialogDestination
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
-import app.eluvio.wallet.screens.videoplayer.toMediaSource
 import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -38,12 +34,10 @@ class RedeemDialogViewModel @Inject constructor(
     private val contentStore: ContentStore,
     private val apiProvider: ApiProvider,
     private val fulfillmentStore: FulfillmentStore,
-    private val videoOptionsFetcher: VideoOptionsFetcher,
 ) : BaseViewModel<RedeemDialogViewModel.State>(State()) {
     data class State(
         val title: String = "",
         val image: String? = null,
-        val animation: MediaSource? = null,
         val offerValid: Boolean = false,
         val dateRange: String = "",
         val offerStatus: RedeemStateEntity.Status = RedeemStateEntity.Status.UNREDEEMED,
@@ -82,26 +76,12 @@ class RedeemDialogViewModel @Inject constructor(
                 State(
                     title = offer.name,
                     image = image,
-                    animation = null, // This will be populated in the next step
                     offerValid = offer.isValid,
                     dateRange = offer.dateRange,
                     offerStatus = redeemState.status,
                     _transaction = transaction,
                     _nftEntity = nft,
-                ) to offer
-            }
-            .flatMapSingle { (state, offer) ->
-                val animationPath = offer.animation.values.firstOrNull()
-                if (animationPath == null) {
-                    Single.just(state)
-                } else {
-                    // This will delay state updates until we download options.json,
-                    // but we get less flickering this way.
-                    videoOptionsFetcher.fetchVideoOptionsFromPath(animationPath)
-                        .map { state.copy(animation = it.toMediaSource()) }
-                        // If we fail to fetch video options, just show the dialog without the animation
-                        .onErrorReturnItem(state)
-                }
+                )
             }
             .subscribeBy(
                 onNext = { updateState { it } },

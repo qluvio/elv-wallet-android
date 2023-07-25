@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -32,7 +31,6 @@ import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.ShimmerImage
-import app.eluvio.wallet.screens.common.VideoPlayer
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.redeemTagSurface
@@ -74,15 +72,11 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: ()
                 .fillMaxWidth(0.8f)
                 .align(Alignment.Center)
         ) {
-            if (state.animation != null) {
-                VideoPlayer(state.animation, modifier = Modifier.widthIn(max = 270.dp))
-            } else if (!state.image.isNullOrEmpty()) {
-                ShimmerImage(
-                    model = state.image,
-                    contentDescription = state.title,
-                    modifier = Modifier.fillMaxHeight()
-                )
-            }
+            ShimmerImage(
+                model = state.image,
+                contentDescription = state.title,
+                modifier = Modifier.fillMaxHeight()
+            )
             Spacer(Modifier.width(40.dp))
             Column {
                 Text(text = state.title, style = MaterialTheme.typography.title_62)
@@ -142,11 +136,10 @@ private fun RedeemButton(
 private fun RedeemedOfferPreview() = EluvioThemePreview {
     RedeemDialog(
         RedeemDialogViewModel.State(
-            "Nft reward offer #1",
-            "http://foo",
-            null,
-            true,
-            "January 1, 1970 - January 1, 2042"
+            title = "Nft reward offer #1",
+            image = "http://foo",
+            offerValid = true,
+            dateRange = "January 1, 1970 - January 1, 2042"
         ),
         onRedeemClicked = {}
     )
@@ -157,11 +150,10 @@ private fun RedeemedOfferPreview() = EluvioThemePreview {
 private fun UnRedeemedOfferPreview() = EluvioThemePreview {
     RedeemDialog(
         RedeemDialogViewModel.State(
-            "Nft reward offer #1",
-            null,
-            null,
-            false,
-            "January 1, 1970 - January 1, 2042"
+            title = "Nft reward offer #1",
+            image = null,
+            offerValid = false,
+            dateRange = "January 1, 1970 - January 1, 2042"
         ),
         onRedeemClicked = {}
     )
