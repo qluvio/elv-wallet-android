@@ -162,7 +162,7 @@ private fun FocusGroupScope.DashboardTab(
         onFocus = onFocus,
         onClick = onClick,
         modifier = Modifier
-            .padding(10.dp)
+            .padding(horizontal = 18.dp, vertical = 4.dp)
             .restorableFocus(),
     ) {
         val icon = tab.icon

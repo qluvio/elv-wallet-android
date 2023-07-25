@@ -25,7 +25,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -85,11 +84,12 @@ private fun EnvironmentSelection(
         Text(
             text = "Welcome to",
             style = MaterialTheme.typography.header_53.withAlpha(0.8f)
-                .copy(fontSize = 30.sp, fontWeight = FontWeight.Thin)
+                .copy(fontSize = 30.sp)
+                .withAlpha(alpha = 0.4f)
         )
         Text(
             text = "Media Wallet",
-            style = MaterialTheme.typography.header_53.copy(fontSize = 50.sp)
+            style = MaterialTheme.typography.header_53.copy(fontSize = 54.sp)
         )
 
         val navigator = LocalNavigator.current
