@@ -9,6 +9,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.leanback.LeanbackPlayerAdapter
 import app.eluvio.wallet.data.VideoOptionsFetcher
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
+import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
@@ -49,7 +50,9 @@ class VideoPlayerFragment : VideoSupportFragment() {
                     player.setMediaSource(it.toMediaSource())
                     player.prepare()
                 },
-                onError = {}
+                onError = {
+                    Log.e("VideoPlayerFragment: Error fetching video options", it)
+                }
             )
     }
 

@@ -201,30 +201,30 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
             )
         }
     }
-    if (item.animation != null) {
-        val interactionSource = remember { MutableInteractionSource() }
-        val focused by interactionSource.collectIsFocusedAsState()
-        val focusedBorder =
-            Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer))
-        Surface(
-            onClick = onClick,
-            interactionSource = interactionSource,
-            border = ClickableSurfaceDefaults.border(focusedBorder = focusedBorder),
-            scale = LocalSurfaceScale.current,
-            modifier = Modifier.size(150.dp)
-        ) {
-            VideoPlayer(
-                mediaSource = item.animation,
-                modifier = Modifier
-                    .size(150.dp)
-                    .dimContent(dim = focused)
-            )
-            if (focused) {
-                offerTitle()
-            }
-            rewardTag()
-        }
-    } else {
+//    if (item.animation != null) {
+//        val interactionSource = remember { MutableInteractionSource() }
+//        val focused by interactionSource.collectIsFocusedAsState()
+//        val focusedBorder =
+//            Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer))
+//        Surface(
+//            onClick = onClick,
+//            interactionSource = interactionSource,
+//            border = ClickableSurfaceDefaults.border(focusedBorder = focusedBorder),
+//            scale = LocalSurfaceScale.current,
+//            modifier = Modifier.size(150.dp)
+//        ) {
+//            VideoPlayer(
+//                mediaSource = item.animation,
+//                modifier = Modifier
+//                    .size(150.dp)
+//                    .dimContent(dim = focused)
+//            )
+//            if (focused) {
+//                offerTitle()
+//            }
+//            rewardTag()
+//        }
+//    } else {
         ImageCard(
             imageUrl = item.imageUrl,
             contentDescription = item.name,
@@ -236,7 +236,7 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
             },
             unFocusedOverlay = rewardTag
         )
-    }
+//    }
 }
 
 @Composable
