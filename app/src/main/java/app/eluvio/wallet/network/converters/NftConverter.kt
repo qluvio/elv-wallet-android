@@ -32,7 +32,7 @@ fun NftResponse.toNfts(): List<NftEntity> {
             contractAddress = dto.contract_addr
             tokenId = dto.token_id
             imageUrl = dto.meta.image
-            displayName = dto.nft_template.display_name!!
+            displayName = dto.nft_template.display_name ?: ""
             editionName = dto.nft_template.edition_name ?: ""
             description = dto.nft_template.description ?: ""
             descriptionRichText = dto.nft_template.description_rich_text

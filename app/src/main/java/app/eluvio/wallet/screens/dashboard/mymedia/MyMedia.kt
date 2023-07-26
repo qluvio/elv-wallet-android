@@ -1,7 +1,6 @@
 package app.eluvio.wallet.screens.dashboard.mymedia
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -25,6 +24,7 @@ import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.MediaItemCard
+import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
 import app.eluvio.wallet.screens.dashboard.myitems.MediaCard
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
@@ -46,11 +46,11 @@ fun MyMedia() {
 private fun MyMedia(state: MyMediaViewModel.State) {
     TvLazyColumn(
         verticalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(10.dp),
         pivotOffsets = PivotOffsets(0.1f),
         modifier = Modifier.fillMaxSize()
     ) {
-        // needs to be portrait aspect ratio
+        spacer(height = listSpacerSize)
+
         item {
             FeaturedMediaRow(state.featuredMedia, state.baseUrl)
         }
@@ -63,15 +63,15 @@ private fun MyMedia(state: MyMediaViewModel.State) {
                 MyItemsRow(state.myItems)
             }
         }
+
+        spacer(height = listSpacerSize)
     }
 }
 
 @Composable
 fun FeaturedMediaRow(featuredMedia: List<MediaEntity>, baseUrl: String?) {
-    TvLazyRow(
-        contentPadding = PaddingValues(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
+    TvLazyRow(horizontalArrangement = itemArrangement) {
+        spacer(width = listSpacerSize)
         items(featuredMedia) { media ->
             val url = if (media.posterImagePath != null && baseUrl != null) {
                 "$baseUrl${media.posterImagePath}"
@@ -86,6 +86,7 @@ fun FeaturedMediaRow(featuredMedia: List<MediaEntity>, baseUrl: String?) {
                 aspectRatio = MediaEntity.ASPECT_RATIO_POSTER,
             )
         }
+        spacer(width = listSpacerSize)
     }
 }
 
@@ -93,23 +94,21 @@ fun FeaturedMediaRow(featuredMedia: List<MediaEntity>, baseUrl: String?) {
 fun NftMediaRow(displayName: String, mediaItems: List<MediaEntity>) {
     RowHeader(displayName)
     Spacer(Modifier.height(10.dp))
-    TvLazyRow(
-        contentPadding = PaddingValues(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
+    TvLazyRow(horizontalArrangement = itemArrangement) {
+        spacer(width = listSpacerSize)
         items(mediaItems) { media ->
             MediaItemCard(media)
         }
+        spacer(width = listSpacerSize)
     }
 }
 
 @Composable
 private fun MyItemsRow(myItems: List<AllMediaProvider.State.Media>) {
     RowHeader(text = "Items")
-    TvLazyRow(
-        contentPadding = PaddingValues(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
+    Spacer(Modifier.height(10.dp))
+    TvLazyRow(horizontalArrangement = itemArrangement) {
+        spacer(width = listSpacerSize)
         items(myItems) { item ->
             val navigator = LocalNavigator.current
             MediaCard(
@@ -122,6 +121,7 @@ private fun MyItemsRow(myItems: List<AllMediaProvider.State.Media>) {
                 modifier = Modifier.width(200.dp)
             )
         }
+        spacer(width = listSpacerSize)
     }
 }
 
@@ -130,9 +130,20 @@ private fun RowHeader(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.carousel_36,
-        modifier = Modifier.padding(start = 10.dp)
+        modifier = Modifier.padding(start = listSpacerSize + itemArrangement.spacing)
     )
 }
+
+/**
+ * How items are spaced in each row.
+ */
+private val itemArrangement = Arrangement.spacedBy(20.dp)
+
+/**
+ * Extra space to add at the start and end of each row.
+ * This is added as a list "item" so [itemArrangement] will also apply to it for a total of 30dp at the start and end of the list.
+ */
+private val listSpacerSize = 10.dp
 
 @Composable
 @Preview(device = Devices.TV_720p)

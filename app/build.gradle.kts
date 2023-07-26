@@ -50,7 +50,7 @@ android {
 
 dependencies {
     implementation(libs.core.ktx)
-    implementation(libs.leanback)
+    implementation(libs.androidx.leanback)
 
     implementation(libs.androidx.tv.foundation)
     implementation(libs.androidx.tv.material)

@@ -8,10 +8,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -46,10 +43,10 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MediaItemCard
-import app.eluvio.wallet.screens.common.MediaItemsRow
 import app.eluvio.wallet.screens.common.VideoPlayer
 import app.eluvio.wallet.screens.common.WrapContentText
 import app.eluvio.wallet.screens.common.dimContent
+import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
@@ -82,19 +79,25 @@ private fun NftDetail(state: NftDetailViewModel.State) {
             modifier = Modifier.fillMaxSize()
         )
     }
-    Column(Modifier.padding(horizontal = 32.dp)) {
+    Column {
         TvLazyColumn {
+            spacer(height = 32.dp)
             item {
-                Spacer(Modifier.height(32.dp))
-                Text(state.title, style = MaterialTheme.typography.title_62)
-                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = state.title,
+                    style = MaterialTheme.typography.title_62,
+                    modifier = Modifier.padding(start = 32.dp)
+                )
                 var expanded by remember { mutableStateOf(false) }
                 Text(
-                    state.subtitle,
+                    text = state.subtitle,
                     style = MaterialTheme.typography.body_32,
                     maxLines = if (expanded) Int.MAX_VALUE else 10,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.clickable { expanded = !expanded })
+                    modifier = Modifier
+                        .clickable { expanded = !expanded }
+                        .padding(start = 32.dp, end = 260.dp, top = 16.dp, bottom = 16.dp)
+                )
             }
             item {
                 FeaturedMediaAndOffersRow(state)
@@ -102,29 +105,35 @@ private fun NftDetail(state: NftDetailViewModel.State) {
 
             state.sections.forEach { section ->
                 section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
-                    item(key = sectionName) {
-                        Spacer(Modifier.height(16.dp))
-                        Text(sectionName, style = MaterialTheme.typography.body_32)
+                    item(key = "${section.id}_$sectionName", contentType = "section_name") {
+                        Text(
+                            sectionName,
+                            style = MaterialTheme.typography.body_32,
+                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+                        )
                     }
                 }
-                items(section.collections) { collection ->
+                items(section.collections, contentType = { "collection" }) { collection ->
                     if (collection.name.isNotEmpty()) {
-                        Spacer(Modifier.height(16.dp))
-                        Text(collection.name, style = MaterialTheme.typography.body_32)
+                        Text(
+                            collection.name,
+                            style = MaterialTheme.typography.body_32,
+                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+                        )
                     }
                     MediaItemsRow(collection.media)
                 }
             }
+
+            spacer(height = 32.dp)
         }
     }
 }
 
 @Composable
 private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
-    TvLazyRow(
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        spacer(width = 16.dp)
         items(state.featuredMedia) { item -> MediaItemCard(item) }
         items(state.redeemableOffers) { item ->
             val navigator = LocalNavigator.current
@@ -138,6 +147,18 @@ private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
                 )
             }
         }
+        spacer(width = 16.dp)
+    }
+}
+
+@Composable
+private fun MediaItemsRow(media: List<MediaEntity>) {
+    TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        spacer(width = 16.dp)
+        items(media) { media ->
+            MediaItemCard(media)
+        }
+        spacer(width = 16.dp)
     }
 }
 
