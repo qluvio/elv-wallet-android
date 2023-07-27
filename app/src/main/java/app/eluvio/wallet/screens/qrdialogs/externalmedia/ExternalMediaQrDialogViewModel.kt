@@ -7,6 +7,7 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.TokenStore
+import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.screens.destinations.ExternalMediaQrDialogDestination
 import app.eluvio.wallet.util.logging.Log
@@ -20,15 +21,19 @@ class ExternalMediaQrDialogViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val contentStore: ContentStore,
     private val tokenStore: TokenStore,
+    private val apiProvider: ApiProvider
 ) : BaseViewModel<ExternalMediaQrDialogViewModel.State>(State()) {
     data class State(val qrCode: Bitmap? = null, val error: Boolean = false)
 
     private val mediaId = ExternalMediaQrDialogDestination.argsFrom(savedStateHandle).mediaItemId
     override fun onResume() {
         super.onResume()
-        contentStore.observeMediaItem(mediaId)
-            .switchMapSingle {
-                generateQrCode(getAuthorizedUrl(it))
+        apiProvider.getFabricEndpoint()
+            .flatMapPublisher { endpoint ->
+                contentStore.observeMediaItem(mediaId)
+                    .switchMapSingle { media ->
+                        generateQrCode(getAuthorizedUrl(endpoint, media))
+                    }
             }
             .subscribeBy(
                 onNext = {
@@ -42,9 +47,18 @@ class ExternalMediaQrDialogViewModel @Inject constructor(
             .addTo(disposables)
     }
 
-    private fun getAuthorizedUrl(media: MediaEntity): String {
-        val url = Uri.parse(media.mediaFile.takeIf { it.isNotEmpty() }
-            ?: media.mediaLinks.values.first())
+    private fun getAuthorizedUrl(baseUrl: String, media: MediaEntity): String {
+        val url = Uri.parse(
+            buildString {
+                append(
+                    media.mediaFile.takeIf { it.isNotEmpty() }
+                        ?: media.mediaLinks.values.first()
+                )
+                if (!startsWith("http")) {
+                    insert(0, baseUrl)
+                }
+            }
+        )
         val token = tokenStore.fabricToken
         return if (token != null && url.getQueryParameter("authorization") == null) {
             url.buildUpon()

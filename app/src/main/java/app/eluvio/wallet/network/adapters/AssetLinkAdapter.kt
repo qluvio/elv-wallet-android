@@ -13,9 +13,16 @@ import com.squareup.moshi.JsonClass
 class AssetLinkAdapter {
     @FromJson
     fun fromJson(assetLinkJson: AssetLinkJson): AssetLinkDto {
-        val hash = assetLinkJson.dot.container
-        val filePath = assetLinkJson.slash.removePrefix("./")
-        return AssetLinkDto("q/$hash/$filePath")
+        return if (assetLinkJson.slash.startsWith("/qfab/")) {
+            // When the link contains "qfab", it also has a different "container" value,
+            // in that case we ignore [assetLinkJson.dot.container]
+            val filePath = assetLinkJson.slash.removePrefix("/qfab/")
+            AssetLinkDto("q/$filePath")
+        } else {
+            val hash = assetLinkJson.dot.container
+            val filePath = assetLinkJson.slash.removePrefix("./")
+            AssetLinkDto("q/$hash/$filePath")
+        }
     }
 }
 

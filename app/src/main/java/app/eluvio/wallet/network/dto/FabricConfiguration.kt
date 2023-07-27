@@ -11,7 +11,7 @@ data class FabricConfiguration(
     @field:Json(name = "fabric_version") val fabricVersion: String,
 ) {
     // TODO: replace with failover logic (probably in a new component)
-    val fabricEndpoint: String = network.services.fabricApi.first()
+    val fabricEndpoint: String = "${network.services.fabricApi.first()}/s/${qspace.names.first()}"
 
     // TODO: replace with failover logic (probably in a new component)
     val authdEndpoint: String = network.services.authService.first()
