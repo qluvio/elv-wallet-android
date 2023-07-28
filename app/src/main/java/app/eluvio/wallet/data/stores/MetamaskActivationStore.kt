@@ -21,7 +21,6 @@ class MetamaskActivationStore @Inject constructor(
     private val tokenStore: TokenStore,
     private val environmentStore: EnvironmentStore,
     private val moshi: Moshi,
-    private val userStore: UserStore,
 ) {
 
     fun observeMetamaskActivationData(): Flowable<MetamaskActivationData> {
@@ -70,10 +69,7 @@ class MetamaskActivationStore @Inject constructor(
             .doOnSuccess {
                 val token = it.token
                 tokenStore.fabricToken = token
-            }
-            .flatMap {
-                userStore.saveUser(it.address)
-                    .andThen(Maybe.just(it))
+                tokenStore.walletAddress = it.address
             }
     }
 }

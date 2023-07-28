@@ -5,7 +5,7 @@ import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.FabricConfigStore
-import app.eluvio.wallet.data.stores.UserStore
+import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.navigation.asNewRoot
 import app.eluvio.wallet.screens.NavGraphs
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userStore: UserStore,
+    private val tokenStore: TokenStore,
     private val fabricConfigStore: FabricConfigStore,
     private val environmentStore: EnvironmentStore,
     private val signOutHandler: SignOutHandler,
@@ -33,12 +33,11 @@ class ProfileViewModel @Inject constructor(
 
         Flowable.combineLatest(
             environmentStore.observeSelectedEnvironment(),
-            fabricConfigStore.observeFabricConfiguration(),
-            userStore.getCurrentUser().toFlowable()
-        ) { env, config, user ->
+            fabricConfigStore.observeFabricConfiguration()
+        ) { env, config ->
             State(
-                address = user.walletAddress,
-                userId = user.userId,
+                address = tokenStore.walletAddress ?: "",
+                userId = tokenStore.userId ?: "",
                 network = env,
                 fabricNode = config.fabricEndpoint
             )

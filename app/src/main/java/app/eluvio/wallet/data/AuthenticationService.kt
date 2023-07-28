@@ -3,7 +3,6 @@ package app.eluvio.wallet.data
 import android.util.Base64
 import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
-import app.eluvio.wallet.data.stores.UserStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.AuthServicesApi
 import app.eluvio.wallet.network.api.authd.SignBody
@@ -23,7 +22,6 @@ class AuthenticationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val fabricConfigStore: FabricConfigStore,
     private val tokenStore: TokenStore,
-    private val userStore: UserStore,
 ) {
     fun getFabricToken(): Single<String> {
         return apiProvider.getApi(AuthServicesApi::class).flatMap { api -> getFabricToken(api) }
@@ -37,10 +35,7 @@ class AuthenticationService @Inject constructor(
                     .doOnSuccess {
                         Log.d("login response: $it")
                         tokenStore.clusterToken = it.token
-                    }
-                    .flatMap {
-                        userStore.saveUser(it.address)
-                            .andThen(Single.just(it))
+                        tokenStore.walletAddress = it.address
                     }
                     .flatMap { jwtResponse ->
                         val (accountId, hash, tokenString) = createTokenParts(
