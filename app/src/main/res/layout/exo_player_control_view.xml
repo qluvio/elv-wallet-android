@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- IMPORTANT! This layout contains ViewGroups that appear
+redundant. However, Media3 is looking for specific ID's for UI show/hide logic and animations,
+so be mindful of pruning the view hierarchy-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 0dp dimensions are used to prevent this view from influencing the size of
+         the parent view if it uses "wrap_content". It is expanded to occupy the
+         entirety of the parent in code, after the parent's size has been
+         determined. See: https://github.com/google/ExoPlayer/issues/8726.
+    -->
+    <View
+        android:id="@id/exo_controls_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/exo_black_opacity_60" />
+
+    <LinearLayout
+        android:id="@id/exo_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="@dimen/exo_styled_bottom_bar_margin_top"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="12dp"
+        android:layoutDirection="ltr"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Keep this to make sure play button hides with the rest of the elements -->
+            <FrameLayout
+                android:id="@id/exo_center_controls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:clipToPadding="false"
+                android:gravity="center"
+                android:layoutDirection="ltr"
+                android:padding="12dp">
+
+                <ImageButton
+                    android:id="@id/exo_play_pause"
+                    style="@style/ExoStyledControls.Button.Center.PlayPause"
+                    android:nextFocusDown="@id/exo_subtitle" />
+            </FrameLayout>
+
+            <androidx.media3.ui.DefaultTimeBar
+                android:id="@id/exo_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@id/exo_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|start"
+                android:layoutDirection="ltr"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingLeft="@dimen/exo_styled_bottom_bar_time_padding"
+                android:paddingEnd="@dimen/exo_styled_bottom_bar_time_padding"
+                android:paddingRight="@dimen/exo_styled_bottom_bar_time_padding">
+
+                <TextView
+                    android:id="@id/exo_position"
+                    style="@style/ExoStyledControls.TimeText.Position" />
+
+                <TextView style="@style/ExoStyledControls.TimeText.Separator" />
+
+                <TextView
+                    android:id="@id/exo_duration"
+                    style="@style/ExoStyledControls.TimeText.Duration" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@id/exo_basic_controls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layoutDirection="ltr">
+
+                <ImageButton
+                    android:id="@id/exo_subtitle"
+                    style="@style/ExoStyledControls.Button.Bottom.CC"
+                    android:nextFocusLeft="@id/exo_play_pause"
+                    android:nextFocusUp="@id/exo_play_pause" />
+
+                <ImageButton
+                    android:id="@id/exo_settings"
+                    style="@style/ExoStyledControls.Button.Bottom.Settings"
+                    android:nextFocusUp="@id/exo_play_pause" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</merge>

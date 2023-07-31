@@ -149,7 +149,7 @@ class NftDetailViewModel @Inject constructor(
                         updateState { copy(redeemableOffers = offers) }
                     },
                     onError = {
-                        Log.e("stav: fuck ", it)
+                        Log.e("Error loading offerStates", it)
                     }
                 )
                 .addTo(disposables)
