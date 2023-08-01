@@ -64,6 +64,10 @@ fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
             InfoField("Network: $network")
             Spacer(Modifier.height(10.dp))
             InfoField("Fabric Node: ${state.fabricNode}")
+            Spacer(Modifier.height(10.dp))
+            InfoField("Authority Service: ${state.authNode}")
+            Spacer(Modifier.height(10.dp))
+            InfoField("Eth Service: ${state.ethNode}")
 
             Spacer(Modifier.weight(1f)) // take up remaining space
 
@@ -106,7 +110,9 @@ private fun ProfilePreview() = EluvioThemePreview {
             address = "0x00f9f89f8f98",
             userId = "ius1f1fd2d8d82e21d",
             network = SelectedEnvEntity.Environment.Demo,
-            fabricNode = "https://host-2-2-2-2.cf.io"
+            fabricNode = "https://host-2-2-2-2.cf.io",
+            authNode = "https://host-2-2-2-2.cf.io/as",
+            ethNode = "https://host-2-2-2-2.cf.io/eth",
         ),
         onSignOut = {}
     )

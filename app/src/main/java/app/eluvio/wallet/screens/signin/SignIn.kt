@@ -47,6 +47,7 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
+import app.eluvio.wallet.screens.common.offsetAndFakeSize
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.screens.destinations.MetamaskSignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -83,7 +84,11 @@ private fun SignIn(
                 .align(Alignment.Start)
                 .padding(start = 50.dp, top = 20.dp)
         )
-        Text(text = "Scan QR Code", style = MaterialTheme.typography.title_62)
+        Text(
+            text = "Scan QR Code",
+            style = MaterialTheme.typography.title_62,
+            modifier = Modifier.offsetAndFakeSize(yOffset = (-24).dp)
+        )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = "Scan the QR Code with your camera app or a QR code reader on your device to verify the code.",

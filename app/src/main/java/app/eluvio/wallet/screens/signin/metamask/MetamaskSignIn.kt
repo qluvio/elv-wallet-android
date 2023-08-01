@@ -24,6 +24,7 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
+import app.eluvio.wallet.screens.common.offsetAndFakeSize
 import app.eluvio.wallet.screens.signin.QrData
 import app.eluvio.wallet.screens.signin.SignInViewModel
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -51,7 +52,8 @@ private fun MetamaskSignIn(state: SignInViewModel.State, onRequestNewToken: () -
         )
         Text(
             stringResource(R.string.metamask_sign_on_title),
-            style = MaterialTheme.typography.title_62
+            style = MaterialTheme.typography.title_62,
+            modifier = Modifier.offsetAndFakeSize(yOffset = (-24).dp)
         )
         Image(
             painterResource(R.drawable.metamask_fox),

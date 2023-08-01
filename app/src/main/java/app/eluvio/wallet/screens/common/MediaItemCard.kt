@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +67,7 @@ fun MediaItemCard(
                     modifier = Modifier
                         .size(40.dp)
                         .align(Alignment.Center)
+                        .alpha(0.75f)
                 )
             }
         },

@@ -25,7 +25,9 @@ class ProfileViewModel @Inject constructor(
         val address: String = "",
         val userId: String = "",
         val network: SelectedEnvEntity.Environment? = null,
-        val fabricNode: String = ""
+        val fabricNode: String = "",
+        val authNode: String = "",
+        val ethNode: String = "",
     )
 
     override fun onResume() {
@@ -39,7 +41,9 @@ class ProfileViewModel @Inject constructor(
                 address = tokenStore.walletAddress ?: "",
                 userId = tokenStore.userId ?: "",
                 network = env,
-                fabricNode = config.fabricEndpoint
+                fabricNode = config.fabricEndpoint,
+                authNode = config.authdEndpoint,
+                ethNode = config.network.services.ethereumApi.first(),
             )
         }
             .subscribeBy { state ->
