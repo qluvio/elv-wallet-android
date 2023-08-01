@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "app.eluvio.wallet"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -110,6 +110,8 @@ dependencies {
     implementation(libs.androidx.media3.okhttp)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.ui.leanback)
+
+    implementation(libs.androidx.crypto)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.junit)
