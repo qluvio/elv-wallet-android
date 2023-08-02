@@ -113,6 +113,7 @@ dependencies {
     implementation(libs.androidx.media3.ui.leanback)
 
     implementation(libs.androidx.crypto)
+    implementation(libs.timber)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.junit)
