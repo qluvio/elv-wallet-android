@@ -17,7 +17,6 @@ package app.eluvio.wallet.screens.videoplayer
     */
 
 
-
 //private fun makeDbProvider(): DatabaseProvider {
 //    TODO("Not yet implemented")
 //}

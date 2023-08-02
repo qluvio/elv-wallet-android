@@ -17,7 +17,7 @@ android {
         applicationId = "app.eluvio.wallet"
         minSdk = 23
         targetSdk = 33
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0"
 
     }
@@ -30,6 +30,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk.debugSymbolLevel = "FULL"
         }
     }
     compileOptions {
