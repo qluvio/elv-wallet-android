@@ -4,9 +4,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
+import dagger.multibindings.ElementsIntoSet
 import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
@@ -32,6 +33,35 @@ class MediaEntity : RealmObject {
     var tvBackgroundImage: String = ""
 
     var gallery: RealmList<GalleryItemEntity> = realmListOf()
+
+    var lockedState: LockedStateEntity? = null
+
+    fun imageOrLockedImage(): String = with(requireLockedState()) {
+        lockedImage?.takeIf { locked } ?: image
+    }
+
+    fun nameOrLockedName(): String = with(requireLockedState()) {
+        lockedName?.takeIf { locked } ?: name
+    }
+
+    /**
+     * Returns the aspect ratio of the image, or the locked aspect ratio if locked.
+     * If neither are set, returns [ASPECT_RATIO_SQUARE].
+     */
+    fun aspectRatio(): Float {
+        val lockedState = requireLockedState()
+        return lockedState.imageAspectRatio.takeIf { lockedState.locked }
+            ?: imageAspectRatio
+            ?: ASPECT_RATIO_SQUARE
+    }
+
+    fun requireLockedState(): LockedStateEntity {
+        return lockedState ?: LockedStateEntity()
+    }
+
+    fun shouldBeHidden(): Boolean {
+        return with(requireLockedState()) { locked && hideWhenLocked }
+    }
 
     override fun toString(): String {
         return "MediaEntity(id='$id', name='$name', image='$image', mediaType='$mediaType', mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery)"
@@ -81,11 +111,24 @@ class MediaEntity : RealmObject {
         const val ASPECT_RATIO_POSTER = 2f / 3f
     }
 
+    class LockedStateEntity : EmbeddedRealmObject {
+        var locked: Boolean = false
+        var hideWhenLocked: Boolean = false
+
+        // full path to image
+        var lockedImage: String? = null
+        var lockedName: String? = null
+
+        var imageAspectRatio: Float? = null
+        var subtitle: String? = null
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {
         @Provides
-        @IntoSet
-        fun provideEntity(): KClass<out TypedRealmObject> = MediaEntity::class
+        @ElementsIntoSet
+        fun provideEntity(): Set<KClass<out TypedRealmObject>> =
+            setOf(MediaEntity::class, LockedStateEntity::class)
     }
 }

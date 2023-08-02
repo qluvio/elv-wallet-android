@@ -1,10 +1,7 @@
 package app.eluvio.wallet.screens.nftdetail
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -29,11 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
-import androidx.tv.material3.Border
-import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -43,13 +37,10 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MediaItemCard
-import app.eluvio.wallet.screens.common.VideoPlayer
 import app.eluvio.wallet.screens.common.WrapContentText
-import app.eluvio.wallet.screens.common.dimContent
 import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.onRedeemTagSurface
@@ -113,7 +104,10 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                         )
                     }
                 }
-                items(section.collections, contentType = { "collection" }) { collection ->
+                // Only show collections that have at least one visible media item
+                val collections = section.collections
+                    .filter { collection -> collection.media.any { !it.shouldBeHidden() } }
+                items(collections, contentType = { "collection" }) { collection ->
                     if (collection.name.isNotEmpty()) {
                         Text(
                             collection.name,
@@ -153,12 +147,15 @@ private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
 
 @Composable
 private fun MediaItemsRow(media: List<MediaEntity>) {
-    TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        spacer(width = 16.dp)
-        items(media) { media ->
-            MediaItemCard(media)
+    val items = media.filter { !it.shouldBeHidden() }
+    if (items.isNotEmpty()) {
+        TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            spacer(width = 16.dp)
+            items(items) { media ->
+                MediaItemCard(media)
+            }
+            spacer(width = 16.dp)
         }
-        spacer(width = 16.dp)
     }
 }
 
@@ -225,17 +222,17 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
 //            rewardTag()
 //        }
 //    } else {
-        ImageCard(
-            imageUrl = item.imageUrl,
-            contentDescription = item.name,
-            onClick = onClick,
-            modifier = Modifier.size(150.dp),
-            focusedOverlay = {
-                offerTitle()
-                rewardTag()
-            },
-            unFocusedOverlay = rewardTag
-        )
+    ImageCard(
+        imageUrl = item.imageUrl,
+        contentDescription = item.name,
+        onClick = onClick,
+        modifier = Modifier.size(150.dp),
+        focusedOverlay = {
+            offerTitle()
+            rewardTag()
+        },
+        unFocusedOverlay = rewardTag
+    )
 //    }
 }
 

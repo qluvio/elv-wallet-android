@@ -21,7 +21,7 @@ import io.realm.kotlin.types.RealmDictionary
 
 fun NftResponse.toNfts(): List<NftEntity> {
     val contents = contents ?: emptyList()
-    return contents.mapIndexedNotNull { index, dto ->
+    return contents.mapNotNull { dto ->
         // What makes this token truly unique is the combination of contract address and token id.
         // This is needed because the internal entities (sections, collections, media) have their own ID, but it's not actually unique.
         // Two MediaItems with the same ID can point to different assets, so we need to persist them differently.
@@ -39,7 +39,7 @@ fun NftResponse.toNfts(): List<NftEntity> {
             // Currently, additional_media_sections is required. In the future we'll probably have
             // to support additional_media for backwards compatibility.
             val additionalMediaSections =
-                dto.nft_template.additional_media_sections ?: return@mapIndexedNotNull null
+                dto.nft_template.additional_media_sections ?: return@mapNotNull null
             featuredMedia =
                 additionalMediaSections.featured_media?.map { it.toEntity(tokenUniqueId) }
                     .toRealmListOrEmpty()
@@ -97,15 +97,24 @@ fun MediaItemDto.toEntity(idPrefix: String): MediaEntity {
         image = dto.image ?: ""
         posterImagePath = dto.poster_image?.path
         mediaType = dto.media_type ?: ""
-        imageAspectRatio = when (dto.image_aspect_ratio) {
-            "Square" -> MediaEntity.ASPECT_RATIO_SQUARE
-            "Wide" -> MediaEntity.ASPECT_RATIO_WIDE
-            else -> null
-        }
+        imageAspectRatio = dto.image_aspect_ratio?.asAspectRatioFloat()
         mediaFile = dto.media_file?.path ?: ""
         mediaLinks = dto.media_link.toPathMap()
         tvBackgroundImage = dto.background_image_tv?.path ?: ""
         gallery = dto.gallery?.map { it.toEntity() }.toRealmListOrEmpty()
+        lockedState = dto.getLockedState()
+    }
+}
+
+private fun MediaItemDto.getLockedState(): MediaEntity.LockedStateEntity {
+    val dto = this
+    return MediaEntity.LockedStateEntity().apply {
+        locked = dto.locked == true
+        hideWhenLocked = dto.locked_state?.hide_when_locked == true
+        lockedImage = dto.locked_state?.image
+        lockedName = dto.locked_state?.name
+        imageAspectRatio = dto.locked_state?.image_aspect_ratio?.asAspectRatioFloat()
+        subtitle = dto.locked_state?.subtitle_1
     }
 }
 
@@ -121,4 +130,12 @@ fun MediaLinkDto?.toPathMap(): RealmDictionary<String> {
     return this?.sources
         ?.mapValues { (_, link) -> link.path }
         .toRealmDictionaryOrEmpty()
+}
+
+private fun String.asAspectRatioFloat(): Float? {
+    return when (this) {
+        "Square" -> MediaEntity.ASPECT_RATIO_SQUARE
+        "Wide" -> MediaEntity.ASPECT_RATIO_WIDE
+        else -> null
+    }
 }

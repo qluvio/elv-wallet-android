@@ -68,6 +68,8 @@ data class MediaItemDto(
     val media_link: MediaLinkDto?,
     val background_image_tv: AssetLinkDto?,
     val gallery: List<GalleryItemDto>?,
+    val locked: Boolean?,
+    val locked_state: LockedStateDto?,
 )
 
 @JsonClass(generateAdapter = true)
@@ -93,4 +95,13 @@ data class RedeemableOfferDto(
     val animation: MediaLinkDto?,
     // Display only while redeeming.
     val redeem_animation: MediaLinkDto?,
+)
+
+@JsonClass(generateAdapter = true)
+data class LockedStateDto(
+    val hide_when_locked: Boolean?,
+    val image: String?,
+    val image_aspect_ratio: String?,
+    val name: String?,
+    val subtitle_1: String?,
 )

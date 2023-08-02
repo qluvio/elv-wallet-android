@@ -49,13 +49,34 @@ class FalsyObjectAdapter(
      * Wrap every non-primitive / non-string type with this adapter.
      */
     class Factory : JsonAdapter.Factory {
+        private val wrapperTypes = setOf<Class<*>>(
+            String::class.java,
+            java.lang.String::class.java,
+            Boolean::class.java,
+            java.lang.Boolean::class.java,
+            Int::class.java,
+            java.lang.Integer::class.java,
+            Long::class.java,
+            java.lang.Long::class.java,
+            Float::class.java,
+            java.lang.Float::class.java,
+            Double::class.java,
+            java.lang.Double::class.java,
+            Byte::class.java,
+            java.lang.Byte::class.java,
+            Char::class.java,
+            java.lang.Character::class.java,
+            Short::class.java,
+            java.lang.Short::class.java,
+        )
+
         override fun create(
             type: Type,
             annotations: MutableSet<out Annotation>,
             moshi: Moshi
         ): JsonAdapter<*>? {
             val rawType = type.rawType
-            if (rawType.isPrimitive || rawType == String::class.java) {
+            if (rawType.isPrimitive || rawType in wrapperTypes) {
                 return null
             }
             val delegate = moshi.nextAdapter<Any>(this, type, annotations)
