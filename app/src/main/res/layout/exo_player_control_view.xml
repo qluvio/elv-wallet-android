@@ -48,6 +48,7 @@ so be mindful of pruning the view hierarchy-->
                 <ImageButton
                     android:id="@id/exo_play_pause"
                     style="@style/ExoStyledControls.Button.Center.PlayPause"
+                    android:nextFocusLeft="@id/exo_progress"
                     android:nextFocusDown="@id/exo_subtitle" />
             </FrameLayout>
 

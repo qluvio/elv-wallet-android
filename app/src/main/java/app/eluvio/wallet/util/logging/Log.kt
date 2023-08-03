@@ -1,4 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE")
+
 package app.eluvio.wallet.util.logging
 
 import timber.log.Timber
@@ -10,5 +11,5 @@ object Log {
     inline fun d(msg: String) = Timber.d(msg)
     inline fun v(msg: String) = Timber.v(msg)
     inline fun i(msg: String) = Timber.i(msg)
-    inline fun e(msg: String, throwable: Throwable? = null) = Timber.e(msg, throwable)
+    inline fun e(msg: String, throwable: Throwable? = null) = Timber.e(throwable, msg)
 }

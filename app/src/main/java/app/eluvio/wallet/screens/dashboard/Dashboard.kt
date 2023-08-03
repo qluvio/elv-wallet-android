@@ -138,7 +138,7 @@ private fun TopBar(onTabSelected: (Tabs) -> Unit) {
                             onFocus = {
                                 selectedTabIndex = index
                                 onTabSelected(tab)
-                                Log.e("Tab focused: $tab")
+                                Log.v("Tab focused: $tab")
                             },
                             onClick = { focusManager.moveFocus(FocusDirection.Down) },
                         )
