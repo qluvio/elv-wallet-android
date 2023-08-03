@@ -1,9 +1,12 @@
 package app.eluvio.wallet.screens.videoplayer
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.DefaultTimeBar
@@ -24,7 +27,7 @@ import javax.inject.Inject
 @ActivityDestination(navArgsDelegate = VideoPlayerArgs::class)
 @AndroidEntryPoint
 @UnstableApi
-class VideoPlayerActivity : FragmentActivity() {
+class VideoPlayerActivity : FragmentActivity(), Player.Listener {
     @Inject
     lateinit var videoOptionsFetcher: VideoOptionsFetcher
     private var disposable: Disposable? = null
@@ -49,6 +52,7 @@ class VideoPlayerActivity : FragmentActivity() {
         exoPlayer = ExoPlayer.Builder(this)
             .build()
             .apply {
+                addListener(this@VideoPlayerActivity)
                 playWhenReady = true
             }
         playerView = findViewById<PlayerView>(R.id.video_player_view)?.apply {
@@ -101,5 +105,25 @@ class VideoPlayerActivity : FragmentActivity() {
         exoPlayer?.release()
         exoPlayer = null
         super.onDestroy()
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        if (isPlaying) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+            if (exoPlayer?.isPlaying == true) {
+                exoPlayer?.pause()
+            } else {
+                exoPlayer?.play()
+            }
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }
