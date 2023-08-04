@@ -15,7 +15,7 @@ import java.util.Date
 import java.util.zip.Deflater
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 @Singleton
 class AuthenticationService @Inject constructor(
@@ -65,7 +65,7 @@ class AuthenticationService @Inject constructor(
         val base64Address = Base64.encodeToString(addressBytes, Base64.DEFAULT)
         val base58Address = Base58.encode(addressBytes)
         val sub = "iusr${base58Address}"
-        val duration = 7.days
+        val duration = 24.hours
         val accountId = "ikms${base58Address}"
 
         val tokenString = """

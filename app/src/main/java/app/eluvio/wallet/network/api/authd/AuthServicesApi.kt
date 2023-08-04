@@ -4,6 +4,9 @@ import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import io.reactivex.rxjava3.core.Single
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -13,7 +16,9 @@ import retrofit2.http.Path
 interface AuthServicesApi : AuthdApi {
     @POST("wlt/login/jwt")
     fun authdLogin(
-        @Body body: LoginBody = LoginBody()
+        // Static body. no need to create special classes for it.
+        @Body body: RequestBody = """{"ext":{"share_email":true}}"""
+            .toRequestBody("application/json".toMediaType())
     ): Single<AuthTokenResponse>
 
     @POST("wlt/sign/eth/{accountId}")
@@ -31,16 +36,6 @@ interface AuthServicesApi : AuthdApi {
         @Path("passcode") passcode: String,
     ): Single<Response<MetamaskTokenResponse>>
 }
-
-@JsonClass(generateAdapter = true)
-data class LoginBody(
-    val ext: Ext = Ext()
-)
-
-@JsonClass(generateAdapter = true)
-data class Ext(
-    @field:Json(name = "share_email") val shareEmail: Boolean = true
-)
 
 @JsonClass(generateAdapter = true)
 data class AuthTokenResponse(

@@ -40,7 +40,10 @@ class DeviceActivationStore @Inject constructor(
         return auth0Api.getToken(GetTokenRequest(deviceCode = deviceCode))
             .doOnSuccess {
                 Log.d("check token result $it")
-                tokenStore.idToken = it.body()?.idToken
+                val response = it.body()
+                tokenStore.idToken = response?.idToken
+                tokenStore.accessToken = response?.accessToken
+                tokenStore.refreshToken = response?.refreshToken
             }
     }
 }

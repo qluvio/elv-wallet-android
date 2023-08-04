@@ -22,6 +22,9 @@ import io.realm.kotlin.types.RealmDictionary
 fun NftResponse.toNfts(): List<NftEntity> {
     val contents = contents ?: emptyList()
     return contents.mapNotNull { dto ->
+        if (dto.nft_template.error != null) {
+            throw IllegalStateException("Fabric error. Probably Bad/expired Token.")
+        }
         // What makes this token truly unique is the combination of contract address and token id.
         // This is needed because the internal entities (sections, collections, media) have their own ID, but it's not actually unique.
         // Two MediaItems with the same ID can point to different assets, so we need to persist them differently.

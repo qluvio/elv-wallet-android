@@ -93,42 +93,45 @@ private fun EnvironmentSelection(
         )
 
         val navigator = LocalNavigator.current
-        val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
-        FocusGroup(Modifier.onPreviewKeyEvent {
-            // Exit screen when back is pressed while FocusGroup is focused
-            if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-                navigator(NavigationEvent.GoBack)
-                return@onPreviewKeyEvent true
-            }
-            false
-        }) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                contentColor = Color.White,
-                indicator = { EluvioTabIndicator(selectedTabIndex, it) }
-            ) {
-                val tabFocusRequesters = remember {
-                    List(size = state.availableEnvironments.size, init = { FocusRequester() })
+        if (state.availableEnvironments.size > 1) {
+            // Only show environment selection if there's more than one option
+            val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
+            FocusGroup(Modifier.onPreviewKeyEvent {
+                // Exit screen when back is pressed while FocusGroup is focused
+                if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
+                    navigator(NavigationEvent.GoBack)
+                    return@onPreviewKeyEvent true
                 }
-                val focusManager = LocalFocusManager.current
-                state.availableEnvironments.forEachIndexed { index, environment ->
-                    key(index) {
-                        EluvioTab(
-                            selected = index == selectedTabIndex,
-                            onFocus = { onEnvironmentSelected(environment) },
-                            onClick = { focusManager.moveFocus(FocusDirection.Down) },
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .restorableFocus()
-                                .focusRequester(tabFocusRequesters[index]),
-                        ) {
-                            Text(stringResource(id = environment.prettyEnvName))
+                false
+            }) {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    contentColor = Color.White,
+                    indicator = { EluvioTabIndicator(selectedTabIndex, it) }
+                ) {
+                    val tabFocusRequesters = remember {
+                        List(size = state.availableEnvironments.size, init = { FocusRequester() })
+                    }
+                    val focusManager = LocalFocusManager.current
+                    state.availableEnvironments.forEachIndexed { index, environment ->
+                        key(index) {
+                            EluvioTab(
+                                selected = index == selectedTabIndex,
+                                onFocus = { onEnvironmentSelected(environment) },
+                                onClick = { focusManager.moveFocus(FocusDirection.Down) },
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .restorableFocus()
+                                    .focusRequester(tabFocusRequesters[index]),
+                            ) {
+                                Text(stringResource(id = environment.prettyEnvName))
+                            }
                         }
                     }
-                }
-                if (selectedTabIndex != -1) {
-                    // Once we have a non-empty state (and only once), request focus on the selected tab
-                    tabFocusRequesters[selectedTabIndex].requestOnce()
+                    if (selectedTabIndex != -1) {
+                        // Once we have a non-empty state (and only once), request focus on the selected tab
+                        tabFocusRequesters[selectedTabIndex].requestOnce()
+                    }
                 }
             }
         }
@@ -141,12 +144,25 @@ private fun EnvironmentSelection(
 
 @Preview(device = Devices.TV_720p)
 @Composable
-private fun EnvSelectPreview() = EluvioThemePreview {
+private fun MultiEnvSelectPreview() = EluvioThemePreview {
     EnvironmentSelection(
         state = EnvSelectViewModel.State(
             false,
+            SelectedEnvEntity.Environment.Main,
             SelectedEnvEntity.Environment.values().toList(),
-            SelectedEnvEntity.Environment.Main
+        ),
+        onEnvironmentSelected = {},
+    )
+}
+
+@Preview(device = Devices.TV_720p)
+@Composable
+private fun SingleEnvSelectPreview() = EluvioThemePreview {
+    EnvironmentSelection(
+        state = EnvSelectViewModel.State(
+            false,
+            SelectedEnvEntity.Environment.Main,
+            listOf(SelectedEnvEntity.Environment.Main),
         ),
         onEnvironmentSelected = {},
     )

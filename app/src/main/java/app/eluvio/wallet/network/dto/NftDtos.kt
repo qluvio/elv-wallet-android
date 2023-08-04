@@ -22,6 +22,8 @@ data class NftDto(
 @JsonClass(generateAdapter = true)
 data class NftMetadataDto(
     val image: String,
+    // Careful adding other elements here! The server doesn't sanitize falsy values here,
+    // so objects/arrays/numbers/booleans can show up in the JSON as "", which will break Moshi.
 )
 
 @JsonClass(generateAdapter = true)
@@ -32,6 +34,8 @@ data class NftTemplateDto(
     val edition_name: String?,
     val additional_media_sections: AdditionalMediaSectionDto?,
     val redeemable_offers: List<RedeemableOfferDto>?,
+    // If 'error' shows up in the template, it's usually a sign of a bad/expired token.
+    val error: Map<String, Any>?,
 )
 
 @JsonClass(generateAdapter = true)

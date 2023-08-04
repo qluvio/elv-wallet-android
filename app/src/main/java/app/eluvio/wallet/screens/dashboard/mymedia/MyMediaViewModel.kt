@@ -36,7 +36,7 @@ class MyMediaViewModel @Inject constructor(
             )
             .addTo(disposables)
 
-        contentStore.observeWalletData()
+        contentStore.observeWalletData(forceRefresh = false)
             .mapNotNull { it.getOrNull() }
             .subscribeBy(
                 onNext = { nfts ->

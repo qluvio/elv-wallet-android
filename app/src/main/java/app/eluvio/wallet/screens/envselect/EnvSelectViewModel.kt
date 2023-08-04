@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.envselect
 
+import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.SelectedEnvEntity.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
@@ -13,9 +14,12 @@ class EnvSelectViewModel @Inject constructor(
 ) : BaseViewModel<EnvSelectViewModel.State>(State()) {
     data class State(
         val loading: Boolean = true,
-        val availableEnvironments: List<Environment> = Environment.values()
-            .toList(),
         val selectedEnvironment: Environment? = null,
+        val availableEnvironments: List<Environment> = if (BuildConfig.DEBUG) {
+            Environment.values().toList()
+        } else {
+            listOf(Environment.Main)
+        },
     )
 
     override fun onResume() {

@@ -25,8 +25,12 @@ class TokenStore @Inject constructor(
     )
 
     var idToken by prefs.nullableString("id_token")
+    var accessToken by prefs.nullableString("access_token")
+    var refreshToken by prefs.nullableString("refresh_token")
+
     var clusterToken by prefs.nullableString("cluster_token")
     var fabricToken by prefs.nullableString("id_token")
+
     var walletAddress by prefs.nullableString("wallet_address")
     val userId: String? get() = walletAddress?.let { "iusr${it.base58}" }
 

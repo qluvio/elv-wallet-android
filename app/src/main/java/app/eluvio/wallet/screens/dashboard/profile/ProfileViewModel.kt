@@ -6,8 +6,7 @@ import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
-import app.eluvio.wallet.navigation.asNewRoot
-import app.eluvio.wallet.screens.NavGraphs
+import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -53,8 +52,9 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun signOut() {
-        signOutHandler.signOut()
-            .subscribeBy { navigateTo(NavGraphs.preLaunchGraph.asNewRoot()) }
+        signOutHandler.signOut("Sign out successful")
+            // No action needed. SignoutHandler takes care of restarting the app
+            .subscribeBy(onError = { Log.e("error logging out", it) })
             .addTo(disposables)
     }
 }
