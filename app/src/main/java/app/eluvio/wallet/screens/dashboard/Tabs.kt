@@ -8,6 +8,7 @@ import app.eluvio.wallet.screens.destinations.MyMediaDestination
 import app.eluvio.wallet.screens.destinations.ProfileDestination
 import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 
+// Order matters here. The order of the tabs in this enum is the order they will appear in the UI.
 enum class Tabs(
     val direction: DirectionDestinationSpec,
     @StringRes val title: Int,

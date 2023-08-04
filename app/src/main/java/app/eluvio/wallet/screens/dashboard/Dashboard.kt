@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.IntState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -19,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -33,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -50,10 +53,9 @@ import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.FocusGroupScope
-import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.navigate
@@ -62,20 +64,47 @@ import com.ramcosta.composedestinations.navigation.navigate
 @Destination
 @Composable
 fun Dashboard() {
-    hiltViewModel<DashboardViewModel>().subscribeToState { _, state ->
-        Dashboard(state)
-    }
-}
-
-@Composable
-private fun Dashboard(state: DashboardViewModel.State) {
     val tabNavController = rememberNavController()
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TopBar(onTabSelected = { tab ->
-            tabNavController.navigate(tab.direction) {
-                launchSingleTop = true
+    tabNavController.addOnDestinationChangedListener { _, destination, _ ->
+        Log.e("Tab destination changed: $destination")
+    }
+    val selectedTabIndex = remember { mutableIntStateOf(0) }
+    val tabFocusRequesters = remember { List(Tabs.values().size) { FocusRequester() } }
+    var topBarFocused by remember { mutableStateOf(false) }
+    val navigator = LocalNavigator.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .onPreviewKeyEvent {
+                // Capture back presses
+                if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
+                    if (!topBarFocused) {
+                        tabFocusRequesters[selectedTabIndex.intValue].requestFocus()
+                    } else if (selectedTabIndex.intValue != 0) {
+                        tabFocusRequesters[0].requestFocus()
+                    } else {
+                        navigator(NavigationEvent.GoBack)
+                    }
+                    return@onPreviewKeyEvent true
+                }
+                false
             }
-        })
+    ) {
+        TopBar(
+            selectedTabIndex,
+            tabFocusRequesters,
+            onTabSelected = { tab, index ->
+                selectedTabIndex.intValue = index
+                tabNavController.navigate(tab.direction) {
+                    launchSingleTop = true
+                }
+            },
+            modifier = Modifier
+                .onFocusChanged {
+                    Log.d("topBar focused: ${it.hasFocus}")
+                    topBarFocused = it.hasFocus
+                }
+        )
         val modifier = Modifier.fillMaxSize()
         if (LocalInspectionMode.current) {
             // Don't load real content in preview mode
@@ -96,26 +125,22 @@ private fun Dashboard(state: DashboardViewModel.State) {
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvFoundationApi::class)
 @Composable
-private fun TopBar(onTabSelected: (Tabs) -> Unit) {
-    val navigator = LocalNavigator.current
+private fun TopBar(
+    // passing as State to delay read as much as possible
+    selectedTabIndex: IntState,
+    tabFocusRequesters: List<FocusRequester>,
+    onTabSelected: (Tabs, Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     // TODO: there's nothing stopping the logo and tabs from overlapping if the screen isn't wide enough
-    FocusGroup(contentAlignment = Alignment.Center, modifier = Modifier.onPreviewKeyEvent {
-        // Exit screen when back is pressed while FocusGroup is focused
-        if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-            navigator(NavigationEvent.GoBack)
-            return@onPreviewKeyEvent true
-        }
-        false
-    }) {
+    FocusGroup(contentAlignment = Alignment.Center, modifier = modifier) {
         val focusManager = LocalFocusManager.current
-        var selectedTabIndex by remember { mutableIntStateOf(0) }
         Box(
             Modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp, horizontal = 30.dp)
         ) {
             AppLogo()
-            val focusRequester = remember { FocusRequester() }
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(40.dp))
@@ -124,23 +149,26 @@ private fun TopBar(onTabSelected: (Tabs) -> Unit) {
                     .align(Alignment.Center)
             ) {
                 TabRow(
-                    selectedTabIndex = selectedTabIndex,
+                    selectedTabIndex = selectedTabIndex.intValue,
                     contentColor = Color.White,
-                    indicator = { EluvioTabIndicator(selectedTabIndex, it) },
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
+                    indicator = { EluvioTabIndicator(selectedTabIndex.intValue, it) },
+                    modifier = Modifier.requestInitialFocus()
                 ) {
-                    focusRequester.requestOnce()
                     Tabs.values().forEachIndexed { index, tab ->
+                        val selected by remember {
+                            derivedStateOf { selectedTabIndex.intValue == index }
+                        }
                         DashboardTab(
                             tab,
-                            selected = selectedTabIndex == index,
+                            selected = selected,
                             onFocus = {
-                                selectedTabIndex = index
-                                onTabSelected(tab)
-                                Log.v("Tab focused: $tab")
+                                if (!selected) {
+                                    onTabSelected(tab, index)
+                                    Log.v("Tab focused: $tab")
+                                }
                             },
                             onClick = { focusManager.moveFocus(FocusDirection.Down) },
+                            modifier = Modifier.focusRequester(tabFocusRequesters[index])
                         )
                     }
                 }
@@ -155,13 +183,14 @@ private fun FocusGroupScope.DashboardTab(
     tab: Tabs,
     selected: Boolean,
     onFocus: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     EluvioTab(
         selected = selected,
         onFocus = onFocus,
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 18.dp, vertical = 4.dp)
             .restorableFocus(),
     ) {
@@ -197,12 +226,15 @@ private fun FocusGroupScope.DashboardTab(
 @Composable
 @Preview(widthDp = 900)
 private fun TopBarPreview() {
-    TopBar(onTabSelected = { })
+    TopBar(
+        selectedTabIndex = remember { mutableIntStateOf(0) },
+        tabFocusRequesters = remember { List(Tabs.values().size) { FocusRequester() } },
+        onTabSelected = { _, _ -> }
+    )
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun DashboardPreview() {
-    val state = DashboardViewModel.State()
-    Dashboard(state)
+    Dashboard()
 }
