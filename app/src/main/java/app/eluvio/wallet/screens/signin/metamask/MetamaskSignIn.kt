@@ -25,6 +25,7 @@ import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.offsetAndFakeSize
+import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.screens.signin.QrData
 import app.eluvio.wallet.screens.signin.SignInViewModel
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -71,7 +72,11 @@ private fun MetamaskSignIn(state: SignInViewModel.State, onRequestNewToken: () -
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
-        TvButton(stringResource(R.string.request_new_code), onClick = onRequestNewToken)
+        TvButton(
+            stringResource(R.string.request_new_code),
+            onClick = onRequestNewToken,
+            modifier = Modifier.requestInitialFocus()
+        )
         Spacer(modifier = Modifier.height(30.dp))
     }
 }

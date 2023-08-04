@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,11 +42,13 @@ import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.TvButton
+import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.screens.destinations.SignInDestination
@@ -65,7 +69,7 @@ fun EnvSelect() {
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvFoundationApi::class)
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun EnvironmentSelection(
     state: EnvSelectViewModel.State,
@@ -93,52 +97,66 @@ private fun EnvironmentSelection(
         )
 
         val navigator = LocalNavigator.current
-        if (state.availableEnvironments.size > 1) {
-            // Only show environment selection if there's more than one option
-            val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
-            FocusGroup(Modifier.onPreviewKeyEvent {
-                // Exit screen when back is pressed while FocusGroup is focused
-                if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-                    navigator(NavigationEvent.GoBack)
-                    return@onPreviewKeyEvent true
-                }
-                false
-            }) {
-                TabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    contentColor = Color.White,
-                    indicator = { EluvioTabIndicator(selectedTabIndex, it) }
-                ) {
-                    val tabFocusRequesters = remember {
-                        List(size = state.availableEnvironments.size, init = { FocusRequester() })
-                    }
-                    val focusManager = LocalFocusManager.current
-                    state.availableEnvironments.forEachIndexed { index, environment ->
-                        key(index) {
-                            EluvioTab(
-                                selected = index == selectedTabIndex,
-                                onFocus = { onEnvironmentSelected(environment) },
-                                onClick = { focusManager.moveFocus(FocusDirection.Down) },
-                                modifier = Modifier
-                                    .padding(10.dp)
-                                    .restorableFocus()
-                                    .focusRequester(tabFocusRequesters[index]),
-                            ) {
-                                Text(stringResource(id = environment.prettyEnvName))
-                            }
-                        }
-                    }
-                    if (selectedTabIndex != -1) {
-                        // Once we have a non-empty state (and only once), request focus on the selected tab
-                        tabFocusRequesters[selectedTabIndex].requestOnce()
-                    }
-                }
-            }
+        val hasMultipleEnvs by remember {
+            derivedStateOf { state.availableEnvironments.size > 1 }
+        }
+        if (hasMultipleEnvs) {
+            EnvironmentTabRow(state, navigator, onEnvironmentSelected)
         }
         Spacer(modifier = Modifier.height(20.dp))
         TvButton(
             stringResource(R.string.sign_in_button),
-            onClick = { navigator(SignInDestination.asPush()) })
+            onClick = { navigator(SignInDestination.asPush()) },
+            modifier = if (hasMultipleEnvs) Modifier else Modifier.requestInitialFocus()
+        )
+    }
+}
+
+@OptIn(ExperimentalTvFoundationApi::class, ExperimentalTvMaterial3Api::class)
+@Composable
+fun EnvironmentTabRow(
+    state: EnvSelectViewModel.State,
+    navigator: Navigator,
+    onEnvironmentSelected: (SelectedEnvEntity.Environment) -> Unit
+) {
+    val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
+    FocusGroup(Modifier.onPreviewKeyEvent {
+        // Exit screen when back is pressed while FocusGroup is focused
+        if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
+            navigator(NavigationEvent.GoBack)
+            return@onPreviewKeyEvent true
+        }
+        false
+    }) {
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            contentColor = Color.White,
+            indicator = { EluvioTabIndicator(selectedTabIndex, it) }
+        ) {
+            val tabFocusRequesters = remember {
+                List(size = state.availableEnvironments.size, init = { FocusRequester() })
+            }
+            val focusManager = LocalFocusManager.current
+            state.availableEnvironments.forEachIndexed { index, environment ->
+                key(index) {
+                    EluvioTab(
+                        selected = index == selectedTabIndex,
+                        onFocus = { onEnvironmentSelected(environment) },
+                        onClick = { focusManager.moveFocus(FocusDirection.Down) },
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .restorableFocus()
+                            .focusRequester(tabFocusRequesters[index]),
+                    ) {
+                        Text(stringResource(id = environment.prettyEnvName))
+                    }
+                }
+            }
+            if (selectedTabIndex != -1) {
+                // Once we have a non-empty state (and only once), request focus on the selected tab
+                tabFocusRequesters[selectedTabIndex].requestOnce()
+            }
+        }
     }
 }
 
