@@ -86,7 +86,7 @@ private fun ImageGallery(state: ImageGalleryViewModel.State) {
                             .focusRequester(focusRequester)
                             .size(100.dp)
                     ) {
-                        val imageAlpha by remember { derivedStateOf { if (isFocused) 1f else 0.5f } }
+                        val imageAlpha by remember { derivedStateOf { if (isFocused) 1f else 0.75f } }
                         ShimmerImage(
                             model = image.url,
                             contentDescription = image.name,
