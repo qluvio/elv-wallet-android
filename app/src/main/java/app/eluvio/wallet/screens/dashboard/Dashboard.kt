@@ -96,6 +96,9 @@ fun Dashboard() {
             onTabSelected = { tab, index ->
                 selectedTabIndex.intValue = index
                 tabNavController.navigate(tab.direction) {
+                    popUpTo(tabNavController.graph.id) {
+                        inclusive = true
+                    }
                     launchSingleTop = true
                 }
             },

@@ -11,14 +11,12 @@ val LocalNavigator =
 
 class ComposeNavigator(
     private val navController: NavController,
-    private val onBackPressedDispatcherOwner: OnBackPressedDispatcherOwner
+    private val onBackPressedDispatcherOwner: OnBackPressedDispatcherOwner,
 ) : Navigator {
     override fun invoke(event: NavigationEvent) {
         when (event) {
             NavigationEvent.GoBack -> {
-                if (!navController.popBackStack()) {
-                    onBackPressedDispatcherOwner.onBackPressedDispatcher.onBackPressed()
-                }
+                onBackPressedDispatcherOwner.onBackPressedDispatcher.onBackPressed()
             }
 
             is NavigationEvent.Push -> {
