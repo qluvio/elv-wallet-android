@@ -24,6 +24,7 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.TvButton
+import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.theme.label_40
@@ -72,7 +73,11 @@ private fun FulfillmentQrDialog(state: FulfillmentQrDialogViewModel.State) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             val navigator = LocalNavigator.current
-            TvButton(text = "Back", onClick = { navigator(NavigationEvent.GoBack) })
+            TvButton(
+                text = "Back",
+                onClick = { navigator(NavigationEvent.GoBack) },
+                Modifier.requestInitialFocus()
+            )
         }
     }
 }

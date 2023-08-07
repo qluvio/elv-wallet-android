@@ -31,6 +31,7 @@ import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.ShimmerImage
+import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.redeemTagSurface
@@ -113,6 +114,7 @@ private fun RedeemButton(
         Surface(
             onClick = onRedeemClicked,
             enabled = !isRedeeming,
+            modifier = Modifier.requestInitialFocus(),
         ) {
             val text = remember(offerStatus) {
                 when (offerStatus) {
