@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.dashboard
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rxjava3.subscribeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,10 +27,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -44,6 +45,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
+import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
@@ -55,10 +57,13 @@ import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.FocusGroupScope
 import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.header_30
+import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.navigate
+import io.reactivex.rxjava3.processors.PublishProcessor
+import java.util.concurrent.TimeUnit
 
 @MainGraph(start = true)
 @Destination
@@ -77,7 +82,7 @@ fun Dashboard() {
         modifier = Modifier
             .onPreviewKeyEvent {
                 // Capture back presses
-                if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
+                if (it.isKeyUpOf(Key.Back)) {
                     if (!topBarFocused) {
                         tabFocusRequesters[selectedTabIndex.intValue].requestFocus()
                     } else if (selectedTabIndex.intValue != 0) {
@@ -189,12 +194,21 @@ private fun FocusGroupScope.DashboardTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val subject = remember { PublishProcessor.create<Any>() }
+    PrintVersionOnMultiClick(subject)
+
     EluvioTab(
         selected = selected,
         onFocus = onFocus,
         onClick = onClick,
         modifier = modifier
             .padding(horizontal = 18.dp, vertical = 4.dp)
+            .onKeyEvent {
+                if (tab == Tabs.Profile && it.isKeyUpOf(Key.DirectionRight)) {
+                    subject.onNext(true)
+                }
+                false
+            }
             .restorableFocus(),
     ) {
         val icon = tab.icon
@@ -214,6 +228,23 @@ private fun FocusGroupScope.DashboardTab(
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
+    }
+}
+
+@Composable
+private fun PrintVersionOnMultiClick(subject: PublishProcessor<Any>, clickThreshold: Int = 4) {
+    val tripleClick by subject.buffer(3, TimeUnit.SECONDS, clickThreshold)
+        .map { it.size >= clickThreshold }
+        .distinctUntilChanged()
+        .subscribeAsState(initial = false)
+    if (tripleClick) {
+        Toast
+            .makeText(
+                LocalContext.current,
+                "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                Toast.LENGTH_SHORT
+            )
+            .show()
     }
 }
 

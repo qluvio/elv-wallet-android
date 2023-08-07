@@ -54,6 +54,7 @@ import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
+import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -122,7 +123,7 @@ fun EnvironmentTabRow(
     val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
     FocusGroup(Modifier.onPreviewKeyEvent {
         // Exit screen when back is pressed while FocusGroup is focused
-        if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
+        if (it.isKeyUpOf(Key.Back)) {
             navigator(NavigationEvent.GoBack)
             return@onPreviewKeyEvent true
         }
