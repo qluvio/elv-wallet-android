@@ -23,6 +23,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -37,10 +38,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Composable
 fun FulfillmentQrDialog() {
     hiltViewModel<FulfillmentQrDialogViewModel>().subscribeToState { vm, state ->
-        if (state.code.isNotEmpty()) {
-            // ignore empty state
-            FulfillmentQrDialog(state)
-        }
+        FulfillmentQrDialog(state)
     }
 }
 
@@ -56,6 +54,7 @@ private fun FulfillmentQrDialog(state: FulfillmentQrDialogViewModel.State) {
                 .fillMaxHeight()
                 .align(Alignment.Center)
         ) {
+            Spacer(modifier = Modifier.height(32.dp))
             Text(text = "Success", style = MaterialTheme.typography.title_62)
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -63,13 +62,20 @@ private fun FulfillmentQrDialog(state: FulfillmentQrDialogViewModel.State) {
                 style = MaterialTheme.typography.label_40
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = state.code, style = MaterialTheme.typography.carousel_48)
-            Spacer(modifier = Modifier.height(6.dp))
-            if (state.qrBitmap != null) {
-                Image(
-                    bitmap = state.qrBitmap.asImageBitmap(),
-                    contentDescription = "qr code",
-                )
+            if (state.loading) {
+                Spacer(modifier = Modifier.weight(1f))
+                EluvioLoadingSpinner()
+                Spacer(modifier = Modifier.weight(1f))
+            } else {
+                Text(text = state.code, style = MaterialTheme.typography.carousel_48)
+                Spacer(modifier = Modifier.height(6.dp))
+                if (state.qrBitmap != null) {
+                    Image(
+                        bitmap = state.qrBitmap.asImageBitmap(),
+                        contentDescription = "qr code",
+                        Modifier.weight(1f)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
             val navigator = LocalNavigator.current
@@ -78,12 +84,19 @@ private fun FulfillmentQrDialog(state: FulfillmentQrDialogViewModel.State) {
                 onClick = { navigator(NavigationEvent.GoBack) },
                 Modifier.requestInitialFocus()
             )
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
+private fun FulfillmentQrDialogLoadingPreview() = EluvioThemePreview {
+    FulfillmentQrDialog(FulfillmentQrDialogViewModel.State(loading = true))
+}
+
+@Composable
+@Preview(device = Devices.TV_720p)
 private fun FulfillmentQrDialogPreview() = EluvioThemePreview {
-    FulfillmentQrDialog(FulfillmentQrDialogViewModel.State("1234567890"))
+    FulfillmentQrDialog(FulfillmentQrDialogViewModel.State(loading = false, code = "1234567890"))
 }

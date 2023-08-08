@@ -12,8 +12,8 @@ import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
-import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.zipWith
 import io.realm.kotlin.Realm
@@ -53,7 +53,7 @@ class FulfillmentStore @Inject constructor(
             }
     }
 
-    fun prefetchFulfillmentData(transactionHash: String): Completable {
+    fun loadFulfillmentData(transactionHash: String): Completable {
         return apiProvider.getApi(RedeemableOffersApi::class)
             .zipWith(envStore.observeSelectedEnvironment().firstOrError())
             .flatMap { (api, env) ->
@@ -64,13 +64,24 @@ class FulfillmentStore @Inject constructor(
             .ignoreElement()
     }
 
+    /**
+     * Observes fulfillment information from db. If it's not there, fetches it from the server.
+     */
     fun observeFulfillmentData(transactionHash: String) =
         realm.query<FulfillmentDataEntity>(
             "${FulfillmentDataEntity::transactionHash.name} = $0",
             transactionHash
         )
             .asFlowable()
-            .mapNotNull { it.firstOrNull() }
+            .switchMap {
+                val data = it.firstOrNull()
+                if (data == null) {
+                    Log.d("Fulfillment data not found, fetching from server")
+                    loadFulfillmentData(transactionHash).andThen(Flowable.empty())
+                } else {
+                    Flowable.just(data)
+                }
+            }
 
     fun initiateRedemption(
         nft: NftEntity,

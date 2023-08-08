@@ -1,6 +1,7 @@
 package app.eluvio.wallet.util.realm
 
 import app.eluvio.wallet.util.logging.Log
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -9,6 +10,7 @@ import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.delete
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.types.RealmObject
+import kotlinx.coroutines.rx3.rxCompletable
 import kotlinx.coroutines.rx3.rxFlowable
 
 // This is very simplified and doesn't handle incremental updates optimally
@@ -24,8 +26,9 @@ inline fun <reified T : RealmObject> Single<T>.saveTo(
     clearTable: Boolean = false,
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ): Single<T> {
-    return doOnSuccess { entity ->
-        saveBlocking(realm, listOf(entity), clearTable, updatePolicy)
+    return flatMap { entity ->
+        saveAsync(realm, listOf(entity), clearTable, updatePolicy)
+            .andThen(Single.just(entity))
     }
 }
 
@@ -39,24 +42,28 @@ inline fun <reified T : RealmObject> Single<List<T>>.saveTo(
     clearTable: Boolean = false,
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ): Single<List<T>> {
-    return doOnSuccess { list ->
-        saveBlocking(realm, list, clearTable, updatePolicy)
+    return flatMap { list ->
+        saveAsync(realm, list, clearTable, updatePolicy)
+            .andThen(Single.just(list))
     }
 }
 
-inline fun <reified T : RealmObject> saveBlocking(
+inline fun <reified T : RealmObject> saveAsync(
     realm: Realm,
     list: List<T>,
     clearTable: Boolean = false,
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
-) {
-    realm.writeBlocking {
-        if (clearTable) {
-            Log.w("Clearing table ${T::class.simpleName}")
-            delete<T>()
-        }
-        list.forEach { entity ->
-            copyToRealm(entity, updatePolicy)
+): Completable {
+    return rxCompletable {
+        realm.write {
+            if (clearTable) {
+                Log.w("Clearing table ${T::class.simpleName}")
+                delete<T>()
+            }
+            list.forEach { entity ->
+                copyToRealm(entity, updatePolicy)
+            }
+            Log.w("Done writing ${T::class.simpleName}")
         }
     }
 }

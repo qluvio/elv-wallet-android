@@ -154,14 +154,16 @@ class RedeemDialogViewModel @Inject constructor(
     private fun prefetchFulfillmentData(transaction: String?) {
         if (fulfillmentDataDisposable == null && transaction != null) {
             fulfillmentDataDisposable =
-                fulfillmentStore.prefetchFulfillmentData(transaction)
+                fulfillmentStore.loadFulfillmentData(transaction)
                     .retry(1)
-                    .subscribeBy(onError = {
-                        Log.e(
-                            "prefetch fulfillment data failed and not retrying! transaction=$transaction",
-                            it
-                        )
-                    })
+                    .subscribeBy(
+                        onComplete = { Log.d("prefetch complete for $transaction") },
+                        onError = {
+                            Log.e(
+                                "prefetch fulfillment data failed and not retrying! transaction=$transaction",
+                                it
+                            )
+                        })
                     .addTo(disposables)
         }
     }

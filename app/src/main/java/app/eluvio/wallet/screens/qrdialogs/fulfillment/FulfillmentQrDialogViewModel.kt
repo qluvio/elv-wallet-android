@@ -6,6 +6,7 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.screens.destinations.FulfillmentQrDialogDestination
+import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
@@ -17,7 +18,11 @@ class FulfillmentQrDialogViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val fulfillmentStore: FulfillmentStore,
 ) : BaseViewModel<FulfillmentQrDialogViewModel.State>(State()) {
-    data class State(val code: String = "", val qrBitmap: Bitmap? = null)
+    data class State(
+        val loading: Boolean = true,
+        val code: String = "",
+        val qrBitmap: Bitmap? = null
+    )
 
     private val transactionHash =
         FulfillmentQrDialogDestination.argsFrom(savedStateHandle).transactionHash
@@ -32,11 +37,16 @@ class FulfillmentQrDialogViewModel @Inject constructor(
                 url to code
             }
             .switchMapSingle { (url, code) ->
-                generateQrCode(url).map { State(code, it) }
+                generateQrCode(url).map { State(loading = false, code, qrBitmap = it) }
             }
             .subscribeBy(
                 onNext = { updateState { it } },
-                onError = {}
+                onError = {
+                    Log.e(
+                        "Error loading fulfillment for transaction $transactionHash",
+                        it
+                    )
+                }
             )
             .addTo(disposables)
     }
