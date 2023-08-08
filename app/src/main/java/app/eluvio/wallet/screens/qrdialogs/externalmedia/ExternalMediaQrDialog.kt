@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.FullscreenDialogStyle
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -45,7 +47,7 @@ private fun ExternalMediaQrDialog(state: ExternalMediaQrDialogViewModel.State) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().padding(Overscan.defaultPadding())
     ) {
         if (state.error) {
             ErrorView()

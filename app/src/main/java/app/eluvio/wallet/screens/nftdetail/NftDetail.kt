@@ -46,6 +46,7 @@ import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.onRedeemTagSurface
 import app.eluvio.wallet.theme.redeemTagSurface
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -77,7 +78,7 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                 Text(
                     text = state.title,
                     style = MaterialTheme.typography.title_62,
-                    modifier = Modifier.padding(start = 32.dp)
+                    modifier = Modifier.padding(start = Overscan.horizontalPadding)
                 )
                 var expanded by remember { mutableStateOf(false) }
                 Text(
@@ -87,7 +88,12 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .clickable { expanded = !expanded }
-                        .padding(start = 32.dp, end = 260.dp, top = 16.dp, bottom = 16.dp)
+                        .padding(
+                            start = Overscan.horizontalPadding,
+                            end = 260.dp,
+                            top = 16.dp,
+                            bottom = 16.dp
+                        )
                 )
             }
             item {
@@ -100,7 +106,10 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                         Text(
                             sectionName,
                             style = MaterialTheme.typography.body_32,
-                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+                            modifier = Modifier.padding(
+                                horizontal = Overscan.horizontalPadding,
+                                vertical = 16.dp
+                            )
                         )
                     }
                 }
@@ -112,7 +121,10 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                         Text(
                             collection.name,
                             style = MaterialTheme.typography.body_32,
-                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+                            modifier = Modifier.padding(
+                                horizontal = Overscan.horizontalPadding,
+                                vertical = 16.dp
+                            )
                         )
                     }
                     MediaItemsRow(collection.media)
@@ -127,7 +139,7 @@ private fun NftDetail(state: NftDetailViewModel.State) {
 @Composable
 private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
     TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        spacer(width = 16.dp)
+        spacer(width = 32.dp)
         items(state.featuredMedia) { item -> MediaItemCard(item) }
         items(state.redeemableOffers) { item ->
             val navigator = LocalNavigator.current
@@ -141,7 +153,7 @@ private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
                 )
             }
         }
-        spacer(width = 16.dp)
+        spacer(width = 32.dp)
     }
 }
 
@@ -150,11 +162,11 @@ private fun MediaItemsRow(media: List<MediaEntity>) {
     val items = media.filter { !it.shouldBeHidden() }
     if (items.isNotEmpty()) {
         TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            spacer(width = 16.dp)
+            spacer(width = 32.dp)
             items(items) { media ->
                 MediaItemCard(media)
             }
-            spacer(width = 16.dp)
+            spacer(width = 32.dp)
         }
     }
 }

@@ -27,6 +27,7 @@ import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -45,7 +46,12 @@ fun Profile() {
 @Composable
 @OptIn(ExperimentalTvMaterial3Api::class)
 fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Overscan.defaultPadding(excludeTop = true))
+    ) {
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.fillMaxWidth(0.6f)
@@ -76,7 +82,6 @@ fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
                 onClick = onSignOut,
                 Modifier.align(Alignment.CenterHorizontally)
             )
-            Spacer(Modifier.height(20.dp))
         }
     }
 }

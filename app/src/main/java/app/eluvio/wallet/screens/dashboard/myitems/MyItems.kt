@@ -108,7 +108,7 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
         pivotOffsets = PivotOffsets(0.1f),
         modifier = Modifier.fillMaxSize()
     ) {
-        item(key = "top_spacer", span = { TvGridItemSpan(maxLineSpan) }) {
+        item(span = { TvGridItemSpan(maxLineSpan) }) {
             Spacer(Modifier.height(10.dp))
         }
         items(media, key = { it.key }) { mediaItem ->
@@ -117,7 +117,7 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
                 onClick = { onItemClick(mediaItem) },
             )
         }
-        item(key = "bottom_spacer", span = { TvGridItemSpan(maxLineSpan) }) {
+        item(span = { TvGridItemSpan(maxLineSpan) }) {
             Spacer(Modifier.height(20.dp))
         }
     }

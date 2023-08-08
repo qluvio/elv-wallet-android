@@ -30,6 +30,7 @@ import app.eluvio.wallet.screens.signin.QrData
 import app.eluvio.wallet.screens.signin.SignInViewModel
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -49,7 +50,7 @@ private fun MetamaskSignIn(state: SignInViewModel.State, onRequestNewToken: () -
         AppLogo(
             Modifier
                 .align(Alignment.Start)
-                .padding(start = 50.dp, top = 20.dp)
+                .padding(Overscan.defaultPadding())
         )
         Text(
             stringResource(R.string.metamask_sign_on_title),

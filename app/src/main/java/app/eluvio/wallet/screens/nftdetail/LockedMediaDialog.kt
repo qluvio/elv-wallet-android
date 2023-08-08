@@ -19,6 +19,7 @@ import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.screens.common.Overscan
 import com.ramcosta.composedestinations.annotation.Destination
 
 
@@ -35,7 +36,7 @@ fun LockedMediaDialog(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(Overscan.defaultPadding())
     ) {
         ShimmerImage(
             model = imageUrl,

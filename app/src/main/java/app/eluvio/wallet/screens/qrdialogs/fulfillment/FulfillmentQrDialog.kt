@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -45,7 +47,7 @@ fun FulfillmentQrDialog() {
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun FulfillmentQrDialog(state: FulfillmentQrDialogViewModel.State) {
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().padding(Overscan.defaultPadding())) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,

@@ -53,6 +53,7 @@ import app.eluvio.wallet.screens.destinations.MetamaskSignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -82,7 +83,7 @@ private fun SignIn(
         AppLogo(
             Modifier
                 .align(Alignment.Start)
-                .padding(start = 50.dp, top = 20.dp)
+                .padding(Overscan.defaultPadding())
         )
         Text(
             text = "Scan QR Code",

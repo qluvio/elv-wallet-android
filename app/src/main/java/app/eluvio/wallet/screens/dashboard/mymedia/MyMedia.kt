@@ -45,11 +45,11 @@ fun MyMedia() {
 @Composable
 private fun MyMedia(state: MyMediaViewModel.State) {
     TvLazyColumn(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = itemArrangement,
         pivotOffsets = PivotOffsets(0.1f),
         modifier = Modifier.fillMaxSize()
     ) {
-        spacer(height = listSpacerSize)
+        spacer(height = 10.dp)
 
         item {
             FeaturedMediaRow(state.featuredMedia, state.baseUrl)
@@ -64,7 +64,7 @@ private fun MyMedia(state: MyMediaViewModel.State) {
             }
         }
 
-        spacer(height = listSpacerSize)
+        spacer(height = 7.dp)
     }
 }
 
@@ -141,9 +141,9 @@ private val itemArrangement = Arrangement.spacedBy(20.dp)
 
 /**
  * Extra space to add at the start and end of each row.
- * This is added as a list "item" so [itemArrangement] will also apply to it for a total of 30dp at the start and end of the list.
+ * This is added as a list "item" so [itemArrangement] will also apply to it for a total of 48dp at the start and end of the list.
  */
-private val listSpacerSize = 10.dp
+private val listSpacerSize = 28.dp
 
 @Composable
 @Preview(device = Devices.TV_720p)
