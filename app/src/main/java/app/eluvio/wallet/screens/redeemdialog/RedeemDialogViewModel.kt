@@ -1,5 +1,7 @@
 package app.eluvio.wallet.screens.redeemdialog
 
+import android.text.Html
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
@@ -15,13 +17,13 @@ import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.toDate
+import app.eluvio.wallet.util.toAnnotatedString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.realm.kotlin.types.RealmInstant
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -37,10 +39,11 @@ class RedeemDialogViewModel @Inject constructor(
 ) : BaseViewModel<RedeemDialogViewModel.State>(State()) {
     data class State(
         val title: String = "",
+        val subtitle: AnnotatedString = AnnotatedString(""),
         val image: String? = null,
-        val offerValid: Boolean = false,
+        val fulfillmentState: RedeemableOfferEntity.FulfillmentState = RedeemableOfferEntity.FulfillmentState.AVAILABLE,
         val dateRange: String = "",
-        val offerStatus: RedeemStateEntity.Status = RedeemStateEntity.Status.UNREDEEMED,
+        val offerStatus: RedeemStateEntity.RedeemStatus = RedeemStateEntity.RedeemStatus.UNREDEEMED,
         // Only needed by VM, View should not use this
         val _nftEntity: NftEntity? = null,
         // If offer is redeemed, this is the transaction hash
@@ -71,12 +74,16 @@ class RedeemDialogViewModel @Inject constructor(
                 val redeemState = nft.redeemStates.firstOrNull { it.offerId == offerId }
                     ?: error("Offer state not found")
                 val transaction = redeemState.transaction
-                prefetchFulfillmentData(transaction)
+                val fulfillmentState = offer.getFulfillmentState(redeemState)
+                if (fulfillmentState == RedeemableOfferEntity.FulfillmentState.AVAILABLE) {
+                    prefetchFulfillmentData(transaction)
+                }
                 val image = (offer.posterImagePath ?: offer.imagePath)?.let { "$endpoint$it" }
                 State(
                     title = offer.name,
+                    subtitle = Html.fromHtml(offer.description.trim()).toAnnotatedString(),
                     image = image,
-                    offerValid = offer.isValid,
+                    fulfillmentState = fulfillmentState,
                     dateRange = offer.dateRange,
                     offerStatus = redeemState.status,
                     _transaction = transaction,
@@ -90,7 +97,6 @@ class RedeemDialogViewModel @Inject constructor(
                 }
             )
             .addTo(disposables)
-
     }
 
     fun redeemOrShowOffer() {
@@ -130,7 +136,7 @@ class RedeemDialogViewModel @Inject constructor(
             }
             .takeUntil { nft ->
                 val status = nft.redeemStates.firstOrNull { it.offerId == offerId }?.status
-                status != RedeemStateEntity.Status.REDEEMING
+                status != RedeemStateEntity.RedeemStatus.REDEEMING
             }
             .ignoreElements()
     }
@@ -167,13 +173,6 @@ class RedeemDialogViewModel @Inject constructor(
                     .addTo(disposables)
         }
     }
-
-    private val RedeemableOfferEntity.isValid: Boolean
-        get() {
-            val availableAt = availableAt ?: return false
-            val expiresAt = expiresAt ?: return false
-            return RealmInstant.now() in availableAt..expiresAt
-        }
 
     private val RedeemableOfferEntity.dateRange: String
         get() {

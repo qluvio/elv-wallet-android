@@ -19,15 +19,16 @@ class RedeemStateEntity : EmbeddedRealmObject {
     var redeemer: String? = null
     var redeemed: RealmInstant? = null
     var transaction: String? = null
-    private var statusStr: String = Status.UNREDEEMED.value
+    private var statusStr: String = RedeemStatus.UNREDEEMED.value
 
     @Ignore
-    var status: Status by realmEnum(::statusStr)
+    var status: RedeemStatus by realmEnum(::statusStr)
 
-    enum class Status(override val value: String) : RealmEnum {
+    enum class RedeemStatus(override val value: String) : RealmEnum {
         UNREDEEMED("UNREDEEMED"),
         REDEEMING("REDEEMING"),
-        REDEEMED("REDEEMED"),
+        REDEEMED_BY_CURRENT_USER("REDEEMED_BY_CURRENT_USER"),
+        REDEEMED_BY_ANOTHER_USER("REDEEMED_BY_ANOTHER_USER"),
         REDEEM_FAILED("REDEEM_FAILED")
     }
 

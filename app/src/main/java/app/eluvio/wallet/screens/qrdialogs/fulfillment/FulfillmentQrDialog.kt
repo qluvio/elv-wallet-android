@@ -25,13 +25,13 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.title_62
-import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -47,7 +47,11 @@ fun FulfillmentQrDialog() {
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun FulfillmentQrDialog(state: FulfillmentQrDialogViewModel.State) {
-    Box(Modifier.fillMaxSize().padding(Overscan.defaultPadding())) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(Overscan.defaultPadding())
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,

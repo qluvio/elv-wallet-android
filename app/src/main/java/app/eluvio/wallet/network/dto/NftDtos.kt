@@ -89,8 +89,9 @@ data class GalleryItemDto(
 
 @JsonClass(generateAdapter = true)
 data class RedeemableOfferDto(
-    val name: String,
     val offer_id: String,
+    val name: String,
+    val description: String?,
     val image: AssetLinkDto?,
     val poster_image: AssetLinkDto?,
     val available_at: Date?,

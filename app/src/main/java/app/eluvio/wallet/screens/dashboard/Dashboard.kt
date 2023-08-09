@@ -55,9 +55,9 @@ import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.FocusGroupScope
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
 import com.ramcosta.composedestinations.DestinationsNavHost

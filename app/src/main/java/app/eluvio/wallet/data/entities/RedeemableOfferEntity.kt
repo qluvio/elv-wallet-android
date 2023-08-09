@@ -10,10 +10,12 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.TypedRealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import kotlin.reflect.KClass
 
 class RedeemableOfferEntity : EmbeddedRealmObject {
     var name: String = ""
+    var description: String = ""
     var offerId: String = ""
     var imagePath: String? = null
     var posterImagePath: String? = null
@@ -23,6 +25,28 @@ class RedeemableOfferEntity : EmbeddedRealmObject {
     // Relative paths to offer animations
     var animation: RealmDictionary<String> = realmDictionaryOf()
     var redeemAnimation: RealmDictionary<String> = realmDictionaryOf()
+
+    @Ignore
+    private val isCurrentlyAvailable: Boolean
+        get() {
+            val availableAt = availableAt ?: return false
+            val expiresAt = expiresAt ?: return false
+            return RealmInstant.now() in availableAt..expiresAt
+        }
+
+    fun getFulfillmentState(redeemState: RedeemStateEntity): FulfillmentState {
+        return when {
+            redeemState.status == RedeemStateEntity.RedeemStatus.REDEEMED_BY_ANOTHER_USER -> FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER
+            isCurrentlyAvailable -> FulfillmentState.AVAILABLE
+            else -> FulfillmentState.EXPIRED
+        }
+    }
+
+    enum class FulfillmentState {
+        EXPIRED,
+        AVAILABLE,
+        CLAIMED_BY_PREVIOUS_OWNER
+    }
 
     override fun toString(): String {
         return "RedeemableOfferEntity(name='$name', offerId='$offerId', imagePath='$imagePath', posterImagePath='$posterImagePath', availableAt=$availableAt, expiresAt=$expiresAt)"

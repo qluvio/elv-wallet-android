@@ -26,6 +26,7 @@ class FulfillmentStore @Inject constructor(
     private val apiProvider: ApiProvider,
     private val envStore: EnvironmentStore,
     private val realm: Realm,
+    private val tokenStore: TokenStore,
 ) {
 
     /**
@@ -37,7 +38,10 @@ class FulfillmentStore @Inject constructor(
                 api.getNftInfo(nft.contractAddress, nft.tokenId)
                     .flatMap { nftInfo ->
                         api.getRedemptionStatus(nftInfo.tenant).map { statuses ->
-                            nftInfo.tenant to nftInfo.toRedeemStateEntities(statuses)
+                            nftInfo.tenant to nftInfo.toRedeemStateEntities(
+                                statuses,
+                                tokenStore.walletAddress
+                            )
                         }
                     }
             }
@@ -94,14 +98,14 @@ class FulfillmentStore @Inject constructor(
             InitiateRedemptionRequest(reference, nft.contractAddress, nft.tokenId, offerId.toInt())
         return Completable.fromAction {
             // Optimistically set state to REDEEMING
-            nft.writeStatusBlocking(offerId, RedeemStateEntity.Status.REDEEMING)
+            nft.writeStatusBlocking(offerId, RedeemStateEntity.RedeemStatus.REDEEMING)
             Log.i("Optimistically set offer#${offerId} status to REDEEMING")
         }
             .andThen(apiProvider.getApi(RedeemableOffersApi::class))
             .flatMapCompletable { api -> api.initiateRedemption(tenant, request) }
             .doOnError {
                 // Revert optimism
-                nft.writeStatusBlocking(offerId, RedeemStateEntity.Status.UNREDEEMED)
+                nft.writeStatusBlocking(offerId, RedeemStateEntity.RedeemStatus.UNREDEEMED)
                 Log.e("Request failed, reverted offer#${offerId} status to UNREDEEMED")
             }
     }
@@ -109,7 +113,10 @@ class FulfillmentStore @Inject constructor(
     /**
      * Convenience method to update the status of an offer in Realm
      */
-    private fun NftEntity.writeStatusBlocking(offerId: String, status: RedeemStateEntity.Status) {
+    private fun NftEntity.writeStatusBlocking(
+        offerId: String,
+        status: RedeemStateEntity.RedeemStatus
+    ) {
         val nft = this
         realm.writeBlocking {
             findLatest(nft)?.also {

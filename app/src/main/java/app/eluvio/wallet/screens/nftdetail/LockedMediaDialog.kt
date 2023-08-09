@@ -15,11 +15,11 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.FullscreenDialogStyle
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.title_62
-import app.eluvio.wallet.screens.common.Overscan
 import com.ramcosta.composedestinations.annotation.Destination
 
 

@@ -60,8 +60,9 @@ fun NftResponse.toNfts(): List<NftEntity> {
 private fun RedeemableOfferDto.toEntity(): RedeemableOfferEntity {
     val dto = this
     return RedeemableOfferEntity().apply {
-        name = dto.name
         offerId = dto.offer_id
+        name = dto.name
+        description = dto.description ?: ""
         imagePath = dto.image?.path
         posterImagePath = dto.poster_image?.path
         availableAt = dto.available_at?.toRealmInstant()

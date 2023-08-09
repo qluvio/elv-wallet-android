@@ -24,3 +24,5 @@ fun EluvioColorScheme(): ColorScheme {
 
 val ColorScheme.redeemTagSurface: Color get() = Color(0xFFFFD541)
 val ColorScheme.onRedeemTagSurface: Color get() = Color.Black
+val ColorScheme.redeemAvailableText: Color get() = redeemTagSurface
+val ColorScheme.redeemExpiredText: Color get() = Color(0xFFF34242)

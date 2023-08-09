@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.nftdetail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,11 +33,13 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
+import app.eluvio.wallet.data.entities.RedeemableOfferEntity.FulfillmentState
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MediaItemCard
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.WrapContentText
 import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
@@ -46,7 +49,6 @@ import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.onRedeemTagSurface
 import app.eluvio.wallet.theme.redeemTagSurface
 import app.eluvio.wallet.theme.title_62
-import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -178,10 +180,15 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
     // https://issuetracker.google.com/issues/291642442), but then it won't scale right when
     // the card is focused.
     // So instead we draw it both in the focused overlay, and unfocused overlay.
-    val rewardTag = remember<@Composable BoxScope.() -> Unit> {
+    val rewardOverlay = remember<@Composable BoxScope.() -> Unit> {
         {
+            val text = when (item.fulfillmentState) {
+                FulfillmentState.AVAILABLE -> "REWARD"
+                FulfillmentState.EXPIRED -> "EXPIRED REWARD"
+                FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER -> "CLAIMED REWARD"
+            }
             Text(
-                text = "REWARD",
+                text = text,
                 style = MaterialTheme.typography.label_24,
                 color = MaterialTheme.colorScheme.onRedeemTagSurface,
                 modifier = Modifier
@@ -193,6 +200,14 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
                     .padding(horizontal = 6.dp, vertical = 0.dp)
                     .align(Alignment.BottomCenter)
             )
+            if (item.fulfillmentState != FulfillmentState.AVAILABLE) {
+                // Gray out unavailable offers
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.6f))
+                )
+            }
         }
     }
     val offerTitle = remember<@Composable BoxScope.() -> Unit> {
@@ -241,9 +256,9 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
         modifier = Modifier.size(150.dp),
         focusedOverlay = {
             offerTitle()
-            rewardTag()
+            rewardOverlay()
         },
-        unFocusedOverlay = rewardTag
+        unFocusedOverlay = rewardOverlay
     )
 //    }
 }
@@ -273,6 +288,7 @@ private fun NftDetailPreview() = EluvioThemePreview {
                 NftDetailViewModel.State.Offer(
                     "_id",
                     "NFT reward",
+                    fulfillmentState = FulfillmentState.AVAILABLE,
                     "https://via.placeholder.com/150",
                     "contractAddr",
                     "token_1",
@@ -317,11 +333,46 @@ private fun NftDetailPreview() = EluvioThemePreview {
 
 @Preview(widthDp = 200, heightDp = 200)
 @Composable
-private fun OfferCardPreview() = EluvioThemePreview {
+private fun OfferCardAvailablePreview() = EluvioThemePreview {
     OfferCard(
         item = NftDetailViewModel.State.Offer(
             "_id",
             "NFT reward",
+            fulfillmentState = FulfillmentState.AVAILABLE,
+            "https://via.placeholder.com/150",
+            "contractAddr",
+            "token_1",
+            animation = null,
+        ),
+        onClick = {}
+    )
+}
+
+@Preview(widthDp = 200, heightDp = 200)
+@Composable
+private fun OfferCardExpiredPreview() = EluvioThemePreview {
+    OfferCard(
+        item = NftDetailViewModel.State.Offer(
+            "_id",
+            "NFT reward",
+            fulfillmentState = FulfillmentState.EXPIRED,
+            "https://via.placeholder.com/150",
+            "contractAddr",
+            "token_1",
+            animation = null,
+        ),
+        onClick = {}
+    )
+}
+
+@Preview(widthDp = 200, heightDp = 200)
+@Composable
+private fun OfferCardClaimedByAnotherPreview() = EluvioThemePreview {
+    OfferCard(
+        item = NftDetailViewModel.State.Offer(
+            "_id",
+            "NFT reward",
+            fulfillmentState = FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER,
             "https://via.placeholder.com/150",
             "contractAddr",
             "token_1",
