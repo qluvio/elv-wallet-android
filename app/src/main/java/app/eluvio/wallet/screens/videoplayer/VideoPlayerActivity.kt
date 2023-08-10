@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 import androidx.media3.common.Player
@@ -85,6 +86,12 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
                 },
                 onError = {
                     Log.e("VideoPlayerFragment: Error fetching video options", it)
+                    Toast.makeText(
+                        this,
+                        "Error loading video. Try again later.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    finish()
                 }
             )
     }
