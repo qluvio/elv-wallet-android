@@ -1,5 +1,6 @@
 package app.eluvio.wallet.network.interceptors
 
+import android.os.Build
 import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.data.AuthenticationService
 import app.eluvio.wallet.data.SignOutHandler
@@ -29,7 +30,7 @@ class AccessTokenInterceptor @Inject constructor(
 ) : Interceptor {
 
     private val userAgent =
-        "${BuildConfig.APPLICATION_ID} AndroidTV v${BuildConfig.VERSION_NAME}"
+        "AndroidTV/${Build.VERSION.RELEASE} (api:${Build.VERSION.SDK_INT}; ${BuildConfig.APPLICATION_ID}:${BuildConfig.VERSION_NAME}_${BuildConfig.VERSION_CODE}; ${Build.MANUFACTURER}; ${Build.MODEL}; ${Build.DEVICE})"
 
     /** URLs that contain these paths should not get special handling for expired tokens. */
     private val authRequestPaths = setOf("wlt/login/jwt", "wlt/sign/eth")
