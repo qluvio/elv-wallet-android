@@ -78,7 +78,7 @@ fun MediaSectionDto.toEntity(idPrefix: String): MediaSectionEntity? {
     dto.collections ?: return null
     return MediaSectionEntity().apply {
         id = "${idPrefix}_${dto.id}"
-        name = dto.name
+        name = dto.name ?: ""
         collections = dto.collections.map { it.toEntity(idPrefix) }.toRealmList()
     }
 }

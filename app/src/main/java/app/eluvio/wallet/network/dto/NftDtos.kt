@@ -47,7 +47,7 @@ data class AdditionalMediaSectionDto(
 @JsonClass(generateAdapter = true)
 data class MediaSectionDto(
     val id: String,
-    val name: String,
+    val name: String?,
     val collections: List<MediaCollectionDto>?,
 )
 
