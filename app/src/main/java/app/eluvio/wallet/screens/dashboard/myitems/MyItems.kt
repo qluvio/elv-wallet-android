@@ -12,9 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,6 +28,7 @@ import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvGridItemSpan
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import androidx.tv.material3.Text
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.DashboardTabsGraph
@@ -33,8 +37,10 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.roundToInt
 
@@ -100,13 +106,25 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
             (availableWidth / cardWidth).roundToInt()
         }
     }
+    val scrollState = rememberTvLazyGridState()
+    val scope = rememberCoroutineScope()
     TvLazyVerticalGrid(
+        state = scrollState,
         columns = TvGridCells.Fixed(columnCount),
         horizontalArrangement = Arrangement.spacedBy(cardSpacing),
         verticalArrangement = Arrangement.spacedBy(cardSpacing),
         contentPadding = PaddingValues(horizontal = horizontalPadding),
         pivotOffsets = PivotOffsets(0.1f),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .onPreviewKeyEvent {
+                if (it.isKeyUpOf(Key.Back)) {
+                    scope.launch {
+                        scrollState.animateScrollToItem(0)
+                    }
+                }
+                false
+            }
     ) {
         item(span = { TvGridItemSpan(maxLineSpan) }) {
             Spacer(Modifier.height(10.dp))

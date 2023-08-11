@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -17,6 +20,7 @@ import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
+import androidx.tv.foundation.lazy.list.rememberTvLazyListState
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -30,8 +34,10 @@ import app.eluvio.wallet.screens.dashboard.myitems.MediaCard
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
+import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.launch
 
 @DashboardTabsGraph
 @Destination
@@ -44,10 +50,22 @@ fun MyMedia() {
 
 @Composable
 private fun MyMedia(state: MyMediaViewModel.State) {
+    val scrollState = rememberTvLazyListState()
+    val scope = rememberCoroutineScope()
     TvLazyColumn(
+        state = scrollState,
         verticalArrangement = itemArrangement,
         pivotOffsets = PivotOffsets(0.1f),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .onPreviewKeyEvent {
+                if (it.isKeyUpOf(Key.Back)) {
+                    scope.launch {
+                        scrollState.animateScrollToItem(0)
+                    }
+                }
+                false
+            }
     ) {
         spacer(height = 10.dp)
 

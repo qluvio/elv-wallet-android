@@ -28,7 +28,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -81,7 +80,7 @@ fun Dashboard() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .onPreviewKeyEvent {
+            .onKeyEvent {
                 // Capture back presses
                 if (it.isKeyUpOf(Key.Back)) {
                     if (!topBarFocused) {
@@ -91,7 +90,7 @@ fun Dashboard() {
                     } else {
                         navigator(NavigationEvent.GoBack)
                     }
-                    return@onPreviewKeyEvent true
+                    return@onKeyEvent true
                 }
                 false
             }
@@ -110,7 +109,6 @@ fun Dashboard() {
             },
             modifier = Modifier
                 .onFocusChanged {
-                    Log.d("topBar focused: ${it.hasFocus}")
                     topBarFocused = it.hasFocus
                 }
         )
