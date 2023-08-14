@@ -113,7 +113,8 @@ fun MediaItemDto.toEntity(idPrefix: String): MediaEntity {
 private fun MediaItemDto.getLockedState(): MediaEntity.LockedStateEntity {
     val dto = this
     return MediaEntity.LockedStateEntity().apply {
-        locked = dto.locked == true
+//        locked = dto.locked == true
+        locked = false // TODO: until we add new locked state API, pretend everything is unlocked
         hideWhenLocked = dto.locked_state?.hide_when_locked == true
         lockedImage = dto.locked_state?.image
         lockedName = dto.locked_state?.name
