@@ -17,9 +17,8 @@ android {
         applicationId = "app.eluvio.wallet"
         minSdk = 23
         targetSdk = 33
-        versionCode = 6
-        versionName = "1.0.1"
-
+        versionCode = 7
+        versionName = "1.0.2"
     }
 
     buildTypes {
