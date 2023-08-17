@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.videoplayer
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -51,6 +53,7 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
         onBackPressedDispatcher.addCallback(this, backPressedCallback)
 
         exoPlayer = ExoPlayer.Builder(this)
+            .setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
             .build()
             .apply {
                 addListener(this@VideoPlayerActivity)
@@ -70,6 +73,7 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
             // Manually show spinner until exoplayer figures itself out
             //noinspection MissingInflatedId
             findViewById<View>(androidx.media3.ui.R.id.exo_buffering).visibility = View.VISIBLE
+            requestFocus()
         }
 
         //noinspection MissingInflatedId
@@ -114,23 +118,16 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
         super.onDestroy()
     }
 
+    @SuppressLint("RestrictedApi")
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        return playerView?.dispatchKeyEvent(event) == true || super.dispatchKeyEvent(event)
+    }
+
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         if (isPlaying) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
-            if (exoPlayer?.isPlaying == true) {
-                exoPlayer?.pause()
-            } else {
-                exoPlayer?.play()
-            }
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
     }
 }
