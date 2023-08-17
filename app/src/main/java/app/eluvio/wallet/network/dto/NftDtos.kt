@@ -22,6 +22,7 @@ data class NftDto(
 @JsonClass(generateAdapter = true)
 data class NftMetadataDto(
     val image: String,
+    val display_name: String?,
     // Careful adding other elements here! The server doesn't sanitize falsy values here,
     // so objects/arrays/numbers/booleans can show up in the JSON as "", which will break Moshi.
 )
@@ -100,6 +101,14 @@ data class RedeemableOfferDto(
     val animation: MediaLinkDto?,
     // Display only while redeeming.
     val redeem_animation: MediaLinkDto?,
+    val visibility: OfferVisibilityDto?,
+)
+
+@JsonClass(generateAdapter = true)
+data class OfferVisibilityDto(
+    val hide: Boolean?,
+    val hide_if_expired: Boolean?,
+    val hide_if_unreleased: Boolean?,
 )
 
 @JsonClass(generateAdapter = true)

@@ -35,20 +35,20 @@ fun NftResponse.toNfts(): List<NftEntity> {
             contractAddress = dto.contract_addr
             tokenId = dto.token_id
             imageUrl = dto.meta.image
-            displayName = dto.nft_template.display_name ?: ""
+            displayName = dto.meta.display_name ?: dto.nft_template.display_name ?: ""
             editionName = dto.nft_template.edition_name ?: ""
             description = dto.nft_template.description ?: ""
             descriptionRichText = dto.nft_template.description_rich_text
             // Currently, additional_media_sections is required. In the future we'll probably have
             // to support additional_media for backwards compatibility.
-            val additionalMediaSections =
-                dto.nft_template.additional_media_sections ?: return@mapNotNull null
-            featuredMedia =
-                additionalMediaSections.featured_media?.map { it.toEntity(tokenUniqueId) }
-                    .toRealmListOrEmpty()
-            mediaSections =
-                additionalMediaSections.sections?.mapNotNull { it.toEntity(tokenUniqueId) }
-                    .toRealmListOrEmpty()
+            dto.nft_template.additional_media_sections?.let { additionalMediaSections ->
+                featuredMedia =
+                    additionalMediaSections.featured_media?.map { it.toEntity(tokenUniqueId) }
+                        .toRealmListOrEmpty()
+                mediaSections =
+                    additionalMediaSections.sections?.mapNotNull { it.toEntity(tokenUniqueId) }
+                        .toRealmListOrEmpty()
+            }
 
             redeemableOffers =
                 dto.nft_template.redeemable_offers?.map { it.toEntity() }
@@ -69,6 +69,12 @@ private fun RedeemableOfferDto.toEntity(): RedeemableOfferEntity {
         expiresAt = dto.expires_at?.toRealmInstant()
         animation = dto.animation.toPathMap()
         redeemAnimation = dto.redeem_animation.toPathMap()
+
+        dto.visibility?.let { visibility ->
+            hide = visibility.hide == true
+            hideIfExpired = visibility.hide_if_expired == true
+            hideIfUnreleased = visibility.hide_if_unreleased == true
+        }
     }
 }
 

@@ -183,7 +183,7 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
     val rewardOverlay = remember<@Composable BoxScope.() -> Unit> {
         {
             val text = when (item.fulfillmentState) {
-                FulfillmentState.AVAILABLE -> "REWARD"
+                FulfillmentState.AVAILABLE, FulfillmentState.UNRELEASED -> "REWARD"
                 FulfillmentState.EXPIRED -> "EXPIRED REWARD"
                 FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER -> "CLAIMED REWARD"
             }
@@ -200,13 +200,18 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
                     .padding(horizontal = 6.dp, vertical = 0.dp)
                     .align(Alignment.BottomCenter)
             )
-            if (item.fulfillmentState != FulfillmentState.AVAILABLE) {
-                // Gray out unavailable offers
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.6f))
-                )
+            when (item.fulfillmentState) {
+                FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER,
+                FulfillmentState.EXPIRED -> {
+                    // Gray out unavailable offers
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.6f))
+                    )
+                }
+
+                else -> {/* no-op */}
             }
         }
     }

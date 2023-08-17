@@ -26,26 +26,43 @@ class RedeemableOfferEntity : EmbeddedRealmObject {
     var animation: RealmDictionary<String> = realmDictionaryOf()
     var redeemAnimation: RealmDictionary<String> = realmDictionaryOf()
 
+    /** Don't use this directly. Check [shouldHide] instead */
+    var hide: Boolean = false
+    var hideIfExpired: Boolean = false
+    var hideIfUnreleased: Boolean = false
+
     @Ignore
-    private val isCurrentlyAvailable: Boolean
-        get() {
-            val availableAt = availableAt ?: return false
-            val expiresAt = expiresAt ?: return false
-            return RealmInstant.now() in availableAt..expiresAt
-        }
+    val availableNow: Boolean get() = !unreleased && !expired
+
+    @Ignore
+    val unreleased: Boolean get() = (availableAt ?: RealmInstant.MIN) > RealmInstant.now()
+
+    @Ignore
+    val expired: Boolean get() = (expiresAt ?: RealmInstant.MAX) < RealmInstant.now()
+
+    /**
+     * Whether or not the offer should be hidden from the UI.
+     */
+    @Ignore
+    val shouldHide: Boolean
+        get() = hide ||
+                (hideIfExpired && expired) ||
+                (hideIfUnreleased && unreleased)
 
     fun getFulfillmentState(redeemState: RedeemStateEntity): FulfillmentState {
         return when {
             redeemState.status == RedeemStateEntity.RedeemStatus.REDEEMED_BY_ANOTHER_USER -> FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER
-            isCurrentlyAvailable -> FulfillmentState.AVAILABLE
-            else -> FulfillmentState.EXPIRED
+            unreleased -> FulfillmentState.UNRELEASED
+            expired -> FulfillmentState.EXPIRED
+            else -> FulfillmentState.AVAILABLE
         }
     }
 
     enum class FulfillmentState {
-        EXPIRED,
         AVAILABLE,
-        CLAIMED_BY_PREVIOUS_OWNER
+        CLAIMED_BY_PREVIOUS_OWNER,
+        EXPIRED,
+        UNRELEASED,
     }
 
     override fun toString(): String {

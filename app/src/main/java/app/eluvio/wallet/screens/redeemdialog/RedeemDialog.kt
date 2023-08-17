@@ -90,9 +90,15 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: ()
                 Spacer(Modifier.height(12.dp))
                 Row {
                     val (text, color) = when (state.fulfillmentState) {
-                        RedeemableOfferEntity.FulfillmentState.EXPIRED -> "OFFER EXPIRED" to MaterialTheme.colorScheme.redeemExpiredText
-                        RedeemableOfferEntity.FulfillmentState.AVAILABLE -> "OFFER VALID" to MaterialTheme.colorScheme.redeemAvailableText
-                        RedeemableOfferEntity.FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER -> "CLAIMED BY PREVIOUS OWNER" to MaterialTheme.colorScheme.redeemExpiredText
+                        RedeemableOfferEntity.FulfillmentState.EXPIRED ->
+                            "OFFER EXPIRED" to MaterialTheme.colorScheme.redeemExpiredText
+
+                        RedeemableOfferEntity.FulfillmentState.AVAILABLE,
+                        RedeemableOfferEntity.FulfillmentState.UNRELEASED ->
+                            "OFFER VALID" to MaterialTheme.colorScheme.redeemAvailableText
+
+                        RedeemableOfferEntity.FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER ->
+                            "CLAIMED BY PREVIOUS OWNER" to MaterialTheme.colorScheme.redeemExpiredText
                     }
                     Text(
                         text = text,

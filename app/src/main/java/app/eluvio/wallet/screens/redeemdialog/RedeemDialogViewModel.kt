@@ -8,6 +8,7 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.data.entities.RedeemableOfferEntity.FulfillmentState
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.di.ApiProvider
@@ -41,7 +42,7 @@ class RedeemDialogViewModel @Inject constructor(
         val title: String = "",
         val subtitle: AnnotatedString = AnnotatedString(""),
         val image: String? = null,
-        val fulfillmentState: RedeemableOfferEntity.FulfillmentState = RedeemableOfferEntity.FulfillmentState.AVAILABLE,
+        val fulfillmentState: FulfillmentState = FulfillmentState.AVAILABLE,
         val dateRange: String = "",
         val offerStatus: RedeemStateEntity.RedeemStatus = RedeemStateEntity.RedeemStatus.UNREDEEMED,
         // Only needed by VM, View should not use this
@@ -75,7 +76,7 @@ class RedeemDialogViewModel @Inject constructor(
                     ?: error("Offer state not found")
                 val transaction = redeemState.transaction
                 val fulfillmentState = offer.getFulfillmentState(redeemState)
-                if (fulfillmentState == RedeemableOfferEntity.FulfillmentState.AVAILABLE) {
+                if (fulfillmentState == FulfillmentState.AVAILABLE) {
                     prefetchFulfillmentData(transaction)
                 }
                 val image = (offer.posterImagePath ?: offer.imagePath)?.let { "$endpoint$it" }
@@ -177,8 +178,15 @@ class RedeemDialogViewModel @Inject constructor(
     private val RedeemableOfferEntity.dateRange: String
         get() {
             val formatter = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
-            val availableAt = availableAt?.toDate() ?: return ""
-            val expiresAt = expiresAt?.toDate() ?: return ""
-            return "${formatter.format(availableAt)} - ${formatter.format(expiresAt)}"
+            val availableDate: String? = availableAt?.toDate()?.let { formatter.format(it) }
+            val expireDate: String? = expiresAt?.toDate()?.let { formatter.format(it) } //?: ""
+            return when {
+                availableDate != null && expireDate != null -> "$availableDate - $expireDate"
+                unreleased && availableDate != null -> "Available Starting On $availableDate"
+                expired && availableDate == null && expireDate != null -> "Ended on $expireDate"
+                availableNow && expireDate != null -> "Available Now - $expireDate"
+                availableNow && expireDate == null -> ""
+                else -> ""
+            }
         }
 }

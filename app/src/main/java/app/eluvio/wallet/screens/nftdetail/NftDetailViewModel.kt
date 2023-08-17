@@ -17,7 +17,6 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.videoplayer.toMediaSource
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.realm.toDate
 import app.eluvio.wallet.util.toAnnotatedString
 import com.google.common.base.Optional
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +24,6 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -105,7 +103,7 @@ class NftDetailViewModel @Inject constructor(
      */
     private fun loadOffers(nft: NftEntity, endpoint: String) {
         val offerStates = nft.redeemableOffers
-            .filter { it.availableAt?.toDate()?.before(Date()) == true }
+            .filterNot { it.shouldHide }
             .mapNotNull { offer ->
                 // Offers we don't have redeemState for aren't confirmed to valid to show to the user
                 nft.redeemStates.firstOrNull { offer.offerId == it.offerId }
