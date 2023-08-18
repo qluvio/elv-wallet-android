@@ -47,4 +47,3 @@ interface RedeemableOffersApi : AuthdApi {
     @GET("wlt/status/act/{tenant}")
     fun getRedemptionStatus(@Path("tenant") tenant: String): Single<List<RedemptionStatusDto>>
 }
-

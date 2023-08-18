@@ -81,7 +81,7 @@ private fun parseRedemptionStatus(
 }
 
 private fun isOwnedByAnotherUser(redeemer: String?, currentUser: String?): Boolean {
-    val redeemerAddress = redeemer?.removePrefix("0x") ?: return false
-    val currentAddress = currentUser?.removePrefix("0x") ?: return false
+    val redeemerAddress = redeemer?.removePrefix("0x")?.lowercase() ?: return false
+    val currentAddress = currentUser?.removePrefix("0x")?.lowercase() ?: return false
     return redeemerAddress.isNotEmpty() && redeemerAddress != currentAddress
 }
