@@ -32,7 +32,7 @@ interface RedeemableOffersApi : AuthdApi {
         @Body body: InitiateRedemptionRequest,
         // Doesn't actually redeem the offer. The BE will return "redeeming" for 10 seconds,
         // then "redeemed" for 2min.
-        @Query("dry_run") dryRun: Boolean = true,
+        @Query("dry_run") dryRun: Boolean = false,
     ): Completable
 
     /**

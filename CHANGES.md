@@ -1,6 +1,8 @@
 # Eluvio Media Wallet for AndroidTV Releases
 
 ## Version 1.0.3
+### Bug Fixes
+* Disable dry_run for offer redemption. ([#2][i2])
 
 ## Version 1.0.2
 ### Improvements / Changes
@@ -20,3 +22,5 @@
 
 ## Version 1.0 ##
 First release of the Eluvio Media Wallet for AndroidTV.
+
+[i2]: https://github.com/eluv-io/elv-wallet-android/issues/2
