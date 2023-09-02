@@ -1,8 +1,6 @@
 # Eluvio Media Wallet for AndroidTV Releases
 
 ## Version 1.0.3
-### Bug Fixes
-* Disable dry_run for offer redemption. ([#2][i2])
 
 ## Version 1.0.2
 ### Improvements / Changes
@@ -14,6 +12,7 @@
 
 ### Bug Fixes
 * Pause audio from other apps when starting to play video.
+* Disable dry_run for offer redemption. ([#2][i2])
 * Empty section names won't break parsing anymore.
 * Background audio from other apps wasn't paused when playing a video.
 
