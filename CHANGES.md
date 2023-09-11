@@ -1,6 +1,8 @@
 # Eluvio Media Wallet for AndroidTV Releases
 
 ## Version 1.0.3
+### Improvements / Changes
+* Better loading/empty states for MyMedia tab.
 
 ## Version 1.0.2
 ### Improvements / Changes

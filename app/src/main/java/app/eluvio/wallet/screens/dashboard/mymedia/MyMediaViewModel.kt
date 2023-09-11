@@ -20,11 +20,14 @@ class MyMediaViewModel @Inject constructor(
     private val apiProvider: ApiProvider,
 ) : BaseViewModel<MyMediaViewModel.State>(State()) {
     data class State(
+        val loading: Boolean = true,
         val featuredMedia: List<MediaEntity> = emptyList(),
         val nftMedia: Map<String, List<MediaEntity>> = emptyMap(),
         val myItems: List<AllMediaProvider.State.Media> = emptyList(),
         val baseUrl: String? = null,
-    )
+    ) {
+        fun isEmpty() = featuredMedia.isEmpty() && nftMedia.isEmpty() && myItems.isEmpty()
+    }
 
     override fun onResume() {
         super.onResume()
@@ -58,7 +61,7 @@ class MyMediaViewModel @Inject constructor(
 
         allMediaProvider.observeAllMedia(onNetworkError = { fireEvent(Events.NetworkError) })
             .subscribeBy(
-                onNext = { updateState { copy(myItems = it.media) } },
+                onNext = { updateState { copy(loading = it.loading, myItems = it.media) } },
                 onError = { Log.e("Error getting MyItems row in MyMedia", it) }
             )
             .addTo(disposables)

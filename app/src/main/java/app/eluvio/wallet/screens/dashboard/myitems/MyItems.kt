@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
 import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import androidx.tv.material3.Text
+import app.eluvio.wallet.R
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.LocalNavigator
@@ -74,7 +76,7 @@ private fun MyItems(state: AllMediaProvider.State) {
         if (state.loading) {
             EluvioLoadingSpinner()
         } else if (state.media.isEmpty()) {
-            Text("No items to display")
+            Text(stringResource(R.string.no_content_warning))
         } else {
             val navigator = LocalNavigator.current
             val context = LocalContext.current
