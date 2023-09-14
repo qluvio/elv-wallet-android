@@ -59,6 +59,8 @@ fun MyItems() {
                     "Network error. Please try again later.",
                     Toast.LENGTH_SHORT
                 ).show()
+
+                else -> {}
             }
         },
         onState = { _, state ->

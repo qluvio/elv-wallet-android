@@ -94,7 +94,7 @@ class SignInViewModel @Inject constructor(
                 .subscribeBy(
                     onSuccess = {
                         Log.d("Got a token $it")
-                        navigateTo(NavGraphs.mainGraph.asNewRoot())
+                        navigateTo(NavGraphs.preLaunchGraph.asNewRoot())
                     }
                 )
                 .addTo(disposables)

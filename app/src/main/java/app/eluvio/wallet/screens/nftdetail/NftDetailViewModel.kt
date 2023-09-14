@@ -6,6 +6,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.VideoOptionsFetcher
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
@@ -13,7 +14,9 @@ import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.FulfillmentStore
+import app.eluvio.wallet.data.stores.NftNotFoundException
 import app.eluvio.wallet.di.ApiProvider
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.videoplayer.toMediaSource
 import app.eluvio.wallet.util.logging.Log
@@ -53,6 +56,9 @@ class NftDetailViewModel @Inject constructor(
             val imageUrl: String?,
             val animation: MediaSource?,
         )
+
+        fun isEmpty() =
+            title.isEmpty() && featuredMedia.isEmpty() && sections.isEmpty() && redeemableOffers.isEmpty() && backgroundImage == null
     }
 
     private val contractAddress = NftDetailDestination.argsFrom(savedStateHandle).contractAddress
@@ -93,7 +99,10 @@ class NftDetailViewModel @Inject constructor(
                     }
                 },
                 onError = {
-
+                    if (it is NftNotFoundException) {
+                        fireEvent(Events.NftNotFound)
+                        navigateTo(NavigationEvent.GoBack)
+                    }
                 })
             .addTo(disposables)
     }

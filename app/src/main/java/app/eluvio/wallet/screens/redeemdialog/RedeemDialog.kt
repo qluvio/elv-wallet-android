@@ -57,6 +57,8 @@ fun RedeemDialog() {
                     "Network error. Please try again.",
                     Toast.LENGTH_SHORT
                 ).show()
+
+                else -> {}
             }
         },
         onState = { vm, state ->

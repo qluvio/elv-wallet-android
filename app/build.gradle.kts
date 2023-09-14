@@ -117,6 +117,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.junit)
     testImplementation(libs.reflections)
+
+    implementation(libs.installReferrer)
 }
 
 // Allow references to generated code

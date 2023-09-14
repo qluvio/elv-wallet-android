@@ -56,7 +56,22 @@ class ContentStore @Inject constructor(
             contractAddress,
             tokenId
         ).asFlowable()
-            .mapNotNull { it.firstOrNull() }
+            .switchMapSingle { list ->
+                val item = list.firstOrNull()
+                if (item == null) {
+                    // Missing item in db, maybe we got here from a deeplink?
+                    // calling fetchWalletData is overkill, but this is a demo
+                    fetchWalletData()
+                        .map { nfts ->
+                            nfts.firstOrNull { nft ->
+                                nft.contractAddress == contractAddress && nft.tokenId == tokenId
+                            } ?: throw NftNotFoundException()
+                        }
+                } else {
+                    Single.just(item)
+                }
+            }
+            .distinctUntilChanged()
     }
 
     fun observeMediaItem(mediaId: String): Flowable<MediaEntity> {
@@ -89,3 +104,5 @@ class ContentStore @Inject constructor(
             }
     }
 }
+
+class NftNotFoundException : Exception("Nft not found in wallet data")

@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -30,6 +33,7 @@ import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
@@ -37,6 +41,7 @@ import app.eluvio.wallet.data.entities.RedeemableOfferEntity.FulfillmentState
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.Overscan
@@ -53,18 +58,47 @@ import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 import io.realm.kotlin.ext.realmListOf
+import kotlinx.coroutines.delay
 
 @MainGraph
 @Destination(navArgsDelegate = NftDetailArgs::class)
 @Composable
 fun NftDetail() {
-    hiltViewModel<NftDetailViewModel>().subscribeToState { _, state ->
+    val context = LocalContext.current
+    hiltViewModel<NftDetailViewModel>().subscribeToState(onEvent = { event ->
+        if (event is Events.NftNotFound) {
+            Toast.makeText(
+                context,
+                "You don't own this NFT",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }) { _, state ->
         NftDetail(state)
     }
 }
 
 @Composable
 private fun NftDetail(state: NftDetailViewModel.State) {
+    if (state.isEmpty()) {
+        //DEMO CODE
+        var actuallyShowLoading by remember {
+            mutableStateOf(false)
+        }
+        LaunchedEffect(Unit) {
+            delay(400)
+            actuallyShowLoading = true
+        }
+        if (actuallyShowLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                EluvioLoadingSpinner()
+            }
+        }
+        return
+    }
     if (state.backgroundImage != null) {
         AsyncImage(
             model = state.backgroundImage,
