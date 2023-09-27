@@ -3,8 +3,10 @@ package app.eluvio.wallet.data.stores
 import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
+import app.eluvio.wallet.data.entities.SkuEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
+import app.eluvio.wallet.network.api.fabric.MarketplaceApi
 import app.eluvio.wallet.network.converters.toNfts
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
@@ -24,6 +26,36 @@ class ContentStore @Inject constructor(
     private val realm: Realm,
     private val signOutHandler: SignOutHandler,
 ) {
+
+    fun observerNftBySku(marketplace: String, sku: String): Flowable<Result<SkuEntity>> {
+        return realm.query<SkuEntity>("${SkuEntity::sku.name} == $0", sku)
+            .asFlowable()
+            .mapNotNull { it.firstOrNull() }
+            .map { Result.success(it) }
+            .mergeWith(
+                fetchSku(marketplace, sku)
+                    .mapNotNull { skuEntity -> Result.success(skuEntity) }
+                    .onErrorReturn { Result.failure(it) }
+            )
+            .doOnNext {
+                it.exceptionOrNull()?.let { error ->
+                    Log.e("Error in wallet data stream", error)
+                }
+            }
+    }
+
+    private fun fetchSku(marketplace: String, sku: String): Single<SkuEntity> {
+        return apiProvider.getApi(MarketplaceApi::class)
+            .flatMap { api -> api.getMarketplaceInfo(marketplace) }
+            .map { dto ->
+                val item = dto.info.items.first { it.sku == sku }
+                SkuEntity().apply {
+                    this.sku = item.sku
+                    this.contractAddress = item.nft_template?.nft?.address!!
+                }
+            }
+            .saveTo(realm, clearTable = true)
+    }
 
     fun observeWalletData(forceRefresh: Boolean = true): Flowable<Result<List<NftEntity>>> {
         return realm.query<NftEntity>()

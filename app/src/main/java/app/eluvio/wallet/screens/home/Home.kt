@@ -1,8 +1,13 @@
 package app.eluvio.wallet.screens.home
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.eluvio.wallet.navigation.PreLaunchGraph
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
@@ -14,16 +19,23 @@ import com.ramcosta.composedestinations.annotation.Destination
     // Handles direct deep links
     deepLinks = [
         DeepLink(
-            uriPattern = "https://eluv.io/wallet#/wallet/users/me/items/ictr{contractId}/{tokenId}"
+            uriPattern = "https://eluv.io/deeplinkdemo/marketplace/{marketplace}/sku/{sku}?jwt={jwt}"
         ),
         DeepLink(
-            uriPattern = "https://www.eluv.io/wallet#/wallet/users/me/items/ictr{contractId}/{tokenId}"
+            uriPattern = "https://www.eluv.io/deeplinkdemo/marketplace/{marketplace}/sku/{sku}?jwt={jwt}"
         )
     ]
 )
 @Composable
 fun Home() {
-    hiltViewModel<HomeViewModel>().subscribeToState { _, _ ->
-        /*NoOp, just need to kick off the vm*/
+    hiltViewModel<HomeViewModel>().subscribeToState { _, state ->
+        if (state.showLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                EluvioLoadingSpinner()
+            }
+        }
     }
 }

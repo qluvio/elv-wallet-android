@@ -86,15 +86,16 @@ class WalletApplication : Application(), ImageLoaderFactory {
                 .associate { it[0] to it[1] }
         }.getOrDefault(emptyMap())
         val url = params["url"]
-        // this is very dumb, but demo
-        val interestingPart =
-            url?.substringAfter("https://eluv.io/wallet#/wallet/users/me/items/ictr")
-        val contractId = interestingPart?.substringBefore("/")
-        val tokenId = interestingPart?.substringAfter("/")
-        if (contractId != null && tokenId != null) {
+        url?.let {
+            val regex = Regex(
+                pattern = "https://eluv\\.io/deeplinkdemo/marketplace/([A-Za-z0-9]+)/sku/([A-Za-z0-9]+)\\?jwt=([A-Za-z0-9]+)",
+                options = setOf(RegexOption.IGNORE_CASE)
+            )
+            regex.find(it)
+        }?.destructured?.let { (marketplace, sku, jwt) ->
             deeplinkStore.installRefHandled = true
             deeplinkStore.deeplinkRequest =
-                DeeplinkStore.DeeplinkRequest(contractId, tokenId)
+                DeeplinkStore.DeeplinkRequest(marketplace, sku, jwt)
         }
     }
 

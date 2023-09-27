@@ -21,6 +21,7 @@ class ApiProvider @Inject constructor(
 ) {
     private val fabricRetrofitFactory = RetrofitCachedFactory { it.fabricEndpoint }
     private val authdRetrofitFactory = RetrofitCachedFactory { it.authdEndpoint }
+    private val externalWalletFactory = RetrofitCachedFactory { "https://wlt.stg.svc.eluv.io/as" }
 
     @JvmName("getFabricApi")
     fun <T : FabricApi> getApi(clazz: KClass<T>): Single<T> {
@@ -30,6 +31,10 @@ class ApiProvider @Inject constructor(
     @JvmName("getAuthdApi")
     fun <T : AuthdApi> getApi(clazz: KClass<T>): Single<T> {
         return authdRetrofitFactory.get().map { it.create(clazz.java) }
+    }
+
+    fun <T : AuthdApi> getExternalWalletApi(clazz: KClass<T>): Single<T> {
+        return externalWalletFactory.get().map { it.create(clazz.java) }
     }
 
     // temp place for a way to get the current fabric endpoint

@@ -5,11 +5,9 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import app.eluvio.wallet.util.boolean
-import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.nullableString
 import dagger.hilt.android.qualifiers.ApplicationContext
-import okio.ByteString.Companion.toByteString
 import javax.inject.Inject
 
 class DeeplinkStore @Inject constructor(
@@ -26,24 +24,20 @@ class DeeplinkStore @Inject constructor(
     var deeplinkRequest: DeeplinkRequest?
         get() {
             return DeeplinkRequest(
-                contractId ?: return null,
-                tokenId ?: return null
+                marketplace ?: return null,
+                sku ?: return null,
+                jwt ?: return null,
             )
         }
         set(value) {
             Log.d("Storing deeplink request: $value")
-            contractId = value?.contractId
-            tokenId = value?.tokenId
+            marketplace = value?.marketplace
+            sku = value?.sku
+            jwt = value?.jwt
         }
-    private var contractId by prefs.nullableString("contractId")
-    private var tokenId by prefs.nullableString("tokenId")
+    private var marketplace by prefs.nullableString("marketplace")
+    private var sku by prefs.nullableString("sku")
+    private var jwt by prefs.nullableString("jwt")
 
-    data class DeeplinkRequest(val contractId: String, val tokenId: String) {
-        val contractAddress = contractId.removePrefix("ictr")
-            .let { Base58.decode(it) }
-            ?.toByteString()
-            ?.hex()
-            ?.let { "0x${it.removePrefix("0x")}" }
-            ?: throw IllegalArgumentException("Invalid contractId: $contractId")
-    }
+    data class DeeplinkRequest(val marketplace: String, val sku: String, val jwt: String)
 }
