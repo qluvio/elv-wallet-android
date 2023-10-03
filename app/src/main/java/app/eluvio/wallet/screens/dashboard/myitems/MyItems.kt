@@ -96,8 +96,8 @@ private fun MyItems(state: AllMediaProvider.State) {
 
 @Composable
 private fun BoxWithConstraintsScope.MyItemsGrid(
-    media: List<AllMediaProvider.State.Media>,
-    onItemClick: (AllMediaProvider.State.Media) -> Unit
+    media: List<AllMediaProvider.Media>,
+    onItemClick: (AllMediaProvider.Media) -> Unit
 ) {
     val width by rememberUpdatedState(maxWidth)
     val horizontalPadding = 100.dp
@@ -149,21 +149,23 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
 @Preview(device = Devices.TV_720p)
 private fun MyItemsPreview() = EluvioThemePreview {
     val items = listOf(
-        AllMediaProvider.State.Media(
+        AllMediaProvider.Media(
             "key",
             "contract_address",
             "https://x",
             "Single Token",
             "Special Edition",
+            "desc",
             "1",
             1
         ),
-        AllMediaProvider.State.Media(
+        AllMediaProvider.Media(
             "key",
             "contract_address",
             "https://x",
             "Token Pack",
             "Pleab Edition",
+            "desc",
             null,
             53
         )

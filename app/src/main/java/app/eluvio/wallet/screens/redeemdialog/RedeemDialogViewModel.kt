@@ -109,7 +109,7 @@ class RedeemDialogViewModel @Inject constructor(
                 }
             } else {
                 redeemOffer(it)
-                    .andThen(pollRedemptionStatusUntilComplete(it))
+                    .andThen(pollRedemptionStatusUntilComplete(it._nftEntity))
             }
         }
             .subscribeBy(onError = {
@@ -129,11 +129,11 @@ class RedeemDialogViewModel @Inject constructor(
         )
     }
 
-    private fun pollRedemptionStatusUntilComplete(state: State): Completable {
-        state._nftEntity ?: error("nft is null")
+    private fun pollRedemptionStatusUntilComplete(nftEntity: NftEntity?): Completable {
+        checkNotNull(nftEntity) { "nft is null" }
         return Flowable.interval(0, 2, TimeUnit.SECONDS)
             .flatMapSingle {
-                fulfillmentStore.refreshRedeemedOffers(state._nftEntity)
+                fulfillmentStore.refreshRedeemedOffers(nftEntity)
             }
             .takeUntil { nft ->
                 val status = nft.redeemStates.firstOrNull { it.offerId == offerId }?.status

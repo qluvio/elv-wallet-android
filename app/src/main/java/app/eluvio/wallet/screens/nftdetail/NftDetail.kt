@@ -245,7 +245,9 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
                     )
                 }
 
-                else -> {/* no-op */}
+                else -> {
+                    /* no-op */
+                }
             }
         }
     }

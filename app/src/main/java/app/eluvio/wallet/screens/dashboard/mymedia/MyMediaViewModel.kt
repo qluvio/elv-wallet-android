@@ -23,7 +23,7 @@ class MyMediaViewModel @Inject constructor(
         val loading: Boolean = true,
         val featuredMedia: List<MediaEntity> = emptyList(),
         val nftMedia: Map<String, List<MediaEntity>> = emptyMap(),
-        val myItems: List<AllMediaProvider.State.Media> = emptyList(),
+        val myItems: List<AllMediaProvider.Media> = emptyList(),
         val baseUrl: String? = null,
     ) {
         fun isEmpty() = featuredMedia.isEmpty() && nftMedia.isEmpty() && myItems.isEmpty()

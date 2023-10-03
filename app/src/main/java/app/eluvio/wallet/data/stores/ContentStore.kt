@@ -3,18 +3,23 @@ package app.eluvio.wallet.data.stores
 import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
-import app.eluvio.wallet.data.entities.SkuEntity
+import app.eluvio.wallet.data.entities.NftId
+import app.eluvio.wallet.data.entities.NftTemplateEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
-import app.eluvio.wallet.network.api.fabric.MarketplaceApi
+import app.eluvio.wallet.network.converters.toEntity
 import app.eluvio.wallet.network.converters.toNfts
+import app.eluvio.wallet.network.dto.NftTemplateDto
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.rx.mapNotNull
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.Sort
@@ -25,16 +30,18 @@ class ContentStore @Inject constructor(
     private val apiProvider: ApiProvider,
     private val realm: Realm,
     private val signOutHandler: SignOutHandler,
+    /*temp*/private val moshi: Moshi
 ) {
 
-    fun observerNftBySku(marketplace: String, sku: String): Flowable<Result<SkuEntity>> {
-        return realm.query<SkuEntity>("${SkuEntity::sku.name} == $0", sku)
+    fun observerNftBySku(marketplace: String, sku: String): Flowable<Result<NftTemplateEntity>> {
+        val id = NftId.forSku(marketplace, sku)
+        return realm.query<NftTemplateEntity>("${NftTemplateEntity::id.name} == $0", id)
             .asFlowable()
             .mapNotNull { it.firstOrNull() }
             .map { Result.success(it) }
             .mergeWith(
-                fetchSku(marketplace, sku)
-                    .mapNotNull { skuEntity -> Result.success(skuEntity) }
+                fetchTemplateForSku(marketplace, sku)
+                    .ignoreElement()
                     .onErrorReturn { Result.failure(it) }
             )
             .doOnNext {
@@ -44,17 +51,28 @@ class ContentStore @Inject constructor(
             }
     }
 
-    private fun fetchSku(marketplace: String, sku: String): Single<SkuEntity> {
-        return apiProvider.getApi(MarketplaceApi::class)
-            .flatMap { api -> api.getMarketplaceInfo(marketplace) }
-            .map { dto ->
-                val item = dto.info.items.first { it.sku == sku }
-                SkuEntity().apply {
-                    this.sku = item.sku
-                    this.contractAddress = item.nft_template?.nft?.address!!
-                }
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun fetchTemplateForSku(marketplace: String, sku: String): Single<NftTemplateEntity> {
+        val fakeData = true
+        val nftTemplateDto = if (fakeData) {
+            val json = when (sku) {
+                "RzVfTVinSpRh1jde2uS5b8" -> GatewayApi.fakeWeatherResponse
+                "UaZHyXZnXEb1EVqawpwFG7" -> GatewayApi.fakeBobResponse
+                else -> "{}"
             }
-            .saveTo(realm, clearTable = true)
+            Single.fromCallable {
+                moshi.adapter<NftTemplateDto>().fromJson(json)!!
+            }.subscribeOn(Schedulers.io())
+        } else {
+            apiProvider.getApi(GatewayApi::class)
+                .flatMap { api -> api.getSkus(marketplace, sku) }
+        }
+        return nftTemplateDto
+            .map { dto ->
+                val id = NftId.forSku(marketplace, sku)
+                dto.toEntity(id)
+            }
+            .saveTo(realm, clearTable = false)
     }
 
     fun observeWalletData(forceRefresh: Boolean = true): Flowable<Result<List<NftEntity>>> {
@@ -83,11 +101,9 @@ class ContentStore @Inject constructor(
     }
 
     fun observeNft(contractAddress: String, tokenId: String): Flowable<NftEntity> {
-        return realm.query<NftEntity>(
-            "${NftEntity::contractAddress.name} == $0 && ${NftEntity::tokenId.name} == $1",
-            contractAddress,
-            tokenId
-        ).asFlowable()
+        val id = NftId.forToken(contractAddress, tokenId)
+        return realm.query<NftEntity>("${NftEntity::id.name} == $0", id)
+            .asFlowable()
             .switchMapSingle { list ->
                 val item = list.firstOrNull()
                 if (item == null) {

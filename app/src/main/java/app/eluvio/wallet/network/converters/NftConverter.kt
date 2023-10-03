@@ -5,6 +5,7 @@ import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
 import app.eluvio.wallet.data.entities.NftEntity
+import app.eluvio.wallet.data.entities.NftId
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.network.dto.GalleryItemDto
 import app.eluvio.wallet.network.dto.MediaCollectionDto
@@ -28,27 +29,14 @@ fun NftResponse.toNfts(): List<NftEntity> {
         // What makes this token truly unique is the combination of contract address and token id.
         // This is needed because the internal entities (sections, collections, media) have their own ID, but it's not actually unique.
         // Two MediaItems with the same ID can point to different assets, so we need to persist them differently.
-        val tokenUniqueId = "${dto.contract_addr}_${dto.token_id}"
+        val tokenUniqueId = NftId.forToken(dto.contract_addr, dto.token_id)
         NftEntity().apply {
-            _id = tokenUniqueId
+            id = tokenUniqueId
             createdAt = dto.created ?: 0
-            contractAddress = dto.contract_addr
+            nftTemplate = dto.nft_template.toEntity(tokenUniqueId)
             tokenId = dto.token_id
             imageUrl = dto.meta.image
             displayName = dto.meta.display_name ?: dto.nft_template.display_name ?: ""
-            editionName = dto.nft_template.edition_name ?: ""
-            description = dto.nft_template.description ?: ""
-            descriptionRichText = dto.nft_template.description_rich_text
-            // Currently, additional_media_sections is required. In the future we'll probably have
-            // to support additional_media for backwards compatibility.
-            dto.nft_template.additional_media_sections?.let { additionalMediaSections ->
-                featuredMedia =
-                    additionalMediaSections.featured_media?.map { it.toEntity(tokenUniqueId) }
-                        .toRealmListOrEmpty()
-                mediaSections =
-                    additionalMediaSections.sections?.mapNotNull { it.toEntity(tokenUniqueId) }
-                        .toRealmListOrEmpty()
-            }
 
             redeemableOffers =
                 dto.nft_template.redeemable_offers?.map { it.toEntity() }

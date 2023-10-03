@@ -20,7 +20,16 @@ class DeeplinkStore @Inject constructor(
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
+
+    /**
+     * Whether or not the install referrer data has been handled.
+     */
     var installRefHandled by prefs.boolean("installRefHandled", false)
+
+    private var marketplace by prefs.nullableString("marketplace")
+    private var sku by prefs.nullableString("sku")
+    private var jwt by prefs.nullableString("jwt")
+
     var deeplinkRequest: DeeplinkRequest?
         get() {
             return DeeplinkRequest(
@@ -35,9 +44,6 @@ class DeeplinkStore @Inject constructor(
             sku = value?.sku
             jwt = value?.jwt
         }
-    private var marketplace by prefs.nullableString("marketplace")
-    private var sku by prefs.nullableString("sku")
-    private var jwt by prefs.nullableString("jwt")
 
     data class DeeplinkRequest(val marketplace: String, val sku: String, val jwt: String)
 }

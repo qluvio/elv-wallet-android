@@ -143,7 +143,7 @@ fun NftMediaRow(displayName: String, mediaItems: List<MediaEntity>) {
 }
 
 @Composable
-private fun MyItemsRow(myItems: List<AllMediaProvider.State.Media>) {
+private fun MyItemsRow(myItems: List<AllMediaProvider.Media>) {
     RowHeader(text = "Items")
     Spacer(Modifier.height(10.dp))
     TvLazyRow(horizontalArrangement = itemArrangement) {

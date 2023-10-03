@@ -29,10 +29,12 @@ data class NftMetadataDto(
 
 @JsonClass(generateAdapter = true)
 data class NftTemplateDto(
+    val address: String,
     val description: String?,
     val description_rich_text: String?,
     val display_name: String?,
     val edition_name: String?,
+    val image: String?,
     val additional_media_sections: AdditionalMediaSectionDto?,
     val redeemable_offers: List<RedeemableOfferDto>?,
     // If 'error' shows up in the template, it's usually a sign of a bad/expired token.
