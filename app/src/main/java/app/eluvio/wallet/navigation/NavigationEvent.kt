@@ -1,19 +1,17 @@
 package app.eluvio.wallet.navigation
 
-import androidx.navigation.NavOptions
-import androidx.navigation.navOptions
-import app.eluvio.wallet.screens.NavGraphs
-import com.ramcosta.composedestinations.navigation.popUpTo
 import com.ramcosta.composedestinations.spec.Direction
 
 sealed interface NavigationEvent {
     object GoBack : NavigationEvent
-    data class Push(
-        val direction: Direction, val navOptions: NavOptions? = null
-    ) : NavigationEvent
+    data class SetRoot(val direction: Direction) : NavigationEvent
+    data class Push(val direction: Direction) : NavigationEvent
+    data class Replace(val direction: Direction) : NavigationEvent
 }
 
 fun Direction.asPush() =
     NavigationEvent.Push(this)
 
-fun Direction.asNewRoot() = NavigationEvent.Push(this, navOptions { popUpTo(NavGraphs.root) })
+fun Direction.asReplace() = NavigationEvent.Replace(this)
+
+fun Direction.asNewRoot() = NavigationEvent.SetRoot(this)

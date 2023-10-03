@@ -3,7 +3,9 @@ package app.eluvio.wallet.screens.deeplink
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.stores.ContentStore
+import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
+import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.destinations.SkuDetailsDestination
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +21,6 @@ class SkuDetailsViewModel @Inject constructor(
 ) : BaseViewModel<SkuDetailsViewModel.State>(State()) {
     data class State(
         val loading: Boolean = true,
-        val owned: Boolean = false,
         val media: AllMediaProvider.Media? = null
     )
 
@@ -27,7 +28,7 @@ class SkuDetailsViewModel @Inject constructor(
     override fun onResume() {
         super.onResume()
 
-        allMediaProvider.observeAllMedia { }
+        allMediaProvider.observeAllMedia(onNetworkError = { })
             .withLatestFrom(
                 contentStore.observerNftBySku(
                     navArgs.marketplace,
@@ -37,15 +38,19 @@ class SkuDetailsViewModel @Inject constructor(
                 templateResult.getOrNull()?.let { nftTemplate ->
                     val mediaForSku =
                         allMedia.media.firstOrNull { it.contractAddress == nftTemplate.contractAddress }
-                    if (mediaForSku != null) {
-                        updateState { copy(loading = false, owned = true, media = mediaForSku) }
+                    if (mediaForSku?.tokenId != null) {
                         Log.w("user owns SKU")
+                        navigateTo(
+                            NftDetailDestination(
+                                mediaForSku.contractAddress,
+                                mediaForSku.tokenId
+                            ).asReplace()
+                        )
                     } else {
                         Log.w("user Doesn't own SKU")
                         updateState {
                             copy(
                                 loading = false,
-                                owned = false,
                                 media = AllMediaProvider.Media.fromTemplate(nftTemplate)
                             )
                         }

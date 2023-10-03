@@ -40,12 +40,12 @@ class HomeViewModel @Inject constructor(
         //TODO, if there's another token but we didn't get all the way to fabricToken, we might want to pick up mid-flow
         if (deepLink != null) {
             handleDeeplink(deepLink)
-        } else if (tokenStore.fabricToken == null) {
-            Log.w("User not signed in, navigating to auth flow")
-            navigateTo(NavGraphs.authFlowGraph.asNewRoot())
-        } else {
+        } else if (tokenStore.isLoggedIn) {
             Log.w("User signed in, navigating to dashboard")
             navigateTo(NavGraphs.mainGraph.asNewRoot())
+        } else {
+            Log.w("User not signed in, navigating to auth flow")
+            navigateTo(NavGraphs.authFlowGraph.asNewRoot())
         }
     }
 
@@ -53,30 +53,40 @@ class HomeViewModel @Inject constructor(
         // consume deeplink
         deeplinkStore.deeplinkRequest = null
 
-        // We need to authenticate with the deeplink JWT, this could take a moment, so show a loading state in the meanwhile.
-        updateState { State(showLoading = true) }
+        if (tokenStore.isLoggedIn) {
+            // We already have a token, ignore the JWT and just launch the deeplink
+            navigateToDeeplink(deepLink)
+        } else {
+            // We need to authenticate with the deeplink JWT, this could take a moment,
+            // so show a loading state in the meanwhile.
+            updateState { State(showLoading = true) }
 
-        tokenStore.wipe()
-        tokenStore.idToken = deepLink.jwt
+            tokenStore.wipe()
+            tokenStore.idToken = deepLink.jwt
 
-        authenticationService.getFabricTokenExternal()
-            .subscribeBy(
-                onSuccess = {
-                    Log.d("Successfully got fabric token from deeplink jwt: $it")
-                    navigateTo(NavGraphs.mainGraph.asNewRoot())
-                    navigateTo(
-                        SkuDetailsDestination(
-                            marketplace = deepLink.marketplace,
-                            sku = deepLink.sku
-                        ).asPush()
-                    )
-                },
-                onError = {
-                    Log.e("Failed to get fabric token", it)
-                    // We failed to get a fabric token, so we need to re-authenticate.
-                    navigateTo(NavGraphs.authFlowGraph.asNewRoot())
-                }
-            )
-            .addTo(disposables)
+            authenticationService.getFabricTokenExternal()
+                .subscribeBy(
+                    onSuccess = {
+                        Log.d("Successfully got fabric token from deeplink jwt: $it")
+                        navigateToDeeplink(deepLink)
+                    },
+                    onError = {
+                        Log.e("Failed to get fabric token", it)
+                        // We failed to get a fabric token, so we need to re-authenticate.
+                        navigateTo(NavGraphs.authFlowGraph.asNewRoot())
+                    }
+                )
+                .addTo(disposables)
+        }
+    }
+
+    private fun navigateToDeeplink(deepLink: DeeplinkStore.DeeplinkRequest) {
+        navigateTo(NavGraphs.mainGraph.asNewRoot())
+        navigateTo(
+            SkuDetailsDestination(
+                marketplace = deepLink.marketplace,
+                sku = deepLink.sku
+            ).asPush()
+        )
     }
 }

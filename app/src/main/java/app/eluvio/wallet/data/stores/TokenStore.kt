@@ -34,6 +34,8 @@ class TokenStore @Inject constructor(
     var walletAddress by prefs.nullableString("wallet_address")
     val userId: String? get() = walletAddress?.let { "iusr${it.base58}" }
 
+    val isLoggedIn: Boolean get() = fabricToken != null
+
     fun wipe() {
         prefs.edit { clear() }
     }
