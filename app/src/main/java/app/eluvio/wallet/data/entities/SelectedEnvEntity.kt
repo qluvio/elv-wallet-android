@@ -45,7 +45,6 @@ class SelectedEnvEntity : RealmObject {
     @Ignore
     var selectedEnv: Environment by realmEnum(::selectedEnvStr)
 
-
     override fun toString(): String {
         return "SelectedEnvEntity(id=$id, selectedEnvStr='$selectedEnvStr')"
     }

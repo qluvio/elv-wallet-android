@@ -32,13 +32,9 @@ class NftEntity : RealmObject {
 
     // Info that can be null until fetched separately from nft/info/{contractAddress}/{tokenId}
     var redeemStates: RealmList<RedeemStateEntity> = realmListOf()
-    var tenant: String? = null
 
     @Ignore
     val contractAddress: String get() = nftTemplate?.contractAddress ?: ""
-
-    @Ignore
-    val editionName: String get() = nftTemplate?.editionName ?: ""
 
     @Ignore
     val description: String get() = nftTemplate?.description ?: ""
@@ -67,7 +63,6 @@ class NftEntity : RealmObject {
         if (displayName != other.displayName) return false
         if (redeemableOffers != other.redeemableOffers) return false
         if (redeemStates != other.redeemStates) return false
-        if (tenant != other.tenant) return false
 
         return true
     }
@@ -81,12 +76,11 @@ class NftEntity : RealmObject {
         result = 31 * result + displayName.hashCode()
         result = 31 * result + redeemableOffers.hashCode()
         result = 31 * result + redeemStates.hashCode()
-        result = 31 * result + (tenant?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "NftEntity(_id='$id', nftTemplate=$nftTemplate, createdAt=$createdAt, tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', redeemableOffers=$redeemableOffers, redeemStates=$redeemStates, tenant=$tenant)"
+        return "NftEntity(_id='$id', nftTemplate=$nftTemplate, createdAt=$createdAt, tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', redeemableOffers=$redeemableOffers, redeemStates=$redeemStates)"
     }
 
     @Module

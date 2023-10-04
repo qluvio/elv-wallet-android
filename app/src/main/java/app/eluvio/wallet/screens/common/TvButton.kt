@@ -37,6 +37,7 @@ fun TvButton(
     modifier: Modifier = Modifier,
     colors: ClickableSurfaceColors = ClickableSurfaceDefaults.colors(),
     scale: ClickableSurfaceScale = LocalSurfaceScale.current,
+    enabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 5.dp)
 ) {
     Surface(
@@ -44,6 +45,7 @@ fun TvButton(
         colors = colors,
         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
         scale = scale,
+        enabled = enabled,
         modifier = modifier
     ) {
         Text(

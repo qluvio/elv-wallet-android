@@ -39,6 +39,9 @@ data class NftTemplateDto(
     val redeemable_offers: List<RedeemableOfferDto>?,
     // If 'error' shows up in the template, it's usually a sign of a bad/expired token.
     val error: Map<String, Any>?,
+
+    //todo: temp hack for deeplinks
+    val tenant_id: String?,
 )
 
 @JsonClass(generateAdapter = true)

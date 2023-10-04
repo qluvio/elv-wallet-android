@@ -28,6 +28,7 @@ class AllMediaProvider @Inject constructor(
         // if there's only one token, we can show the token id
         val tokenId: String? = null,
         val tokenCount: Int = 1,
+        val tenant: String? = null
     ) {
         companion object {
             fun fromTemplate(
@@ -44,7 +45,8 @@ class AllMediaProvider @Inject constructor(
                 // If there's only one token, we can show the token id
                 tokenId = tokenId,
                 // TODO: design hasn't settled on how to treat token count, this will always be 1 for now
-                tokenCount = tokenCount
+                tokenCount = tokenCount,
+                tenant = nftTemplateEntity.tenant
             )
         }
     }

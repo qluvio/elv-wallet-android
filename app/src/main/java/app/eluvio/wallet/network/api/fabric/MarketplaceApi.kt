@@ -13,7 +13,10 @@ interface MarketplaceApi : FabricApi {
 }
 
 @JsonClass(generateAdapter = true)
-data class MarketplaceDto(val info: MarketplaceInfoDto)
+data class MarketplaceDto(
+    val info: MarketplaceInfoDto,
+    val tenant_id: String,
+)
 
 @JsonClass(generateAdapter = true)
 data class MarketplaceInfoDto(val items: List<MarketplaceItemDto>)

@@ -63,10 +63,6 @@ class MediaEntity : RealmObject {
         return with(requireLockedState()) { locked && hideWhenLocked }
     }
 
-    override fun toString(): String {
-        return "MediaEntity(id='$id', name='$name', image='$image', mediaType='$mediaType', mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery)"
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -76,11 +72,14 @@ class MediaEntity : RealmObject {
         if (id != other.id) return false
         if (name != other.name) return false
         if (image != other.image) return false
+        if (posterImagePath != other.posterImagePath) return false
         if (mediaType != other.mediaType) return false
+        if (imageAspectRatio != other.imageAspectRatio) return false
         if (mediaFile != other.mediaFile) return false
         if (mediaLinks != other.mediaLinks) return false
         if (tvBackgroundImage != other.tvBackgroundImage) return false
         if (gallery != other.gallery) return false
+        if (lockedState != other.lockedState) return false
 
         return true
     }
@@ -89,12 +88,19 @@ class MediaEntity : RealmObject {
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + image.hashCode()
+        result = 31 * result + (posterImagePath?.hashCode() ?: 0)
         result = 31 * result + mediaType.hashCode()
+        result = 31 * result + (imageAspectRatio?.hashCode() ?: 0)
         result = 31 * result + mediaFile.hashCode()
         result = 31 * result + mediaLinks.hashCode()
         result = 31 * result + tvBackgroundImage.hashCode()
         result = 31 * result + gallery.hashCode()
+        result = 31 * result + (lockedState?.hashCode() ?: 0)
         return result
+    }
+
+    override fun toString(): String {
+        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, lockedState=$lockedState)"
     }
 
     companion object {

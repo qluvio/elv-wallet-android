@@ -15,6 +15,7 @@ interface GatewayApi : AuthdApi {
     companion object {
         val fakeWeatherResponse = """
             {
+              "tenant_id": "iteneozdHLVyDYFrDQvPPeWuoKUaT3M",
               "additional_media": [],
               "additional_media_custom_css": "",
               "additional_media_display": "Media",
@@ -537,6 +538,7 @@ interface GatewayApi : AuthdApi {
         """.trimIndent()
         val fakeBobResponse = """
             {
+            "tenant_id": "iten2GyWiLWuhyQYNa9bYWpq87bsAYyf",
               "additional_media": [
                 {
                   "authorized_link": false,

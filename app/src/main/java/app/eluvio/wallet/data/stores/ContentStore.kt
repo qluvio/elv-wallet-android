@@ -70,7 +70,10 @@ class ContentStore @Inject constructor(
         return nftTemplateDto
             .map { dto ->
                 val id = NftId.forSku(marketplace, sku)
-                dto.toEntity(id)
+                dto.toEntity(id).apply {
+                    // TODO: this is a hack. tenant should be returned by new nftForSku api
+                    tenant = dto.tenant_id
+                }
             }
             .saveTo(realm, clearTable = false)
     }
@@ -130,7 +133,7 @@ class ContentStore @Inject constructor(
             .mapNotNull { it.firstOrNull() }
     }
 
-    private fun fetchWalletData(): Single<List<NftEntity>> {
+    fun fetchWalletData(): Single<List<NftEntity>> {
         return apiProvider.getApi(GatewayApi::class)
             .flatMap { api -> api.getNfts() }
             .map { response -> response.toNfts() }
