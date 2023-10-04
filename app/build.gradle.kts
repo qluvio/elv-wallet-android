@@ -11,12 +11,12 @@ plugins {
 
 android {
     namespace = "app.eluvio.wallet"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "app.eluvio.wallet"
         minSdk = 23
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 9
         versionName = "1.0.2"
     }
