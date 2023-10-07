@@ -2,7 +2,6 @@ package app.eluvio.wallet.network.api.authd
 
 import app.eluvio.wallet.network.dto.InitiateNftClaimRequest
 import app.eluvio.wallet.network.dto.NftClaimStatusDto
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -18,7 +17,7 @@ interface NftClaimApi : AuthdApi {
     fun claimNft(
         @Path("tenant") tenant: String,
         @Body body: InitiateNftClaimRequest
-    ): Completable
+    ): Single<NftClaimStatusDto>
 
     @GET("wlt/status/act/{tenant}")
     fun getClaimStatus(@Path("tenant") tenant: String): Single<List<NftClaimStatusDto>>

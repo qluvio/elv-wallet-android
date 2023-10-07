@@ -93,7 +93,7 @@ class SkuDetailsViewModel @Inject constructor(
             navArgs.marketplace,
             navArgs.sku
         )
-            .andThen(pollClaimStatusUntilComplete(tenant))
+            .flatMapPublisher { op -> pollClaimStatusUntilComplete(tenant, op) }
             .doOnSubscribe {
                 updateState { copy(claimingInProgress = true) }
             }
@@ -130,11 +130,12 @@ class SkuDetailsViewModel @Inject constructor(
             .addTo(disposables)
     }
 
-    private fun pollClaimStatusUntilComplete(tenant: String): Flowable<NftClaimStore.NftClaimResult> {
+    private fun pollClaimStatusUntilComplete(
+        tenant: String,
+        op: String
+    ): Flowable<NftClaimStore.NftClaimResult> {
         return Flowables.interval(2.seconds)
-            .flatMapSingle {
-                nftClaimStore.checkNftClaimStatus(tenant, navArgs.marketplace, navArgs.sku)
-            }
+            .flatMapSingle { nftClaimStore.checkNftClaimStatus(tenant, op) }
             .takeUntil { it is NftClaimStore.NftClaimResult.Success }
     }
 }

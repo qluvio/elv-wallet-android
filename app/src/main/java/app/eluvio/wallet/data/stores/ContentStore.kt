@@ -9,17 +9,13 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
 import app.eluvio.wallet.network.converters.toEntity
 import app.eluvio.wallet.network.converters.toNfts
-import app.eluvio.wallet.network.dto.NftTemplateDto
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.rx.mapNotNull
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapter
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.schedulers.Schedulers
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.Sort
@@ -30,7 +26,6 @@ class ContentStore @Inject constructor(
     private val apiProvider: ApiProvider,
     private val realm: Realm,
     private val signOutHandler: SignOutHandler,
-    /*temp*/private val moshi: Moshi
 ) {
 
     fun observerNftBySku(marketplace: String, sku: String): Flowable<Result<NftTemplateEntity>> {
@@ -51,28 +46,13 @@ class ContentStore @Inject constructor(
             }
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun fetchTemplateForSku(marketplace: String, sku: String): Single<NftTemplateEntity> {
-        val fakeData = true
-        val nftTemplateDto = if (fakeData) {
-            val json = when (sku) {
-                "RzVfTVinSpRh1jde2uS5b8" -> GatewayApi.fakeWeatherResponse
-                "UaZHyXZnXEb1EVqawpwFG7" -> GatewayApi.fakeBobResponse
-                else -> "{}"
-            }
-            Single.fromCallable {
-                moshi.adapter<NftTemplateDto>().fromJson(json)!!
-            }.subscribeOn(Schedulers.io())
-        } else {
-            apiProvider.getApi(GatewayApi::class)
-                .flatMap { api -> api.getSkus(marketplace, sku) }
-        }
-        return nftTemplateDto
+        return apiProvider.getApi(GatewayApi::class)
+            .flatMap { api -> api.getNftForSku(marketplace, sku) }
             .map { dto ->
                 val id = NftId.forSku(marketplace, sku)
-                dto.toEntity(id).apply {
-                    // TODO: this is a hack. tenant should be returned by new nftForSku api
-                    tenant = dto.tenant_id
+                dto.nftTemplate.toEntity(id).apply {
+                    tenant = dto.tenant
                 }
             }
             .saveTo(realm, clearTable = false)

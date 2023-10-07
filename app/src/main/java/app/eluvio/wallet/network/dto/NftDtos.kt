@@ -1,5 +1,6 @@
 package app.eluvio.wallet.network.dto
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.Date
 
@@ -7,6 +8,12 @@ import java.util.Date
 data class NftResponse(
     val contents: List<NftDto>?,
     val paging: Paging,
+)
+
+@JsonClass(generateAdapter = true)
+data class NftForSkuResponse(
+    @field:Json(name = "tenant_id") val tenant: String,
+    @field:Json(name = "nft_template") val nftTemplate: NftTemplateDto
 )
 
 @JsonClass(generateAdapter = true)
@@ -39,9 +46,6 @@ data class NftTemplateDto(
     val redeemable_offers: List<RedeemableOfferDto>?,
     // If 'error' shows up in the template, it's usually a sign of a bad/expired token.
     val error: Map<String, Any>?,
-
-    //todo: temp hack for deeplinks
-    val tenant_id: String?,
 )
 
 @JsonClass(generateAdapter = true)

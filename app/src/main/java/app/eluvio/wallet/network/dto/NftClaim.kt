@@ -13,22 +13,11 @@ data class InitiateNftClaimRequest(
 
 @JsonClass(generateAdapter = true)
 data class NftClaimStatusDto(
-    // A composite field of the form: op:marketplaceId:sku
+    // A composite field of the form: op:marketplaceId:sku:counter
     @field:Json(name = "op") val operationKey: String,
     val status: String?,
     val extra: NftClaimStatusExtraDto?
-) {
-    val operation: String?
-    val marketplaceId: String?
-    val sku: String?
-
-    init {
-        val split = operationKey.split(":")
-        operation = split.getOrNull(0)
-        marketplaceId = split.getOrNull(1)
-        sku = split.getOrNull(2)
-    }
-}
+)
 
 @JsonClass(generateAdapter = true)
 data class NftClaimStatusExtraDto(

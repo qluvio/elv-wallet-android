@@ -2,8 +2,10 @@
 
 package app.eluvio.wallet.screens.deeplink
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateValue
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -19,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,7 +47,6 @@ import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
-import kotlin.math.roundToInt
 
 @MainGraph
 @Destination(navArgsDelegate = SkuDetailsNavArgs::class)
@@ -118,17 +118,19 @@ private fun SkuDetails(state: SkuDetailsViewModel.State, onClaimClick: () -> Uni
 }
 
 @Composable
-fun animateDots(): State<Int> {
-    val floatAnimation by rememberInfiniteTransition(label = "ellipsis animation").animateFloat(
-        initialValue = 1f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "ellipsis animation"
-    )
-    return remember { derivedStateOf { floatAnimation.roundToInt() } }
+private fun animateDots(numberOfDots: Int = 3): State<Int> {
+    val intToVector: TwoWayConverter<Int, AnimationVector1D> =
+        TwoWayConverter({ AnimationVector1D(it.toFloat()) }, { it.value.toInt() })
+    return rememberInfiniteTransition(label = "ellipsis transition")
+        .animateValue(
+            initialValue = 1,
+            targetValue = numberOfDots + 1,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 2000, easing = LinearEasing)
+            ),
+            label = "ellipsis animation",
+            typeConverter = intToVector
+        )
 }
 
 @Composable
