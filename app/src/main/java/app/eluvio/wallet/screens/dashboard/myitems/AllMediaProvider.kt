@@ -1,9 +1,11 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
+import android.os.Parcelable
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Flowable
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 /**
@@ -12,10 +14,12 @@ import javax.inject.Inject
 class AllMediaProvider @Inject constructor(
     private val contentStore: ContentStore
 ) {
+    @Parcelize
     data class State(
         val loading: Boolean = true,
         val media: List<Media> = emptyList(),
-    ) {
+    ) : Parcelable {
+        @Parcelize
         data class Media(
             val key: String,
             val contractAddress: String,
@@ -25,7 +29,7 @@ class AllMediaProvider @Inject constructor(
             // if there's only one token, we can show the token id
             val tokenId: String? = null,
             val tokenCount: Int = 1,
-        )
+        ) : Parcelable
     }
 
     //TODO: this is a HACK. The ContentStore needs to emit information about whether the

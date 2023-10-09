@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
+import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.util.logging.Log
@@ -11,7 +12,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MyItemsViewModel @Inject constructor(
     private val allMediaProvider: AllMediaProvider,
-) : BaseViewModel<AllMediaProvider.State>(AllMediaProvider.State()) {
+    savedStateHandle: SavedStateHandle,
+) : BaseViewModel<AllMediaProvider.State>(AllMediaProvider.State(), savedStateHandle) {
 
     override fun onResume() {
         super.onResume()
