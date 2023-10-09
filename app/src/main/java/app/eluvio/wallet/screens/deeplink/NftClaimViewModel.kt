@@ -1,13 +1,15 @@
 package app.eluvio.wallet.screens.deeplink
 
+import android.view.ContextThemeWrapper
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.NftClaimStore
 import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
-import app.eluvio.wallet.screens.destinations.SkuDetailsDestination
+import app.eluvio.wallet.screens.destinations.NftClaimDestination
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.interval
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,23 +18,24 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Flowables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
-class SkuDetailsViewModel @Inject constructor(
+class NftClaimViewModel @Inject constructor(
     private val contentStore: ContentStore,
     private val allMediaProvider: AllMediaProvider,
     private val nftClaimStore: NftClaimStore,
     savedStateHandle: SavedStateHandle,
-) : BaseViewModel<SkuDetailsViewModel.State>(State()) {
+) : BaseViewModel<NftClaimViewModel.State>(State()) {
     data class State(
         val loading: Boolean = true,
         val claimingInProgress: Boolean = false,
         val media: AllMediaProvider.Media? = null
     )
 
-    private val navArgs = SkuDetailsDestination.argsFrom(savedStateHandle)
+    private val navArgs = NftClaimDestination.argsFrom(savedStateHandle)
 
     override fun onResume() {
         super.onResume()
@@ -97,9 +100,6 @@ class SkuDetailsViewModel @Inject constructor(
             .doOnSubscribe {
                 updateState { copy(claimingInProgress = true) }
             }
-            .doFinally {
-                updateState { copy(claimingInProgress = false) }
-            }
             .flatMapSingle { result ->
                 if (result is NftClaimStore.NftClaimResult.Success) {
                     // Re-fetch wallet data before navigating away.
@@ -125,6 +125,8 @@ class SkuDetailsViewModel @Inject constructor(
                 },
                 onError = {
                     Log.e("Error claiming NFT", it)
+                    updateState { copy(claimingInProgress = false) }
+                    fireEvent(Events.NetworkError)
                 }
             )
             .addTo(disposables)

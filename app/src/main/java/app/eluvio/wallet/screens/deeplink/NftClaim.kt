@@ -36,6 +36,7 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
@@ -45,26 +46,32 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
 @MainGraph
-@Destination(navArgsDelegate = SkuDetailsNavArgs::class)
+@Destination(navArgsDelegate = NftClaimNavArgs::class)
 @Composable
-fun SkuDetails() {
-    hiltViewModel<SkuDetailsViewModel>().subscribeToState { vm, state ->
+fun NftClaim() {
+    val toaster = rememberToaster()
+    hiltViewModel<NftClaimViewModel>().subscribeToState(onEvent = { event ->
+        if (event is Events.NetworkError) {
+            toaster.toast(event.defaultMessage)
+        }
+    }) { vm, state ->
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            SkuDetails(state, vm::claimNft)
+            NftClaim(state, vm::claimNft)
         }
     }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun SkuDetails(state: SkuDetailsViewModel.State, onClaimClick: () -> Unit) {
+private fun NftClaim(state: NftClaimViewModel.State, onClaimClick: () -> Unit) {
     val media = state.media
     if (state.loading || media == null) {
         EluvioLoadingSpinner()
@@ -135,6 +142,6 @@ private fun animateDots(numberOfDots: Int = 3): State<Int> {
 
 @Composable
 @Preview(device = Devices.TV_720p)
-private fun SkuDetailsPreview() = EluvioThemePreview {
-    SkuDetails(SkuDetailsViewModel.State(), onClaimClick = {})
+private fun NftClaimPreview() = EluvioThemePreview {
+    NftClaim(NftClaimViewModel.State(), onClaimClick = {})
 }

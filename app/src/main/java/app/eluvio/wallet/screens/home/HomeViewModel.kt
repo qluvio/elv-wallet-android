@@ -9,7 +9,7 @@ import app.eluvio.wallet.navigation.asNewRoot
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.destinations.HomeDestination
-import app.eluvio.wallet.screens.destinations.SkuDetailsDestination
+import app.eluvio.wallet.screens.destinations.NftClaimDestination
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
@@ -83,7 +83,7 @@ class HomeViewModel @Inject constructor(
     private fun navigateToDeeplink(deepLink: DeeplinkStore.DeeplinkRequest) {
         navigateTo(NavGraphs.mainGraph.asNewRoot())
         navigateTo(
-            SkuDetailsDestination(
+            NftClaimDestination(
                 marketplace = deepLink.marketplace,
                 sku = deepLink.sku
             ).asPush()

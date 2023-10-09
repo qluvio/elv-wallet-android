@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.nftdetail
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -54,6 +52,7 @@ import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.onRedeemTagSurface
 import app.eluvio.wallet.theme.redeemTagSurface
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -64,18 +63,17 @@ import kotlinx.coroutines.delay
 @Destination(navArgsDelegate = NftDetailArgs::class)
 @Composable
 fun NftDetail() {
-    val context = LocalContext.current
-    hiltViewModel<NftDetailViewModel>().subscribeToState(onEvent = { event ->
-        if (event is Events.NftNotFound) {
-            Toast.makeText(
-                context,
-                "You don't own this NFT",
-                Toast.LENGTH_SHORT
-            ).show()
+    val toaster = rememberToaster()
+    hiltViewModel<NftDetailViewModel>().subscribeToState(
+        onEvent = { event ->
+            if (event is Events.NftNotFound) {
+                toaster.toast("You don't own this NFT")
+            }
+        },
+        onState = { _, state ->
+            NftDetail(state)
         }
-    }) { _, state ->
-        NftDetail(state)
-    }
+    )
 }
 
 @Composable
