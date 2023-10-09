@@ -1,9 +1,11 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
+import android.os.Parcelable
 import app.eluvio.wallet.data.entities.NftTemplateEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Flowable
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 /**
@@ -12,11 +14,13 @@ import javax.inject.Inject
 class AllMediaProvider @Inject constructor(
     private val contentStore: ContentStore
 ) {
+    @Parcelize
     data class State(
         val loading: Boolean = true,
         val media: List<Media> = emptyList(),
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class Media(
         val key: String,
         val contractAddress: String,
@@ -29,7 +33,7 @@ class AllMediaProvider @Inject constructor(
         val tokenId: String? = null,
         val tokenCount: Int = 1,
         val tenant: String? = null
-    ) {
+    ) : Parcelable {
         companion object {
             fun fromTemplate(
                 nftTemplateEntity: NftTemplateEntity,

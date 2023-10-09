@@ -2,6 +2,7 @@ package app.eluvio.wallet.screens.qrdialogs.externalmedia
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -14,6 +15,7 @@ import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,8 +24,9 @@ class ExternalMediaQrDialogViewModel @Inject constructor(
     private val contentStore: ContentStore,
     private val tokenStore: TokenStore,
     private val apiProvider: ApiProvider
-) : BaseViewModel<ExternalMediaQrDialogViewModel.State>(State()) {
-    data class State(val qrCode: Bitmap? = null, val error: Boolean = false)
+) : BaseViewModel<ExternalMediaQrDialogViewModel.State>(State(), savedStateHandle) {
+    @Parcelize
+    data class State(val qrCode: Bitmap? = null, val error: Boolean = false) : Parcelable
 
     private val mediaId = ExternalMediaQrDialogDestination.argsFrom(savedStateHandle).mediaItemId
     override fun onResume() {

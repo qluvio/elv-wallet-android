@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.realm)
     alias(libs.plugins.gradle.secrets)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {

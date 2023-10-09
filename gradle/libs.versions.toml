@@ -93,6 +93,7 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 realm = { id = "io.realm.kotlin", version.ref = "realm" }
 gradle-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "gradle-secrets" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "org-jetbrains-kotlin-android" }
 
 [bundles]
 

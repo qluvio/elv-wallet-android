@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.realm) apply false
     alias(libs.plugins.gradle.secrets) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
 }
 
 buildscript {

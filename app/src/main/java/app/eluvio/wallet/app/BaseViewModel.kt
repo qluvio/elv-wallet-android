@@ -1,7 +1,9 @@
 package app.eluvio.wallet.app
 
+import android.os.Parcelable
 import androidx.annotation.CallSuper
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.util.logging.Log
@@ -13,7 +15,12 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
-abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
+private const val STATE_KEY = "viewmodel_state"
+
+abstract class BaseViewModel<State : Any>(
+    initialState: State,
+    private val savedStateHandle: SavedStateHandle? = null,
+) : ViewModel() {
     // TODO: decouple this from Compose.
     private val _navigationEvents = PublishSubject.create<NavigationEvent>()
     val navigationEvents: Observable<NavigationEvent> =
@@ -23,7 +30,8 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
     val events: Observable<Events> =
         _events.observeOn(AndroidSchedulers.mainThread())
 
-    private val _state = BehaviorSubject.createDefault(initialState)
+    private val _state =
+        BehaviorSubject.createDefault(savedStateHandle?.get(STATE_KEY) ?: initialState)
     val state = _state
         .doOnSubscribe {
             Log.d("${this.javaClass.simpleName} has started streaming state")
@@ -77,7 +85,12 @@ abstract class BaseViewModel<State : Any>(initialState: State) : ViewModel() {
 
     protected fun updateState(mapper: State.() -> State) {
         singleThreadScheduler.scheduleDirect {
-            _state.value?.mapper()?.let { _state.onNext(it) }
+            _state.value?.mapper()?.let { newState ->
+                _state.onNext(newState)
+                if (savedStateHandle!=null && newState is Parcelable) {
+                    savedStateHandle[STATE_KEY] = newState
+                }
+            }
         }
     }
 }
