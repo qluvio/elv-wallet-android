@@ -10,7 +10,7 @@ interface GatewayApi : AuthdApi {
     @GET("apigw/nfts")
     fun getNfts(): Single<NftResponse>
 
-    @GET("apigw/marketplace/{marketplaceId}/sku/{sku}")
+    @GET("apigw/marketplaces/{marketplaceId}/sku/{sku}")
     fun getNftForSku(
         @Path("marketplaceId") marketplaceId: String,
         @Path("sku") sku: String
