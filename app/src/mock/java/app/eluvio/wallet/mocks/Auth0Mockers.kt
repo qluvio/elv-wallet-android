@@ -6,8 +6,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoMap
-import dagger.multibindings.StringKey
+import dagger.multibindings.IntoSet
+import okhttp3.Request
+import okhttp3.Response
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
@@ -17,34 +18,38 @@ import kotlin.time.Duration.Companion.seconds
 @InstallIn(SingletonComponent::class)
 class Auth0MockersModule {
     @Provides
-    @IntoMap
-    @StringKey("/oauth/device/code")
-    fun provide_oauth_device_code(): Mocker {
-        var count = Random.nextInt(900)
-        val interval = 1 // poll every 1 second (real auth0 uses 5)
-        return { request ->
+    @IntoSet
+    fun provide_oauth_device_code() = object : Mocker {
+        private var count = Random.nextInt(900)
+        private val interval = 1 // poll every 1 second (real auth0 uses 5)
+
+        override fun canHandle(path: String): Boolean = path == "/oauth/device/code"
+
+        override fun mock(request: Request): Response {
             count++
             val userCode = "ABCD-${count.toString().padStart(4, '0')}"
-            request.mockResponse(
+            return request.mockResponse(
                 """
                     {"device_code":"foo","user_code":"$userCode","verification_uri":"https://prod-elv.us.auth0.com/activate","expires_in":900,"interval":$interval,"verification_uri_complete":"https://prod-elv.us.auth0.com/activate?user_code=$userCode"}
-                        """.trimIndent()
+                """.trimIndent()
             )
         }
     }
 
     @Provides
-    @IntoMap
-    @StringKey("/oauth/token")
-    fun provide_oauth_token(): Mocker {
+    @IntoSet
+    fun provide_oauth_token() = object : Mocker {
         // Return 403 until 3 seconds have passed, then return the token
-        var startTime = Duration.ZERO
-        return { request ->
+        private var startTime = Duration.ZERO
+
+        override fun canHandle(path: String): Boolean = path == "/oauth/token"
+
+        override fun mock(request: Request): Response {
             val now = System.nanoTime().nanoseconds
             if (startTime == Duration.ZERO) {
                 startTime = now
             }
-            if (now - startTime >= 3.seconds) {
+            return if (now - startTime >= 1.seconds) {
                 startTime = Duration.ZERO
                 Log.d("mock activation complete!")
                 request.mockResponse(
