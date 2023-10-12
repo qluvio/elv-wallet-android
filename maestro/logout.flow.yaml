@@ -1,0 +1,10 @@
+appId: app.eluvio.wallet.mock.debug
+---
+- runFlow: launch.flow.yaml
+
+- pressKey: Remote Dpad Right
+- pressKey: Remote Dpad Right
+- waitForAnimationToEnd
+- pressKey: Remote Dpad Down
+- pressKey: enter
+- assertVisible: Sign In
