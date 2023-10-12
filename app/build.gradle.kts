@@ -32,7 +32,23 @@ android {
             )
             ndk.debugSymbolLevel = "FULL"
         }
+
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+        }
     }
+
+    flavorDimensions += listOf("server")
+    productFlavors {
+        create("default") {
+            dimension = "server"
+        }
+        create("mock") {
+            dimension = "server"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

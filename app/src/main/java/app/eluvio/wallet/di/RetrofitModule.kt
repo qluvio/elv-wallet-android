@@ -12,13 +12,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.reactivex.rxjava3.schedulers.Schedulers
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.create
-import timber.log.Timber
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -29,11 +28,13 @@ object RetrofitModule {
     @TokenAwareHttpClient
     fun provideHttpClient(
         accessTokenInterceptor: AccessTokenInterceptor,
-        loggingInterceptor: HttpLoggingInterceptor
+        interceptors: Set<@JvmSuppressWildcards Interceptor>,
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(accessTokenInterceptor)
-            .addInterceptor(loggingInterceptor)
+            .apply {
+                interceptors.forEach { addInterceptor(it) }
+            }
             .build()
     }
 
@@ -60,12 +61,15 @@ object RetrofitModule {
     @Singleton
     @Provides
     @FabricConfig
-    fun provideRetrofit(moshi: Moshi, loggingInterceptor: HttpLoggingInterceptor): Retrofit {
+    fun provideRetrofit(
+        moshi: Moshi,
+        interceptors: Set<@JvmSuppressWildcards Interceptor>
+    ): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://localhost/")
             .client(
                 OkHttpClient.Builder()
-                    .addInterceptor(loggingInterceptor)
+                    .apply { interceptors.forEach { addInterceptor(it) } }
                     .build()
             )
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -76,25 +80,20 @@ object RetrofitModule {
     @Singleton
     @Provides
     @Auth0
-    fun provideAuth0Retrofit(moshi: Moshi, loggingInterceptor: HttpLoggingInterceptor): Retrofit {
+    fun provideAuth0Retrofit(
+        moshi: Moshi,
+        interceptors: Set<@JvmSuppressWildcards Interceptor>
+    ): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://prod-elv.us.auth0.com/")
             .client(
                 OkHttpClient.Builder()
-                    .addInterceptor(loggingInterceptor)
+                    .apply { interceptors.forEach { addInterceptor(it) } }
                     .build()
             )
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .build()
-    }
-
-    @Provides
-    fun provideLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor { message ->
-            Timber.tag("OkHttp").d(message)
-        }
-            .setLevel(HttpLoggingInterceptor.Level.BODY)
     }
 
     @Provides

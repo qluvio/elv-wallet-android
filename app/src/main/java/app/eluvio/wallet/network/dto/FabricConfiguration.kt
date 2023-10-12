@@ -8,7 +8,6 @@ data class FabricConfiguration(
     @field:Json(name = "node_id") val nodeID: String,
     @field:Json(name = "network") val network: Network,
     @field:Json(name = "qspace") val qspace: QSpace,
-    @field:Json(name = "fabric_version") val fabricVersion: String,
 ) {
     // TODO: replace with failover logic (probably in a new component)
     val fabricEndpoint: String = "${network.services.fabricApi.first()}/s/${qspace.names.first()}"
@@ -28,7 +27,6 @@ data class Services(
     @field:Json(name = "authority_service") val authService: List<String>,
     @field:Json(name = "ethereum_api") val ethereumApi: List<String>,
     @field:Json(name = "fabric_api") val fabricApi: List<String>,
-    @field:Json(name = "search") val search: List<String>,
 )
 
 @JsonClass(generateAdapter = true)
@@ -36,11 +34,5 @@ data class QSpace(
     @field:Json(name = "id") val id: String,
     @field:Json(name = "version") val version: String,
     @field:Json(name = "type") val type: String,
-    @field:Json(name = "ethereum") val ethereum: Ethereum,
     @field:Json(name = "names") val names: List<String>
-)
-
-@JsonClass(generateAdapter = true)
-data class Ethereum(
-    @field:Json(name = "network_id") val networkId: Int
 )
