@@ -16,6 +16,7 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.VideoOptionsFetcher
+import app.eluvio.wallet.data.stores.PlaybackStore
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.util.logging.Log
@@ -33,6 +34,10 @@ import javax.inject.Inject
 class VideoPlayerActivity : FragmentActivity(), Player.Listener {
     @Inject
     lateinit var videoOptionsFetcher: VideoOptionsFetcher
+
+    @Inject
+    lateinit var playbackStore: PlaybackStore
+
     private var disposable: Disposable? = null
 
     private var playerView: PlayerView? = null
@@ -45,6 +50,7 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
             playerView?.hideController()
         }
     }
+    private val mediaItemId by lazy { VideoPlayerActivityDestination.argsFrom(intent).mediaItemId }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,13 +86,13 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
         findViewById<DefaultTimeBar>(androidx.media3.ui.R.id.exo_progress)
             ?.setKeyTimeIncrement(5000)
 
-        val mediaItemId = VideoPlayerActivityDestination.argsFrom(intent).mediaItemId
         disposable = videoOptionsFetcher.fetchVideoOptions(mediaItemId)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = {
                     exoPlayer?.setMediaSource(it.toMediaSource())
                     exoPlayer?.prepare()
+                    exoPlayer?.seekTo(playbackStore.getPlaybackPosition(mediaItemId))
                 },
                 onError = {
                     Log.e("VideoPlayerFragment: Error fetching video options", it)
@@ -107,6 +113,9 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
 
     override fun onPause() {
         super.onPause()
+        exoPlayer?.currentPosition?.let { currentPosition ->
+            playbackStore.setPlaybackPosition(mediaItemId, currentPosition)
+        }
         playerView?.onPause()
         playerView?.player?.pause()
     }
