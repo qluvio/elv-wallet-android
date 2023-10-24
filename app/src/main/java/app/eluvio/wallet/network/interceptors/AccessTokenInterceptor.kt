@@ -29,8 +29,12 @@ class AccessTokenInterceptor @Inject constructor(
     private val signOutHandler: SignOutHandler,
 ) : Interceptor {
 
-    private val userAgent =
+    private val userAgent = if (BuildConfig.DEBUG) {
+        // Don't use "androidtv" in debug build, to bypass eligible-tenants filtering by backend.
+        "android-debug_v${BuildConfig.VERSION_NAME}"
+    } else {
         "AndroidTV/${Build.VERSION.RELEASE} (api:${Build.VERSION.SDK_INT}; ${BuildConfig.APPLICATION_ID}:${BuildConfig.VERSION_NAME}_${BuildConfig.VERSION_CODE}; ${Build.MANUFACTURER}; ${Build.MODEL}; ${Build.DEVICE})"
+    }
 
     /** URLs that contain these paths should not get special handling for expired tokens. */
     private val authRequestPaths = setOf("wlt/login/jwt", "wlt/sign/eth")
