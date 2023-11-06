@@ -26,6 +26,8 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @MainGraph
 @ActivityDestination(navArgsDelegate = VideoPlayerArgs::class)
@@ -114,7 +116,11 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
     override fun onPause() {
         super.onPause()
         exoPlayer?.currentPosition?.let { currentPosition ->
-            playbackStore.setPlaybackPosition(mediaItemId, currentPosition)
+            if (shouldStorePlaybackPosition(currentPosition)) {
+                playbackStore.setPlaybackPosition(mediaItemId, currentPosition)
+            } else {
+                playbackStore.setPlaybackPosition(mediaItemId, 0)
+            }
         }
         playerView?.onPause()
         playerView?.player?.pause()
@@ -138,5 +144,20 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
+    }
+
+    /**
+     * If the current position is close enough to the start or end of the video, don't bother storing it.
+     */
+    private fun shouldStorePlaybackPosition(currentPosition: Long): Boolean {
+        val position = currentPosition.milliseconds
+        val startThreshold = 5.seconds
+        if (position < startThreshold) {
+            // Too close to the start, don't bother storing
+            return false
+        }
+        val duration = (exoPlayer?.duration ?: 0).milliseconds
+        val endThreshold = 15.seconds
+        return duration - position > endThreshold
     }
 }
