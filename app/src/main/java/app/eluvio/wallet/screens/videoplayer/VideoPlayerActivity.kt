@@ -81,7 +81,6 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
             // Manually show spinner until exoplayer figures itself out
             //noinspection MissingInflatedId
             findViewById<View>(androidx.media3.ui.R.id.exo_buffering).visibility = View.VISIBLE
-            requestFocus()
         }
 
         //noinspection MissingInflatedId
