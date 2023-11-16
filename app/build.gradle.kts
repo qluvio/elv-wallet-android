@@ -143,5 +143,6 @@ kapt {
 }
 
 secrets {
-    propertiesFileName = "secrets.properties"
+    propertiesFileName = "secrets/secrets.properties"
+    defaultPropertiesFileName = "secrets.default.properties"
 }
