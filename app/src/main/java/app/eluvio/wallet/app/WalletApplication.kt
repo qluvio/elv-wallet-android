@@ -42,7 +42,9 @@ class WalletApplication : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         // Coil checks if Application implements ImageLoaderFactory and calls this automatically.
         // We provide our own OkHttpClient so image requests include fabric token headers.
-        return ImageLoader.Builder(this).okHttpClient(httpClient).build()
+        return ImageLoader.Builder(this).okHttpClient(httpClient)
+            .components { add(ContentFabricSizingInterceptor()) }
+            .build()
     }
 }
 

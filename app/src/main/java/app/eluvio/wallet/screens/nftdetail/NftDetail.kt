@@ -114,21 +114,7 @@ private fun NftDetail(state: NftDetailViewModel.State) {
                     style = MaterialTheme.typography.title_62,
                     modifier = Modifier.padding(start = Overscan.horizontalPadding)
                 )
-                var expanded by remember { mutableStateOf(false) }
-                Text(
-                    text = state.subtitle,
-                    style = MaterialTheme.typography.body_32,
-                    maxLines = if (expanded) Int.MAX_VALUE else 10,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .clickable { expanded = !expanded }
-                        .padding(
-                            start = Overscan.horizontalPadding,
-                            end = 260.dp,
-                            top = 16.dp,
-                            bottom = 16.dp
-                        )
-                )
+                DescriptionText(text = state.subtitle)
             }
             item {
                 FeaturedMediaAndOffersRow(state)
@@ -168,6 +154,30 @@ private fun NftDetail(state: NftDetailViewModel.State) {
             spacer(height = 32.dp)
         }
     }
+}
+
+@Composable
+private fun DescriptionText(text: AnnotatedString) {
+    var isClickable by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.body_32,
+        maxLines = if (expanded) Int.MAX_VALUE else 10,
+        overflow = TextOverflow.Ellipsis,
+        onTextLayout = { textLayoutResult ->
+            // Only clickable if there's actually overflow.
+            isClickable = expanded || textLayoutResult.hasVisualOverflow
+        },
+        modifier = Modifier
+            .clickable(enabled = isClickable, onClick = { expanded = !expanded })
+            .padding(
+                start = Overscan.horizontalPadding,
+                end = 260.dp,
+                top = 16.dp,
+                bottom = 16.dp
+            )
+    )
 }
 
 @Composable

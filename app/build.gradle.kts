@@ -46,6 +46,7 @@ android {
         }
         create("mock") {
             dimension = "server"
+            applicationIdSuffix = ".mock"
         }
     }
 
@@ -144,5 +145,6 @@ kapt {
 }
 
 secrets {
-    propertiesFileName = "secrets.properties"
+    propertiesFileName = "secrets/secrets.properties"
+    defaultPropertiesFileName = "secrets.default.properties"
 }

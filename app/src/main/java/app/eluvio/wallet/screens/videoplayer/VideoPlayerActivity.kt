@@ -16,6 +16,7 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.VideoOptionsFetcher
+import app.eluvio.wallet.data.stores.PlaybackStore
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.util.logging.Log
@@ -25,6 +26,8 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @MainGraph
 @ActivityDestination(navArgsDelegate = VideoPlayerArgs::class)
@@ -33,6 +36,10 @@ import javax.inject.Inject
 class VideoPlayerActivity : FragmentActivity(), Player.Listener {
     @Inject
     lateinit var videoOptionsFetcher: VideoOptionsFetcher
+
+    @Inject
+    lateinit var playbackStore: PlaybackStore
+
     private var disposable: Disposable? = null
 
     private var playerView: PlayerView? = null
@@ -45,6 +52,7 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
             playerView?.hideController()
         }
     }
+    private val mediaItemId by lazy { VideoPlayerActivityDestination.argsFrom(intent).mediaItemId }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,20 +81,19 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
             // Manually show spinner until exoplayer figures itself out
             //noinspection MissingInflatedId
             findViewById<View>(androidx.media3.ui.R.id.exo_buffering).visibility = View.VISIBLE
-            requestFocus()
         }
 
         //noinspection MissingInflatedId
         findViewById<DefaultTimeBar>(androidx.media3.ui.R.id.exo_progress)
             ?.setKeyTimeIncrement(5000)
 
-        val mediaItemId = VideoPlayerActivityDestination.argsFrom(intent).mediaItemId
         disposable = videoOptionsFetcher.fetchVideoOptions(mediaItemId)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = {
                     exoPlayer?.setMediaSource(it.toMediaSource())
                     exoPlayer?.prepare()
+                    exoPlayer?.seekTo(playbackStore.getPlaybackPosition(mediaItemId))
                 },
                 onError = {
                     Log.e("VideoPlayerFragment: Error fetching video options", it)
@@ -107,6 +114,13 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
 
     override fun onPause() {
         super.onPause()
+        exoPlayer?.currentPosition?.let { currentPosition ->
+            if (shouldStorePlaybackPosition(currentPosition)) {
+                playbackStore.setPlaybackPosition(mediaItemId, currentPosition)
+            } else {
+                playbackStore.setPlaybackPosition(mediaItemId, 0)
+            }
+        }
         playerView?.onPause()
         playerView?.player?.pause()
     }
@@ -129,5 +143,20 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
+    }
+
+    /**
+     * If the current position is close enough to the start or end of the video, don't bother storing it.
+     */
+    private fun shouldStorePlaybackPosition(currentPosition: Long): Boolean {
+        val position = currentPosition.milliseconds
+        val startThreshold = 5.seconds
+        if (position < startThreshold) {
+            // Too close to the start, don't bother storing
+            return false
+        }
+        val duration = (exoPlayer?.duration ?: 0).milliseconds
+        val endThreshold = 15.seconds
+        return duration - position > endThreshold
     }
 }

@@ -43,7 +43,7 @@ so be mindful of pruning the view hierarchy-->
                 android:layoutDirection="ltr"
                 android:padding="12dp">
 
-                <ImageButton
+                <app.eluvio.wallet.screens.videoplayer.ui.AutoFocusButton
                     android:id="@id/exo_play_pause"
                     style="@style/ExoStyledControls.Button.Center.PlayPause"
                     android:nextFocusLeft="@id/exo_progress"

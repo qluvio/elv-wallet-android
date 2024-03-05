@@ -1,0 +1,15 @@
+appId: app.eluvio.wallet.mock.debug
+---
+- clearState
+- launchApp
+
+# Debug builds have an environment selector. Skip it, assuming Main is selected
+- runFlow:
+    when:
+      visible: Main
+    commands:
+      - pressKey: enter
+
+- pressKey: enter
+- assertVisible: FOX Weather All Access
+- assertVisible: My Items

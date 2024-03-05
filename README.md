@@ -1,3 +1,15 @@
+## Eluvio Media Wallet for AndroidTV
+
+An embedded TV app for viewing collected NFTs on the Eluvio Content Fabric.
+
+See [https://live.eluv.io/media-wallet/compatible-devices](https://live.eluv.io/media-wallet/compatible-devices)
+for a complete list of devices.
+
+### Setup
+Client secrets are defined in [secrets.default.properties](secrets.default.properties). To override default values (required for full functionality):  
+* External developers: either edit the file directly, or create a new file in `secrets/secrets.properties`.    
+* Internal Eluvio developers: sync submodules (`git submodule update --init --recursive --remote`) and follow the instructions there to generate the secrets file.
+
 ### Persistence 
 We use [Realm](https://www.mongodb.com/docs/realm/sdk/kotlin/) for persistence.
 Entities that need to be persisted must:
