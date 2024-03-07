@@ -5,6 +5,7 @@ import android.content.Intent
 import android.widget.Toast
 import app.eluvio.wallet.MainActivity
 import app.eluvio.wallet.data.stores.TokenStore
+import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -16,6 +17,7 @@ class SignOutHandler @Inject constructor(
     private val tokenStore: TokenStore,
     private val realm: Realm,
     @ApplicationContext private val context: Context,
+    private val toaster: Toaster,
 ) {
     fun signOut(completeMessage: String?): Completable {
         return Completable.fromAction {
@@ -29,7 +31,7 @@ class SignOutHandler @Inject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnComplete {
                 if (completeMessage != null) {
-                    Toast.makeText(context, completeMessage, Toast.LENGTH_LONG).show()
+                    toaster.toast(completeMessage, Toast.LENGTH_LONG)
                 }
                 restartApp()
             }

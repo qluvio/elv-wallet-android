@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ClickableSurfaceColors
 import androidx.tv.material3.ClickableSurfaceDefaults
+import androidx.tv.material3.ClickableSurfaceScale
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
@@ -35,13 +36,16 @@ fun TvButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     colors: ClickableSurfaceColors = ClickableSurfaceDefaults.colors(),
+    scale: ClickableSurfaceScale = LocalSurfaceScale.current,
+    enabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 5.dp)
 ) {
     Surface(
         onClick = onClick,
         colors = colors,
         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
-        scale = LocalSurfaceScale.current,
+        scale = scale,
+        enabled = enabled,
         modifier = modifier
     ) {
         Text(

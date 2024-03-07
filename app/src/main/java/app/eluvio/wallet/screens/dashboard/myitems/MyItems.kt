@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -18,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +38,7 @@ import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.isKeyUpOf
+import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
@@ -50,15 +49,12 @@ import kotlin.math.roundToInt
 @Destination
 @Composable
 fun MyItems() {
-    val context = LocalContext.current
+    val toaster = rememberToaster()
     hiltViewModel<MyItemsViewModel>().subscribeToState(
         onEvent = {
             when (it) {
-                Events.NetworkError -> Toast.makeText(
-                    context,
-                    "Network error. Please try again later.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                is Events.NetworkError -> toaster.toast(it.defaultMessage)
+                else -> {}
             }
         },
         onState = { _, state ->
@@ -79,11 +75,10 @@ private fun MyItems(state: AllMediaProvider.State) {
             Text(stringResource(R.string.no_content_warning))
         } else {
             val navigator = LocalNavigator.current
-            val context = LocalContext.current
+            val toaster = rememberToaster()
             MyItemsGrid(state.media, onItemClick = {
                 if (it.tokenId == null) {
-                    Toast.makeText(context, "NFT Packs not supported yet", Toast.LENGTH_SHORT)
-                        .show()
+                    toaster.toast("NFT Packs not supported yet")
                 } else {
                     navigator(NftDetailDestination(it.contractAddress, it.tokenId).asPush())
                 }
@@ -94,8 +89,8 @@ private fun MyItems(state: AllMediaProvider.State) {
 
 @Composable
 private fun BoxWithConstraintsScope.MyItemsGrid(
-    media: List<AllMediaProvider.State.Media>,
-    onItemClick: (AllMediaProvider.State.Media) -> Unit
+    media: List<AllMediaProvider.Media>,
+    onItemClick: (AllMediaProvider.Media) -> Unit
 ) {
     val width by rememberUpdatedState(maxWidth)
     val horizontalPadding = 100.dp
@@ -147,21 +142,23 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
 @Preview(device = Devices.TV_720p)
 private fun MyItemsPreview() = EluvioThemePreview {
     val items = listOf(
-        AllMediaProvider.State.Media(
+        AllMediaProvider.Media(
             "key",
             "contract_address",
             "https://x",
             "Single Token",
             "Special Edition",
+            "desc",
             "1",
             1
         ),
-        AllMediaProvider.State.Media(
+        AllMediaProvider.Media(
             "key",
             "contract_address",
             "https://x",
             "Token Pack",
             "Pleab Edition",
+            "desc",
             null,
             53
         )

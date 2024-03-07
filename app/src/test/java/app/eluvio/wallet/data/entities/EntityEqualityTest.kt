@@ -63,7 +63,7 @@ class EntityEqualityTest {
 
             if (missedFields.isNotEmpty()) {
                 appendLine()
-                appendLine(">>>Incomplete equals implementation (remember to call toList() when comparing RealmLists)<<<")
+                appendLine(">>>Incomplete equals implementation<<<")
                 missedFields.forEach { (kls, fields) ->
                     appendLine(kls)
                     appendLine(
@@ -170,9 +170,10 @@ class EntityEqualityTest {
                 "io_realm_kotlin_objectReference"
             )
             return declaredFields
-                .filter {
-                    !Modifier.isStatic(it.modifiers) &&
-                            it.name !in excludedFields &&
+                .filterNot {
+                    Modifier.isStatic(it.modifiers) ||
+                            Modifier.isFinal(it.modifiers) ||
+                            it.name in excludedFields ||
                             it.isAnnotationPresent(Ignore::class.java)
                 }
         }

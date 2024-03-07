@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,29 +39,25 @@ import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
 
+
+/**
+ * @param onClick if null, the card will not be clickable/focusable/interactive
+ */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun MediaCard(
-    media: AllMediaProvider.State.Media,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    media: AllMediaProvider.Media,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     @DrawableRes val bgResource: Int = remember(focused) {
         if (focused) R.drawable.item_card_bg_focused else R.drawable.item_card_bg
     }
-    Surface(
+    SurfaceWrapper(
         onClick = onClick,
         interactionSource = interactionSource,
-        scale = LocalSurfaceScale.current,
-        colors = ClickableSurfaceDefaults.colors(
-            containerColor = Color.Transparent,
-            contentColor = Color(0xFF7A7A7A),
-            focusedContainerColor = Color.Transparent,
-            focusedContentColor = Color.Black,
-            pressedContentColor = Color.Black,
-        ),
         modifier = modifier.aspectRatio(0.65f)
     ) {
         Column(
@@ -118,8 +115,43 @@ fun MediaCard(
     }
 }
 
+/**
+ * [Surface] has interactive, and non-interactive variants. This wrapper will choose a variant
+ * based on whether [onClick] is null.
+ */
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun Header(media: AllMediaProvider.State.Media) {
+private fun SurfaceWrapper(
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    onClick: (() -> Unit)?,
+    content: @Composable BoxScope.() -> Unit
+) {
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            interactionSource = interactionSource,
+            scale = LocalSurfaceScale.current,
+            colors = ClickableSurfaceDefaults.colors(
+                containerColor = Color.Transparent,
+                contentColor = Color(0xFF7A7A7A),
+                focusedContainerColor = Color.Transparent,
+                focusedContentColor = Color.Black,
+                pressedContentColor = Color.Black,
+            ),
+            modifier = modifier.aspectRatio(0.65f),
+            content = content
+        )
+    } else {
+        Surface(
+            modifier = modifier.aspectRatio(0.65f),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun Header(media: AllMediaProvider.Media) {
     Row(Modifier.padding(horizontal = 6.dp, vertical = 6.dp)) {
         // add logo
         // add marketplace name
@@ -140,12 +172,13 @@ private val subtitleFocusedColor = Color(0xFF646464)
 @Preview
 fun MediaCardPreviewPack() = EluvioThemePreview {
     MediaCard(
-        AllMediaProvider.State.Media(
+        AllMediaProvider.Media(
             "key",
             "id1",
             "https://x",
             "Goat Pack",
             "Special Edition",
+            "desc",
             null,
             23
         ),
@@ -157,12 +190,13 @@ fun MediaCardPreviewPack() = EluvioThemePreview {
 @Preview
 fun MediaCardPreviewSingle() = EluvioThemePreview {
     MediaCard(
-        AllMediaProvider.State.Media(
+        AllMediaProvider.Media(
             "key",
             "id1",
             "https://x",
             "Single Token",
             "Special Edition",
+            "desc",
             "1",
             1
         ),

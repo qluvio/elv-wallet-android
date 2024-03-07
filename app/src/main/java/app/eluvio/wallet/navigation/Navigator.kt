@@ -3,6 +3,9 @@ package app.eluvio.wallet.navigation
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavController
+import app.eluvio.wallet.screens.NavGraphs
+import com.ramcosta.composedestinations.navigation.navigate
+import com.ramcosta.composedestinations.navigation.popUpTo
 
 typealias Navigator = (event: NavigationEvent) -> Unit
 
@@ -20,7 +23,21 @@ class ComposeNavigator(
             }
 
             is NavigationEvent.Push -> {
-                navController.navigate(event.direction.route, event.navOptions)
+                navController.navigate(event.direction)
+            }
+
+            is NavigationEvent.Replace -> {
+                navController.navigate(event.direction) {
+                    navController.currentDestination?.route?.let { currentRoute ->
+                        popUpTo(currentRoute) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }
+
+            is NavigationEvent.SetRoot -> {
+                navController.navigate(event.direction) { popUpTo(NavGraphs.root) }
             }
         }
     }

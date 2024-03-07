@@ -25,6 +25,9 @@ class WalletApplication : Application(), ImageLoaderFactory {
     @TokenAwareHttpClient
     lateinit var httpClient: OkHttpClient
 
+    @Inject
+    lateinit var installReferrerHandler: InstallReferrerHandler
+
     override fun onCreate() {
         super.onCreate()
         ProcessLifecycleOwner.get().lifecycle.addObserver(configRefresher)
@@ -32,6 +35,8 @@ class WalletApplication : Application(), ImageLoaderFactory {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+
+        installReferrerHandler.captureInstallReferrer()
     }
 
     override fun newImageLoader(): ImageLoader {

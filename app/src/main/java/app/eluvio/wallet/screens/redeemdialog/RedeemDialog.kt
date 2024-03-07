@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.redeemdialog
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +39,7 @@ import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.redeemAvailableText
 import app.eluvio.wallet.theme.redeemExpiredText
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -48,15 +47,12 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Destination(navArgsDelegate = RedeemDialogNavArgs::class)
 @Composable
 fun RedeemDialog() {
-    val context = LocalContext.current
+    val toaster = rememberToaster()
     hiltViewModel<RedeemDialogViewModel>().subscribeToState(
         onEvent = {
             when (it) {
-                Events.NetworkError -> Toast.makeText(
-                    context,
-                    "Network error. Please try again.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                is Events.NetworkError -> toaster.toast(it.defaultMessage)
+                else -> {}
             }
         },
         onState = { vm, state ->

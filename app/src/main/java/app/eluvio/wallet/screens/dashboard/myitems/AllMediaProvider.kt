@@ -1,7 +1,7 @@
 package app.eluvio.wallet.screens.dashboard.myitems
 
 import android.os.Parcelable
-import app.eluvio.wallet.data.entities.NftEntity
+import app.eluvio.wallet.data.entities.NftTemplateEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Flowable
@@ -18,18 +18,41 @@ class AllMediaProvider @Inject constructor(
     data class State(
         val loading: Boolean = true,
         val media: List<Media> = emptyList(),
+    ) : Parcelable
+
+    @Parcelize
+    data class Media(
+        val key: String,
+        val contractAddress: String,
+        val imageUrl: String,
+        val title: String,
+        val subtitle: String? = null,
+        // Doesn't show up in cards, but is used in the detail view.
+        val description: String,
+        // if there's only one token, we can show the token id
+        val tokenId: String? = null,
+        val tokenCount: Int = 1,
+        val tenant: String? = null
     ) : Parcelable {
-        @Parcelize
-        data class Media(
-            val key: String,
-            val contractAddress: String,
-            val imageUrl: String,
-            val title: String,
-            val subtitle: String? = null,
-            // if there's only one token, we can show the token id
-            val tokenId: String? = null,
-            val tokenCount: Int = 1,
-        ) : Parcelable
+        companion object {
+            fun fromTemplate(
+                nftTemplateEntity: NftTemplateEntity,
+                tokenId: String? = null,
+                tokenCount: Int = 1
+            ) = Media(
+                key = nftTemplateEntity.id,
+                contractAddress = nftTemplateEntity.contractAddress,
+                imageUrl = nftTemplateEntity.imageUrl ?: "",
+                title = nftTemplateEntity.displayName,
+                subtitle = nftTemplateEntity.editionName,
+                description = nftTemplateEntity.description,
+                // If there's only one token, we can show the token id
+                tokenId = tokenId,
+                // TODO: design hasn't settled on how to treat token count, this will always be 1 for now
+                tokenCount = tokenCount,
+                tenant = nftTemplateEntity.tenant
+            )
+        }
     }
 
     //TODO: this is a HACK. The ContentStore needs to emit information about whether the
@@ -47,22 +70,17 @@ class AllMediaProvider @Inject constructor(
                 }
             }
             .mapNotNull { it.getOrNull() }
-            .map { response -> response.map { nft -> nft.toMediaState() } }
+            .map { response ->
+                response.mapNotNull { nft ->
+                    nft.nftTemplate?.let { template ->
+                        Media.fromTemplate(template, nft.tokenId)
+                    }
+                }
+            }
             .map { media ->
                 storeEmissions++
                 val loading = storeEmissions < 2 && media.isEmpty()
                 State(loading, media)
             }
     }
-
-    private fun NftEntity.toMediaState() = State.Media(
-        key = _id,
-        contractAddress = contractAddress,
-        imageUrl = imageUrl,
-        title = displayName,
-        subtitle = editionName,
-        // If there's only one token, we can show the token id
-        tokenId = tokenId,
-        tokenCount = 1
-    )
 }

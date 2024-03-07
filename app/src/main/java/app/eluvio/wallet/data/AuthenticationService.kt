@@ -27,6 +27,11 @@ class AuthenticationService @Inject constructor(
         return apiProvider.getApi(AuthServicesApi::class).flatMap { api -> getFabricToken(api) }
     }
 
+    fun getFabricTokenExternal(): Single<String> {
+        return apiProvider.getExternalWalletApi(AuthServicesApi::class)
+            .flatMap { api -> getFabricToken(api) }
+    }
+
     private fun getFabricToken(authServicesApi: AuthServicesApi): Single<String> {
         return fabricConfigStore.observeFabricConfiguration()
             .firstOrError()

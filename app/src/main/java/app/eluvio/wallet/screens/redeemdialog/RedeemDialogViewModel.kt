@@ -14,7 +14,7 @@ import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.FulfillmentQrDialogDestination
-import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
+import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.toDate
@@ -51,9 +51,8 @@ class RedeemDialogViewModel @Inject constructor(
         val _transaction: String? = null,
     )
 
-    private val contractAddress = RedeemDialogDestination.argsFrom(stateHandle).contractAddress
-    private val tokenId = RedeemDialogDestination.argsFrom(stateHandle).tokenId
-    private val offerId = RedeemDialogDestination.argsFrom(stateHandle).offerId
+    private val navArgs = stateHandle.navArgs<RedeemDialogNavArgs>()
+    private val offerId = navArgs.offerId
 
     private var refreshDisposable: Disposable? = null
     private var fulfillmentDataDisposable: Disposable? = null
@@ -61,7 +60,7 @@ class RedeemDialogViewModel @Inject constructor(
     override fun onResume() {
         super.onResume()
         apiProvider.getFabricEndpoint().flatMapPublisher { endpoint ->
-            contentStore.observeNft(contractAddress, tokenId)
+            contentStore.observeNft(navArgs.contractAddress, navArgs.tokenId)
                 .doOnNext {
                     // Already fetched before we got here, but just in case it failed or got
                     // canceled before finishing, fetch info again.
@@ -109,7 +108,7 @@ class RedeemDialogViewModel @Inject constructor(
                 }
             } else {
                 redeemOffer(it)
-                    .andThen(pollRedemptionStatusUntilComplete(it))
+                    .andThen(pollRedemptionStatusUntilComplete(it._nftEntity))
             }
         }
             .subscribeBy(onError = {
@@ -124,16 +123,16 @@ class RedeemDialogViewModel @Inject constructor(
         val reference = Base58.encode(Random.nextBytes(16))
         return fulfillmentStore.initiateRedemption(
             state._nftEntity,
-            offerId,
+            navArgs.offerId,
             reference,
         )
     }
 
-    private fun pollRedemptionStatusUntilComplete(state: State): Completable {
-        state._nftEntity ?: error("nft is null")
+    private fun pollRedemptionStatusUntilComplete(nftEntity: NftEntity?): Completable {
+        checkNotNull(nftEntity) { "nft is null" }
         return Flowable.interval(0, 2, TimeUnit.SECONDS)
             .flatMapSingle {
-                fulfillmentStore.refreshRedeemedOffers(state._nftEntity)
+                fulfillmentStore.refreshRedeemedOffers(nftEntity)
             }
             .takeUntil { nft ->
                 val status = nft.redeemStates.firstOrNull { it.offerId == offerId }?.status

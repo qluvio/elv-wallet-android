@@ -51,7 +51,7 @@ class FulfillmentStore @Inject constructor(
                         // Filter any offers that don't have valid redeem states
                         it.redeemableOffers.removeAll { offer -> redeemStates.none { redeemState -> redeemState.offerId == offer.offerId } }
                         it.redeemStates = redeemStates.toRealmListOrEmpty()
-                        it.tenant = tenant
+                        it.nftTemplate?.tenant = tenant
                     }
                 } ?: nft
             }
@@ -93,7 +93,8 @@ class FulfillmentStore @Inject constructor(
         reference: String,
     ): Completable {
         val tenant =
-            nft.tenant ?: return Completable.error(IllegalStateException("NFT has no tenant"))
+            nft.nftTemplate?.tenant
+                ?: return Completable.error(IllegalStateException("NFT has no tenant"))
         val request =
             InitiateRedemptionRequest(reference, nft.contractAddress, nft.tokenId, offerId.toInt())
         return Completable.fromAction {

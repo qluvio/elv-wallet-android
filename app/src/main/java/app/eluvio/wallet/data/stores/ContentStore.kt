@@ -3,8 +3,11 @@ package app.eluvio.wallet.data.stores
 import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
+import app.eluvio.wallet.data.entities.NftId
+import app.eluvio.wallet.data.entities.NftTemplateEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
+import app.eluvio.wallet.network.converters.toEntity
 import app.eluvio.wallet.network.converters.toNfts
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
@@ -24,6 +27,36 @@ class ContentStore @Inject constructor(
     private val realm: Realm,
     private val signOutHandler: SignOutHandler,
 ) {
+
+    fun observerNftBySku(marketplace: String, sku: String): Flowable<Result<NftTemplateEntity>> {
+        val id = NftId.forSku(marketplace, sku)
+        return realm.query<NftTemplateEntity>("${NftTemplateEntity::id.name} == $0", id)
+            .asFlowable()
+            .mapNotNull { it.firstOrNull() }
+            .map { Result.success(it) }
+            .mergeWith(
+                fetchTemplateForSku(marketplace, sku)
+                    .ignoreElement()
+                    .onErrorReturn { Result.failure(it) }
+            )
+            .doOnNext {
+                it.exceptionOrNull()?.let { error ->
+                    Log.e("Error in wallet data stream", error)
+                }
+            }
+    }
+
+    private fun fetchTemplateForSku(marketplace: String, sku: String): Single<NftTemplateEntity> {
+        return apiProvider.getApi(GatewayApi::class)
+            .flatMap { api -> api.getNftForSku(marketplace, sku) }
+            .map { dto ->
+                val id = NftId.forSku(marketplace, sku)
+                dto.nftTemplate.toEntity(id).apply {
+                    tenant = dto.tenant
+                }
+            }
+            .saveTo(realm, clearTable = false)
+    }
 
     fun observeWalletData(forceRefresh: Boolean = true): Flowable<Result<List<NftEntity>>> {
         return realm.query<NftEntity>()
@@ -51,12 +84,25 @@ class ContentStore @Inject constructor(
     }
 
     fun observeNft(contractAddress: String, tokenId: String): Flowable<NftEntity> {
-        return realm.query<NftEntity>(
-            "${NftEntity::contractAddress.name} == $0 && ${NftEntity::tokenId.name} == $1",
-            contractAddress,
-            tokenId
-        ).asFlowable()
-            .mapNotNull { it.firstOrNull() }
+        val id = NftId.forToken(contractAddress, tokenId)
+        return realm.query<NftEntity>("${NftEntity::id.name} == $0", id)
+            .asFlowable()
+            .switchMapSingle { list ->
+                val item = list.firstOrNull()
+                if (item == null) {
+                    // Missing item in db, maybe we got here from a deeplink?
+                    // calling fetchWalletData is overkill, but this is a demo
+                    fetchWalletData()
+                        .map { nfts ->
+                            nfts.firstOrNull { nft ->
+                                nft.contractAddress == contractAddress && nft.tokenId == tokenId
+                            } ?: throw NftNotFoundException()
+                        }
+                } else {
+                    Single.just(item)
+                }
+            }
+            .distinctUntilChanged()
     }
 
     fun observeMediaItem(mediaId: String): Flowable<MediaEntity> {
@@ -67,7 +113,7 @@ class ContentStore @Inject constructor(
             .mapNotNull { it.firstOrNull() }
     }
 
-    private fun fetchWalletData(): Single<List<NftEntity>> {
+    fun fetchWalletData(): Single<List<NftEntity>> {
         return apiProvider.getApi(GatewayApi::class)
             .flatMap { api -> api.getNfts() }
             .map { response -> response.toNfts() }
@@ -89,3 +135,5 @@ class ContentStore @Inject constructor(
             }
     }
 }
+
+class NftNotFoundException : Exception("Nft not found in wallet data")

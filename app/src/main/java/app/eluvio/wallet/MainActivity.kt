@@ -1,5 +1,6 @@
 package app.eluvio.wallet
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,10 +8,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.core.util.Consumer
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -37,6 +40,16 @@ class MainActivity : ComponentActivity() {
                         .background(Color(0xFF050505))
                 ) {
                     val navController = rememberNavController()
+                    DisposableEffect(navController) {
+                        val consumer = Consumer<Intent> {
+                            Log.d("New intent captured and forwarded to navController: $it")
+                            navController.handleDeepLink(it)
+                        }
+                        this@MainActivity.addOnNewIntentListener(consumer)
+                        onDispose {
+                            this@MainActivity.removeOnNewIntentListener(consumer)
+                        }
+                    }
                     val navigator = remember {
                         ComposeNavigator(
                             navController,

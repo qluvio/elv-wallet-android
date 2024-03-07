@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.dashboard
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -59,6 +57,7 @@ import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rememberToaster
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.navigate
@@ -237,13 +236,9 @@ private fun PrintVersionOnMultiClick(subject: PublishProcessor<Any>, clickThresh
         .distinctUntilChanged()
         .subscribeAsState(initial = false)
     if (tripleClick) {
-        Toast
-            .makeText(
-                LocalContext.current,
-                "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                Toast.LENGTH_SHORT
-            )
-            .show()
+        rememberToaster().toast(
+            "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+        )
     }
 }
 
