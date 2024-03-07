@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 private const val DEEPLINK_URL_REGEX_PATTERN =
-    "eluv\\.io/deeplinkdemo/marketplaces/([A-Za-z0-9_]+)/sku/([A-Za-z0-9_]+)(?:\\?jwt=([A-Za-z0-9\\-._]+))?"
+    "elvwallet://items/([A-Za-z0-9_]+)/([A-Za-z0-9_]+)/([A-Za-z0-9_]+)(?:\\?jwt=([A-Za-z0-9\\-._]+))?"
 
 /**
  * Looks for Install Referrer parameters (https://developer.android.com/google/play/installreferrer/library).
@@ -64,7 +64,7 @@ class InstallReferrerHandler @Inject constructor(
             options = setOf(RegexOption.IGNORE_CASE)
         )
             .find(installReferrerParams)?.let {
-                val (marketplace, sku, jwt) = it.destructured
+                val (marketplace, contract, sku, jwt) = it.destructured
                 // jwt can be "" at this point
                 deeplinkStore.deeplinkRequest =
                     DeeplinkStore.DeeplinkRequest(marketplace, sku, jwt)

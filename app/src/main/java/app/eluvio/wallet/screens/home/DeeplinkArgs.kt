@@ -7,7 +7,7 @@ data class DeeplinkArgs(val marketplace: String?, val sku: String?, val jwt: Str
         return DeeplinkStore.DeeplinkRequest(
             marketplace ?: return null,
             sku ?: return null,
-            jwt ?: return null
+            jwt
         )
     }
 }
