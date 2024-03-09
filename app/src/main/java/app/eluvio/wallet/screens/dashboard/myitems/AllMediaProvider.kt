@@ -37,12 +37,13 @@ class AllMediaProvider @Inject constructor(
         companion object {
             fun fromTemplate(
                 nftTemplateEntity: NftTemplateEntity,
+                imageOverride: String? = null,
                 tokenId: String? = null,
                 tokenCount: Int = 1
             ) = Media(
                 key = nftTemplateEntity.id,
                 contractAddress = nftTemplateEntity.contractAddress,
-                imageUrl = nftTemplateEntity.imageUrl ?: "",
+                imageUrl = imageOverride ?: nftTemplateEntity.imageUrl ?: "",
                 title = nftTemplateEntity.displayName,
                 subtitle = nftTemplateEntity.editionName,
                 description = nftTemplateEntity.description,
@@ -73,7 +74,7 @@ class AllMediaProvider @Inject constructor(
             .map { response ->
                 response.mapNotNull { nft ->
                     nft.nftTemplate?.let { template ->
-                        Media.fromTemplate(template, nft.tokenId)
+                        Media.fromTemplate(template, nft.imageUrl, nft.tokenId)
                     }
                 }
             }
