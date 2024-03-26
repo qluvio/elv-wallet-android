@@ -19,7 +19,7 @@ import com.ramcosta.composedestinations.annotation.Destination
     // Handles direct deep links
     deepLinks = [
         DeepLink(
-            uriPattern = "elvwallet://items/{marketplace}/{contract}/{sku}?jwt={jwt}"
+            uriPattern = "elvwallet://items/{marketplace}/{contract}/{sku}?jwt={jwt}&entitlement={entitlement}",
         ),
     ]
 )

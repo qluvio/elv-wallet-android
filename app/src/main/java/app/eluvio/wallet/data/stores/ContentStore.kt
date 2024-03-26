@@ -9,6 +9,7 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
 import app.eluvio.wallet.network.converters.toEntity
 import app.eluvio.wallet.network.converters.toNfts
+import app.eluvio.wallet.network.dto.TokenIdDto
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
@@ -22,40 +23,108 @@ import io.realm.kotlin.query.Sort
 import javax.inject.Inject
 
 
+typealias TokenOwnership = TokenIdDto
+
 class ContentStore @Inject constructor(
     private val apiProvider: ApiProvider,
     private val realm: Realm,
     private val signOutHandler: SignOutHandler,
 ) {
+    /**
+     * Dumbed down version of [java.util.Optional]
+     */
+    private data class Optional<T>(val value: T? = null)
 
-    fun observerNftBySku(marketplace: String, sku: String): Flowable<Result<NftTemplateEntity>> {
-        val id = NftId.forSku(marketplace, sku)
-        return realm.query<NftTemplateEntity>("${NftTemplateEntity::id.name} == $0", id)
+    fun observeNftBySku(
+        marketplace: String,
+        sku: String,
+        signedEntitlementMessage: String?
+    ): Flowable<Pair<NftTemplateEntity, TokenOwnership?>> {
+        val id = if (signedEntitlementMessage != null) {
+            NftId.forEntitlement(signedEntitlementMessage)
+        } else {
+            NftId.forSku(marketplace, sku)
+        }
+        val templateFromDb = realm.query<NftTemplateEntity>(
+            "${NftTemplateEntity::id.name} == $0",
+            id
+        )
             .asFlowable()
             .mapNotNull { it.firstOrNull() }
-            .map { Result.success(it) }
-            .mergeWith(
-                fetchTemplateForSku(marketplace, sku)
-                    .ignoreElement()
-                    .onErrorReturn { Result.failure(it) }
-            )
-            .doOnNext {
-                it.exceptionOrNull()?.let { error ->
-                    Log.e("Error in wallet data stream", error)
+
+        val fetchTemplateAndOwnership = fetchTemplateAndOwnership(
+            id,
+            marketplace,
+            sku,
+            signedEntitlementMessage
+        )
+            .map { Optional(it) }
+            // Start with something, to not delay the result of the realm query
+            .startWith(Single.just(Optional()))
+
+        return Flowable.combineLatest(
+            templateFromDb,
+            fetchTemplateAndOwnership
+        ) { template, ownership ->
+            template to ownership.value
+        }
+    }
+
+    /**
+     * Fetches the NFT template for a given SKU/Entitlement, and saves it to the database.
+     * Template isn't actually returned because it's never used.
+     * Returns the owned token id/address if it exists
+     */
+    private fun fetchTemplateAndOwnership(
+        id: String, // When fetched, save nftTemplate under this id.
+        marketplace: String,
+        sku: String,
+        signedEntitlementMessage: String?
+    ): Maybe<TokenOwnership> {
+        return apiProvider.getApi(GatewayApi::class)
+            .flatMap { api -> api.getNftForSku(marketplace, sku, signedEntitlementMessage) }
+            .flatMapMaybe { dto ->
+                val nftTemplateEntity = dto.nftTemplate.toEntity(id).apply {
+                    tenant = dto.tenant
                 }
+                Single.just(nftTemplateEntity)
+                    .saveTo(realm, clearTable = false)
+                    .flatMapMaybe {
+                        val ownership = dto.entitlementClaimedTokens?.firstOrNull()
+                        when {
+                            ownership != null -> {
+                                Log.d("Server provided entitlement ownership: $ownership")
+                                Maybe.just(ownership)
+                            }
+
+                            signedEntitlementMessage == null -> {
+                                // For SKU without Entitlement, we need to figure out ownership locally
+                                Log.d("Starting to manually check ownership for SKU without entitlement.")
+                                findOwnedToken(nftTemplateEntity)
+                            }
+
+                            else -> {
+                                // Server is explicitly telling us that the user doesn't own this entitlement
+                                Log.d("No ownership for Entitlement")
+                                Maybe.empty()
+                            }
+                        }
+                    }
             }
     }
 
-    private fun fetchTemplateForSku(marketplace: String, sku: String): Single<NftTemplateEntity> {
-        return apiProvider.getApi(GatewayApi::class)
-            .flatMap { api -> api.getNftForSku(marketplace, sku) }
-            .map { dto ->
-                val id = NftId.forSku(marketplace, sku)
-                dto.nftTemplate.toEntity(id).apply {
-                    tenant = dto.tenant
+    /**
+     * Finds an owned token for a given SKU. Or an empty Maybe if the user doesn't own the token.
+     */
+    private fun findOwnedToken(nftTemplateEntity: NftTemplateEntity): Maybe<TokenOwnership> {
+        return observeWalletData(forceRefresh = false)
+            .mapNotNull { nfts ->
+                nfts.getOrNull()?.firstOrNull { nft ->
+                    nft.contractAddress == nftTemplateEntity.contractAddress
                 }
             }
-            .saveTo(realm, clearTable = false)
+            .map { nft -> TokenOwnership(nft.contractAddress, nft.tokenId) }
+            .firstElement()
     }
 
     fun observeWalletData(forceRefresh: Boolean = true): Flowable<Result<List<NftEntity>>> {

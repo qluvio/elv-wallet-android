@@ -13,7 +13,8 @@ data class NftResponse(
 @JsonClass(generateAdapter = true)
 data class NftForSkuResponse(
     @field:Json(name = "tenant_id") val tenant: String,
-    @field:Json(name = "nft_template") val nftTemplate: NftTemplateDto
+    @field:Json(name = "nft_template") val nftTemplate: NftTemplateDto,
+    @field:Json(name = "entitlement_claimed_tokens") val entitlementClaimedTokens: List<TokenIdDto>?
 )
 
 @JsonClass(generateAdapter = true)
@@ -46,6 +47,12 @@ data class NftTemplateDto(
     val redeemable_offers: List<RedeemableOfferDto>?,
     // If 'error' shows up in the template, it's usually a sign of a bad/expired token.
     val error: Map<String, Any>?,
+)
+
+@JsonClass(generateAdapter = true)
+data class TokenIdDto(
+    @field:Json(name = "contract_addr") val contractAddress: String,
+    @field:Json(name = "token_id") val tokenId: String
 )
 
 @JsonClass(generateAdapter = true)

@@ -12,6 +12,12 @@ data class InitiateNftClaimRequest(
 )
 
 @JsonClass(generateAdapter = true)
+data class InitiateEntitlementClaimRequest(
+    @field:Json(name = "signature") val entitlementSignedMessage: String,
+    val op: String = NftClaimApi.ENTITLEMENT_CLAIM_OPERATION,
+)
+
+@JsonClass(generateAdapter = true)
 data class NftClaimStatusDto(
     // A composite field of the form: op:marketplaceId:sku:counter
     @field:Json(name = "op") val operationKey: String,

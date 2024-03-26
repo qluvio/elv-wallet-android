@@ -2,6 +2,7 @@ package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.NftClaimApi
+import app.eluvio.wallet.network.dto.InitiateEntitlementClaimRequest
 import app.eluvio.wallet.network.dto.InitiateNftClaimRequest
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
@@ -20,11 +21,16 @@ class NftClaimStore @Inject constructor(
      * Returns the "operation" key to use for checking the status of the claim.
      */
     fun initiateNftClaim(
-        tenant: String, marketplaceId: String, sku: String
+        tenant: String, marketplaceId: String, sku: String, entitlement: String?
     ): Single<String> {
-        val request = InitiateNftClaimRequest(marketplaceId, sku)
         return apiProvider.getApi(NftClaimApi::class)
-            .flatMap { api -> api.claimNft(tenant, request) }
+            .flatMap { api ->
+                if (entitlement != null) {
+                    api.claimEntitlement(tenant, InitiateEntitlementClaimRequest(entitlement))
+                } else {
+                    api.claimNft(tenant, InitiateNftClaimRequest(marketplaceId, sku))
+                }
+            }
             .map { it.operationKey }
     }
 
@@ -38,7 +44,10 @@ class NftClaimStore @Inject constructor(
                 dto
                     .firstOrNull { it.operationKey == op }
                     ?.extra?.claimResult?.let { result ->
-                        NftClaimResult.Success(result.tokenId, result.contractAddress)
+                        NftClaimResult.Success(
+                            contractAddress = result.contractAddress,
+                            tokenId = result.tokenId
+                        )
                     }
                     ?: NftClaimResult.Pending
             }

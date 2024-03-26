@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.deeplink
 
-import android.view.ContextThemeWrapper
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
@@ -8,8 +7,8 @@ import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.NftClaimStore
 import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
-import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.destinations.NftClaimDestination
+import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.interval
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,14 +17,12 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Flowables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NftClaimViewModel @Inject constructor(
     private val contentStore: ContentStore,
-    private val allMediaProvider: AllMediaProvider,
     private val nftClaimStore: NftClaimStore,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<NftClaimViewModel.State>(State()) {
@@ -40,26 +37,23 @@ class NftClaimViewModel @Inject constructor(
     override fun onResume() {
         super.onResume()
 
-        allMediaProvider.observeAllMedia(onNetworkError = { })
-            .withLatestFrom(
-                contentStore.observerNftBySku(
-                    navArgs.marketplace,
-                    navArgs.sku
-                ).startWithItem(Result.failure(Exception("first")))
-            ) { allMedia, templateResult ->
-                templateResult.getOrNull()?.let { nftTemplate ->
-                    val mediaForSku =
-                        allMedia.media.firstOrNull { it.contractAddress == nftTemplate.contractAddress }
-                    if (mediaForSku?.tokenId != null) {
-                        Log.w("user owns SKU")
+        contentStore.observeNftBySku(
+            navArgs.marketplace,
+            navArgs.sku,
+            navArgs.signedEntitlementMessage
+        )
+            .subscribeBy(
+                onNext = { (nftTemplate, ownership) ->
+                    if (ownership != null) {
+                        Log.w("user owns SKU/Entitlement")
                         navigateTo(
                             NftDetailDestination(
-                                mediaForSku.contractAddress,
-                                mediaForSku.tokenId
+                                ownership.contractAddress,
+                                ownership.tokenId
                             ).asReplace()
                         )
                     } else {
-                        Log.w("user Doesn't own SKU")
+                        Log.w("user Doesn't own SKU/Entitlement")
                         updateState {
                             copy(
                                 loading = false,
@@ -67,12 +61,8 @@ class NftClaimViewModel @Inject constructor(
                             )
                         }
                     }
-                }
-                allMedia
-            }
-            .subscribeBy(
-                onNext = { },
-                onError = { Log.e("Error getting wallet data", it) }
+                },
+                onError = { Log.e("Error getting NFT data", it) }
             )
             .addTo(disposables)
     }
@@ -94,7 +84,8 @@ class NftClaimViewModel @Inject constructor(
         nftClaimStore.initiateNftClaim(
             tenant,
             navArgs.marketplace,
-            navArgs.sku
+            navArgs.sku,
+            navArgs.signedEntitlementMessage
         )
             .flatMapPublisher { op -> pollClaimStatusUntilComplete(tenant, op) }
             .doOnSubscribe {

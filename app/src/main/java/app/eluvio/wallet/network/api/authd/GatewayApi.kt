@@ -5,6 +5,7 @@ import app.eluvio.wallet.network.dto.NftResponse
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface GatewayApi : AuthdApi {
     @GET("apigw/nfts")
@@ -13,6 +14,7 @@ interface GatewayApi : AuthdApi {
     @GET("apigw/marketplaces/{marketplaceId}/sku/{sku}")
     fun getNftForSku(
         @Path("marketplaceId") marketplaceId: String,
-        @Path("sku") sku: String
+        @Path("sku") sku: String,
+        @Query("signedEntitlementMessage") signedEntitlementMessage: String?
     ): Single<NftForSkuResponse>
 }
