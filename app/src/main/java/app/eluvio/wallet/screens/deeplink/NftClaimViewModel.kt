@@ -52,7 +52,7 @@ class NftClaimViewModel @Inject constructor(
                                 ownership.tokenId
                             ).asReplace()
                         )
-                    } else {
+                    } else if (nftTemplate != null) {
                         Log.w("user Doesn't own SKU/Entitlement")
                         updateState {
                             copy(

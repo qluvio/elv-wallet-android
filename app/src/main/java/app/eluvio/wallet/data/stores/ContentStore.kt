@@ -24,22 +24,20 @@ import javax.inject.Inject
 
 
 typealias TokenOwnership = TokenIdDto
+typealias TemplateOrOwnership = Pair<NftTemplateEntity?, TokenOwnership?>
 
 class ContentStore @Inject constructor(
     private val apiProvider: ApiProvider,
     private val realm: Realm,
     private val signOutHandler: SignOutHandler,
 ) {
-    /**
-     * Dumbed down version of [java.util.Optional]
-     */
-    private data class Optional<T>(val value: T? = null)
 
+    /** Returns either the NFT template to display, or the owned token for this SKU/Entitlement. */
     fun observeNftBySku(
         marketplace: String,
         sku: String,
         signedEntitlementMessage: String?
-    ): Flowable<Pair<NftTemplateEntity, TokenOwnership?>> {
+    ): Flowable<TemplateOrOwnership> {
         val id = if (signedEntitlementMessage != null) {
             NftId.forEntitlement(signedEntitlementMessage)
         } else {
@@ -50,24 +48,20 @@ class ContentStore @Inject constructor(
             id
         )
             .asFlowable()
-            .mapNotNull { it.firstOrNull() }
+            .mapNotNull { it.firstOrNull() to null }
 
-        val fetchTemplateAndOwnership = fetchTemplateAndOwnership(
+        // We could technically start observing the DB before we get token ownership info, but
+        // it'll just cause the UI to flicker before navigating away to NftDetails.
+        // So instead of we'll only observe the DB if we verified we don't own this SKU/Entitlement yet.
+        return fetchTemplateAndOwnership(
             id,
             marketplace,
             sku,
             signedEntitlementMessage
         )
-            .map { Optional(it) }
-            // Start with something, to not delay the result of the realm query
-            .startWith(Single.just(Optional()))
-
-        return Flowable.combineLatest(
-            templateFromDb,
-            fetchTemplateAndOwnership
-        ) { template, ownership ->
-            template to ownership.value
-        }
+            .map<TemplateOrOwnership> { null to it }
+            .toFlowable()
+            .switchIfEmpty(templateFromDb)
     }
 
     /**
