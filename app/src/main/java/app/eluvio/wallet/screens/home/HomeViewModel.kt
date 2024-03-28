@@ -53,8 +53,8 @@ class HomeViewModel @Inject constructor(
         // consume deeplink
         deeplinkStore.deeplinkRequest = null
 
-        if (tokenStore.isLoggedIn) {
-            // We already have a token, ignore the JWT and just launch the deeplink
+        if (tokenStore.isLoggedIn && deepLink.jwt == null) {
+            // No token provided, assume the current token is valid and navigate to the deeplink.
             navigateToDeeplink(deepLink)
         } else {
             // We need to authenticate with the deeplink JWT, this could take a moment,
