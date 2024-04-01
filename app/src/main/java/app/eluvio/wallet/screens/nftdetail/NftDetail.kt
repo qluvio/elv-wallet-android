@@ -1,12 +1,16 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -17,19 +21,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
+import androidx.tv.material3.Border
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
@@ -47,11 +63,13 @@ import app.eluvio.wallet.screens.common.WrapContentText
 import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.onRedeemTagSurface
 import app.eluvio.wallet.theme.redeemTagSurface
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.util.findActivity
 import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
@@ -105,14 +123,28 @@ private fun NftDetail(state: NftDetailViewModel.State) {
             modifier = Modifier.fillMaxSize()
         )
     }
+    val lazyColumnFocusRequester = remember { FocusRequester() }
+    val backButtonFocusRequester = remember { FocusRequester() }
+    if (state.backLinkUrl != null) {
+        BackToThirdPartyButton(
+            state.backButtonLogo,
+            Modifier
+                .focusRequester(backButtonFocusRequester)
+                .focusProperties { down = lazyColumnFocusRequester }
+        )
+    }
     Column {
-        TvLazyColumn {
+        TvLazyColumn(
+            Modifier
+                .focusRequester(lazyColumnFocusRequester)
+                .focusProperties { up = backButtonFocusRequester })
+        {
             spacer(height = 32.dp)
             item {
                 Text(
                     text = state.title,
                     style = MaterialTheme.typography.title_62,
-                    modifier = Modifier.padding(start = Overscan.horizontalPadding)
+                    modifier = Modifier.padding(start = Overscan.horizontalPadding, end = 260.dp)
                 )
                 DescriptionText(text = state.subtitle)
             }
@@ -121,18 +153,23 @@ private fun NftDetail(state: NftDetailViewModel.State) {
             }
 
             state.sections.forEach { section ->
-                section.name.takeIf { it.isNotEmpty() }?.let { sectionName ->
-                    item(key = "${section.id}_$sectionName", contentType = "section_name") {
-                        Text(
-                            sectionName,
-                            style = MaterialTheme.typography.body_32,
-                            modifier = Modifier.padding(
-                                horizontal = Overscan.horizontalPadding,
-                                vertical = 16.dp
+                section.name
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { sectionName ->
+                        item(
+                            key = "${section.id}_$sectionName",
+                            contentType = "section_name"
+                        ) {
+                            Text(
+                                sectionName,
+                                style = MaterialTheme.typography.body_32,
+                                modifier = Modifier.padding(
+                                    horizontal = Overscan.horizontalPadding,
+                                    vertical = 16.dp
+                                )
                             )
-                        )
+                        }
                     }
-                }
                 // Only show collections that have at least one visible media item
                 val collections = section.collections
                     .filter { collection -> collection.media.any { !it.shouldBeHidden() } }
@@ -152,6 +189,67 @@ private fun NftDetail(state: NftDetailViewModel.State) {
             }
 
             spacer(height = 32.dp)
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalTvMaterial3Api::class)
+private fun BackToThirdPartyButton(
+    backButtonLogo: String?,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.TopEnd,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 32.dp, end = 32.dp)
+    ) {
+        val border = Border(
+            BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer),
+            shape = MaterialTheme.shapes.extraSmall
+        )
+        val context = LocalContext.current
+        Surface(
+            onClick = { context.findActivity()?.finish() },
+            border = ClickableSurfaceDefaults.border(border = border),
+            scale = LocalSurfaceScale.current,
+            colors = ClickableSurfaceDefaults.colors(
+                containerColor = Color.Black.copy(alpha = 0.2f),
+                focusedContainerColor = Color.Black
+            ),
+            modifier = Modifier.size(width = 160.dp, height = 40.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // TODO: handle logo missing / error loading
+                val text = if (backButtonLogo != null) "Back to" else "Go Back"
+                Text(
+                    text,
+                    style = MaterialTheme.typography.label_24.copy(fontSize = 16.sp),
+                )
+                backButtonLogo?.let { logo ->
+                    // scale logo request from server to save bandwidth
+                    val url = logo + "?h=" + LocalDensity.current.run { 20.dp.roundToPx() }
+                    AsyncImage(
+                        model = url,
+                        contentDescription = null,
+                        placeholder = rememberVectorPainter(
+                            defaultWidth = 50.dp,
+                            defaultHeight = 20.dp,
+                            autoMirror = false,
+                        ) { _, _ ->
+                            // Empty vector painter to take up the space we expect the logo to be while we load it
+                        },
+                        modifier = Modifier
+                            .height(20.dp)
+                            .padding(start = 10.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -312,73 +410,79 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
 //    }
 }
 
+class BackLinkParameterProvider : PreviewParameterProvider<String?> {
+    override val values = sequenceOf(null, "http://3rdparty.app")
+}
+
 @Composable
 @Preview(device = Devices.TV_720p)
-private fun NftDetailPreview() = EluvioThemePreview {
-    NftDetail(
-        NftDetailViewModel.State(
-            title = "Superman",
-            subtitle = AnnotatedString(
-                """
+private fun NftDetailPreview(@PreviewParameter(BackLinkParameterProvider::class) backlink: String) =
+    EluvioThemePreview {
+        NftDetail(
+            NftDetailViewModel.State(
+                backLinkUrl = backlink,
+                title = "Superman",
+                subtitle = AnnotatedString(
+                    """
             Superman Web3 Movie Experience includes:
             Immersive menus featuring Fortress of Solitude, Metropolis, and Lex Luthor’s Lair
             Superman The Movie (Theatrical version) • Hours of special features*
             Curated image galleries • Hidden digital easter eggs
             A Voucher Code** for DC3 Super Power Pack: Series Superman from DC NFT Marketplace
         """.trimIndent()
-            ),
-            featuredMedia = listOf(
-                MediaEntity().apply {
-                    name = "Feature Film"
-                    mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-                },
-            ),
-            redeemableOffers = listOf(
-                NftDetailViewModel.State.Offer(
-                    "_id",
-                    "NFT reward",
-                    fulfillmentState = FulfillmentState.AVAILABLE,
-                    "https://via.placeholder.com/150",
-                    "contractAddr",
-                    "token_1",
-                    animation = null,
-                )
-            ),
-            sections = listOf(
-                MediaSectionEntity().apply {
-                    name = "Section 1"
-                    collections = realmListOf(
-                        MediaCollectionEntity().apply {
-                            name = "Movies"
-                            media = realmListOf(
-                                MediaEntity().apply {
-                                    name = "Superman 1"
-                                    mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-                                },
-                                MediaEntity().apply {
-                                    name = "Superman 2"
-                                    mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-                                },
-                            )
-                        },
-                        MediaCollectionEntity().apply {
-                            name = "Extras"
-                            media = realmListOf(
-                                MediaEntity().apply {
-                                    name = "Superman 2052 Poster"
-                                    mediaType = MediaEntity.MEDIA_TYPE_IMAGE
-                                },
-                                MediaEntity().apply {
-                                    name = "Man of Steel Trailer"
-                                    mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-                                },
-                            )
-                        }
+                ),
+                featuredMedia = listOf(
+                    MediaEntity().apply {
+                        name = "Feature Film"
+                        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+                    },
+                ),
+                redeemableOffers = listOf(
+                    NftDetailViewModel.State.Offer(
+                        "_id",
+                        "NFT reward",
+                        fulfillmentState = FulfillmentState.AVAILABLE,
+                        "https://via.placeholder.com/150",
+                        "contractAddr",
+                        "token_1",
+                        animation = null,
                     )
-                })
+                ),
+                sections = listOf(
+                    MediaSectionEntity().apply {
+                        name = "Section 1"
+                        collections = realmListOf(
+                            MediaCollectionEntity().apply {
+                                name = "Movies"
+                                media = realmListOf(
+                                    MediaEntity().apply {
+                                        name = "Superman 1"
+                                        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+                                    },
+                                    MediaEntity().apply {
+                                        name = "Superman 2"
+                                        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+                                    },
+                                )
+                            },
+                            MediaCollectionEntity().apply {
+                                name = "Extras"
+                                media = realmListOf(
+                                    MediaEntity().apply {
+                                        name = "Superman 2052 Poster"
+                                        mediaType = MediaEntity.MEDIA_TYPE_IMAGE
+                                    },
+                                    MediaEntity().apply {
+                                        name = "Man of Steel Trailer"
+                                        mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+                                    },
+                                )
+                            }
+                        )
+                    })
+            )
         )
-    )
-}
+    }
 
 @Preview(widthDp = 200, heightDp = 200)
 @Composable

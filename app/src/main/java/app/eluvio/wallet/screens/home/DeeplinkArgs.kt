@@ -6,14 +6,16 @@ data class DeeplinkArgs(
     val marketplace: String?,
     val sku: String?,
     val jwt: String?,
-    val entitlement: String?
+    val entitlement: String?,
+    val backLink: String?
 ) {
     fun toDeeplinkRequest(): DeeplinkStore.DeeplinkRequest? {
         return DeeplinkStore.DeeplinkRequest(
             marketplace ?: return null,
             sku ?: return null,
             jwt = jwt,
-            entitlement = entitlement
+            entitlement = entitlement,
+            backLink =  backLink
         )
     }
 }

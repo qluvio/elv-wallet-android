@@ -86,7 +86,8 @@ class HomeViewModel @Inject constructor(
             NftClaimDestination(
                 marketplace = deepLink.marketplace,
                 sku = deepLink.sku,
-                signedEntitlementMessage = deepLink.entitlement
+                signedEntitlementMessage = deepLink.entitlement,
+                backLink = deepLink.backLink
             ).asPush()
         )
     }

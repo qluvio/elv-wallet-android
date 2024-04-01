@@ -17,9 +17,11 @@ import app.eluvio.wallet.data.stores.FulfillmentStore
 import app.eluvio.wallet.data.stores.NftNotFoundException
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.network.api.fabric.MarketplaceApi
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.videoplayer.toMediaSource
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.mapNotNull
 import app.eluvio.wallet.util.toAnnotatedString
 import com.google.common.base.Optional
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +47,8 @@ class NftDetailViewModel @Inject constructor(
         val sections: List<MediaSectionEntity> = emptyList(),
         val redeemableOffers: List<Offer> = emptyList(),
         val backgroundImage: String? = null,
+        val backLinkUrl: String? = null,
+        val backButtonLogo: String? = null,
     ) {
         @Immutable
         data class Offer(
@@ -61,20 +65,21 @@ class NftDetailViewModel @Inject constructor(
             title.isEmpty() && featuredMedia.isEmpty() && sections.isEmpty() && redeemableOffers.isEmpty() && backgroundImage == null
     }
 
-    private val contractAddress = NftDetailDestination.argsFrom(savedStateHandle).contractAddress
-    private val tokenId = NftDetailDestination.argsFrom(savedStateHandle).tokenId
+    private val navArgs = NftDetailDestination.argsFrom(savedStateHandle)
     private var prefetchDisposable: Disposable? = null
     private var offerLoaderDisposable: Disposable? = null
 
     override fun onResume() {
         super.onResume()
+
         apiProvider.getFabricEndpoint()
             .flatMapPublisher { endpoint ->
-                contentStore.observeNft(contractAddress, tokenId)
+                contentStore.observeNft(navArgs.contractAddress, navArgs.tokenId)
                     .doOnNext { prefetchNftInfoOnce(it) }
                     .map { it to endpoint }
             }
             .doOnNext { (nft, endpoint) ->
+                loadBackButtonLogo(endpoint)
                 loadOffers(nft, endpoint)
             }
             .subscribeBy(
@@ -95,6 +100,7 @@ class NftDetailViewModel @Inject constructor(
                             featuredMedia = nft.featuredMedia,
                             sections = nft.mediaSections,
                             backgroundImage = backgroundImage,
+                            backLinkUrl = navArgs.backLink
                         )
                     }
                 },
@@ -105,6 +111,18 @@ class NftDetailViewModel @Inject constructor(
                     }
                 })
             .addTo(disposables)
+    }
+
+    private fun loadBackButtonLogo(endpoint: String) {
+        navArgs.marketplaceId?.let { marketplaceId ->
+            apiProvider.getApi(MarketplaceApi::class)
+                .flatMap { api -> api.getMarketplaceInfo(marketplaceId) }
+                .mapNotNull { it.info?.branding?.tv?.logo?.path }
+                .subscribeBy {
+                    updateState { copy(backButtonLogo = "$endpoint$it") }
+                }
+                .addTo(disposables)
+        }
     }
 
     /**

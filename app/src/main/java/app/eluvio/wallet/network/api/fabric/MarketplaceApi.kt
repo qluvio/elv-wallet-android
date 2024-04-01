@@ -1,7 +1,6 @@
 package app.eluvio.wallet.network.api.fabric
 
 import app.eluvio.wallet.network.dto.AssetLinkDto
-import app.eluvio.wallet.network.dto.MediaLinkDto
 import com.squareup.moshi.JsonClass
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
@@ -12,48 +11,17 @@ interface MarketplaceApi : FabricApi {
     fun getMarketplaceInfo(@Path("marketplace") marketplace: String): Single<MarketplaceDto>
 }
 
+// Yes, this is a lot of DTOs just to get a single deeply-nested field, but the alternative is
+// manually messing around json parsing and in the end we still need to feed it thru Moshi to
+// properly parse the AssetLinkDto, so what's 4 more DTOs+JsonAdapters? :)
 @JsonClass(generateAdapter = true)
-data class MarketplaceDto(
-    val info: MarketplaceInfoDto,
-    val tenant_id: String,
-)
+data class MarketplaceDto(val info: MarketplaceInfoDto?)
 
 @JsonClass(generateAdapter = true)
-data class MarketplaceInfoDto(val items: List<MarketplaceItemDto>)
+data class MarketplaceInfoDto(val branding: MarketplaceBrandingDto?)
 
 @JsonClass(generateAdapter = true)
-data class MarketplaceItemDto(val sku: String, val nft_template: KindOfNftTemplate?)
+data class MarketplaceBrandingDto(val tv: MarketplaceTvResourcesDto?)
 
 @JsonClass(generateAdapter = true)
-data class KindOfNftTemplate(val nft: NftTemplate2?, val title: String?)
-
-@JsonClass(generateAdapter = true)
-data class NftTemplate2(
-    val description: String,
-    val address: String,
-    val image: String?,
-
-    val display_name: String?,
-    val edition_name: String?,
-//    val additional_media_sections: AdditionalMediaSection2?,
-)
-
-@JsonClass(generateAdapter = true)
-data class AdditionalMediaSection2(
-    val featured_media: List<MediaItemDto2>?,
-//    val sections: List<MediaSectionDto>?,
-)
-
-@JsonClass(generateAdapter = true)
-data class MediaItemDto2(
-    val id: String,
-    val name: String?,
-    val display: String?,
-    val image: String?,
-    val media_type: String?,
-    val image_aspect_ratio: String?,
-    val poster_image: AssetLinkDto?,
-    val media_file: AssetLinkDto?,
-    val media_link: MediaLinkDto?,
-    val background_image_tv: AssetLinkDto?,
-)
+data class MarketplaceTvResourcesDto(val logo: AssetLinkDto?)

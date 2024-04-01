@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.eluvio.wallet.data.stores.DeeplinkStore
 import app.eluvio.wallet.navigation.PreLaunchGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.util.subscribeToState
@@ -19,7 +20,7 @@ import com.ramcosta.composedestinations.annotation.Destination
     // Handles direct deep links
     deepLinks = [
         DeepLink(
-            uriPattern = "elvwallet://items/{marketplace}/{contract}/{sku}?jwt={jwt}&entitlement={entitlement}",
+            uriPattern = "elvwallet://items/{marketplace}/{contract}/{sku}?jwt={jwt}&entitlement={entitlement}&back_link={backLink}",
         ),
     ]
 )

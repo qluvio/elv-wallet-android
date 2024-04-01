@@ -48,8 +48,10 @@ class NftClaimViewModel @Inject constructor(
                         Log.w("user owns SKU/Entitlement")
                         navigateTo(
                             NftDetailDestination(
-                                ownership.contractAddress,
-                                ownership.tokenId
+                                contractAddress = ownership.contractAddress,
+                                tokenId = ownership.tokenId,
+                                marketplaceId = navArgs.marketplace,
+                                backLink = navArgs.backLink
                             ).asReplace()
                         )
                     } else if (nftTemplate != null) {

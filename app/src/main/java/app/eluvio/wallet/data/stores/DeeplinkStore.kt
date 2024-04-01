@@ -45,5 +45,11 @@ class DeeplinkStore @Inject constructor(
             jwt = value?.jwt
         }
 
-    data class DeeplinkRequest(val marketplace: String, val sku: String, val jwt: String?, val entitlement: String? = null)
+    data class DeeplinkRequest(
+        val marketplace: String,
+        val sku: String,
+        val jwt: String?,
+        val entitlement: String? = null,
+        val backLink: String? = null
+    )
 }
