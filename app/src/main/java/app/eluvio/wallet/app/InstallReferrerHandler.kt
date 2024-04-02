@@ -1,17 +1,17 @@
 package app.eluvio.wallet.app
 
 import android.content.Context
+import android.net.Uri
+import app.eluvio.wallet.data.entities.deeplink.DeeplinkRequestEntity
 import app.eluvio.wallet.data.stores.DeeplinkStore
 import app.eluvio.wallet.screens.home.HomeViewModel
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.unsaved
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
 import com.android.installreferrer.api.ReferrerDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-
-private const val DEEPLINK_URL_REGEX_PATTERN =
-    "elvwallet://items/([A-Za-z0-9_]+)/([A-Za-z0-9_]+)/([A-Za-z0-9_]+)(?:\\?jwt=([A-Za-z0-9\\-._]+))?"
 
 /**
  * Looks for Install Referrer parameters (https://developer.android.com/google/play/installreferrer/library).
@@ -59,15 +59,24 @@ class InstallReferrerHandler @Inject constructor(
     private fun handleInstallReferrerResponse(response: ReferrerDetails) {
         val installReferrerParams = response.installReferrer
         Log.d("Install installReferrerParams: $installReferrerParams")
-        Regex(
-            pattern = DEEPLINK_URL_REGEX_PATTERN,
-            options = setOf(RegexOption.IGNORE_CASE)
-        )
-            .find(installReferrerParams)?.let {
-                val (marketplace, contract, sku, jwt) = it.destructured
-                // jwt can be "" at this point
-                deeplinkStore.deeplinkRequest =
-                    DeeplinkStore.DeeplinkRequest(marketplace, sku, jwt)
-            }
+        val uriStart = installReferrerParams.indexOf("elvwallet://", ignoreCase = true)
+        if (uriStart >= 0) {
+            val uri = Uri.parse(installReferrerParams.substring(uriStart))
+            Log.d("Install deeplink uri: $uri")
+            val action = uri.host ?: return
+            if (uri.pathSegments.size < 3) return
+            val (marketplace, contract, sku) = uri.pathSegments
+            deeplinkStore.setDeeplinkRequest(
+                DeeplinkRequestEntity().apply {
+                    this.action = action
+                    this.marketplace = marketplace
+                    this.contract = contract
+                    this.sku = sku
+                    this.jwt = uri.getQueryParameter("jwt")
+                    this.entitlement = uri.getQueryParameter("entitlement")
+                    this.backLink = uri.getQueryParameter("back_link")
+                }
+            ).subscribe().unsaved()
+        }
     }
 }

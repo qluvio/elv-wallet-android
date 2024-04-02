@@ -2,16 +2,25 @@ package app.eluvio.wallet.data.stores
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.annotation.CheckResult
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import app.eluvio.wallet.data.entities.deeplink.DeeplinkRequestEntity
 import app.eluvio.wallet.util.boolean
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.nullableString
+import app.eluvio.wallet.util.realm.asFlowable
+import app.eluvio.wallet.util.realm.saveAsync
+import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
+import io.realm.kotlin.Realm
+import io.realm.kotlin.ext.query
 import javax.inject.Inject
 
 class DeeplinkStore @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext context: Context,
+    private val realm: Realm,
 ) {
     private val prefs: SharedPreferences = EncryptedSharedPreferences.create(
         "encrypted_deeplink_store",
@@ -26,30 +35,23 @@ class DeeplinkStore @Inject constructor(
      */
     var installRefHandled by prefs.boolean("installRefHandled", false)
 
-    private var marketplace by prefs.nullableString("marketplace")
-    private var sku by prefs.nullableString("sku")
-    private var jwt by prefs.nullableString("jwt")
+    /**
+     * Returns a deeplink from DB, if any. If it exists, it will be removed from the DB.
+     */
+    fun consumeDeeplinkRequest(): Maybe<DeeplinkRequestEntity> {
+        return realm.query<DeeplinkRequestEntity>()
+            .asFlowable()
+            .firstElement()
+            .mapNotNull { it.firstOrNull() }
+            .flatMap { deeplink ->
+                Log.d("Deeplink found in DB, passing along and removing from db")
+                saveAsync(realm, emptyList<DeeplinkRequestEntity>(), clearTable = true)
+                    .andThen(Maybe.just(deeplink))
+            }
+    }
 
-    var deeplinkRequest: DeeplinkRequest?
-        get() {
-            return DeeplinkRequest(
-                marketplace ?: return null,
-                sku ?: return null,
-                jwt ?: return null,
-            )
-        }
-        set(value) {
-            Log.d("Storing deeplink request: $value")
-            marketplace = value?.marketplace
-            sku = value?.sku
-            jwt = value?.jwt
-        }
-
-    data class DeeplinkRequest(
-        val marketplace: String,
-        val sku: String,
-        val jwt: String?,
-        val entitlement: String? = null,
-        val backLink: String? = null
-    )
+    @CheckResult("Subscribe to the returned Completable to perform the operation")
+    fun setDeeplinkRequest(request: DeeplinkRequestEntity): Completable {
+        return saveAsync(realm, listOf(request), clearTable = true)
+    }
 }

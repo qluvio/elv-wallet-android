@@ -37,11 +37,15 @@ class NftClaimViewModel @Inject constructor(
     override fun onResume() {
         super.onResume()
 
-        contentStore.observeNftBySku(
-            navArgs.marketplace,
-            navArgs.sku,
-            navArgs.signedEntitlementMessage
-        )
+        // start by fetching all owned nfts, so we can check if the user already owns this SKU
+        contentStore.fetchWalletData().ignoreElement()
+            .andThen(
+                contentStore.observeNftBySku(
+                    navArgs.marketplace,
+                    navArgs.sku,
+                    navArgs.signedEntitlementMessage
+                )
+            )
             .subscribeBy(
                 onNext = { (nftTemplate, ownership) ->
                     if (ownership != null) {

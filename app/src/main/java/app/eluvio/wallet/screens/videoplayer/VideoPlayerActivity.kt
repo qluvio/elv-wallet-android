@@ -16,13 +16,18 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.VideoOptionsFetcher
+import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.PlaybackStore
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
+import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.mapNotNull
 import com.ramcosta.composedestinations.annotation.ActivityDestination
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
@@ -52,7 +57,15 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
             playerView?.hideController()
         }
     }
-    private val mediaItemId by lazy { VideoPlayerActivityDestination.argsFrom(intent).mediaItemId }
+
+    // This is for deeplink demo only.
+    private var fakeMediaItemId: String? = null
+
+    @Inject
+    lateinit var contentStore: ContentStore
+
+    private val navArgs by lazy { VideoPlayerActivityDestination.argsFrom(intent) }
+    private val mediaItemId by lazy { fakeMediaItemId ?: navArgs.mediaItemId }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,7 +100,34 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
         findViewById<DefaultTimeBar>(androidx.media3.ui.R.id.exo_progress)
             ?.setKeyTimeIncrement(5000)
 
-        disposable = videoOptionsFetcher.fetchVideoOptions(mediaItemId)
+        disposable = Maybe.fromCallable { navArgs.deeplinkhack_contract }
+            .flatMap { base58contract ->
+                // Assume we own a token for this contract. If we don't, we'll just be stuck loading forever.
+                contentStore.observeWalletData()
+                    .mapNotNull { result ->
+                        val contract = Base58.decodeAsHex(base58contract.removePrefix("ictr"))
+                        result.getOrNull()
+                            ?.find { nft ->
+                                nft.contractAddress.contains(
+                                    contract,
+                                    ignoreCase = true
+                                )
+                            }
+                            ?.featuredMedia
+                            ?.firstOrNull { it.mediaType == MediaEntity.MEDIA_TYPE_VIDEO }
+                            ?.id
+                    }
+                    .firstElement()
+            }
+            .doOnSuccess {
+                Log.w("Found media item id from deeplink hack: $it")
+                fakeMediaItemId = it
+            }
+            .defaultIfEmpty("done with fake stuff, time to load video")
+            .flatMap {
+                // this is all we really need if it wasn't for all the fake stuff
+                videoOptionsFetcher.fetchVideoOptions(mediaItemId)
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = {

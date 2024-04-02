@@ -17,7 +17,6 @@ class FulfillmentDataEntity : RealmObject {
     var url: String? = null
     var code: String? = null
 
-
     override fun toString(): String {
         return "FulfillmentDataEntity(transactionHash='$transactionHash', message=$message, url=$url, code=$code)"
     }

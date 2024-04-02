@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.home
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.AuthenticationService
+import app.eluvio.wallet.data.entities.deeplink.DeeplinkRequestEntity
 import app.eluvio.wallet.data.stores.DeeplinkStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.navigation.asNewRoot
@@ -10,8 +11,11 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.destinations.HomeDestination
 import app.eluvio.wallet.screens.destinations.NftClaimDestination
+import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.util.logging.Log
+import com.ramcosta.composedestinations.spec.Direction
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
@@ -30,33 +34,41 @@ class HomeViewModel @Inject constructor(
     )
 
     private val navArgs = HomeDestination.argsFrom(savedStateHandle)
+
     override fun onResume() {
         super.onResume()
         Log.e("Started Home with args: $navArgs")
 
-        val deepLink = navArgs.toDeeplinkRequest()
-            ?.also { deeplinkStore.deeplinkRequest = it }
-            ?: deeplinkStore.deeplinkRequest
-        //TODO, if there's another token but we didn't get all the way to fabricToken, we might want to pick up mid-flow
-        if (deepLink != null) {
-            handleDeeplink(deepLink)
-        } else if (tokenStore.isLoggedIn) {
-            Log.w("User signed in, navigating to dashboard")
-            navigateTo(NavGraphs.mainGraph.asNewRoot())
-        } else {
-            Log.w("User not signed in, navigating to auth flow")
-            navigateTo(NavGraphs.authFlowGraph.asNewRoot())
-        }
+        Maybe.fromCallable { navArgs.toDeeplinkRequest() }
+            // There's a small risk of a race-condition here, where the install referrer is still
+            // being processed by the time we get here. This isn't handled at this point.
+            .switchIfEmpty(deeplinkStore.consumeDeeplinkRequest())
+            .subscribeBy(
+                onSuccess = {
+                    // Some deeplink was found, either from NavArgs, or db.
+                    handleDeeplink(it)
+                },
+                onComplete = {
+                    // No Deeplink, proceed with normal flow
+                    if (tokenStore.isLoggedIn) {
+                        Log.w("User signed in, navigating to dashboard")
+                        navigateTo(NavGraphs.mainGraph.asNewRoot())
+                    } else {
+                        Log.w("User not signed in, navigating to auth flow")
+                        navigateTo(NavGraphs.authFlowGraph.asNewRoot())
+                    }
+                },
+                onError = { }
+            )
+            .addTo(disposables)
     }
 
-    private fun handleDeeplink(deepLink: DeeplinkStore.DeeplinkRequest) {
-        // consume deeplink
-        deeplinkStore.deeplinkRequest = null
-
+    private fun handleDeeplink(deepLink: DeeplinkRequestEntity) {
         if (tokenStore.isLoggedIn && deepLink.jwt == null) {
-            // No token provided, assume the current token is valid and navigate to the deeplink.
+            Log.d("Deeplink has no JWT, but user is logged in. Navigating to the deeplink without re-authenticating.")
             navigateToDeeplink(deepLink)
         } else {
+            Log.d("Starting authentication using token from deeplink...")
             // We need to authenticate with the deeplink JWT, this could take a moment,
             // so show a loading state in the meanwhile.
             updateState { State(showLoading = true) }
@@ -80,15 +92,32 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToDeeplink(deepLink: DeeplinkStore.DeeplinkRequest) {
+    private fun navigateToDeeplink(deepLink: DeeplinkRequestEntity) {
         navigateTo(NavGraphs.mainGraph.asNewRoot())
-        navigateTo(
-            NftClaimDestination(
-                marketplace = deepLink.marketplace,
-                sku = deepLink.sku,
-                signedEntitlementMessage = deepLink.entitlement,
-                backLink = deepLink.backLink
-            ).asPush()
+        when (deepLink.action) {
+            "items" -> deepLink.toNftClaimDestination()
+            "play" -> deepLink.toVideoPlayerDestination()
+            else -> {
+                Log.e("Unknown action: ${deepLink.action}")
+                null
+            }
+        }?.let { navigateTo(it.asPush()) }
+    }
+
+    private fun DeeplinkRequestEntity.toNftClaimDestination(): Direction? {
+        return NftClaimDestination(
+            marketplace = marketplace ?: return null,
+            sku = sku ?: return null,
+            signedEntitlementMessage = entitlement,
+            backLink = backLink
+        )
+    }
+
+    private fun DeeplinkRequestEntity.toVideoPlayerDestination(): Direction {
+        //TODO: fix this hack once we figure out what we actually want to do with ://play actions
+        return VideoPlayerActivityDestination(
+            mediaItemId = "fake - won't be used",
+            deeplinkhack_contract = contract
         )
     }
 }

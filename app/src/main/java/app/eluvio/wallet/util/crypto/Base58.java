@@ -22,6 +22,8 @@ package app.eluvio.wallet.util.crypto;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import app.eluvio.wallet.util.StringUtils;
+
 /**
  * Base58 is a way to encode Bitcoin addresses (or arbitrary data) as alphanumeric strings.
  * <p>
@@ -89,6 +91,10 @@ public class Base58 {
         }
         // Return encoded string (including encoded leading zeros).
         return new String(encoded, outputStart, encoded.length - outputStart);
+    }
+
+    public static String decodeAsHex(String input) {
+        return StringUtils.hexToString(decode(input));
     }
 
     /**

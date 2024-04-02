@@ -112,13 +112,13 @@ class ContentStore @Inject constructor(
      */
     private fun findOwnedToken(nftTemplateEntity: NftTemplateEntity): Maybe<TokenOwnership> {
         return observeWalletData(forceRefresh = false)
+            .firstElement()
             .mapNotNull { nfts ->
                 nfts.getOrNull()?.firstOrNull { nft ->
                     nft.contractAddress == nftTemplateEntity.contractAddress
                 }
             }
             .map { nft -> TokenOwnership(nft.contractAddress, nft.tokenId) }
-            .firstElement()
     }
 
     fun observeWalletData(forceRefresh: Boolean = true): Flowable<Result<List<NftEntity>>> {
