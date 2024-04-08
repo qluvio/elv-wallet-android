@@ -111,6 +111,7 @@ class MediaEntity : RealmObject {
         const val MEDIA_TYPE_IMAGE = "Image"
         const val MEDIA_TYPE_LIVE = "Live"
         const val MEDIA_TYPE_VIDEO = "Video"
+        const val MEDIA_TYPE_LIVE_VIDEO = "Live Video"
 
         const val ASPECT_RATIO_SQUARE = 1f
         const val ASPECT_RATIO_WIDE = 16f / 9f

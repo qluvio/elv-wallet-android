@@ -112,6 +112,7 @@ fun defaultMediaItemClickHandler(navigator: Navigator): (media: MediaEntity) -> 
             )
         } else {
             when (media.mediaType) {
+                MediaEntity.MEDIA_TYPE_LIVE_VIDEO,
                 MediaEntity.MEDIA_TYPE_VIDEO -> {
                     navigator(VideoPlayerActivityDestination(media.id).asPush())
                 }
