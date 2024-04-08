@@ -48,6 +48,7 @@ class MyMediaViewModel @Inject constructor(
                         nft.displayName to nft.mediaSections.flatMap { it.collections }
                             .flatMap { it.media }
                     }
+                        .filterValues { it.isNotEmpty() }
                     updateState {
                         copy(
                             featuredMedia = featuredMedia,
