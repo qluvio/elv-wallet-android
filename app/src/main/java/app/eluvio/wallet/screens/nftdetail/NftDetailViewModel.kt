@@ -147,7 +147,7 @@ class NftDetailViewModel @Inject constructor(
                         .onErrorReturnItem(Optional.absent())
                 }
                 videoOptions.map { optional ->
-                    val imageUrl = (offer.posterImagePath ?: offer.imagePath)?.let { path ->
+                    val imageUrl = (offer.imagePath ?: offer.posterImagePath)?.let { path ->
                         "${endpoint}${path}"
                     }
                     State.Offer(
