@@ -256,19 +256,14 @@ private fun BackToThirdPartyButton(
 
 @Composable
 private fun DescriptionText(text: AnnotatedString) {
-    var isClickable by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     Text(
         text = text,
         style = MaterialTheme.typography.body_32,
         maxLines = if (expanded) Int.MAX_VALUE else 10,
         overflow = TextOverflow.Ellipsis,
-        onTextLayout = { textLayoutResult ->
-            // Only clickable if there's actually overflow.
-            isClickable = expanded || textLayoutResult.hasVisualOverflow
-        },
         modifier = Modifier
-            .clickable(enabled = isClickable, onClick = { expanded = !expanded })
+            .clickable { expanded = !expanded }
             .padding(
                 start = Overscan.horizontalPadding,
                 end = 260.dp,
