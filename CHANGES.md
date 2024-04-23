@@ -2,7 +2,11 @@
 
 ## Version 1.0.3
 ### Improvements / Changes
+* Deeplink support!
 * Better loading/empty states for MyMedia tab.
+* Added Live Video Support
+* Fix redeemable offer image aspect ratio. 
+* Fixed scrolling issue in NFTDetail when description is just long enough to prevent scrolling to top.
 
 ## Version 1.0.2
 ### Improvements / Changes
