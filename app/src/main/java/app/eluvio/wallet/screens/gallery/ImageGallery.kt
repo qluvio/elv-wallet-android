@@ -25,14 +25,11 @@ import androidx.tv.foundation.lazy.list.itemsIndexed
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.ImmersiveList
-import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
-import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -57,7 +54,7 @@ private fun ImageGallery(state: ImageGalleryViewModel.State) {
             if (listHasFocus) {
                 AnimatedContent(targetState = index) {
                     val image = state.images[index]
-                    AsyncImage(
+                    ShimmerImage(
                         model = image.url,
                         contentDescription = image.name,
                         Modifier.fillMaxSize()
@@ -86,21 +83,17 @@ private fun ImageGallery(state: ImageGalleryViewModel.State) {
                             .focusRequester(focusRequester)
                             .size(100.dp)
                     ) {
-                        val imageAlpha by remember { derivedStateOf { if (isFocused) 1f else 0.75f } }
-                        ShimmerImage(
-                            model = image.url,
-                            contentDescription = image.name,
-                            alpha = imageAlpha,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .fillMaxSize()
-                        )
-                        if (isFocused && image.name != null) {
-                            Text(
-                                image.name,
-                                style = MaterialTheme.typography.body_32,
-                                modifier = Modifier.align(Alignment.BottomCenter)
+                        // Don't show thumbnails when there's only 1 item in the gallery
+                        if (state.images.size > 1) {
+                            val imageAlpha by remember { derivedStateOf { if (isFocused) 1f else 0.75f } }
+                            ShimmerImage(
+                                model = image.url,
+                                contentDescription = image.name,
+                                alpha = imageAlpha,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxSize()
                             )
                         }
                     }
