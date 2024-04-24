@@ -9,7 +9,11 @@ import retrofit2.http.Query
 
 interface GatewayApi : AuthdApi {
     @GET("apigw/nfts")
-    fun getNfts(): Single<NftResponse>
+    fun getNfts(
+        // 100 is a pretty big limit and will slow things down, but until we have proper
+        // pagination support, it'll help us get around bugs in SKU/Entitlement flows.
+        @Query("limit") limit: Int = 100
+    ): Single<NftResponse>
 
     @GET("apigw/marketplaces/{marketplaceId}/sku/{sku}")
     fun getNftForSku(
