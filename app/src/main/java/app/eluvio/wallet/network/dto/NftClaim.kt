@@ -27,7 +27,9 @@ data class NftClaimStatusDto(
 
 @JsonClass(generateAdapter = true)
 data class NftClaimStatusExtraDto(
-    @field:Json(name = "0") val claimResult: ClaimResultDto
+    // For [NftClaimApi.NFT_CLAIM_OPERATION], this field will be non-null, but there are other
+    // operations the server could spit back at us that have a different set of "extra" fields.
+    @field:Json(name = "0") val claimResult: ClaimResultDto?
 )
 
 @JsonClass(generateAdapter = true)

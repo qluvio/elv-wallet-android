@@ -41,15 +41,15 @@ class NftClaimStore @Inject constructor(
         return apiProvider.getApi(NftClaimApi::class)
             .flatMap { api -> api.getClaimStatus(tenant) }
             .map { dto ->
-                dto
-                    .firstOrNull { it.operationKey == op }
-                    ?.extra?.claimResult?.let { result ->
-                        NftClaimResult.Success(
-                            contractAddress = result.contractAddress,
-                            tokenId = result.tokenId
-                        )
-                    }
-                    ?: NftClaimResult.Pending
+                val extra = dto.firstOrNull { it.operationKey == op }?.extra
+                when {
+                    extra == null -> NftClaimResult.Pending
+                    extra.claimResult == null -> throw IllegalStateException("nft-claim has \"extra\" but no \"claimResult\"")
+                    else -> NftClaimResult.Success(
+                        contractAddress = extra.claimResult.contractAddress,
+                        tokenId = extra.claimResult.tokenId
+                    )
+                }
             }
     }
 }
