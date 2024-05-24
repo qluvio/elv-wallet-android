@@ -150,7 +150,7 @@ private fun TopBar(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(40.dp))
-                    .background(Color.White.copy(alpha = 0.1f))
+                    .background(Color(0xff373737))
                     .padding(5.dp)
                     .align(Alignment.Center)
             ) {

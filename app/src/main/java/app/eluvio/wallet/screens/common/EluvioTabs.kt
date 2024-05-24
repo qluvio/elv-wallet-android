@@ -23,8 +23,9 @@ fun TabRowScope.EluvioTab(
         onFocus = onFocus,
         onClick = onClick,
         colors = TabDefaults.pillIndicatorTabColors(
-            contentColor = Color(0xFFD8D8D8),
-            selectedContentColor = Color.Black,
+            contentColor = Color(0xFFB8B8B8),
+            inactiveContentColor = Color(0xFFB8B8B8),
+            selectedContentColor = Color(0xFFBBBBBB),
             focusedContentColor = Color.Black
         ),
         modifier = modifier,
@@ -38,8 +39,8 @@ val EluvioTabIndicator: @Composable (selectedTabIndex: Int, tabPositions: List<D
             TabRowDefaults.PillIndicator(
                 currentTabPosition = it,
                 doesTabRowHaveFocus = doesTabRowHaveFocus,
-                activeColor = Color(0xE5FFFFFF),
-                inactiveColor = Color(0x99FFFFFF),
+                activeColor = Color(0xFFD0D0D0),
+                inactiveColor = Color(0xFF838485)
             )
         }
     }
