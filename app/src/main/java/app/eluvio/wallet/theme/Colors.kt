@@ -1,10 +1,7 @@
-@file:OptIn(ExperimentalTvMaterial3Api::class)
-
 package app.eluvio.wallet.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.tv.material3.ColorScheme
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.darkColorScheme
 
 

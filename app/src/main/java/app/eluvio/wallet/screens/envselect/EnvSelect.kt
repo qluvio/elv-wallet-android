@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.ExperimentalTvFoundationApi
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
@@ -67,7 +66,6 @@ fun EnvSelect() {
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun EnvironmentSelection(
     state: EnvSelectViewModel.State,
@@ -110,7 +108,7 @@ private fun EnvironmentSelection(
     }
 }
 
-@OptIn(ExperimentalTvFoundationApi::class, ExperimentalTvMaterial3Api::class)
+@OptIn(ExperimentalTvFoundationApi::class)
 @Composable
 fun EnvironmentTabRow(
     state: EnvSelectViewModel.State,
@@ -129,7 +127,13 @@ fun EnvironmentTabRow(
         TabRow(
             selectedTabIndex = selectedTabIndex,
             contentColor = Color.White,
-            indicator = { EluvioTabIndicator(selectedTabIndex, it) }
+            indicator = { tabPositions, doesTabRowHaveFocus ->
+                EluvioTabIndicator(
+                    selectedTabIndex,
+                    tabPositions,
+                    doesTabRowHaveFocus
+                )
+            }
         ) {
             val tabFocusRequesters = remember {
                 List(size = state.availableEnvironments.size, init = { FocusRequester() })
@@ -165,7 +169,7 @@ private fun MultiEnvSelectPreview() = EluvioThemePreview {
         state = EnvSelectViewModel.State(
             false,
             SelectedEnvEntity.Environment.Main,
-            SelectedEnvEntity.Environment.values().toList(),
+            SelectedEnvEntity.Environment.entries,
         ),
         onEnvironmentSelected = {},
     )

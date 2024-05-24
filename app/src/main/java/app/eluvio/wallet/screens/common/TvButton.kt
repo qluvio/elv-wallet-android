@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ClickableSurfaceColors
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ClickableSurfaceScale
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
@@ -29,7 +28,6 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.label_40
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun TvButton(
     text: String,
@@ -58,7 +56,6 @@ fun TvButton(
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Preview
 @Composable
 fun TvButtonPreview() = EluvioThemePreview {

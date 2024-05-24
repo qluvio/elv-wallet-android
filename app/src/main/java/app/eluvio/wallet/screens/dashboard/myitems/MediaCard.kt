@@ -27,7 +27,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
@@ -43,7 +42,6 @@ import app.eluvio.wallet.theme.label_24
 /**
  * @param onClick if null, the card will not be clickable/focusable/interactive
  */
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun MediaCard(
     media: AllMediaProvider.Media,
@@ -119,7 +117,6 @@ fun MediaCard(
  * [Surface] has interactive, and non-interactive variants. This wrapper will choose a variant
  * based on whether [onClick] is null.
  */
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun SurfaceWrapper(
     modifier: Modifier = Modifier,

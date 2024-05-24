@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTvMaterial3Api::class)
-
 package app.eluvio.wallet.theme
 
 import androidx.compose.foundation.layout.Box
@@ -11,7 +9,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import app.eluvio.wallet.navigation.LocalNavigator
@@ -46,6 +43,5 @@ fun EluvioThemePreview(content: @Composable () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 val LocalSurfaceScale =
     staticCompositionLocalOf { ClickableSurfaceDefaults.scale(focusedScale = 1.05f) }

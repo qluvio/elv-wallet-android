@@ -18,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.SelectedEnvEntity
@@ -44,7 +43,6 @@ fun Profile() {
 }
 
 @Composable
-@OptIn(ExperimentalTvMaterial3Api::class)
 fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,

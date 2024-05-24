@@ -16,7 +16,7 @@ class EnvSelectViewModel @Inject constructor(
         val loading: Boolean = true,
         val selectedEnvironment: Environment? = null,
         val availableEnvironments: List<Environment> = if (BuildConfig.DEBUG) {
-            Environment.values().toList()
+            Environment.entries
         } else {
             listOf(Environment.Main)
         },

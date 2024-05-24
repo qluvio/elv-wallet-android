@@ -21,7 +21,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import kotlin.math.cos
 import kotlin.math.sin
@@ -31,7 +30,6 @@ import kotlin.math.sin
  * https://github.com/commandiron/ComposeLoading
  * Replaced Material dependency with androidx.tv.material3
  */
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ChasingDots(
     modifier: Modifier = Modifier,

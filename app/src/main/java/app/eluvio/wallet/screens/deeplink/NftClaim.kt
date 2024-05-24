@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvMaterial3Api::class)
-
 package app.eluvio.wallet.screens.deeplink
 
 import androidx.compose.animation.core.AnimationVector1D
@@ -33,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.app.Events
@@ -69,7 +66,6 @@ fun NftClaim() {
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun NftClaim(state: NftClaimViewModel.State, onClaimClick: () -> Unit) {
     val media = state.media

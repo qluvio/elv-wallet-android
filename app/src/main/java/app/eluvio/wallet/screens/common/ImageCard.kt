@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -25,7 +24,6 @@ import app.eluvio.wallet.theme.LocalSurfaceScale
 /**
  * An image card with a focus border. Image is darkened when focused.
  */
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ImageCard(
     imageUrl: String?,

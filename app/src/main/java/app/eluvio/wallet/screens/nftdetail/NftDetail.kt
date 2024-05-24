@@ -43,7 +43,6 @@ import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
@@ -194,7 +193,6 @@ private fun NftDetail(state: NftDetailViewModel.State) {
 }
 
 @Composable
-@OptIn(ExperimentalTvMaterial3Api::class)
 private fun BackToThirdPartyButton(
     backButtonLogo: String?,
     modifier: Modifier = Modifier
@@ -308,7 +306,6 @@ private fun MediaItemsRow(media: List<MediaEntity>) {
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit) {
     // It's possible to layer this Text on top of the card (with explicit zIndex modifiers, see:

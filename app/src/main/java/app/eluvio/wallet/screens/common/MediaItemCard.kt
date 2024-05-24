@@ -20,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -35,7 +34,6 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.logging.Log
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun MediaItemCard(
     media: MediaEntity,

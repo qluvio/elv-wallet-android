@@ -8,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import coil.compose.AsyncImage
 import com.google.accompanist.placeholder.PlaceholderDefaults
@@ -20,7 +19,6 @@ import com.google.accompanist.placeholder.material.shimmer
 /**
  * An async image that shows a placeholder while loading.
  */
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ShimmerImage(
     model: Any?,

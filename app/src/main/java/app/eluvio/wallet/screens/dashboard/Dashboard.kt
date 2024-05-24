@@ -37,10 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.foundation.ExperimentalTvFoundationApi
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.TabRow
+import androidx.tv.material3.TabRowScope
 import androidx.tv.material3.Text
 import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.navigation.LocalNavigator
@@ -73,7 +73,7 @@ fun Dashboard() {
         Log.e("Tab destination changed: $destination")
     }
     val selectedTabIndex = remember { mutableIntStateOf(0) }
-    val tabFocusRequesters = remember { List(Tabs.values().size) { FocusRequester() } }
+    val tabFocusRequesters = remember { List(Tabs.entries.size) { FocusRequester() } }
     var topBarFocused by remember { mutableStateOf(false) }
     val navigator = LocalNavigator.current
     Column(
@@ -129,7 +129,7 @@ fun Dashboard() {
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalTvFoundationApi::class)
+@OptIn(ExperimentalTvFoundationApi::class)
 @Composable
 private fun TopBar(
     // passing as State to delay read as much as possible
@@ -157,15 +157,22 @@ private fun TopBar(
                 TabRow(
                     selectedTabIndex = selectedTabIndex.intValue,
                     contentColor = Color.White,
-                    indicator = { EluvioTabIndicator(selectedTabIndex.intValue, it) },
+                    indicator = { tabPositions, doesTabRowHaveFocus ->
+                        EluvioTabIndicator(
+                            selectedTabIndex.intValue,
+                            tabPositions,
+                            doesTabRowHaveFocus
+                        )
+                    },
                     modifier = Modifier.requestInitialFocus()
                 ) {
-                    Tabs.values().forEachIndexed { index, tab ->
+                    Tabs.entries.forEachIndexed { index, tab ->
                         val selected by remember {
                             derivedStateOf { selectedTabIndex.intValue == index }
                         }
                         DashboardTab(
                             tab,
+                            tabRowScope = this,
                             selected = selected,
                             onFocus = {
                                 if (!selected) {
@@ -183,10 +190,11 @@ private fun TopBar(
     }
 }
 
-@OptIn(ExperimentalTvFoundationApi::class, ExperimentalTvMaterial3Api::class)
+@OptIn(ExperimentalTvFoundationApi::class)
 @Composable
 private fun FocusGroupScope.DashboardTab(
     tab: Tabs,
+    tabRowScope: TabRowScope,
     selected: Boolean,
     onFocus: () -> Unit,
     onClick: () -> Unit,
@@ -195,7 +203,7 @@ private fun FocusGroupScope.DashboardTab(
     val subject = remember { PublishProcessor.create<Any>() }
     PrintVersionOnMultiClick(subject)
 
-    EluvioTab(
+    tabRowScope.EluvioTab(
         selected = selected,
         onFocus = onFocus,
         onClick = onClick,
@@ -256,7 +264,7 @@ private fun PrintVersionOnMultiClick(subject: PublishProcessor<Any>, clickThresh
 private fun TopBarPreview() {
     TopBar(
         selectedTabIndex = remember { mutableIntStateOf(0) },
-        tabFocusRequesters = remember { List(Tabs.values().size) { FocusRequester() } },
+        tabFocusRequesters = remember { List(Tabs.entries.size) { FocusRequester() } },
         onTabSelected = { _, _ -> }
     )
 }
