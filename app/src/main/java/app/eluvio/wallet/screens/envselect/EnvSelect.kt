@@ -24,6 +24,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,7 +47,6 @@ import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.screens.common.requestOnce
-import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
@@ -78,18 +78,21 @@ private fun EnvironmentSelection(
     ) {
         Image(
             painter = painterResource(id = R.drawable.elv_logo),
-            contentDescription = "Eluvio Logo"
+            contentDescription = "Eluvio Logo",
+            modifier = Modifier.size(100.dp)
         )
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(6.dp))
         Text(
             text = "Welcome to",
-            style = MaterialTheme.typography.header_53.withAlpha(0.8f)
-                .copy(fontSize = 30.sp)
-                .withAlpha(alpha = 0.4f)
+            style = MaterialTheme.typography.header_53.copy(
+                fontSize = 29.sp,
+                fontWeight = FontWeight.ExtraLight
+            )
         )
+        Spacer(modifier = Modifier.size(4.dp))
         Text(
             text = "Media Wallet",
-            style = MaterialTheme.typography.header_53.copy(fontSize = 54.sp)
+            style = MaterialTheme.typography.header_53.copy(fontSize = 44.sp)
         )
 
         val navigator = LocalNavigator.current
@@ -99,7 +102,7 @@ private fun EnvironmentSelection(
         if (hasMultipleEnvs) {
             EnvironmentTabRow(state, navigator, onEnvironmentSelected)
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         TvButton(
             stringResource(R.string.sign_in_button),
             onClick = { navigator(SignInDestination.asPush()) },
