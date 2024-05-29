@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
@@ -134,7 +135,8 @@ private fun NftDetail(state: NftDetailViewModel.State) {
     }
     Column {
         TvLazyColumn(
-            Modifier
+            pivotOffsets = PivotOffsets(0.6f),
+            modifier = Modifier
                 .focusRequester(lazyColumnFocusRequester)
                 .focusProperties { up = backButtonFocusRequester })
         {
@@ -254,14 +256,19 @@ private fun BackToThirdPartyButton(
 
 @Composable
 private fun DescriptionText(text: AnnotatedString) {
+    var isClickable by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     Text(
         text = text,
         style = MaterialTheme.typography.body_32,
         maxLines = if (expanded) Int.MAX_VALUE else 10,
         overflow = TextOverflow.Ellipsis,
+        onTextLayout = { textLayoutResult ->
+            // Only clickable if there's actually overflow.
+            isClickable = expanded || textLayoutResult.hasVisualOverflow
+        },
         modifier = Modifier
-            .clickable { expanded = !expanded }
+            .clickable(enabled = isClickable, onClick = { expanded = !expanded })
             .padding(
                 start = Overscan.horizontalPadding,
                 end = 260.dp,
