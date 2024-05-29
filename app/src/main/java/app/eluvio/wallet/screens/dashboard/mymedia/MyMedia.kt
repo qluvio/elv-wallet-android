@@ -75,7 +75,7 @@ private fun MyMediaGrid(state: MyMediaViewModel.State) {
     val scope = rememberCoroutineScope()
     TvLazyColumn(
         state = scrollState,
-        verticalArrangement = itemArrangement,
+        verticalArrangement = Arrangement.spacedBy(30.dp),
         pivotOffsets = PivotOffsets(0.1f),
         modifier = Modifier
             .fillMaxSize()
@@ -132,7 +132,7 @@ fun FeaturedMediaRow(featuredMedia: List<MediaEntity>, baseUrl: String?) {
 @Composable
 fun NftMediaRow(displayName: String, mediaItems: List<MediaEntity>) {
     RowHeader(displayName)
-    Spacer(Modifier.height(10.dp))
+    Spacer(Modifier.height(15.dp))
     TvLazyRow(horizontalArrangement = itemArrangement) {
         spacer(width = listSpacerSize)
         items(mediaItems) { media ->
@@ -145,7 +145,7 @@ fun NftMediaRow(displayName: String, mediaItems: List<MediaEntity>) {
 @Composable
 private fun MyItemsRow(myItems: List<AllMediaProvider.Media>) {
     RowHeader(text = "Items")
-    Spacer(Modifier.height(10.dp))
+    Spacer(Modifier.height(15.dp))
     TvLazyRow(horizontalArrangement = itemArrangement) {
         spacer(width = listSpacerSize)
         items(myItems) { item ->
@@ -187,5 +187,24 @@ private val listSpacerSize = 28.dp
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun MyMediaPreview() = EluvioThemePreview {
-    MyMedia(MyMediaViewModel.State(loading = false))
+    MyMedia(
+        MyMediaViewModel.State(
+            loading = false,
+            featuredMedia = List(10) { MediaEntity() },
+            nftMedia = mapOf(
+                "Section Title" to List(10) { MediaEntity() },
+                "Section Title2" to List(10) { MediaEntity() },
+            ),
+            myItems = List(10) { i ->
+                AllMediaProvider.Media(
+                    "$i",
+                    "",
+                    "",
+                    "Title #$i",
+                    "subtitle",
+                    ""
+                )
+            }
+        )
+    )
 }
