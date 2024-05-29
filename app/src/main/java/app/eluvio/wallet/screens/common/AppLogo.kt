@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.theme.label_40
+import app.eluvio.wallet.theme.carousel_36
 
 @Composable
 fun AppLogo(modifier: Modifier = Modifier) {
@@ -23,14 +23,14 @@ fun AppLogo(modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         Image(
-            painter = painterResource(id = R.drawable.elv_logo),
+            painter = painterResource(id = R.drawable.elv_logo_bw),
             contentDescription = "Eluvio Logo",
-            modifier = Modifier.size(50.dp)
+            modifier = Modifier.size(30.dp)
         )
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = stringResource(id = R.string.app_name),
-            style = MaterialTheme.typography.label_40
+            style = MaterialTheme.typography.carousel_36
         )
     }
 }

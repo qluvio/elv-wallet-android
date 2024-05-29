@@ -1,8 +1,11 @@
 package app.eluvio.wallet.screens.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -141,18 +144,19 @@ private fun TopBar(
     // TODO: there's nothing stopping the logo and tabs from overlapping if the screen isn't wide enough
     FocusGroup(contentAlignment = Alignment.Center, modifier = modifier) {
         val focusManager = LocalFocusManager.current
-        Box(
-            Modifier
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(Overscan.defaultPadding(excludeBottom = true))
         ) {
-            AppLogo()
+            AppLogo(Modifier.weight(1f))
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(40.dp))
                     .background(Color(0xff373737))
                     .padding(5.dp)
-                    .align(Alignment.Center)
+                    .align(Alignment.CenterVertically)
             ) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex.intValue,
@@ -186,6 +190,7 @@ private fun TopBar(
                     }
                 }
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
