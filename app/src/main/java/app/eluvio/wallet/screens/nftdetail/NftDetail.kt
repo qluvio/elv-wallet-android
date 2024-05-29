@@ -280,9 +280,9 @@ private fun DescriptionText(text: AnnotatedString) {
 
 @Composable
 private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
-    TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        spacer(width = 32.dp)
-        items(state.featuredMedia) { item -> MediaItemCard(item) }
+    TvLazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+        spacer(width = 28.dp)
+        items(state.featuredMedia) { item -> MediaItemCard(item, cardHeight = CARD_HEIGHT) }
         items(state.redeemableOffers) { item ->
             val navigator = LocalNavigator.current
             OfferCard(item) {
@@ -295,7 +295,7 @@ private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
                 )
             }
         }
-        spacer(width = 32.dp)
+        spacer(width = 28.dp)
     }
 }
 
@@ -303,12 +303,12 @@ private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
 private fun MediaItemsRow(media: List<MediaEntity>) {
     val items = media.filter { !it.shouldBeHidden() }
     if (items.isNotEmpty()) {
-        TvLazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            spacer(width = 32.dp)
+        TvLazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            spacer(width = 28.dp)
             items(items) { media ->
-                MediaItemCard(media)
+                MediaItemCard(media, cardHeight = CARD_HEIGHT)
             }
-            spacer(width = 32.dp)
+            spacer(width = 28.dp)
         }
     }
 }
@@ -399,7 +399,7 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
         imageUrl = item.imageUrl,
         contentDescription = item.name,
         onClick = onClick,
-        modifier = Modifier.size(150.dp),
+        modifier = Modifier.size(CARD_HEIGHT),
         focusedOverlay = {
             offerTitle()
             rewardOverlay()
@@ -412,6 +412,8 @@ private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit)
 class BackLinkParameterProvider : PreviewParameterProvider<String?> {
     override val values = sequenceOf(null, "http://3rdparty.app")
 }
+
+private val CARD_HEIGHT = 170.dp
 
 @Composable
 @Preview(device = Devices.TV_720p)
