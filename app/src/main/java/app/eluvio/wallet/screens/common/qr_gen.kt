@@ -11,15 +11,18 @@ import java.io.ByteArrayOutputStream
 const val DEFAULT_QR_SIZE = 512
 
 fun generateQrCode(url: String, size: Int = DEFAULT_QR_SIZE): Single<Bitmap> {
-    return Single.create {
-        val bytes = ByteArrayOutputStream()
-        val qr = QRCode(url)
-        val rawData = qr.encode()
-        val margin = 20 //(pixels)
-        val cellSize = (size - margin) / rawData.size
-        qr.render(margin = margin, cellSize = cellSize, rawData = rawData).writeImage(bytes)
-        val bitmap = BitmapFactory.decodeByteArray(bytes.toByteArray(), 0, bytes.size())
-        Log.d("QR generated for url: $url")
-        it.onSuccess(bitmap)
+    return Single.fromCallable {
+        generateQrCodeBlocking(url, size).also { Log.d("QR generated for url: $url") }
     }
+}
+
+fun generateQrCodeBlocking(url: String, size: Int = DEFAULT_QR_SIZE): Bitmap {
+    val bytes = ByteArrayOutputStream()
+    val qr = QRCode(url)
+    val rawData = qr.encode()
+    val margin = 20 //(pixels)
+    val cellSize = (size - margin) / rawData.size
+    qr.render(margin = margin, cellSize = cellSize, rawData = rawData).writeImage(bytes)
+    val bitmap = BitmapFactory.decodeByteArray(bytes.toByteArray(), 0, bytes.size())
+    return bitmap
 }
