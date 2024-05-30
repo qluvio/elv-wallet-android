@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,13 +14,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
@@ -33,8 +37,9 @@ import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.body_32
+import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
+import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.redeemAvailableText
 import app.eluvio.wallet.theme.redeemExpiredText
 import app.eluvio.wallet.theme.title_62
@@ -73,15 +78,26 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: ()
                 .fillMaxWidth(0.8f)
                 .align(Alignment.Center)
         ) {
+            // Asume poster ratio by default (2/3), but update it when image is loaded
+            var aspectRatio by remember { mutableFloatStateOf(2f / 3f) }
             ShimmerImage(
                 model = state.image,
                 contentDescription = state.title,
-                modifier = Modifier.fillMaxHeight(0.5f)
+                onSuccess = {
+                    val drawable = it.result.drawable
+                    aspectRatio = drawable.intrinsicWidth.toFloat() / drawable.intrinsicHeight
+                },
+                modifier = Modifier
+                    .fillMaxHeight(0.6f)
+                    .aspectRatio(aspectRatio),
             )
-            Spacer(Modifier.width(40.dp))
+            Spacer(Modifier.width(35.dp))
             Column {
-                Text(text = state.title, style = MaterialTheme.typography.title_62)
-                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = state.title,
+                    style = MaterialTheme.typography.title_62.copy(fontSize = 34.sp)
+                )
+                Spacer(Modifier.height(16.dp))
                 Row {
                     val (text, color) = when (state.fulfillmentState) {
                         RedeemableOfferEntity.FulfillmentState.EXPIRED ->
@@ -104,9 +120,12 @@ private fun RedeemDialog(state: RedeemDialogViewModel.State, onRedeemClicked: ()
                 }
                 Spacer(Modifier.height(12.dp))
 
-                Text(text = state.subtitle, style = MaterialTheme.typography.body_32)
+                Text(
+                    text = state.subtitle,
+                    style = MaterialTheme.typography.carousel_36
+                )
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(42.dp))
                 if (state.fulfillmentState == RedeemableOfferEntity.FulfillmentState.AVAILABLE) {
                     RedeemButton(state.offerStatus, onRedeemClicked)
                 }
@@ -140,7 +159,11 @@ private fun RedeemButton(
             enabled = !isRedeeming,
             modifier = Modifier.requestInitialFocus(),
         ) {
-            Text(text, Modifier.padding(10.dp))
+            Text(
+                text,
+                style = MaterialTheme.typography.label_40,
+                modifier = Modifier.padding(10.dp)
+            )
         }
         if (isRedeeming) {
             Spacer(Modifier.width(16.dp))
@@ -169,7 +192,7 @@ private fun UnredeemedOfferPreview() = EluvioThemePreview {
     RedeemDialog(
         RedeemDialogViewModel.State(
             title = "Nft reward offer #1",
-            subtitle = AnnotatedString("Very special NFT offer! Don't spend it all at once!"),
+            subtitle = AnnotatedString("Very special NFT offer! Don't spend it all at once!\nand another line!"),
             image = null,
             fulfillmentState = RedeemableOfferEntity.FulfillmentState.AVAILABLE,
             dateRange = "January 1, 1970 - January 1, 2042"

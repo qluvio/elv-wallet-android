@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.tv.material3.MaterialTheme
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.google.accompanist.placeholder.PlaceholderDefaults
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.color
@@ -26,13 +27,17 @@ fun ShimmerImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
     alpha: Float = DefaultAlpha,
+    onSuccess: ((AsyncImagePainter.State.Success) -> Unit)? = null,
 ) {
     var showPlaceholder by remember { mutableStateOf(true) }
     AsyncImage(
         model = model,
         onLoading = { showPlaceholder = true },
         onError = { showPlaceholder = false },
-        onSuccess = { showPlaceholder = false },
+        onSuccess = {
+            onSuccess?.invoke(it)
+            showPlaceholder = false
+        },
         modifier = modifier.placeholder(
             showPlaceholder,
             color = PlaceholderDefaults.color(backgroundColor = MaterialTheme.colorScheme.secondaryContainer),
