@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Devices
@@ -44,6 +45,10 @@ fun ImageCard(
         scale = LocalSurfaceScale.current,
         shape = ClickableSurfaceDefaults.shape(shape),
         interactionSource = interactionSource,
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent
+        ),
         modifier = modifier
     ) {
         val parentScope = this
