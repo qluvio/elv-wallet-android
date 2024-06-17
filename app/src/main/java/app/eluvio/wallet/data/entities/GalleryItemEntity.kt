@@ -12,6 +12,7 @@ import kotlin.reflect.KClass
 class GalleryItemEntity : EmbeddedRealmObject {
     var name: String? = null
     var imagePath: String? = null
+    var imageAspectRatio: Float? = null
 
     override fun toString(): String {
         return "GalleryItemEntity(name='$name', imagePath=$imagePath)"

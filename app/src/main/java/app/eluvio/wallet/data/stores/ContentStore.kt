@@ -179,7 +179,7 @@ class ContentStore @Inject constructor(
     fun fetchWalletData(): Single<List<NftEntity>> {
         return apiProvider.getApi(GatewayApi::class)
             .flatMap { api -> api.getNfts() }
-            .map { response -> response.toNfts() }
+            .map { response -> response.contents.orEmpty().toNfts() }
             .saveTo(realm, clearTable = true)
             .retry { count, error ->
                 // There's a rare edge case where the API gateway validates our token, but by the time it hits fabric, the token is expired.

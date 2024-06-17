@@ -18,8 +18,7 @@ fun NftInfoDto.toRedeemStateEntities(
                 it.contract == contract &&
                 it.tokenId == token_id_str
     }
-    return offers?.map { offer -> offer.toEntity(relevantStatuses, currentUserAddress) }
-        ?: emptyList()
+    return offers?.map { offer -> offer.toEntity(relevantStatuses, currentUserAddress) }.orEmpty()
 }
 
 /**

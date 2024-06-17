@@ -18,7 +18,7 @@ class ImageGalleryViewModel @Inject constructor(
     private val apiProvider: ApiProvider,
 ) : BaseViewModel<ImageGalleryViewModel.State>(State()) {
     data class State(val images: List<GalleryImage> = emptyList()) {
-        data class GalleryImage(val url: String, val name: String?)
+        data class GalleryImage(val url: String, val name: String?, val aspectRatio: Float? = null)
     }
 
     private val mediaEntityId = ImageGalleryDestination.argsFrom(savedStateHandle).mediaEntityId
@@ -34,14 +34,24 @@ class ImageGalleryViewModel @Inject constructor(
                     MediaEntity.MEDIA_TYPE_GALLERY -> {
                         media.gallery.mapNotNull { galleryItem ->
                             galleryItem.imagePath?.let { path ->
-                                State.GalleryImage("$endpoint$path", galleryItem.name)
+                                State.GalleryImage(
+                                    "$endpoint$path",
+                                    galleryItem.name,
+                                    galleryItem.imageAspectRatio
+                                )
                             }
                         }
                     }
 
                     MediaEntity.MEDIA_TYPE_IMAGE -> {
                         val image = media.mediaFile.takeIf { it.isNotEmpty() }
-                            ?.let { path -> State.GalleryImage("$endpoint$path", media.name) }
+                            ?.let { path ->
+                                State.GalleryImage(
+                                    "$endpoint$path",
+                                    media.name,
+                                    media.imageAspectRatio
+                                )
+                            }
                         listOfNotNull(image)
                     }
 

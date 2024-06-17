@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.dashboard
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
 import app.eluvio.wallet.R
+import app.eluvio.wallet.screens.destinations.DiscoverDestination
 import app.eluvio.wallet.screens.destinations.MyItemsDestination
 import app.eluvio.wallet.screens.destinations.MyMediaDestination
 import app.eluvio.wallet.screens.destinations.ProfileDestination
@@ -14,6 +15,7 @@ enum class Tabs(
     @StringRes val title: Int,
     val icon: ImageVector? = null
 ) {
+    Discover(DiscoverDestination, R.string.dashboard_tab_discover),
     MyItems(MyItemsDestination, R.string.dashboard_tab_my_items),
     MyMedia(MyMediaDestination, R.string.dashboard_tab_my_media),
     Profile(ProfileDestination, R.string.dashboard_tab_profile),

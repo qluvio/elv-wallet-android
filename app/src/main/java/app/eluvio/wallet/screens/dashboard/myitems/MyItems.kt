@@ -36,6 +36,7 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
+import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.rememberToaster
@@ -45,7 +46,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.roundToInt
 
-@DashboardTabsGraph(start = true)
+@DashboardTabsGraph
 @Destination
 @Composable
 fun MyItems() {
@@ -77,7 +78,9 @@ private fun MyItems(state: AllMediaProvider.State) {
             val navigator = LocalNavigator.current
             val toaster = rememberToaster()
             MyItemsGrid(state.media, onItemClick = {
-                if (it.tokenId == null) {
+                if (it.propertyId != null) {
+                    navigator(PropertyDetailDestination(it.propertyId).asPush())
+                } else if (it.tokenId == null) {
                     toaster.toast("NFT Packs not supported yet")
                 } else {
                     navigator(NftDetailDestination(it.contractAddress, it.tokenId).asPush())

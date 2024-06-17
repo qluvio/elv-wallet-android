@@ -18,6 +18,7 @@ fun NftTemplateDto.toEntity(primaryKey: String): NftTemplateEntity {
         editionName = dto.edition_name ?: ""
         description = dto.description ?: ""
         descriptionRichText = dto.description_rich_text
+        propertyId = dto.bundled_property_id
         // Currently, additional_media_sections is required. In the future we'll probably have
         // to support additional_media for backwards compatibility.
         dto.additional_media_sections?.let { additionalMediaSections ->

@@ -5,12 +5,6 @@ import com.squareup.moshi.JsonClass
 import java.util.Date
 
 @JsonClass(generateAdapter = true)
-data class NftResponse(
-    val contents: List<NftDto>?,
-    val paging: Paging,
-)
-
-@JsonClass(generateAdapter = true)
 data class NftForSkuResponse(
     @field:Json(name = "tenant_id") val tenant: String,
     @field:Json(name = "nft_template") val nftTemplate: NftTemplateDto,
@@ -45,6 +39,7 @@ data class NftTemplateDto(
     val image: String?,
     val additional_media_sections: AdditionalMediaSectionDto?,
     val redeemable_offers: List<RedeemableOfferDto>?,
+    val bundled_property_id: String?,
     // If 'error' shows up in the template, it's usually a sign of a bad/expired token.
     val error: Map<String, Any>?,
 )

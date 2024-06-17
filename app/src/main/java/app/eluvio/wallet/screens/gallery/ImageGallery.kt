@@ -2,9 +2,10 @@ package app.eluvio.wallet.screens.gallery
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -75,7 +76,12 @@ private fun ImageGallery(state: ImageGalleryViewModel.State) {
                 modifier = Modifier
                     .focusRequester(focusRequester)
                     .onFocusChanged { isFocused = it.hasFocus }
-                    .size(100.dp)
+                    .height(100.dp)
+                    .then(
+                        image.aspectRatio?.let {
+                            Modifier.aspectRatio(it, matchHeightConstraintsFirst = true)
+                        } ?: Modifier
+                    )
             ) {
                 // Don't show thumbnails when there's only 1 item in the gallery
                 if (state.images.size > 1) {

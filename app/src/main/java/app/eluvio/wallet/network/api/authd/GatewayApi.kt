@@ -1,7 +1,8 @@
 package app.eluvio.wallet.network.api.authd
 
+import app.eluvio.wallet.network.dto.NftDto
 import app.eluvio.wallet.network.dto.NftForSkuResponse
-import app.eluvio.wallet.network.dto.NftResponse
+import app.eluvio.wallet.network.dto.PagedContent
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -13,7 +14,7 @@ interface GatewayApi : AuthdApi {
         // 100 is a pretty big limit and will slow things down, but until we have proper
         // pagination support, it'll help us get around bugs in SKU/Entitlement flows.
         @Query("limit") limit: Int = 100
-    ): Single<NftResponse>
+    ): Single<PagedContent<NftDto>>
 
     @GET("apigw/marketplaces/{marketplaceId}/sku/{sku}")
     fun getNftForSku(

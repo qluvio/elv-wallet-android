@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities
 
+import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,7 +48,7 @@ class NftEntity : RealmObject {
 
     @Ignore
     val mediaSections: RealmList<MediaSectionEntity>
-        get() = nftTemplate?.mediaSections ?: realmListOf()
+        get() = nftTemplate?.mediaSections.toRealmListOrEmpty()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

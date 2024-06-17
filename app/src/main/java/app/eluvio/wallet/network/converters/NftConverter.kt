@@ -12,7 +12,7 @@ import app.eluvio.wallet.network.dto.MediaCollectionDto
 import app.eluvio.wallet.network.dto.MediaItemDto
 import app.eluvio.wallet.network.dto.MediaLinkDto
 import app.eluvio.wallet.network.dto.MediaSectionDto
-import app.eluvio.wallet.network.dto.NftResponse
+import app.eluvio.wallet.network.dto.NftDto
 import app.eluvio.wallet.network.dto.RedeemableOfferDto
 import app.eluvio.wallet.util.realm.toRealmDictionaryOrEmpty
 import app.eluvio.wallet.util.realm.toRealmInstant
@@ -20,9 +20,8 @@ import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmDictionary
 
-fun NftResponse.toNfts(): List<NftEntity> {
-    val contents = contents ?: emptyList()
-    return contents.mapNotNull { dto ->
+fun List<NftDto>.toNfts(): List<NftEntity> {
+    return mapNotNull { dto ->
         if (dto.nft_template.error != null) {
             throw IllegalStateException("Fabric error. Probably Bad/expired Token.")
         }
@@ -95,7 +94,7 @@ fun MediaItemDto.toEntity(idPrefix: String): MediaEntity {
         image = dto.image ?: ""
         posterImagePath = dto.poster_image?.path
         mediaType = dto.media_type ?: ""
-        imageAspectRatio = dto.image_aspect_ratio?.asAspectRatioFloat()
+        imageAspectRatio = ConverterUtils.parseAspectRatio(dto.image_aspect_ratio)
         mediaFile = dto.media_file?.path ?: ""
         mediaLinks = dto.media_link.toPathMap()
         tvBackgroundImage = dto.background_image_tv?.path ?: ""
@@ -112,7 +111,7 @@ private fun MediaItemDto.getLockedState(): MediaEntity.LockedStateEntity {
         hideWhenLocked = dto.locked_state?.hide_when_locked == true
         lockedImage = dto.locked_state?.image
         lockedName = dto.locked_state?.name
-        imageAspectRatio = dto.locked_state?.image_aspect_ratio?.asAspectRatioFloat()
+        imageAspectRatio = ConverterUtils.parseAspectRatio(dto.locked_state?.image_aspect_ratio)
         subtitle = dto.locked_state?.subtitle_1
     }
 }
@@ -129,12 +128,4 @@ fun MediaLinkDto?.toPathMap(): RealmDictionary<String> {
     return this?.sources
         ?.mapValues { (_, link) -> link.path }
         .toRealmDictionaryOrEmpty()
-}
-
-private fun String.asAspectRatioFloat(): Float? {
-    return when (this) {
-        "Square" -> MediaEntity.ASPECT_RATIO_SQUARE
-        "Wide" -> MediaEntity.ASPECT_RATIO_WIDE
-        else -> null
-    }
 }

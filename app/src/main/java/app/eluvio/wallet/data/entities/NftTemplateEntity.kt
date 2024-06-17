@@ -26,6 +26,9 @@ class NftTemplateEntity : RealmObject {
     var featuredMedia: RealmList<MediaEntity> = realmListOf()
     var mediaSections: RealmList<MediaSectionEntity> = realmListOf()
 
+    // An NFT can be tied to a Media Property (Media Wallet V2).
+    var propertyId: String? = null
+
     // Tenant can be null until fetched separately from nft/info/{contractAddress}/{tokenId}
     // or from marketplace info
     var tenant: String? = null
@@ -45,6 +48,7 @@ class NftTemplateEntity : RealmObject {
         if (descriptionRichText != other.descriptionRichText) return false
         if (featuredMedia != other.featuredMedia) return false
         if (mediaSections != other.mediaSections) return false
+        if (propertyId != other.propertyId) return false
         if (tenant != other.tenant) return false
 
         return true
@@ -60,12 +64,13 @@ class NftTemplateEntity : RealmObject {
         result = 31 * result + (descriptionRichText?.hashCode() ?: 0)
         result = 31 * result + featuredMedia.hashCode()
         result = 31 * result + mediaSections.hashCode()
+        result = 31 * result + (propertyId?.hashCode() ?: 0)
         result = 31 * result + (tenant?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "NftTemplateEntity(id='$id', contractAddress='$contractAddress', imageUrl=$imageUrl, displayName='$displayName', editionName='$editionName', description='$description', descriptionRichText=$descriptionRichText, featuredMedia=$featuredMedia, mediaSections=$mediaSections, tenant=$tenant)"
+        return "NftTemplateEntity(id='$id', contractAddress='$contractAddress', imageUrl=$imageUrl, displayName='$displayName', editionName='$editionName', description='$description', descriptionRichText=$descriptionRichText, featuredMedia=$featuredMedia, mediaSections=$mediaSections, propertyId=$propertyId, tenant=$tenant)"
     }
 
     @Module

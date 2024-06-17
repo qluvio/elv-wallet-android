@@ -37,6 +37,7 @@ import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
 import app.eluvio.wallet.screens.dashboard.myitems.MediaCard
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
+import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.util.isKeyUpOf
@@ -153,7 +154,9 @@ private fun MyItemsRow(myItems: List<AllMediaProvider.Media>) {
             MediaCard(
                 media = item,
                 onClick = {
-                    if (item.tokenId != null) {
+                    if (item.propertyId != null) {
+                        navigator(PropertyDetailDestination(item.propertyId).asPush())
+                    } else if (item.tokenId != null) {
                         navigator(NftDetailDestination(item.contractAddress, item.tokenId).asPush())
                     }
                 },
