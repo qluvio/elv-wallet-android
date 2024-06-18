@@ -63,17 +63,21 @@ class PropertyDetailViewModel @Inject constructor(
     }
 
     private fun title(mainPage: MediaPageEntity): DynamicPageLayoutState.Row? {
-        return mainPage.title?.let { DynamicPageLayoutState.Row.Title(AnnotatedString(it)) }
+        return mainPage.title
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { DynamicPageLayoutState.Row.Title(AnnotatedString(it)) }
     }
 
     private fun description(mainPage: MediaPageEntity): DynamicPageLayoutState.Row? {
-        return mainPage.description?.let { DynamicPageLayoutState.Row.Description(AnnotatedString(it)) }
+        return mainPage.description
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { DynamicPageLayoutState.Row.Description(AnnotatedString(it)) }
     }
 
     private fun descriptionRichText(mainPage: MediaPageEntity): DynamicPageLayoutState.Row? {
         return mainPage.descriptionRichText
             // Only fallback to RichText if neither title nor description are present.
-            ?.takeIf { mainPage.title == null && mainPage.description == null }
+            ?.takeIf { mainPage.title.isNullOrEmpty() && mainPage.description.isNullOrEmpty() }
             ?.let {
                 DynamicPageLayoutState.Row.Description(
                     HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_LEGACY).toAnnotatedString()

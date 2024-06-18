@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.property.rows
 
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -8,7 +9,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import coil.compose.AsyncImage
 
 @Composable
- fun BannerRow(
+fun BannerRow(
     item: DynamicPageLayoutState.Row.Banner,
     state: DynamicPageLayoutState,
     modifier: Modifier = Modifier
@@ -16,6 +17,8 @@ import coil.compose.AsyncImage
     AsyncImage(
         model = state.urlForPath(item.imagePath),
         contentDescription = "Logo",
-        modifier.offset(x = 28.dp)
+        modifier
+            .offset(x = 28.dp)
+            .heightIn(max = 240.dp)
     )
 }
