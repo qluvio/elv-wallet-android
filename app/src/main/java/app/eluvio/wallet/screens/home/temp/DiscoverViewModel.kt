@@ -32,7 +32,8 @@ class DiscoverViewModel @Inject constructor(
         propertyStore.observeMediaProperties(true)
             .subscribeBy(
                 onNext = { properties ->
-                    updateState { copy(properties = properties, loading = false) }
+                    // Assume that Properties will never be empty once fetched from Server
+                    updateState { copy(properties = properties, loading = properties.isEmpty()) }
                 },
                 onError = {}
             )
