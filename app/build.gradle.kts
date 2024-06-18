@@ -100,8 +100,6 @@ dependencies {
     implementation(libs.rxjava)
     implementation(libs.rxkotlin)
 
-    implementation(libs.androidx.navigation.compose)
-
     implementation(libs.hilt.navigation.compose)
 
     implementation(libs.qrcode.kotlin.android)
