@@ -19,7 +19,7 @@ data class SectionItemDto(
 
     val type: String,
     @field:Json(name = "media_type")
-    val mediaType: String,
+    val mediaType: String?,
     val media: MediaItemV2Dto?,
     /**
      * Only applies to lists and collections.
@@ -29,5 +29,5 @@ data class SectionItemDto(
 
     // TODO: handle this field
     @field:Json(name = "use_media_settings")
-    val useMediaSettings: Boolean
+    val useMediaSettings: Boolean?
 )
