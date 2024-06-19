@@ -58,7 +58,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
         val url = state.urlForPath(state.backgroundImagePath)
         AsyncImage(
             model = url,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillWidth,
             contentDescription = "Background",
             modifier = Modifier.fillMaxSize()
         )

@@ -12,8 +12,6 @@ data class MediaPropertyDto(
     val id: String,
     val image: AssetLinkDto,
     val name: String,
-    @field:Json(name = "page_title")
-    val pageTitle: String,
     @field:Json(name = "main_page")
     val mainPage: MediaPageDto,
 )
