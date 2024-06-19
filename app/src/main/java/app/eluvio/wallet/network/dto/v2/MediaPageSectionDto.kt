@@ -6,7 +6,8 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class MediaPageSectionDto(
     // List of IDs of the media items in this section
-    val content: List<SectionItemDto>,
+    //TODO: only null for "automatic" section, which the API should later on inline with 'content'
+    val content: List<SectionItemDto>?,
     val description: String?,
     val id: String,
     val type: String,

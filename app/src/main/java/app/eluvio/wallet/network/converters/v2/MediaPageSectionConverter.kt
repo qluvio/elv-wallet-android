@@ -3,6 +3,7 @@ package app.eluvio.wallet.network.converters.v2
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.SectionItemDto
+import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import io.realm.kotlin.ext.toRealmList
 
 private val supportedSectionTypes = setOf("media")
@@ -12,7 +13,7 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
 
     return MediaPageSectionEntity().apply {
         id = dto.id
-        items = dto.content.mapNotNull { it.toEntity(baseUrl) }.toRealmList()
+        items = dto.content?.mapNotNull { it.toEntity(baseUrl) }.toRealmListOrEmpty()
         title = dto.display?.title
         subtitle = dto.display?.subtitle
     }
