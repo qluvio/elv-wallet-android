@@ -19,11 +19,11 @@ import androidx.compose.ui.text.style.TextDecoration
  * Currently supports `bold`, `italic`, `underline` and `color`.
  */
 fun Spanned.toAnnotatedString(): AnnotatedString = buildAnnotatedString {
-    val spanned = trim()
+    val spanned = this@toAnnotatedString
     append(spanned.toString())
     getSpans(0, spanned.length, Any::class.java).forEach { span ->
-        val start = getSpanStart(span)
-        val end = getSpanEnd(span)
+        val start = spanned.getSpanStart(span)
+        val end = spanned.getSpanEnd(span)
         when (span) {
             is StyleSpan -> when (span.style) {
                 Typeface.BOLD -> addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
