@@ -25,4 +25,7 @@ interface MediaWalletV2Api : AuthdApi {
         @Path("propertyId") propertyId: String,
         @Body request: List<String>
     ): Single<PagedContent<MediaPageSectionDto>>
+
+    @GET("mw/properties/{propertyId}")
+    fun getProperty(@Path("propertyId") propertyId: String): Single<MediaPropertyDto>
 }

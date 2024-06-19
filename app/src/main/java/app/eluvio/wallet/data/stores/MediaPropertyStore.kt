@@ -9,11 +9,9 @@ import app.eluvio.wallet.network.converters.v2.toEntity
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
-import app.eluvio.wallet.util.rx.generate
-import app.eluvio.wallet.util.rx.mapNotNull
+import app.eluvio.wallet.util.rx.zipWithGenerator
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.kotlin.Flowables
 import io.reactivex.rxjava3.kotlin.zipWith
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
@@ -59,15 +57,40 @@ class MediaPropertyStore @Inject constructor(
             .ignoreElement()
     }
 
-    fun observeMediaProperty(propertyId: String): Flowable<MediaPropertyEntity> {
+    fun observeMediaProperty(
+        propertyId: String,
+        forceRefresh: Boolean = true
+    ): Flowable<MediaPropertyEntity> {
         return realm.query<MediaPropertyEntity>(
             "${MediaPropertyEntity::id.name} == $0",
             propertyId
         )
             .asFlowable()
-            .mapNotNull { it.firstOrNull() }
-    }
+            // Force refresh on first DB emit only
+            .zipWithGenerator(forceRefresh) { false }
+            .switchMap { (properties, refresh) ->
+                val cachedProperty = properties.firstOrNull()
+                when {
+                    cachedProperty == null -> {
+                        // Won't actually emit anything, we're just waiting for it to complete and
+                        // save to DB.
+                        Log.v("stav:No cached property for id $propertyId, fetching from network.")
+                        fetchMediaProperty(propertyId).toFlowable()
+                    }
 
+                    refresh -> {
+                        Log.v("stav:Force refreshing property for id $propertyId.")
+                        Flowable.just(cachedProperty).mergeWith(fetchMediaProperty(propertyId))
+                    }
+
+                    else -> {
+                        // Just emit the cached property
+                        Log.v("stav: just emit prop")
+                        Flowable.just(cachedProperty)
+                    }
+                }
+            }
+    }
 
     fun observeSections(
         property: MediaPropertyEntity,
@@ -79,12 +102,10 @@ class MediaPropertyStore @Inject constructor(
             page.sectionIds
         )
             .asFlowable()
-            .zipWith(
-                // Whenever the DB emits, this will combine with the [forceRefresh] value for the
-                // first item, but [false] for the rest. That way we can hit the network only once,
-                // rather than every time the DB emits.
-                Flowables.generate(initialState = forceRefresh, generator = { false })
-            )
+            // Whenever the DB emits, this will combine with the [forceRefresh] value for the
+            // first item, but [false] for the rest. That way we can hit the network only once,
+            // rather than every time the DB emits.
+            .zipWithGenerator(forceRefresh) { false }
             .distinctUntilChanged(
                 // This avoids an infinite loop when we can't fetch all sections in one page,
                 // because until we implement pagination, there will always be missing sections.
@@ -99,6 +120,15 @@ class MediaPropertyStore @Inject constructor(
                 fetchMissingSections(property.id, page, existingSections)
                     .startWith(Flowable.just(sections))
             }
+    }
+
+    private fun fetchMediaProperty(propertyId: String): Completable {
+        return apiProvider.getApi(MediaWalletV2Api::class)
+            .flatMap { api -> api.getProperty(propertyId) }
+            .doOnError { Log.e("Error fetching property: $it") }
+            .map { response -> response.toEntity() }
+            .saveTo(realm)
+            .ignoreElement()
     }
 
     private fun fetchMissingSections(
