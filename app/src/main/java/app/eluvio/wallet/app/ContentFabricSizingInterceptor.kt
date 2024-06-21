@@ -20,8 +20,12 @@ class ContentFabricSizingInterceptor : Interceptor {
         ) {
             val url = data.toHttpUrl()
                 .newBuilder()
-                .addQueryParameter("width", widthPx.toString())
+                // ContentFabric has a bug where providing both width and height causes the image to
+                // be distorted. Regardless, the intended behavior when providing both, is to ignore
+                // one, and what we really want is to define maxWidth and maxHeight, and that's
+                // something the CF doesn't support (yet?).
                 .addQueryParameter("height", heightPx.toString())
+                //.addQueryParameter("width", widthPx.toString())
                 .build()
             val request = chain.request.newBuilder().data(url).build()
             return chain.proceed(request)
