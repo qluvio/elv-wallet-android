@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -33,7 +34,7 @@ import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
-@MainGraph
+@AuthFlowGraph
 @Destination
 @Composable
 fun MetamaskSignIn() {

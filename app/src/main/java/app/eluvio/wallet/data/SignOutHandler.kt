@@ -1,9 +1,7 @@
 package app.eluvio.wallet.data
 
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
-import app.eluvio.wallet.MainActivity
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
@@ -25,6 +23,7 @@ class SignOutHandler @Inject constructor(
             // delete entire db?
             realm.writeBlocking {
                 Log.w("Deleting all realm data")
+                // TODO: find a way to keep non-auth data
                 deleteAll()
             }
         }
@@ -33,14 +32,6 @@ class SignOutHandler @Inject constructor(
                 if (completeMessage != null) {
                     toaster.toast(completeMessage, Toast.LENGTH_LONG)
                 }
-                restartApp()
             }
-    }
-
-    private fun restartApp() {
-        val intent = Intent(context, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        context.startActivity(intent)
     }
 }

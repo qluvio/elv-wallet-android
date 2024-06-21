@@ -4,10 +4,12 @@ import android.graphics.Bitmap
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.AuthenticationService
 import app.eluvio.wallet.data.stores.DeviceActivationStore
-import app.eluvio.wallet.navigation.asNewRoot
+import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.network.api.DeviceActivationData
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.generateQrCode
+import app.eluvio.wallet.screens.destinations.DashboardDestination
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -94,7 +96,7 @@ class SignInViewModel @Inject constructor(
                 .subscribeBy(
                     onSuccess = {
                         Log.d("Got a token $it")
-                        navigateTo(NavGraphs.preLaunchGraph.asNewRoot())
+                        navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
                     }
                 )
                 .addTo(disposables)

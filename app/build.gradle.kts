@@ -128,6 +128,8 @@ dependencies {
     testImplementation(libs.reflections)
 
     implementation(libs.installReferrer)
+
+    implementation(libs.rx3prefs)
 }
 
 // Allow references to generated code

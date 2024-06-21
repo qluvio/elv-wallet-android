@@ -74,18 +74,17 @@ class MediaPropertyStore @Inject constructor(
                     cachedProperty == null -> {
                         // Won't actually emit anything, we're just waiting for it to complete and
                         // save to DB.
-                        Log.v("stav:No cached property for id $propertyId, fetching from network.")
+                        Log.v("No cached property for id $propertyId, fetching from network.")
                         fetchMediaProperty(propertyId).toFlowable()
                     }
 
                     refresh -> {
-                        Log.v("stav:Force refreshing property for id $propertyId.")
+                        Log.v("Force refreshing property for id $propertyId.")
                         Flowable.just(cachedProperty).mergeWith(fetchMediaProperty(propertyId))
                     }
 
                     else -> {
                         // Just emit the cached property
-                        Log.v("stav: just emit prop")
                         Flowable.just(cachedProperty)
                     }
                 }

@@ -11,13 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.IntState
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rxjava3.subscribeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -39,8 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.TabRow
@@ -54,69 +51,54 @@ import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
-import app.eluvio.wallet.screens.common.FocusGroup
-import app.eluvio.wallet.screens.common.FocusGroupScope
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.requestInitialFocus
+import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rememberToaster
+import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.navigate
 import io.reactivex.rxjava3.processors.PublishProcessor
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.milliseconds
 
-@MainGraph(start = true)
+@MainGraph
 @Destination
 @Composable
 fun Dashboard() {
+    hiltViewModel<DashboardViewModel>().subscribeToState { _, state ->
+        Dashboard(state)
+    }
+}
+
+@Composable
+fun Dashboard(tabs: List<Tabs>) {
     val tabNavController = rememberNavController()
     tabNavController.addOnDestinationChangedListener { _, destination, _ ->
         Log.e("Tab destination changed: $destination")
     }
-    val selectedTabIndex = rememberSaveable { mutableIntStateOf(0) }
-    val tabFocusRequesters = remember { List(Tabs.entries.size) { FocusRequester() } }
-    var topBarFocused by remember { mutableStateOf(false) }
+    var selectedTab by rememberSaveable { mutableStateOf(tabs.first()) }
+    if (selectedTab !in tabs) {
+        // Tabs can change according to log in state, make sure we never focus a tab that was removed.
+        selectedTab = tabs.first()
+    }
+    val selectedTabIndex = tabs.indexOf(selectedTab)
+
+    val tabFocusRequesters = remember(tabs) { List(tabs.size) { FocusRequester() } }
+    var topBarFocused by rememberSaveable { mutableStateOf(false) }
     val navigator = LocalNavigator.current
-    // This is a temp semi-fix to focus problems when navigating back to dashboard. This will just
-    // focus the tabs again. I still couldn't find a good way to focus on the tab content itself, if
-    // it was focused when we left.
-    val dashboardFocusRequester = remember { FocusRequester() }
-    val scope = rememberCoroutineScope()
-    var refocusJob by remember { mutableStateOf<Job?>(null) }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .focusRequester(dashboardFocusRequester)
-            .onFocusChanged {
-                // Focus will oscillate between Active and Inactive quickly while changing focus
-                // between the Tab Row and the content, but never stay on Inactive for too long.
-                // However, when coming back from another screen, it'll settle on Inactive, which
-                // should never really happen, because this Column contains the entire screen, so
-                // *something* inside it needs to be focused. So we'll wait 10ms and force focus
-                // back if we lost it.
-                refocusJob?.cancel()
-                refocusJob = scope.launch {
-                    delay(10.milliseconds)
-                    // Still no focus after delay - we truly lost it
-                    if (!it.hasFocus) {
-                        dashboardFocusRequester.requestFocus()
-                    }
-                    refocusJob = null
-                }
-            }
             .onKeyEvent {
                 // Capture back presses
                 if (it.isKeyUpOf(Key.Back)) {
                     if (!topBarFocused) {
-                        tabFocusRequesters[selectedTabIndex.intValue].requestFocus()
-                    } else if (selectedTabIndex.intValue != 0) {
+                        tabFocusRequesters[selectedTabIndex].requestFocus()
+                    } else if (selectedTabIndex != 0) {
                         tabFocusRequesters[0].requestFocus()
                     } else {
                         navigator(NavigationEvent.GoBack)
@@ -127,10 +109,11 @@ fun Dashboard() {
             }
     ) {
         TopBar(
+            tabs,
             selectedTabIndex,
             tabFocusRequesters,
-            onTabSelected = { tab, index ->
-                selectedTabIndex.intValue = index
+            onTabSelected = { tab ->
+                selectedTab = tab
                 tabNavController.navigate(tab.direction) {
                     popUpTo(tabNavController.graph.id) {
                         inclusive = true
@@ -152,6 +135,7 @@ fun Dashboard() {
                 modifier = modifier.background(Color.Red.copy(alpha = 0.5f))
             )
         } else {
+            //TODO: replace with with manual content selection. This is causing focus issues
             DestinationsNavHost(
                 navGraph = NavGraphs.dashboardTabsGraph,
                 navController = tabNavController,
@@ -161,74 +145,81 @@ fun Dashboard() {
     }
 }
 
-@OptIn(ExperimentalTvFoundationApi::class)
 @Composable
 private fun TopBar(
-    // passing as State to delay read as much as possible
-    selectedTabIndex: IntState,
+    tabs: List<Tabs>,
+    selectedTabIndex: Int,
     tabFocusRequesters: List<FocusRequester>,
-    onTabSelected: (Tabs, Int) -> Unit,
+    onTabSelected: (Tabs) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // TODO: there's nothing stopping the logo and tabs from overlapping if the screen isn't wide enough
-    FocusGroup(contentAlignment = Alignment.Center, modifier = modifier) {
-        val focusManager = LocalFocusManager.current
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+    val focusManager = LocalFocusManager.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(Overscan.defaultPadding(excludeBottom = true))
+    ) {
+        AppLogo(Modifier.weight(1f))
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(Overscan.defaultPadding(excludeBottom = true))
+                .clip(RoundedCornerShape(40.dp))
+                .background(Color(0xff373737))
+                .padding(5.dp)
+                .align(Alignment.CenterVertically)
         ) {
-            AppLogo(Modifier.weight(1f))
-            Box(
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                contentColor = Color.White,
+                indicator = { tabPositions, doesTabRowHaveFocus ->
+                    EluvioTabIndicator(
+                        selectedTabIndex,
+                        tabPositions,
+                        doesTabRowHaveFocus
+                    )
+                },
                 modifier = Modifier
-                    .clip(RoundedCornerShape(40.dp))
-                    .background(Color(0xff373737))
-                    .padding(5.dp)
-                    .align(Alignment.CenterVertically)
-            ) {
-                TabRow(
-                    selectedTabIndex = selectedTabIndex.intValue,
-                    contentColor = Color.White,
-                    indicator = { tabPositions, doesTabRowHaveFocus ->
-                        EluvioTabIndicator(
-                            selectedTabIndex.intValue,
-                            tabPositions,
-                            doesTabRowHaveFocus
-                        )
-                    },
-                    modifier = Modifier.requestInitialFocus()
-                ) {
-                    Tabs.entries.forEachIndexed { index, tab ->
-                        val selected by remember {
-                            derivedStateOf { selectedTabIndex.intValue == index }
+                    .requestInitialFocus()
+                    .onFocusChanged {
+                        if (it.hasFocus) {
+                            // Manually restore focus to the selected tab.
+                            // Required since we removed the FocusGroup wrapper
+                            tabFocusRequesters[selectedTabIndex].requestFocus()
                         }
-                        DashboardTab(
-                            tab,
-                            tabRowScope = this,
-                            selected = selected,
-                            onFocus = {
-                                if (!selected) {
-                                    onTabSelected(tab, index)
-                                    Log.v("Tab focused: $tab")
-                                }
-                            },
-                            onClick = { focusManager.moveFocus(FocusDirection.Down) },
-                            modifier = Modifier.focusRequester(tabFocusRequesters[index])
-                        )
+                    }
+            ) {
+                tabs.forEachIndexed { index, tab ->
+                    val selected = selectedTabIndex == index
+                    val focusRequester = tabFocusRequesters[index]
+                    DashboardTab(
+                        tab,
+                        selected = selected,
+                        onFocus = {
+                            if (!selected) {
+                                onTabSelected(tab)
+                                Log.v("Tab focused: $tab")
+                            }
+                        },
+                        onClick = { focusManager.moveFocus(FocusDirection.Down) },
+                        modifier = Modifier.focusRequester(focusRequester)
+                    )
+                    LaunchedEffect(selected) {
+                        if (selected) {
+                            // Manually focus self. This avoids focus issues when tabs change state.
+                            Log.d("Tab $tab self-requesting focus.")
+                            focusRequester.requestFocus()
+                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
         }
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
-@OptIn(ExperimentalTvFoundationApi::class)
 @Composable
-private fun FocusGroupScope.DashboardTab(
+private fun TabRowScope.DashboardTab(
     tab: Tabs,
-    tabRowScope: TabRowScope,
     selected: Boolean,
     onFocus: () -> Unit,
     onClick: () -> Unit,
@@ -237,7 +228,7 @@ private fun FocusGroupScope.DashboardTab(
     val subject = remember { PublishProcessor.create<Any>() }
     PrintVersionOnMultiClick(subject)
 
-    tabRowScope.EluvioTab(
+    EluvioTab(
         selected = selected,
         onFocus = onFocus,
         onClick = onClick,
@@ -249,7 +240,6 @@ private fun FocusGroupScope.DashboardTab(
                 }
                 false
             }
-            .restorableFocus(),
     ) {
         val icon = tab.icon
         if (icon != null) {
@@ -284,27 +274,19 @@ private fun PrintVersionOnMultiClick(subject: PublishProcessor<Any>, clickThresh
     }
 }
 
-//@DashboardTabsGraph
-//@Destination
-//@Composable
-//fun Search() {
-//    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-//        Text(text = "Welcome to ${stringResource(id = Tabs.Search.title)}")
-//    }
-//}
-
 @Composable
-@Preview(widthDp = 900)
-private fun TopBarPreview() {
+@Preview(device = Devices.TV_720p)
+private fun TopBarPreview() = EluvioThemePreview {
     TopBar(
-        selectedTabIndex = remember { mutableIntStateOf(0) },
+        Tabs.entries,
+        selectedTabIndex = 0,
         tabFocusRequesters = remember { List(Tabs.entries.size) { FocusRequester() } },
-        onTabSelected = { _, _ -> }
+        onTabSelected = { },
     )
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
-private fun DashboardPreview() {
-    Dashboard()
+private fun DashboardPreview() = EluvioThemePreview {
+    Dashboard(Tabs.entries)
 }

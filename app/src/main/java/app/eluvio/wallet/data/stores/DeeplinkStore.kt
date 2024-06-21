@@ -6,7 +6,7 @@ import androidx.annotation.CheckResult
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import app.eluvio.wallet.data.entities.deeplink.DeeplinkRequestEntity
-import app.eluvio.wallet.util.boolean
+import app.eluvio.wallet.util.sharedprefs.boolean
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveAsync

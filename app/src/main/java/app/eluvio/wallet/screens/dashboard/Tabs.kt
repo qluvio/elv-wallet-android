@@ -21,4 +21,9 @@ enum class Tabs(
     Profile(ProfileDestination, R.string.dashboard_tab_profile),
 //    Search(SearchDestination, R.string.dashboard_tab_search, Icons.Default.Search),
     ;
+
+    companion object {
+        val NoAuthTabs = listOf(Discover, Profile)
+        val AuthTabs = listOf(Discover, MyItems, MyMedia, Profile)
+    }
 }

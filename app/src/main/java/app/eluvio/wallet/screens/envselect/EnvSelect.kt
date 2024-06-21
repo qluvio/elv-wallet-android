@@ -54,7 +54,7 @@ import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
-@AuthFlowGraph(start = true)
+// TODO: This screen is no longer reachable.. figure out if design still want to keep it or not
 @Destination
 @Composable
 fun EnvSelect() {

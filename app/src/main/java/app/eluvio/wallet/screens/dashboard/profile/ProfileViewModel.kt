@@ -10,7 +10,7 @@ import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.kotlin.Flowables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
@@ -26,6 +26,7 @@ class ProfileViewModel @Inject constructor(
 ) : BaseViewModel<ProfileViewModel.State>(State(), savedStateHandle) {
     @Parcelize
     data class State(
+        val isLoggedIn: Boolean = false,
         val address: String = "",
         val userId: String = "",
         val network: SelectedEnvEntity.Environment? = null,
@@ -37,22 +38,25 @@ class ProfileViewModel @Inject constructor(
     override fun onResume() {
         super.onResume()
 
-        Flowable.combineLatest(
+        tokenStore.loggedInObservable
+            .subscribeBy { loggedIn -> updateState { copy(isLoggedIn = loggedIn) } }
+            .addTo(disposables)
+
+        Flowables.combineLatest(
             environmentStore.observeSelectedEnvironment(),
             fabricConfigStore.observeFabricConfiguration()
-        ) { env, config ->
-            State(
-                address = tokenStore.walletAddress ?: "",
-                userId = tokenStore.userId ?: "",
-                network = env,
-                fabricNode = config.fabricEndpoint,
-                authNode = config.authdEndpoint,
-                ethNode = config.network.services.ethereumApi.first(),
-            )
-        }
-            .subscribeBy { state ->
-                updateState { state }
+        ).subscribeBy { (env, config) ->
+            updateState {
+                copy(
+                    address = tokenStore.walletAddress ?: "",
+                    userId = tokenStore.userId ?: "",
+                    network = env,
+                    fabricNode = config.fabricEndpoint,
+                    authNode = config.authdEndpoint,
+                    ethNode = config.network.services.ethereumApi.first(),
+                )
             }
+        }
             .addTo(disposables)
     }
 

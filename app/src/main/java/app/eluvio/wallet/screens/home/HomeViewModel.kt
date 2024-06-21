@@ -9,6 +9,7 @@ import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.navigation.asNewRoot
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.NavGraphs
+import app.eluvio.wallet.screens.destinations.DashboardDestination
 import app.eluvio.wallet.screens.destinations.HomeDestination
 import app.eluvio.wallet.screens.destinations.NftClaimDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
@@ -50,13 +51,7 @@ class HomeViewModel @Inject constructor(
                 },
                 onComplete = {
                     // No Deeplink, proceed with normal flow
-                    if (tokenStore.isLoggedIn) {
-                        Log.w("User signed in, navigating to dashboard")
-                        navigateTo(NavGraphs.mainGraph.asNewRoot())
-                    } else {
-                        Log.w("User not signed in, navigating to auth flow")
-                        navigateTo(NavGraphs.authFlowGraph.asNewRoot())
-                    }
+                    navigateTo(DashboardDestination.asNewRoot())
                 },
                 onError = { }
             )
@@ -93,7 +88,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun navigateToDeeplink(deepLink: DeeplinkRequestEntity) {
-        navigateTo(NavGraphs.mainGraph.asNewRoot())
+        navigateTo(DashboardDestination.asNewRoot())
         when (deepLink.action) {
             "items" -> deepLink.toNftClaimDestination()
             "play" -> deepLink.toVideoPlayerDestination()

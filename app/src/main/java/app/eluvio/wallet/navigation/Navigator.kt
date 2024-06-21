@@ -5,6 +5,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavController
 import app.eluvio.wallet.screens.NavGraphs
 import com.ramcosta.composedestinations.navigation.navigate
+import com.ramcosta.composedestinations.navigation.popBackStack
 import com.ramcosta.composedestinations.navigation.popUpTo
 
 typealias Navigator = (event: NavigationEvent) -> Unit
@@ -38,6 +39,10 @@ class ComposeNavigator(
 
             is NavigationEvent.SetRoot -> {
                 navController.navigate(event.direction) { popUpTo(NavGraphs.root) }
+            }
+
+            is NavigationEvent.PopTo -> {
+                navController.popBackStack(event.route, event.inclusive)
             }
         }
     }

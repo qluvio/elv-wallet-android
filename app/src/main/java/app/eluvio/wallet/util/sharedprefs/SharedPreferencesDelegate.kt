@@ -1,4 +1,4 @@
-package app.eluvio.wallet.util
+package app.eluvio.wallet.util.sharedprefs
 
 import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
