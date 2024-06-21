@@ -18,9 +18,3 @@ annotation class MainGraph(
 annotation class AuthFlowGraph(
     val start: Boolean = false
 )
-
-// No root, detached from main graph
-@NavGraph
-annotation class DashboardTabsGraph(
-    val start: Boolean = false
-)

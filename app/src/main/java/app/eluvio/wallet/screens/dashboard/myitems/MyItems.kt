@@ -31,7 +31,6 @@ import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.app.Events
-import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -41,13 +40,10 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
-import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.roundToInt
 
-@DashboardTabsGraph
-@Destination
 @Composable
 fun MyItems() {
     val toaster = rememberToaster()

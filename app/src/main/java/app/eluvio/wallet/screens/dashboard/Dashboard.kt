@@ -1,5 +1,10 @@
 package app.eluvio.wallet.screens.dashboard
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +33,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -37,7 +44,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.TabRow
@@ -47,21 +53,25 @@ import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.requestInitialFocus
+import app.eluvio.wallet.screens.dashboard.myitems.MyItems
+import app.eluvio.wallet.screens.dashboard.mymedia.MyMedia
+import app.eluvio.wallet.screens.dashboard.profile.Profile
+import app.eluvio.wallet.screens.home.temp.Discover
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
-import com.ramcosta.composedestinations.DestinationsNavHost
+import coil.compose.AsyncImage
+import coil.drawable.CrossfadeDrawable
+import coil.request.ImageRequest
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.navigate
 import io.reactivex.rxjava3.processors.PublishProcessor
 import java.util.concurrent.TimeUnit
 
@@ -75,21 +85,21 @@ fun Dashboard() {
 }
 
 @Composable
-fun Dashboard(tabs: List<Tabs>) {
-    val tabNavController = rememberNavController()
-    tabNavController.addOnDestinationChangedListener { _, destination, _ ->
-        Log.e("Tab destination changed: $destination")
-    }
+private fun Dashboard(tabs: List<Tabs>) {
     var selectedTab by rememberSaveable { mutableStateOf(tabs.first()) }
     if (selectedTab !in tabs) {
         // Tabs can change according to log in state, make sure we never focus a tab that was removed.
         selectedTab = tabs.first()
     }
     val selectedTabIndex = tabs.indexOf(selectedTab)
+    var backgroundImage by rememberSaveable { mutableStateOf<String?>(null) }
 
     val tabFocusRequesters = remember(tabs) { List(tabs.size) { FocusRequester() } }
     var topBarFocused by rememberSaveable { mutableStateOf(false) }
     val navigator = LocalNavigator.current
+
+    AnimatedBackground(url = backgroundImage)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -114,12 +124,6 @@ fun Dashboard(tabs: List<Tabs>) {
             tabFocusRequesters,
             onTabSelected = { tab ->
                 selectedTab = tab
-                tabNavController.navigate(tab.direction) {
-                    popUpTo(tabNavController.graph.id) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
-                }
             },
             modifier = Modifier
                 .onFocusChanged {
@@ -135,13 +139,58 @@ fun Dashboard(tabs: List<Tabs>) {
                 modifier = modifier.background(Color.Red.copy(alpha = 0.5f))
             )
         } else {
-            //TODO: replace with with manual content selection. This is causing focus issues
-            DestinationsNavHost(
-                navGraph = NavGraphs.dashboardTabsGraph,
-                navController = tabNavController,
+            TabContent(
+                selectedTab = selectedTab,
+                onBackgroundImageSet = { backgroundImage = it },
                 modifier = modifier
             )
         }
+    }
+}
+
+@Composable
+private fun TabContent(
+    selectedTab: Tabs,
+    onBackgroundImageSet: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (selectedTab != Tabs.Discover) {
+        onBackgroundImageSet(null)
+    }
+    AnimatedContent(
+        targetState = selectedTab,
+        label = "DashboardContent"
+    ) { tab ->
+        when (tab) {
+            Tabs.Discover -> Discover(onBackgroundImageSet)
+            Tabs.MyItems -> MyItems()
+            Tabs.MyMedia -> MyMedia()
+            Tabs.Profile -> Profile()
+        }
+    }
+}
+
+@Composable
+private fun AnimatedBackground(url: String?, modifier: Modifier = Modifier) {
+    val animationDuration = CrossfadeDrawable.DEFAULT_DURATION
+    AnimatedContent(
+        targetState = url,
+        transitionSpec = {
+            // Default transition spec has a scale animation and we don't want that
+            (fadeIn(animationSpec = tween(animationDuration, delayMillis = 90)))
+                .togetherWith(fadeOut(animationSpec = tween(90)))
+        },
+        label = "bgImage"
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(it)
+                .crossfade(animationDuration)
+                .build(),
+            contentScale = ContentScale.FillWidth,
+            contentDescription = "background",
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 

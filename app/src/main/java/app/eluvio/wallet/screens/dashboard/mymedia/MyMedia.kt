@@ -28,7 +28,6 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.MediaEntity
-import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -42,11 +41,8 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.subscribeToState
-import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 
-@DashboardTabsGraph
-@Destination
 @Composable
 fun MyMedia() {
     hiltViewModel<MyMediaViewModel>().subscribeToState { _, state ->

@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +29,6 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
-import app.eluvio.wallet.navigation.DashboardTabsGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -36,21 +36,17 @@ import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
-import com.ramcosta.composedestinations.annotation.Destination
 import kotlin.math.roundToInt
 
-@DashboardTabsGraph(start = true)
-@Destination
 @Composable
-fun Discover() {
+fun Discover(onBackgroundImageSet: (String?) -> Unit) {
     hiltViewModel<DiscoverViewModel>().subscribeToState { _, state ->
-        Discover(state)
+        Discover(state, onBackgroundImageSet)
     }
 }
 
 @Composable
-private fun Discover(state: DiscoverViewModel.State) {
-
+private fun Discover(state: DiscoverViewModel.State, onBackgroundImageSet: (String?) -> Unit) {
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
@@ -63,6 +59,12 @@ private fun Discover(state: DiscoverViewModel.State) {
             val navigator = LocalNavigator.current
             DiscoverGrid(
                 state,
+                onPropertyFocused = { property ->
+                    val bgImage = property.mainPage?.backgroundImagePath?.let {
+                        "${state.baseUrl}/${it}"
+                    }
+                    onBackgroundImageSet(bgImage)
+                },
                 onPropertyClicked = {
                     navigator(PropertyDetailDestination(it.id).asPush())
                 }
@@ -74,6 +76,7 @@ private fun Discover(state: DiscoverViewModel.State) {
 @Composable
 private fun BoxWithConstraintsScope.DiscoverGrid(
     state: DiscoverViewModel.State,
+    onPropertyFocused: (MediaPropertyEntity) -> Unit,
     onPropertyClicked: (MediaPropertyEntity) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -99,7 +102,14 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
             Spacer(Modifier.height(10.dp))
         }
         items(state.properties) { property ->
-            Surface(onClick = { onPropertyClicked(property) }) {
+            Surface(
+                onClick = { onPropertyClicked(property) },
+                modifier = Modifier.onFocusChanged {
+                    if (it.hasFocus) {
+                        onPropertyFocused(property)
+                    }
+                }
+            ) {
                 ShimmerImage(
                     model = "${state.baseUrl}/${property.image}",
                     contentDescription = property.name
@@ -115,5 +125,5 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun DiscoverPreview() = EluvioThemePreview {
-    Discover(DiscoverViewModel.State())
+    Discover(DiscoverViewModel.State(), onBackgroundImageSet = {})
 }
