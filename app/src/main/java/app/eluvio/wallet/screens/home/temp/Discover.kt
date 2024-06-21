@@ -1,20 +1,23 @@
 package app.eluvio.wallet.screens.home.temp
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,24 +85,28 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
 ) {
     val width by rememberUpdatedState(maxWidth)
     val horizontalPadding = 50.dp
-    val cardSpacing = 20.dp
-    val desiredCardWidth = 240.dp
-    val columnCount by remember {
-        derivedStateOf {
-            val availableWidth = width - horizontalPadding
-            val cardWidth = desiredCardWidth + cardSpacing
-            return@derivedStateOf (availableWidth / cardWidth).roundToInt()
-        }
+    val cardSpacing = 15.dp
+    val desiredCardWidth = 170.dp
+    val columnCount = remember(width, horizontalPadding, desiredCardWidth, cardSpacing) {
+        val availableWidth = width - horizontalPadding
+        val cardWidth = desiredCardWidth + cardSpacing
+        (availableWidth / cardWidth).roundToInt()
     }
     TvLazyVerticalGrid(
         columns = TvGridCells.Fixed(columnCount),
         horizontalArrangement = Arrangement.spacedBy(cardSpacing),
         verticalArrangement = Arrangement.spacedBy(cardSpacing),
         contentPadding = PaddingValues(horizontal = horizontalPadding),
-        pivotOffsets = PivotOffsets(0.1f),
+        pivotOffsets = PivotOffsets(0.6f),
     ) {
         item(span = { TvGridItemSpan(maxLineSpan) }) {
-            Spacer(Modifier.height(10.dp))
+            Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.height(180.dp)) {
+                Image(
+                    painter = painterResource(id = R.drawable.discover_logo),
+                    contentDescription = "Eluvio Logo",
+                    modifier = Modifier.fillMaxWidth(0.4f)
+                )
+            }
         }
         items(state.properties) { property ->
             Surface(

@@ -209,7 +209,13 @@ private fun TopBar(
             .fillMaxWidth()
             .padding(Overscan.defaultPadding(excludeBottom = true))
     ) {
-        AppLogo(Modifier.weight(1f))
+        if (selectedTabIndex == 0) {
+            // Kind of a hack, the Discover tab doesn't need a logo,
+            // so we just assume it's the first tab
+            Spacer(Modifier.weight(1f))
+        } else {
+            AppLogo(Modifier.weight(1f))
+        }
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(40.dp))
