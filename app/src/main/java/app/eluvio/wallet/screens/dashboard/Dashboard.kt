@@ -14,7 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,6 +70,7 @@ import app.eluvio.wallet.screens.dashboard.profile.Profile
 import app.eluvio.wallet.screens.home.temp.Discover
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
+import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rememberToaster
@@ -103,15 +107,18 @@ private fun NoTabsDashboard(modifier: Modifier = Modifier) {
     Column {
         val navigator = LocalNavigator.current
         TvButton(
-            text = "Sign In",
-            onClick = {
-                navigator(NavGraphs.authFlowGraph.asPush())
-            },
-            Modifier
+            onClick = { navigator(NavGraphs.authFlowGraph.asPush()) },
+            modifier = Modifier
                 .align(Alignment.End)
                 .padding(10.dp)
                 .requestInitialFocus()
-        )
+        ) {
+            Row(modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)) {
+                Icon(imageVector = Icons.Default.AccountCircle, contentDescription = null)
+                Spacer(Modifier.width(6.dp))
+                Text("Sign In", style = MaterialTheme.typography.label_40)
+            }
+        }
         Discover(onBackgroundImageSet = { backgroundImage = it })
     }
 }

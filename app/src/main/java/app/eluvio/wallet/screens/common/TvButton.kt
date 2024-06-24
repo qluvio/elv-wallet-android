@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -38,14 +39,7 @@ fun TvButton(
     enabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 5.dp)
 ) {
-    Surface(
-        onClick = onClick,
-        colors = colors,
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
-        scale = scale,
-        enabled = enabled,
-        modifier = modifier
-    ) {
+    TvButton(onClick, modifier, colors, scale, enabled, contentPadding) {
         Text(
             text,
             style = MaterialTheme.typography.label_40,
@@ -54,6 +48,27 @@ fun TvButton(
                 .padding(contentPadding)
         )
     }
+}
+
+@Composable
+fun TvButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    colors: ClickableSurfaceColors = ClickableSurfaceDefaults.colors(),
+    scale: ClickableSurfaceScale = LocalSurfaceScale.current,
+    enabled: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 5.dp),
+    content: @Composable BoxScope.() -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        colors = colors,
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
+        scale = scale,
+        enabled = enabled,
+        modifier = modifier,
+        content = content
+    )
 }
 
 @Preview
