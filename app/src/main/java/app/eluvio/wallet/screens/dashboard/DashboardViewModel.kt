@@ -12,23 +12,21 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val tokenStore: TokenStore,
-) : BaseViewModel<List<Tabs>>(
-    if (tokenStore.isLoggedIn) {
-        Tabs.AuthTabs
-    } else {
-        Tabs.NoAuthTabs
-    }, savedStateHandle
+) : BaseViewModel<DashboardViewModel.State>(
+    State(isLoggedIn = tokenStore.isLoggedIn), savedStateHandle
 ) {
+    data class State(
+        val isLoggedIn: Boolean = false,
+        // We'll probably only ever use these, because we no longer show tabs in unauthed state
+        val tabs: List<Tabs> = Tabs.AuthTabs,
+    )
+
     override fun onResume() {
         super.onResume()
 
         tokenStore.loggedInObservable
             .subscribeBy { loggedIn ->
-                if (loggedIn) {
-                    updateState { Tabs.AuthTabs }
-                } else {
-                    updateState { Tabs.NoAuthTabs }
-                }
+                updateState { copy(isLoggedIn = loggedIn) }
             }
             .addTo(disposables)
     }

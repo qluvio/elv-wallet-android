@@ -53,10 +53,13 @@ import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.Overscan
+import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.screens.dashboard.myitems.MyItems
 import app.eluvio.wallet.screens.dashboard.mymedia.MyMedia
@@ -85,7 +88,36 @@ fun Dashboard() {
 }
 
 @Composable
-private fun Dashboard(tabs: List<Tabs>) {
+private fun Dashboard(state: DashboardViewModel.State) {
+    if (state.isLoggedIn) {
+        TabbedDashboard(state.tabs)
+    } else {
+        NoTabsDashboard()
+    }
+}
+
+@Composable
+private fun NoTabsDashboard(modifier: Modifier = Modifier) {
+    var backgroundImage by rememberSaveable { mutableStateOf<String?>(null) }
+    AnimatedBackground(url = backgroundImage)
+    Column {
+        val navigator = LocalNavigator.current
+        TvButton(
+            text = "Sign In",
+            onClick = {
+                navigator(NavGraphs.authFlowGraph.asPush())
+            },
+            Modifier
+                .align(Alignment.End)
+                .padding(10.dp)
+                .requestInitialFocus()
+        )
+        Discover(onBackgroundImageSet = { backgroundImage = it })
+    }
+}
+
+@Composable
+private fun TabbedDashboard(tabs: List<Tabs>) {
     var selectedTab by rememberSaveable { mutableStateOf(tabs.first()) }
     if (selectedTab !in tabs) {
         // Tabs can change according to log in state, make sure we never focus a tab that was removed.
@@ -343,5 +375,5 @@ private fun TopBarPreview() = EluvioThemePreview {
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun DashboardPreview() = EluvioThemePreview {
-    Dashboard(Tabs.entries)
+    Dashboard(DashboardViewModel.State(isLoggedIn = true, tabs = Tabs.AuthTabs))
 }

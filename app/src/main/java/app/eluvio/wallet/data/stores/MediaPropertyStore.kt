@@ -37,6 +37,14 @@ class MediaPropertyStore @Inject constructor(
                     Completable.complete()
                 }
             )
+            .switchMap {
+                // In theory can be an infinite network request loop, but assuming server will never return empty
+                if (it.isEmpty()) {
+                    fetchMediaProperties().andThen(Flowable.just(it))
+                } else {
+                    Flowable.just(it)
+                }
+            }
     }
 
     private fun fetchMediaProperties(): Completable {
