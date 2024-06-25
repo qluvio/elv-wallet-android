@@ -67,7 +67,7 @@ import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.screens.dashboard.myitems.MyItems
 import app.eluvio.wallet.screens.dashboard.mymedia.MyMedia
 import app.eluvio.wallet.screens.dashboard.profile.Profile
-import app.eluvio.wallet.screens.home.temp.Discover
+import app.eluvio.wallet.screens.dashboard.discover.Discover
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.label_40

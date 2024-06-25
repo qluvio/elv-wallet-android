@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.home.temp
+package app.eluvio.wallet.screens.dashboard.discover
 
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
