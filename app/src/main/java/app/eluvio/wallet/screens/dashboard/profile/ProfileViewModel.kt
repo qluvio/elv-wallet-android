@@ -48,7 +48,7 @@ class ProfileViewModel @Inject constructor(
         ).subscribeBy { (env, config) ->
             updateState {
                 copy(
-                    address = tokenStore.walletAddress ?: "",
+                    address = tokenStore.walletAddress.get() ?: "",
                     userId = tokenStore.userId ?: "",
                     network = env,
                     fabricNode = config.fabricEndpoint,

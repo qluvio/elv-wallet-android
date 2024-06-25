@@ -32,7 +32,7 @@ class VideoOptionsFetcher @Inject constructor(
                     val pathDelimiter = if (url.contains("%2F")) "%2F" else "/"
                     val baseUrl = url.substringBeforeLast(pathDelimiter)
                     response.body()
-                        ?.toEntity(baseUrl, tokenStore.fabricToken)
+                        ?.toEntity(baseUrl, tokenStore.fabricToken.get())
                         ?: throw RuntimeException("No supported video formats found from $url")
                 }
             }

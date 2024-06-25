@@ -2,6 +2,7 @@
 agp = "8.3.1"
 compose-bom = "2024.03.00"
 # for personal signing keccak algo
+datastore = "1.1.1"
 hilt-android = "2.46.1"
 hilt-navigation-compose = "1.2.0"
 ksp = "1.9.23-1.0.20"
@@ -11,7 +12,6 @@ leanback = "1.0.0"
 androidx-activity-compose = "1.8.2"
 androidx-lifecycle = "2.7.0"
 androidx-junit = "1.1.5"
-androidx-crypto = "1.0.0"
 compose-tv-foundation = "1.0.0-alpha10"
 compose-tv-material = "1.0.0-beta01"
 compose-destinations = "1.9.54"
@@ -41,7 +41,8 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-compose-rxjava3 = { module = "androidx.compose.runtime:runtime-rxjava3" }
-androidx-crypto = { module = "androidx.security:security-crypto", version.ref = "androidx-crypto" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+androidx-datastore-rxjava3 = { module = "androidx.datastore:datastore-preferences-rxjava3", version.ref = "datastore" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
@@ -71,7 +72,6 @@ retrofit = { module = "com.squareup.retrofit2:retrofit" }
 retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
 retrofit-rxjava = { module = "com.squareup.retrofit2:adapter-rxjava3", version.ref = "retrofit" }
 okhttp-logginginterceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
-rx3prefs = { module = "com.frybits.rx.preferences:rx3", version = "1.1.0" }
 rxandroid = { module = "io.reactivex.rxjava3:rxandroid", version.ref = "rxandroid" }
 rxjava = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava" }
 rxkotlin = { module = "io.reactivex.rxjava3:rxkotlin", version.ref = "rxkotlin" }

@@ -67,9 +67,10 @@ class MetamaskActivationStore @Inject constructor(
                 }
             }
             .doOnSuccess {
-                val token = it.token
-                tokenStore.fabricToken = token
-                tokenStore.walletAddress = it.address
+                tokenStore.update(
+                    tokenStore.fabricToken to it.token,
+                    tokenStore.walletAddress to it.address,
+                )
             }
     }
 }

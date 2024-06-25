@@ -40,7 +40,7 @@ class FulfillmentStore @Inject constructor(
                         api.getRedemptionStatus(nftInfo.tenant).map { statuses ->
                             nftInfo.tenant to nftInfo.toRedeemStateEntities(
                                 statuses,
-                                tokenStore.walletAddress
+                                tokenStore.walletAddress.get()
                             )
                         }
                     }

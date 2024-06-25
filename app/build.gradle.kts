@@ -120,7 +120,6 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.ui.leanback)
 
-    implementation(libs.androidx.crypto)
     implementation(libs.timber)
 
     testImplementation(libs.junit)
@@ -129,7 +128,8 @@ dependencies {
 
     implementation(libs.installReferrer)
 
-    implementation(libs.rx3prefs)
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.rxjava3)
 }
 
 // Allow references to generated code

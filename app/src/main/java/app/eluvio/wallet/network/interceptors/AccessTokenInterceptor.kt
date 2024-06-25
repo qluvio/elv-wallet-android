@@ -78,7 +78,7 @@ class AccessTokenInterceptor @Inject constructor(
     private fun refreshAndRetry(chain: Interceptor.Chain): Response? {
         val request = chain.request()
         log("Detected bad token from ${request.url}")
-        val refreshToken = tokenStore.refreshToken
+        val refreshToken = tokenStore.refreshToken.get()
         if (refreshToken == null) {
             log("No refresh token to work with (metamask user?). Signing out.")
             // Can't refresh token, so this is a fatal error.
@@ -93,7 +93,7 @@ class AccessTokenInterceptor @Inject constructor(
                 .blockingSubscribe()
             log("done waiting!")
 
-            if (refreshToken != tokenStore.refreshToken) {
+            if (refreshToken != tokenStore.refreshToken.get()) {
                 // refresh token has changed since we started this request. Someone else must have refreshed it.
                 log("refresh token changed. retrying original request.")
                 return chain.proceed(request.withHeaders())
@@ -104,8 +104,10 @@ class AccessTokenInterceptor @Inject constructor(
         log("going to actually try to refresh token")
         refreshInProgress.onNext(true)
         // Clear out invalid tokens
-        tokenStore.clusterToken = null
-        tokenStore.fabricToken = null
+        tokenStore.update(
+            tokenStore.clusterToken to null,
+            tokenStore.fabricToken to null,
+        )
         return runCatching {
             // try to refresh
             auth0Api.refreshToken(RefreshTokenRequest(refreshToken = refreshToken))
@@ -113,9 +115,11 @@ class AccessTokenInterceptor @Inject constructor(
         }
             .mapCatching {
                 log("refresh call successful, making new fabric token")
-                tokenStore.idToken = it.idToken
-                tokenStore.accessToken = it.accessToken
-                tokenStore.refreshToken = it.refreshToken
+                tokenStore.update(
+                    tokenStore.idToken to it.idToken,
+                    tokenStore.accessToken to it.accessToken,
+                    tokenStore.refreshToken to it.refreshToken,
+                )
 
                 val newFabricToken =
                     authenticationService.get().getFabricToken().blockingGet()
@@ -147,15 +151,15 @@ class AccessTokenInterceptor @Inject constructor(
      */
     private fun addTokenHeader(requestUrl: String, builder: Request.Builder) {
         if (requestUrl.contains("wlt/login/jwt")) {
-            tokenStore.idToken?.let { idToken ->
+            tokenStore.idToken.get()?.let { idToken ->
                 builder.header("Authorization", "Bearer $idToken")
             }
         } else if (requestUrl.contains("wlt/sign/eth")) {
-            tokenStore.clusterToken?.let { walletToken ->
+            tokenStore.clusterToken.get()?.let { walletToken ->
                 builder.header("Authorization", "Bearer $walletToken")
             }
         } else {
-            tokenStore.fabricToken?.let { fabricToken ->
+            tokenStore.fabricToken.get()?.let { fabricToken ->
                 builder.header("Authorization", "Bearer $fabricToken")
             }
         }

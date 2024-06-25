@@ -41,9 +41,11 @@ class DeviceActivationStore @Inject constructor(
             .doOnSuccess {
                 Log.d("check token result $it")
                 val response = it.body()
-                tokenStore.idToken = response?.idToken
-                tokenStore.accessToken = response?.accessToken
-                tokenStore.refreshToken = response?.refreshToken
+                tokenStore.update(
+                    tokenStore.idToken to response?.idToken,
+                    tokenStore.accessToken to response?.accessToken,
+                    tokenStore.refreshToken to response?.refreshToken
+                )
             }
     }
 }

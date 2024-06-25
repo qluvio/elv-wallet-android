@@ -69,7 +69,7 @@ class HomeViewModel @Inject constructor(
             updateState { State(showLoading = true) }
 
             tokenStore.wipe()
-            tokenStore.idToken = deepLink.jwt
+            tokenStore.idToken.set(deepLink.jwt)
 
             authenticationService.getFabricTokenExternal()
                 .subscribeBy(

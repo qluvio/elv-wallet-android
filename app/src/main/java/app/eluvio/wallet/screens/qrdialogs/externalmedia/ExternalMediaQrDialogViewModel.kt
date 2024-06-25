@@ -62,7 +62,7 @@ class ExternalMediaQrDialogViewModel @Inject constructor(
                 }
             }
         )
-        val token = tokenStore.fabricToken
+        val token = tokenStore.fabricToken.get()
         return if (token != null && url.getQueryParameter("authorization") == null) {
             url.buildUpon()
                 .appendQueryParameter("authorization", token)

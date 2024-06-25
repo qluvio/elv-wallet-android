@@ -39,8 +39,10 @@ class AuthenticationService @Inject constructor(
                 authServicesApi.authdLogin()
                     .doOnSuccess {
                         Log.d("login response: $it")
-                        tokenStore.clusterToken = it.token
-                        tokenStore.walletAddress = it.address
+                        tokenStore.update(
+                            tokenStore.clusterToken to it.token,
+                            tokenStore.walletAddress to it.address
+                        )
                     }
                     .flatMap { jwtResponse ->
                         val (accountId, hash, tokenString) = createTokenParts(
@@ -50,7 +52,7 @@ class AuthenticationService @Inject constructor(
                         remoteSign(hash, accountId, authServicesApi)
                             .map { signature ->
                                 createFabricToken(tokenString, signature).also {
-                                    tokenStore.fabricToken = it
+                                    tokenStore.fabricToken.set(it)
                                 }
                             }
                     }
