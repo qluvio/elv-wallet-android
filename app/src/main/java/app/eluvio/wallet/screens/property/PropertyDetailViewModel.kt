@@ -98,15 +98,31 @@ class PropertyDetailViewModel @Inject constructor(
                     subtitle = section.subtitle,
                     items = section.items
                         .flatMap { item ->
-                            // TODO: Also expand media collections
-                            if (item.expand && item.mediaType in MEDIA_CONTAINERS) {
-                                item.media?.mediaListItems.orEmpty()
-                            } else {
-                                listOf(item.media)
+                            when {
+                                item.subpropertyId != null -> {
+                                    listOf(
+                                        DynamicPageLayoutState.CarouselItem.SubpropertyLink(
+                                            subpropertyId = item.subpropertyId!!,
+                                            imageUrl = item.subpropertyImage
+                                        )
+                                    )
+                                }
+
+                                item.expand && item.mediaType in MEDIA_CONTAINERS -> {
+                                    // TODO: Also expand media collections
+                                    item.media
+                                        ?.mediaListItems.orEmpty()
+                                        .map { DynamicPageLayoutState.CarouselItem.Media(it) }
+                                }
+
+                                else -> {
+                                    listOf(item.media?.let {
+                                        DynamicPageLayoutState.CarouselItem.Media(it)
+                                    })
+                                }
                             }
                         }
                         .filterNotNull()
-                        .map { DynamicPageLayoutState.CarouselItem.Media(it) }
                 )
             }
     }

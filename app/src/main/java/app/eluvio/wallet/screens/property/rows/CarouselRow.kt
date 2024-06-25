@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.navigation.LocalNavigator
@@ -26,8 +27,10 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.Overscan
+import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.screens.common.WrapContentText
 import app.eluvio.wallet.screens.common.spacer
+import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.theme.body_32
@@ -70,11 +73,23 @@ fun CarouselRow(item: DynamicPageLayoutState.Row.Carousel) {
                 )
 
                 is DynamicPageLayoutState.CarouselItem.RedeemableOffer -> OfferCard(item)
+                is DynamicPageLayoutState.CarouselItem.SubpropertyLink -> SubpropertyLink(item)
             }
         }
         spacer(width = 28.dp)
     }
     Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+private fun SubpropertyLink(item: DynamicPageLayoutState.CarouselItem.SubpropertyLink) {
+    val navigator = LocalNavigator.current
+    Surface(
+        onClick = { navigator(PropertyDetailDestination(item.subpropertyId).asPush()) },
+        modifier = Modifier.height(CARD_HEIGHT)
+    ) {
+        ShimmerImage(model = item.imageUrl, contentDescription = null)
+    }
 }
 
 @Composable

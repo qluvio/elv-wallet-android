@@ -61,6 +61,10 @@ class MediaPageSectionEntity : RealmObject {
          */
         var expand: Boolean = false
 
+        /** This section item links to another Property. */
+        var subpropertyId: String? = null
+        var subpropertyImage: String? = null
+
         companion object {
             private const val MEDIA_TYPE_LIST = "list"
             private const val MEDIA_TYPE_COLLECTION = "collection"

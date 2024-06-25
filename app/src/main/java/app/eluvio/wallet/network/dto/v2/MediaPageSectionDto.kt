@@ -30,5 +30,13 @@ data class SectionItemDto(
 
     // TODO: handle this field
     @field:Json(name = "use_media_settings")
-    val useMediaSettings: Boolean?
+    val useMediaSettings: Boolean?,
+
+    @field:Json(name = "subproperty_id")
+    val subpropertyId: String?,
+    // Page is also provided, but we just navigate to Main for now
+    // @field:Json(name="subproperty_page_id")
+    // val subpropertyPageId: String?,
+
+    val display: DisplaySettingsDto?,
 )

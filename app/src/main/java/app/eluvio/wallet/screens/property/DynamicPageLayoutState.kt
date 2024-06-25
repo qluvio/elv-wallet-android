@@ -57,6 +57,12 @@ data class DynamicPageLayoutState(
         data class Media(val entity: MediaEntity) : CarouselItem
 
         @Immutable
+        data class SubpropertyLink(
+            val subpropertyId: String,
+            val imageUrl: String?,
+        ) : CarouselItem
+
+        @Immutable
         data class RedeemableOffer(
             val offerId: String,
             val name: String,
