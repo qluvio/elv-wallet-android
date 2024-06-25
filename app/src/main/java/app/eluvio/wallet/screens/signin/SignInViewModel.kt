@@ -2,18 +2,17 @@ package app.eluvio.wallet.screens.signin
 
 import android.graphics.Bitmap
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.AfterSignInDestination
 import app.eluvio.wallet.data.AuthenticationService
 import app.eluvio.wallet.data.stores.DeviceActivationStore
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.network.api.DeviceActivationData
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.generateQrCode
-import app.eluvio.wallet.screens.destinations.DashboardDestination
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -72,7 +71,7 @@ class SignInViewModel @Inject constructor(
     private fun observeActivationComplete(activationData: DeviceActivationData) {
         activationCompleteDisposable?.dispose()
         activationCompleteDisposable =
-            Observable.interval(activationData.intervalSeconds, TimeUnit.SECONDS)
+            Flowable.interval(activationData.intervalSeconds, TimeUnit.SECONDS)
                 .doOnSubscribe {
                     Log.d("starting to poll token for userCode=${activationData.userCode} (intervalSeconds=${activationData.intervalSeconds})")
                 }
@@ -97,6 +96,10 @@ class SignInViewModel @Inject constructor(
                     onSuccess = {
                         Log.d("Got a token $it")
                         navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
+                        val nextDestination = AfterSignInDestination.direction.getAndSet(null)
+                        if (nextDestination != null) {
+                            navigateTo(NavigationEvent.Push(nextDestination))
+                        }
                     }
                 )
                 .addTo(disposables)

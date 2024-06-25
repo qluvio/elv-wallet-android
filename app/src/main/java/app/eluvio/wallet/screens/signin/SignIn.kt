@@ -56,7 +56,7 @@ import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
-@AuthFlowGraph(start = true)
+@AuthFlowGraph
 @Destination
 @Composable
 fun SignIn() {

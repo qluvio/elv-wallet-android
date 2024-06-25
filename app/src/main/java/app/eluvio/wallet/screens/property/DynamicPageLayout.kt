@@ -3,7 +3,6 @@ package app.eluvio.wallet.screens.property
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,35 +72,33 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
                 .focusProperties { down = lazyColumnFocusRequester }
         )
     }
-    Column {
-        TvLazyColumn(
-            pivotOffsets = PivotOffsets(0.6f),
-            modifier = Modifier
-                .focusRequester(lazyColumnFocusRequester)
-                .focusProperties { up = backButtonFocusRequester })
-        {
+    TvLazyColumn(
+        pivotOffsets = PivotOffsets(0.6f),
+        modifier = Modifier
+            .focusRequester(lazyColumnFocusRequester)
+            .focusProperties { up = backButtonFocusRequester })
+    {
+        item {
+            // Empty item to make top of list focusable
+            Surface(onClick = {}, content = {})
+        }
+        spacer(height = 32.dp)
+        state.rows.forEach { row ->
             item {
-                // Empty item to make top of list focusable
-                Surface(onClick = {}, content = {})
-            }
-            spacer(height = 32.dp)
-            state.rows.forEach { row ->
-                item {
-                    when (row) {
-                        is DynamicPageLayoutState.Row.Banner -> BannerRow(
-                            item = row,
-                            state
-                        )
+                when (row) {
+                    is DynamicPageLayoutState.Row.Banner -> BannerRow(
+                        item = row,
+                        state
+                    )
 
-                        is DynamicPageLayoutState.Row.Carousel -> CarouselRow(item = row)
-                        is DynamicPageLayoutState.Row.Description -> DescriptionRow(item = row)
-                        is DynamicPageLayoutState.Row.Title -> TitleRow(item = row)
-                    }
+                    is DynamicPageLayoutState.Row.Carousel -> CarouselRow(item = row)
+                    is DynamicPageLayoutState.Row.Description -> DescriptionRow(item = row)
+                    is DynamicPageLayoutState.Row.Title -> TitleRow(item = row)
                 }
             }
-
-            spacer(height = 32.dp)
         }
+
+        spacer(height = 32.dp)
     }
 }
 

@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.signin.metamask
 
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.AfterSignInDestination
 import app.eluvio.wallet.data.stores.MetamaskActivationStore
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.network.api.authd.MetamaskActivationData
@@ -79,6 +80,10 @@ class MetamaskSignInViewModel @Inject constructor(
                     onSuccess = {
                         Log.d("Got a token $it")
                         navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
+                        val nextDestination = AfterSignInDestination.direction.getAndSet(null)
+                        if (nextDestination != null) {
+                            navigateTo(NavigationEvent.Push(nextDestination))
+                        }
                     }
                 )
                 .addTo(disposables)
