@@ -1,18 +1,19 @@
 package app.eluvio.wallet.screens.signin.preamble
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -22,16 +23,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.media3.ui.PlayerView
 import androidx.tv.foundation.ExperimentalTvFoundationApi
-import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
@@ -49,8 +52,8 @@ import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.screens.common.requestOnce
 import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.header_53
 import app.eluvio.wallet.util.isKeyUpOf
+import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -68,46 +71,83 @@ private fun SignInPreamble(
     state: SignInPreambleViewModel.State,
     onEnvironmentSelected: (SelectedEnvEntity.Environment) -> Unit,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+    AnimatedBackground(state)
+    Box(
+        contentAlignment = Alignment.BottomStart,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 40.dp, horizontal = 65.dp)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.elv_logo),
-            contentDescription = "Eluvio Logo",
-            modifier = Modifier.size(100.dp)
-        )
-        Spacer(modifier = Modifier.size(6.dp))
-        Text(
-            text = "Welcome to",
-            style = MaterialTheme.typography.header_53.copy(
-                fontSize = 29.sp,
-                fontWeight = FontWeight.ExtraLight
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.discover_logo),
+                contentDescription = "Eluvio Logo",
+                modifier = Modifier.fillMaxWidth(0.4f)
             )
-        )
-        Spacer(modifier = Modifier.size(4.dp))
-        Text(
-            text = "Media Wallet",
-            style = MaterialTheme.typography.header_53.copy(fontSize = 44.sp)
-        )
 
-        val navigator = LocalNavigator.current
-        val hasMultipleEnvs by remember {
-            derivedStateOf { state.availableEnvironments.size > 1 }
+            Spacer(Modifier.weight(1f))
+
+            val navigator = LocalNavigator.current
+
+            // Disable env selector for now
+            val hasMultipleEnvs = false
+//        val hasMultipleEnvs by remember {
+//            derivedStateOf { state.availableEnvironments.size > 1 }
+//        }
+//        if (hasMultipleEnvs) {
+//            EnvironmentTabRow(state, navigator, onEnvironmentSelected)
+//        }
+
+            TvButton(
+                stringResource(R.string.sign_in_button),
+                onClick = { navigator(SignInDestination.asPush()) },
+                modifier = if (hasMultipleEnvs) Modifier else Modifier.requestInitialFocus()
+            )
         }
-        if (hasMultipleEnvs) {
-            EnvironmentTabRow(state, navigator, onEnvironmentSelected)
-        }
-        Spacer(modifier = Modifier.height(30.dp))
-        TvButton(
-            stringResource(R.string.sign_in_button),
-            onClick = { navigator(SignInDestination.asPush()) },
-            modifier = if (hasMultipleEnvs) Modifier else Modifier.requestInitialFocus()
-        )
     }
 }
 
+@Composable
+private fun AnimatedBackground(state: SignInPreambleViewModel.State) {
+    var lifecycle by remember { mutableStateOf(Lifecycle.Event.ON_CREATE) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            lifecycle = event
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+    AndroidView(
+        factory = { context ->
+            PlayerView(context).apply {
+                useController = false
+            }
+        },
+        update = { playerView ->
+            playerView.player = state.player
+            Log.d("stav: ANDROID VIEW UPDATE $lifecycle")
+            when (lifecycle) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    playerView.onPause()
+                    playerView.player?.pause()
+                }
+
+                Lifecycle.Event.ON_RESUME -> {
+                    playerView.onResume()
+                    playerView.player?.play()
+                }
+
+                else -> {}
+            }
+        },
+    )
+}
 
 @OptIn(ExperimentalTvFoundationApi::class, ExperimentalTvFoundationApi::class)
 @Composable
