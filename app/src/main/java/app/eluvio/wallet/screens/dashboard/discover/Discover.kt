@@ -27,7 +27,7 @@ import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvGridItemSpan
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
-import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.grid.itemsIndexed
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
@@ -36,6 +36,7 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.ShimmerImage
+import app.eluvio.wallet.screens.common.requestInitialFocus
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
@@ -111,14 +112,21 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                 )
             }
         }
-        items(state.properties) { property ->
+        itemsIndexed(state.properties) { index, property ->
             Surface(
                 onClick = { onPropertyClicked(property) },
-                modifier = Modifier.onFocusChanged {
-                    if (it.hasFocus) {
-                        onPropertyFocused(property)
+                modifier = Modifier
+                    .onFocusChanged {
+                        if (it.hasFocus) {
+                            onPropertyFocused(property)
+                        }
                     }
-                }
+                    .then(
+                        if (index == 0)
+                            Modifier.requestInitialFocus()
+                        else
+                            Modifier
+                    )
             ) {
                 ShimmerImage(
                     model = "${state.baseUrl}/${property.image}",

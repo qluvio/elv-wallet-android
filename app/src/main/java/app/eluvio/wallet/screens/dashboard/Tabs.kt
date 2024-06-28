@@ -1,17 +1,22 @@
 package app.eluvio.wallet.screens.dashboard
 
 import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
 import app.eluvio.wallet.R
+import app.eluvio.wallet.util.compose.icons.Eluvio
+import app.eluvio.wallet.util.compose.icons.MyItems
 
 enum class Tabs(
     @StringRes val title: Int,
-    val icon: ImageVector? = null
+    val icon: ImageVector
 ) {
-    Discover(R.string.dashboard_tab_discover),
-    MyItems(R.string.dashboard_tab_my_items),
-    MyMedia(R.string.dashboard_tab_my_media),
-    Profile(R.string.dashboard_tab_profile),
+    Discover(R.string.dashboard_tab_discover, Icons.Default.Home),
+    MyItems(R.string.dashboard_tab_my_items, Icons.Eluvio.MyItems),
+//    MyMedia(R.string.dashboard_tab_my_media),
+    Profile(R.string.dashboard_tab_profile, Icons.Default.AccountCircle),
     ;
 
     companion object {

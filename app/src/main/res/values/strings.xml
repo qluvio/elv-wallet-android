@@ -8,7 +8,7 @@
     <string name="env_demo_name">Demo</string>
     <string name="sign_in_button">Sign In</string>
 
-    <string name="dashboard_tab_discover">Discover</string>
+    <string name="dashboard_tab_discover">Home</string>
     <string name="dashboard_tab_my_items">My Items</string>
     <string name="dashboard_tab_my_media">My Media</string>
     <string name="dashboard_tab_profile">Profile</string>
