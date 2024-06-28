@@ -9,6 +9,12 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 
 @RootNavGraph(start = true)
 @NavGraph
+annotation class PreLaunchGraph(
+    val start: Boolean = false
+)
+
+@RootNavGraph
+@NavGraph
 annotation class MainGraph(
     val start: Boolean = false
 )

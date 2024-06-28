@@ -32,16 +32,19 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
+import app.eluvio.wallet.navigation.LocalNavigator
+import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.ShimmerImage
+import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
 import kotlin.math.roundToInt
 
 @Composable
 fun Discover(onBackgroundImageSet: (String?) -> Unit) {
-    hiltViewModel<DiscoverViewModel>().subscribeToState { vm, state ->
-        Discover(state, onBackgroundImageSet, vm::onPropertyClicked)
+    hiltViewModel<DiscoverViewModel>().subscribeToState { _, state ->
+        Discover(state, onBackgroundImageSet)
     }
 }
 
@@ -49,7 +52,6 @@ fun Discover(onBackgroundImageSet: (String?) -> Unit) {
 private fun Discover(
     state: DiscoverViewModel.State,
     onBackgroundImageSet: (String?) -> Unit,
-    onPropertyClicked: (MediaPropertyEntity) -> Unit,
 ) {
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
@@ -60,6 +62,7 @@ private fun Discover(
         } else if (state.properties.isEmpty()) {
             Text(stringResource(R.string.no_content_warning))
         } else {
+            val navigator = LocalNavigator.current
             DiscoverGrid(
                 state,
                 onPropertyFocused = { property ->
@@ -68,7 +71,9 @@ private fun Discover(
                     }
                     onBackgroundImageSet(bgImage)
                 },
-                onPropertyClicked = onPropertyClicked
+                onPropertyClicked = {
+                    navigator(PropertyDetailDestination(it.id).asPush())
+                }
             )
         }
     }
@@ -130,5 +135,5 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun DiscoverPreview() = EluvioThemePreview {
-    Discover(DiscoverViewModel.State(), onBackgroundImageSet = {}, onPropertyClicked = {})
+    Discover(DiscoverViewModel.State(), onBackgroundImageSet = {})
 }

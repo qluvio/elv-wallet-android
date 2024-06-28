@@ -14,10 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.TabRow
@@ -56,25 +52,20 @@ import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.NavigationEvent
-import app.eluvio.wallet.navigation.asPush
-import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.Overscan
-import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.requestInitialFocus
+import app.eluvio.wallet.screens.dashboard.discover.Discover
 import app.eluvio.wallet.screens.dashboard.myitems.MyItems
 import app.eluvio.wallet.screens.dashboard.mymedia.MyMedia
 import app.eluvio.wallet.screens.dashboard.profile.Profile
-import app.eluvio.wallet.screens.dashboard.discover.Discover
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
-import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rememberToaster
-import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import coil.drawable.CrossfadeDrawable
 import coil.request.ImageRequest
@@ -82,52 +73,14 @@ import com.ramcosta.composedestinations.annotation.Destination
 import io.reactivex.rxjava3.processors.PublishProcessor
 import java.util.concurrent.TimeUnit
 
-@MainGraph
+@MainGraph(start = true)
 @Destination
 @Composable
 fun Dashboard() {
-    hiltViewModel<DashboardViewModel>().subscribeToState { _, state ->
-        Dashboard(state)
-    }
-}
-
-@Composable
-private fun Dashboard(state: DashboardViewModel.State) {
-    if (state.isLoggedIn) {
-        TabbedDashboard(state.tabs)
-    } else {
-        NoTabsDashboard()
-    }
-}
-
-@Composable
-private fun NoTabsDashboard(modifier: Modifier = Modifier) {
-    var backgroundImage by rememberSaveable { mutableStateOf<String?>(null) }
-    AnimatedBackground(url = backgroundImage)
-    Column {
-        val navigator = LocalNavigator.current
-        TvButton(
-            onClick = { navigator(NavGraphs.authFlowGraph.asPush()) },
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(10.dp)
-                .requestInitialFocus()
-        ) {
-            Row(modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)) {
-                Icon(imageVector = Icons.Default.AccountCircle, contentDescription = null)
-                Spacer(Modifier.width(6.dp))
-                Text("Sign In", style = MaterialTheme.typography.label_40)
-            }
-        }
-        Discover(onBackgroundImageSet = { backgroundImage = it })
-    }
-}
-
-@Composable
-private fun TabbedDashboard(tabs: List<Tabs>) {
+    val tabs = Tabs.AuthTabs
     var selectedTab by rememberSaveable { mutableStateOf(tabs.first()) }
     if (selectedTab !in tabs) {
-        // Tabs can change according to log in state, make sure we never focus a tab that was removed.
+        // This is a vestige of the never-used no-auth flow.
         selectedTab = tabs.first()
     }
     val selectedTabIndex = tabs.indexOf(selectedTab)
@@ -382,5 +335,5 @@ private fun TopBarPreview() = EluvioThemePreview {
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun DashboardPreview() = EluvioThemePreview {
-    Dashboard(DashboardViewModel.State(isLoggedIn = true, tabs = Tabs.AuthTabs))
+    Dashboard()
 }

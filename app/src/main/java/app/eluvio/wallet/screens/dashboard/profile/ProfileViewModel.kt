@@ -24,9 +24,9 @@ class ProfileViewModel @Inject constructor(
     private val environmentStore: EnvironmentStore,
     private val signOutHandler: SignOutHandler,
 ) : BaseViewModel<ProfileViewModel.State>(State(), savedStateHandle) {
+
     @Parcelize
     data class State(
-        val isLoggedIn: Boolean = false,
         val address: String = "",
         val userId: String = "",
         val network: SelectedEnvEntity.Environment? = null,
@@ -37,10 +37,6 @@ class ProfileViewModel @Inject constructor(
 
     override fun onResume() {
         super.onResume()
-
-        tokenStore.loggedInObservable
-            .subscribeBy { loggedIn -> updateState { copy(isLoggedIn = loggedIn) } }
-            .addTo(disposables)
 
         Flowables.combineLatest(
             environmentStore.observeSelectedEnvironment(),

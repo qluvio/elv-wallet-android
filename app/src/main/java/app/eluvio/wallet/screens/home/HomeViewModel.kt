@@ -51,7 +51,13 @@ class HomeViewModel @Inject constructor(
                 },
                 onComplete = {
                     // No Deeplink, proceed with normal flow
-                    navigateTo(DashboardDestination.asNewRoot())
+                    if (tokenStore.isLoggedIn) {
+                        Log.w("User signed in, navigating to dashboard")
+                        navigateTo(NavGraphs.mainGraph.asNewRoot())
+                    } else {
+                        Log.w("User not signed in, navigating to auth flow")
+                        navigateTo(NavGraphs.authFlowGraph.asNewRoot())
+                    }
                 },
                 onError = { }
             )
@@ -88,7 +94,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun navigateToDeeplink(deepLink: DeeplinkRequestEntity) {
-        navigateTo(DashboardDestination.asNewRoot())
+        navigateTo(NavGraphs.mainGraph.asNewRoot())
         when (deepLink.action) {
             "items" -> deepLink.toNftClaimDestination()
             "play" -> deepLink.toVideoPlayerDestination()

@@ -21,9 +21,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.SelectedEnvEntity
-import app.eluvio.wallet.navigation.LocalNavigator
-import app.eluvio.wallet.navigation.asPush
-import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.withAlpha
@@ -34,29 +31,7 @@ import app.eluvio.wallet.util.subscribeToState
 @Composable
 fun Profile() {
     hiltViewModel<ProfileViewModel>().subscribeToState { vm, state ->
-        if (state.isLoggedIn) {
-            Profile(state, onSignOut = vm::signOut)
-        } else {
-            SignInPrompt()
-        }
-    }
-}
-
-@Composable
-private fun SignInPrompt(modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Overscan.defaultPadding(excludeTop = true))
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth(0.6f)
-        ) {
-            val navigator = LocalNavigator.current
-            TvButton(text = "Sign In", onClick = { navigator(NavGraphs.authFlowGraph.asPush()) })
-        }
+        Profile(state, onSignOut = vm::signOut)
     }
 }
 
@@ -137,10 +112,4 @@ private fun ProfilePreview() = EluvioThemePreview {
         ),
         onSignOut = {}
     )
-}
-
-@Composable
-@Preview(device = Devices.TV_720p)
-fun SignInPromptPreview(modifier: Modifier = Modifier) = EluvioThemePreview {
-    SignInPrompt()
 }
