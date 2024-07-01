@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,6 +29,7 @@ import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvGridItemSpan
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.itemsIndexed
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
@@ -115,6 +117,7 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
         itemsIndexed(state.properties) { index, property ->
             Surface(
                 onClick = { onPropertyClicked(property) },
+                shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(2.dp)),
                 modifier = Modifier
                     .onFocusChanged {
                         if (it.hasFocus) {
