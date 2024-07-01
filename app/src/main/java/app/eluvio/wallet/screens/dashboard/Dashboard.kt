@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,30 +19,33 @@ import androidx.compose.runtime.rxjava3.subscribeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.tv.foundation.lazy.list.TvLazyColumn
+import androidx.tv.foundation.lazy.list.itemsIndexed
 import androidx.tv.material3.DrawerValue
 import androidx.tv.material3.Icon
 import androidx.tv.material3.ModalNavigationDrawer
 import androidx.tv.material3.NavigationDrawerItem
+import androidx.tv.material3.NavigationDrawerItemDefaults
+import androidx.tv.material3.NavigationDrawerScope
 import androidx.tv.material3.Text
-import androidx.tv.material3.rememberDrawerState
 import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.dashboard.discover.Discover
@@ -51,7 +53,6 @@ import app.eluvio.wallet.screens.dashboard.myitems.MyItems
 import app.eluvio.wallet.screens.dashboard.profile.Profile
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.isKeyUpOf
-import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rememberToaster
 import coil.compose.AsyncImage
 import coil.drawable.CrossfadeDrawable
@@ -70,95 +71,109 @@ fun Dashboard() {
         // This is a vestige of the never-used no-auth flow.
         selectedTab = tabs.first()
     }
-    val selectedTabIndex = tabs.indexOf(selectedTab)
     var backgroundImage by rememberSaveable { mutableStateOf<String?>(null) }
 
-//    val tabFocusRequesters = remember(tabs) { List(tabs.size) { FocusRequester() } }
     AnimatedBackground(url = backgroundImage)
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-    ) {
-        val contentFocusRequester = remember { FocusRequester() }
-        var closedDrawerWidth by remember { mutableStateOf(0.dp) }
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val density = LocalDensity.current
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            scrimBrush = Brush.horizontalGradient(listOf(Color.Black, Color.Transparent)),
-            drawerContent = { drawerValue ->
-                Column(
-                    Modifier
-                        .fillMaxHeight()
-                        .padding(12.dp)
-//                        .selectableGroup()
-                        .onGloballyPositioned {
-                            if (closedDrawerWidth == 0.dp) {
-                                // Assume that the first callback we get will have the correct closed drawer width
-                                with(density) {
-                                    closedDrawerWidth = it.size.width.toDp()
-                                }
-                            }
-                        }
-                        .onKeyEvent {
-                            Log.d("stav: onKey $it")
-                            if (it.isKeyUpOf(Key.Back)) {
-                                if (drawerValue == DrawerValue.Open) {
-                                    contentFocusRequester.requestFocus()
-                                    return@onKeyEvent true
-                                }
-                            } else if (it.key == Key.DirectionRight) {
-                                // Something consumes the UP event, so we do this on either up or down.
-                                contentFocusRequester.requestFocus()
-                                return@onKeyEvent true
-                            }
-                            false
-                        },
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    tabs.forEachIndexed { index, tab ->
-                        val selected = selectedTabIndex == index
-                        NavigationDrawerItem(
-                            selected = selected,
-                            onClick = {
-                                selectedTab = tab
-                                contentFocusRequester.requestFocus()
-                            },
-//                            modifier = Modifier.focusRequester(tabFocusRequesters[index]),
-                            leadingContent = {
-                                Icon(
-                                    tab.icon,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                            },
-                            content = { Text(text = stringResource(tab.title)) }
+    val contentFocusRequester = remember { FocusRequester() }
+    ModalNavigationDrawer(
+        scrimBrush = Brush.horizontalGradient(listOf(Color.Black, Color.Transparent)),
+        drawerContent = { drawerValue ->
+            DrawerContent(
+                drawerValue,
+                tabs,
+                selectedTab,
+                onTabSelected = {
+                    selectedTab = it
+                    contentFocusRequester.requestFocus()
+                },
+                onDrawerClosed = { contentFocusRequester.requestFocus() }
+            )
+        },
+        content = {
+            val modifier = Modifier
+                .fillMaxSize()
+                .focusRequester(contentFocusRequester)
+                // Drawer width is hardcoded for now, but might change in the future?
+                .padding(start = NavigationDrawerItemDefaults.CollapsedDrawerItemWidth)
+            if (LocalInspectionMode.current) {
+                // Don't load real content in preview mode
+                Text(
+                    text = "Dashboard page content",
+                    textAlign = TextAlign.Center,
+                    modifier = modifier.background(Color.Red.copy(alpha = 0.5f))
+                )
+            } else {
+                TabContent(
+                    selectedTab = selectedTab,
+                    onBackgroundImageSet = { backgroundImage = it },
+                    modifier = modifier
+                )
+            }
+        })
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun NavigationDrawerScope.DrawerContent(
+    drawerValue: DrawerValue,
+    tabs: List<Tabs>,
+    selectedTab: Tabs,
+    onTabSelected: (Tabs) -> Unit,
+    onDrawerClosed: () -> Unit,
+) {
+    val firstTabFocusRequester = remember { FocusRequester() }
+    // Columns don't handle Focus well. Use LazyColumn instead.
+    TvLazyColumn(
+        Modifier
+            .focusRestorer { firstTabFocusRequester }
+            .then(
+                if (drawerValue == DrawerValue.Closed) {
+                    Modifier.background(
+                        Brush.horizontalGradient(
+                            0.0f to Color.Black.copy(alpha = 0.8f),
+                            0.8f to Color.Black.copy(alpha = 0.3f),
+                            1.0f to Color.Transparent,
                         )
+                    )
+                } else Modifier
+            )
+            .fillMaxHeight()
+            .padding(12.dp)
+            .onKeyEvent {
+                if (it.isKeyUpOf(Key.Back)) {
+                    if (drawerValue == DrawerValue.Open) {
+                        onDrawerClosed()
+                        return@onKeyEvent true
                     }
+                } else if (it.key == Key.DirectionRight) {
+                    // Something consumes the UP event, so we do this on either up or down.
+                    onDrawerClosed()
+                    return@onKeyEvent true
                 }
+                false
             },
-            content = {
-                val modifier = Modifier
-                    .fillMaxSize()
-                    .focusRequester(contentFocusRequester)
-                    .padding(start = closedDrawerWidth)
-                if (LocalInspectionMode.current) {
-                    // Don't load real content in preview mode
-                    Text(
-                        text = "Dashboard page content",
-                        textAlign = TextAlign.Center,
-                        modifier = modifier.background(Color.Red.copy(alpha = 0.5f))
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        itemsIndexed(tabs) { index, tab ->
+            val selected = selectedTab == tab
+            val modifier =
+                if (index == 0) Modifier.focusRequester(firstTabFocusRequester) else Modifier
+            NavigationDrawerItem(
+                selected = selected,
+                modifier = modifier,
+                onClick = { onTabSelected(tab) },
+                leadingContent = {
+                    Icon(
+                        tab.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp)
                     )
-                } else {
-                    TabContent(
-                        selectedTab = selectedTab,
-                        onBackgroundImageSet = { backgroundImage = it },
-                        modifier = modifier
-                    )
-                }
-            })
+                },
+                content = { Text(text = stringResource(tab.title)) }
+            )
+        }
     }
 }
 
