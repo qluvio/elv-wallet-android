@@ -26,6 +26,7 @@ import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.withAlpha
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.subscribeToState
 
 @Composable
@@ -71,7 +72,7 @@ private fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
             TvButton(
                 text = "Sign Out",
                 onClick = onSignOut,
-                Modifier.align(Alignment.CenterHorizontally)
+                Modifier.align(Alignment.CenterHorizontally).requestInitialFocus()
             )
         }
     }

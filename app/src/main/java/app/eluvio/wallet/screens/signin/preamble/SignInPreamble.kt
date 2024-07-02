@@ -48,8 +48,8 @@ import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
 import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.TvButton
-import app.eluvio.wallet.screens.common.requestInitialFocus
-import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.util.compose.requestInitialFocus
+import app.eluvio.wallet.util.compose.requestOnce
 import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.isKeyUpOf
@@ -131,7 +131,6 @@ private fun AnimatedBackground(state: SignInPreambleViewModel.State) {
         },
         update = { playerView ->
             playerView.player = state.player
-            Log.d("stav: ANDROID VIEW UPDATE $lifecycle")
             when (lifecycle) {
                 Lifecycle.Event.ON_PAUSE -> {
                     playerView.onPause()

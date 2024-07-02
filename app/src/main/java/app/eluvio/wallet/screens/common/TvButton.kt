@@ -28,6 +28,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
 import app.eluvio.wallet.theme.label_40
+import app.eluvio.wallet.util.compose.requestOnce
 
 @Composable
 fun TvButton(

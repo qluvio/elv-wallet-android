@@ -37,7 +37,7 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
-import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.util.compose.requestOnce
 import app.eluvio.wallet.screens.dashboard.myitems.MediaCard
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32

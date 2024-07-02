@@ -15,6 +15,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
@@ -26,7 +28,7 @@ import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvGridItemSpan
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
-import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.grid.itemsIndexed
 import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
@@ -34,9 +36,12 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.util.compose.focusRestorer
+import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
@@ -104,6 +109,7 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
     }
     val scrollState = rememberTvLazyGridState()
     val scope = rememberCoroutineScope()
+    val firstItemFocusRequester = remember { FocusRequester() }
     TvLazyVerticalGrid(
         state = scrollState,
         columns = TvGridCells.Fixed(columnCount),
@@ -112,12 +118,15 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
         contentPadding = PaddingValues(horizontal = horizontalPadding),
         pivotOffsets = PivotOffsets(0.1f),
         modifier = Modifier
+            .focusRestorer(firstItemFocusRequester)
             .fillMaxSize()
             .onPreviewKeyEvent {
                 if (it.isKeyUpOf(Key.Back)) {
                     scope.launch {
                         scrollState.animateScrollToItem(0)
+                        firstItemFocusRequester.requestFocus()
                     }
+                    return@onPreviewKeyEvent true
                 }
                 false
             }
@@ -125,10 +134,14 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
         item(span = { TvGridItemSpan(maxLineSpan) }) {
             Spacer(Modifier.height(10.dp))
         }
-        items(media, key = { it.key }) { mediaItem ->
+        itemsIndexed(media, key = { _, mediaItem -> mediaItem.key }) { index, mediaItem ->
             MediaCard(
                 mediaItem,
                 onClick = { onItemClick(mediaItem) },
+                modifier = Modifier.thenIf(index == 0) {
+                    focusRequester(firstItemFocusRequester)
+                        .requestInitialFocus(firstItemFocusRequester)
+                }
             )
         }
         item(span = { TvGridItemSpan(maxLineSpan) }) {

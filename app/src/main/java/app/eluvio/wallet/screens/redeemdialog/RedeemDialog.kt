@@ -35,7 +35,7 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.ShimmerImage
-import app.eluvio.wallet.screens.common.requestInitialFocus
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24

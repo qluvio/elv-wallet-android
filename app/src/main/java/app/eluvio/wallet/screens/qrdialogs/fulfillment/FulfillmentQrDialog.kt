@@ -29,7 +29,7 @@ import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.generateQrCodeBlocking
-import app.eluvio.wallet.screens.common.requestInitialFocus
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.theme.label_40

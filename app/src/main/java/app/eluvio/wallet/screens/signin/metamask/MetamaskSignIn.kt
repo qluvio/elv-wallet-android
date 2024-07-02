@@ -20,13 +20,12 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.navigation.AuthFlowGraph
-import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.AppLogo
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.offsetAndFakeSize
-import app.eluvio.wallet.screens.common.requestInitialFocus
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.screens.signin.QrData
 import app.eluvio.wallet.screens.signin.SignInViewModel
 import app.eluvio.wallet.theme.EluvioThemePreview

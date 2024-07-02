@@ -29,7 +29,7 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Surface
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.ShimmerImage
-import app.eluvio.wallet.screens.common.requestOnce
+import app.eluvio.wallet.util.compose.requestOnce
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination

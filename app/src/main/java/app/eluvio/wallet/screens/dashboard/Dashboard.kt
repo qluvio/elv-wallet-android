@@ -19,11 +19,9 @@ import androidx.compose.runtime.rxjava3.subscribeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
@@ -52,6 +50,8 @@ import app.eluvio.wallet.screens.dashboard.discover.Discover
 import app.eluvio.wallet.screens.dashboard.myitems.MyItems
 import app.eluvio.wallet.screens.dashboard.profile.Profile
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.util.compose.focusRestorer
+import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.rememberToaster
 import coil.compose.AsyncImage
@@ -113,7 +113,6 @@ fun Dashboard() {
         })
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NavigationDrawerScope.DrawerContent(
     drawerValue: DrawerValue,
@@ -126,18 +125,16 @@ private fun NavigationDrawerScope.DrawerContent(
     // Columns don't handle Focus well. Use LazyColumn instead.
     TvLazyColumn(
         Modifier
-            .focusRestorer { firstTabFocusRequester }
-            .then(
-                if (drawerValue == DrawerValue.Closed) {
-                    Modifier.background(
-                        Brush.horizontalGradient(
-                            0.0f to Color.Black.copy(alpha = 0.8f),
-                            0.8f to Color.Black.copy(alpha = 0.3f),
-                            1.0f to Color.Transparent,
-                        )
+            .focusRestorer(firstTabFocusRequester)
+            .thenIf(drawerValue == DrawerValue.Closed) {
+                Modifier.background(
+                    Brush.horizontalGradient(
+                        0.0f to Color.Black.copy(alpha = 0.8f),
+                        0.8f to Color.Black.copy(alpha = 0.3f),
+                        1.0f to Color.Transparent,
                     )
-                } else Modifier
-            )
+                )
+            }
             .fillMaxHeight()
             .padding(12.dp)
             .onKeyEvent {
@@ -158,11 +155,11 @@ private fun NavigationDrawerScope.DrawerContent(
     ) {
         itemsIndexed(tabs) { index, tab ->
             val selected = selectedTab == tab
-            val modifier =
-                if (index == 0) Modifier.focusRequester(firstTabFocusRequester) else Modifier
             NavigationDrawerItem(
                 selected = selected,
-                modifier = modifier,
+                modifier = Modifier.thenIf(index == 0) {
+                    focusRequester(firstTabFocusRequester)
+                },
                 onClick = { onTabSelected(tab) },
                 leadingContent = {
                     Icon(
