@@ -189,7 +189,14 @@ private fun TabContent(
         modifier = modifier
     ) { tab ->
         when (tab) {
-            Tabs.Discover -> Discover(onBackgroundImageSet)
+            Tabs.Discover -> Discover(onBackgroundImageSet = {
+                if (selectedTab == Tabs.Discover) {
+                    // This can get called when navigating away from Discover so we need to
+                    // consider the targetState
+                    onBackgroundImageSet(it)
+                }
+            })
+
             Tabs.MyItems -> MyItems()
 //            Tabs.MyMedia -> MyMedia()
             Tabs.Profile -> Profile()
