@@ -19,6 +19,7 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.property.CarouselItemCard
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
+import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
 import app.eluvio.wallet.util.subscribeToState
@@ -37,8 +38,15 @@ fun MediaGrid() {
 private fun MediaGrid(state: MediaGridViewModel.State) {
     val cardSpacing = 20.dp
     val cardHeight = 200.dp
+
+    val hasAnyWideItems = state.items.any {
+        // TODO: this won't look good if there's a mix of 1:1 and 16:9 items, but a lazy-loading
+        //  FlowRow doesn't exist yet on TV, so I'm sacrificing visuals for performance.
+        it is CarouselItem.Media && it.entity.aspectRatio() > 1f
+    }
+    val columnCount = if (hasAnyWideItems) 2 else 4
     TvLazyVerticalGrid(
-        columns = TvGridCells.Adaptive(minSize = cardHeight),
+        columns = TvGridCells.Fixed(columnCount),
         horizontalArrangement = Arrangement.spacedBy(cardSpacing),
         verticalArrangement = Arrangement.spacedBy(cardSpacing),
         contentPadding = Overscan.defaultPadding(),
