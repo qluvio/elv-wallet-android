@@ -15,6 +15,7 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
         items = dto.content?.mapNotNull { it.toEntity(baseUrl) }.toRealmListOrEmpty()
         title = dto.display?.title
         subtitle = dto.display?.subtitle
+        displayLimit = dto.display?.displayLimit
     }
 }
 

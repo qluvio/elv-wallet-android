@@ -14,6 +14,7 @@ data class MediaItemV2Dto(
     val mediaLink: MediaLinkDto?,
     @field:Json(name = "media_type")
     val mediaType: String?,
+    val type: String,
     @field:Json(name = "poster_image")
     val posterImage: AssetLinkDto?,
     @field:Json(name = "thumbnail_image_landscape")

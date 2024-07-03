@@ -9,6 +9,7 @@ import app.eluvio.wallet.network.converters.v2.toEntity
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
+import app.eluvio.wallet.util.rx.mapNotNull
 import app.eluvio.wallet.util.rx.zipWithGenerator
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
@@ -127,6 +128,15 @@ class MediaPropertyStore @Inject constructor(
                 fetchMissingSections(property.id, page, existingSections)
                     .startWith(Flowable.just(sections))
             }
+    }
+
+    fun observeSection(sectionId: String): Flowable<MediaPageSectionEntity> {
+        return realm.query<MediaPageSectionEntity>(
+            "${MediaPageSectionEntity::id.name} == $0",
+            sectionId
+        )
+            .asFlowable()
+            .mapNotNull { it.firstOrNull() }
     }
 
     private fun fetchMediaProperty(propertyId: String): Completable {

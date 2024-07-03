@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.navigation.NavigationEvent
 
 /**
  * Currently this is only used by PropertyPages, but we were planning to use it as the new
@@ -48,6 +49,7 @@ data class DynamicPageLayoutState(
         data class Carousel(
             val title: String? = null,
             val subtitle: String? = null,
+            val showAllNavigationEvent: NavigationEvent? = null,
             val items: List<CarouselItem>
         ) : Row
     }

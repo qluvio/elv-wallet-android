@@ -14,4 +14,6 @@ data class DisplaySettingsDto(
     val thumbnailPortrait: AssetLinkDto?,
     @field:Json(name = "thumbnail_image_square")
     val thumbnailSquare: AssetLinkDto?,
+    @field:Json(name = "display_limit")
+    val displayLimit: Int?
 )

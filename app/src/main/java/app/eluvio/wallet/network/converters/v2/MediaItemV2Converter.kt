@@ -24,7 +24,7 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         name = dto.title ?: ""
         mediaFile = imageFile?.path ?: ""
         imageAspectRatio = aspectRatio
-        mediaType = dto.mediaType ?: ""
+        mediaType = dto.mediaType ?: dto.type ?: ""
         val imageLink = dto.thumbnailSquare
             ?: dto.thumbnailPortrait
             ?: dto.thumbnailLandscape
@@ -53,7 +53,7 @@ private fun UnexpandedMediaListDto.toEntity(baseUrl: String): MediaEntity {
         name = dto.title ?: ""
         mediaFile = imageFile?.path ?: ""
         imageAspectRatio = aspectRatio
-        mediaType = dto.mediaType ?: ""
+        mediaType = dto.mediaType ?: MediaEntity.MEDIA_TYPE_LIST
         val imageLink = dto.thumbnailSquare
             ?: dto.thumbnailPortrait
             ?: dto.thumbnailLandscape

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ClickableSurfaceColors
@@ -35,6 +36,7 @@ fun TvButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = MaterialTheme.typography.label_40,
     colors: ClickableSurfaceColors = ClickableSurfaceDefaults.colors(),
     scale: ClickableSurfaceScale = LocalSurfaceScale.current,
     enabled: Boolean = true,
@@ -43,7 +45,7 @@ fun TvButton(
     TvButton(onClick, modifier, colors, scale, enabled, contentPadding) {
         Text(
             text,
-            style = MaterialTheme.typography.label_40,
+            style = textStyle,
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(contentPadding)

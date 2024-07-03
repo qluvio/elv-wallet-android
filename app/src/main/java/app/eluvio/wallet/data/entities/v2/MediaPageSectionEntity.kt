@@ -20,6 +20,7 @@ class MediaPageSectionEntity : RealmObject {
 
     var title: String? = null
     var subtitle: String? = null
+    var displayLimit: Int? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -31,6 +32,7 @@ class MediaPageSectionEntity : RealmObject {
         if (items != other.items) return false
         if (title != other.title) return false
         if (subtitle != other.subtitle) return false
+        if (displayLimit != other.displayLimit) return false
 
         return true
     }
@@ -40,11 +42,12 @@ class MediaPageSectionEntity : RealmObject {
         result = 31 * result + items.hashCode()
         result = 31 * result + (title?.hashCode() ?: 0)
         result = 31 * result + (subtitle?.hashCode() ?: 0)
+        result = 31 * result + (displayLimit ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPageSectionEntity(id='$id', items=$items, title=$title, subtitle=$subtitle)"
+        return "MediaPageSectionEntity(id='$id', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit)"
     }
 
     class SectionItemEntity : EmbeddedRealmObject {
@@ -73,26 +76,8 @@ class MediaPageSectionEntity : RealmObject {
             val MEDIA_CONTAINERS = listOf(MEDIA_TYPE_LIST, MEDIA_TYPE_COLLECTION)
         }
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as SectionItemEntity
-
-            if (media != other.media) return false
-            if (expand != other.expand) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = media?.hashCode() ?: 0
-            result = 31 * result + expand.hashCode()
-            return result
-        }
-
         override fun toString(): String {
-            return "SectionItemEntity(media=$media, expand=$expand)"
+            return "SectionItemEntity(mediaType=$mediaType, media=$media, expand=$expand, subpropertyId=$subpropertyId, subpropertyImage=$subpropertyImage)"
         }
     }
 

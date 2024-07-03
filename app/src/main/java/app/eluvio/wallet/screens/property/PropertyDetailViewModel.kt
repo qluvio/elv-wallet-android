@@ -6,9 +6,10 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
-import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity.SectionItemEntity.Companion.MEDIA_CONTAINERS
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.di.ApiProvider
+import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.util.rx.mapNotNull
 import app.eluvio.wallet.util.toAnnotatedString
@@ -93,36 +94,14 @@ class PropertyDetailViewModel @Inject constructor(
         // is defined by the Page's sectionIds.
         return mainPage.sectionIds.mapNotNull { sections[it] }
             .map { section ->
+                val items = section.items.toCarouselItems()
                 DynamicPageLayoutState.Row.Carousel(
                     title = section.title,
                     subtitle = section.subtitle,
-                    items = section.items
-                        .flatMap { item ->
-                            when {
-                                item.subpropertyId != null -> {
-                                    listOf(
-                                        DynamicPageLayoutState.CarouselItem.SubpropertyLink(
-                                            subpropertyId = item.subpropertyId!!,
-                                            imageUrl = item.subpropertyImage
-                                        )
-                                    )
-                                }
-
-                                item.expand && item.mediaType in MEDIA_CONTAINERS -> {
-                                    // TODO: Also expand media collections
-                                    item.media
-                                        ?.mediaListItems.orEmpty()
-                                        .map { DynamicPageLayoutState.CarouselItem.Media(it) }
-                                }
-
-                                else -> {
-                                    listOf(item.media?.let {
-                                        DynamicPageLayoutState.CarouselItem.Media(it)
-                                    })
-                                }
-                            }
-                        }
-                        .filterNotNull()
+                    items = items,
+                    showAllNavigationEvent = MediaGridDestination(sectionId = section.id)
+                        .takeIf { items.size > (section.displayLimit ?: 5) }
+                        ?.asPush()
                 )
             }
     }
