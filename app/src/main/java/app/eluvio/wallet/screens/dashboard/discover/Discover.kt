@@ -84,7 +84,7 @@ private fun Discover(
                 state,
                 onPropertyFocused = { property ->
                     val bgImage = property.mainPage?.backgroundImagePath?.let {
-                        "${state.baseUrl}/${it}"
+                        "${state.baseUrl}${it}"
                     }
                     onBackgroundImageSet(bgImage)
                 },
@@ -215,7 +215,7 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                     }
             ) {
                 ShimmerImage(
-                    model = "${state.baseUrl}/${property.image}",
+                    model = "${state.baseUrl}${property.image}",
                     contentDescription = property.name
                 )
             }

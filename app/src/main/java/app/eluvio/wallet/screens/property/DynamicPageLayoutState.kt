@@ -32,7 +32,7 @@ data class DynamicPageLayoutState(
      * If [imagesBaseUrl] is not available, returns the path as-is.
      */
     fun urlForPath(path: String): String {
-        return imagesBaseUrl?.let { "$it/$path" } ?: path
+        return imagesBaseUrl?.let { "$it$path" } ?: path
     }
 
     sealed interface Row {

@@ -28,7 +28,7 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         val imageLink = dto.thumbnailSquare
             ?: dto.thumbnailPortrait
             ?: dto.thumbnailLandscape
-        image = imageLink?.path?.let { "$baseUrl/$it" } ?: ""
+        image = imageLink?.path?.let { "$baseUrl$it" } ?: ""
         mediaLinks = dto.mediaLink?.toPathMap().toRealmDictionaryOrEmpty()
         gallery = dto.gallery?.map { it.toEntity() }.toRealmListOrEmpty()
         // Media Lists will have a list of media items under `media`, while Media Collections
@@ -57,7 +57,7 @@ private fun UnexpandedMediaListDto.toEntity(baseUrl: String): MediaEntity {
         val imageLink = dto.thumbnailSquare
             ?: dto.thumbnailPortrait
             ?: dto.thumbnailLandscape
-        image = imageLink?.path?.let { "$baseUrl/$it" } ?: ""
+        image = imageLink?.path?.let { "$baseUrl$it" } ?: ""
         //TODO: we'll need to figure out how we handle some lists getting fully media objects,
         // but others only a list of string ids
         mediaListItems = realmListOf()

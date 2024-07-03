@@ -31,6 +31,6 @@ private fun SectionItemDto.toEntity(baseUrl: String): MediaPageSectionEntity.Sec
         val imageLink = dto.display?.thumbnailSquare
             ?: dto.display?.thumbnailPortrait
             ?: dto.display?.thumbnailLandscape
-        subpropertyImage = imageLink?.path?.let { "$baseUrl/$it" } ?: ""
+        subpropertyImage = imageLink?.path?.let { "$baseUrl$it" } ?: ""
     }
 }
