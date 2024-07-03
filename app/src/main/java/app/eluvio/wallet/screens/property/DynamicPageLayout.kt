@@ -1,14 +1,19 @@
 package app.eluvio.wallet.screens.property
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,13 +33,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.list.TvLazyColumn
+import androidx.tv.foundation.lazy.list.TvLazyListItemScope
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
+import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.navigation.LocalNavigator
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
 import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.property.rows.BannerRow
@@ -79,10 +88,13 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
             .focusProperties { up = backButtonFocusRequester })
     {
         item {
-            // Empty item to make top of list focusable
-            Surface(onClick = {}, content = {})
+            if (state.searchNavigationEvent != null) {
+                SearchButton(searchNavigationEvent = state.searchNavigationEvent)
+            } else {
+                // Empty item to make top of list focusable
+                Spacer(Modifier.height(32.dp).focusable())
+            }
         }
-        spacer(height = 32.dp)
         state.rows.forEach { row ->
             item {
                 when (row) {
@@ -99,6 +111,27 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
         }
 
         spacer(height = 32.dp)
+    }
+}
+
+@Composable
+private fun TvLazyListItemScope.SearchButton(searchNavigationEvent: NavigationEvent) {
+    Box(
+        contentAlignment = Alignment.TopEnd,
+        modifier = Modifier.fillParentMaxWidth(),
+    ) {
+        val navigator = LocalNavigator.current
+        Surface(
+            onClick = { navigator(searchNavigationEvent) },
+            shape = ClickableSurfaceDefaults.shape(CircleShape),
+            modifier = Modifier.padding(8.dp).size(32.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
+                modifier = Modifier.fillMaxSize().padding(6.dp)
+            )
+        }
     }
 }
 
@@ -166,6 +199,7 @@ private fun BackToThirdPartyButton(
 @Preview(device = Devices.TV_720p)
 private fun DynamicPageLayoutPreview() = EluvioThemePreview {
     DynamicPageLayout(DynamicPageLayoutState(
+        searchNavigationEvent = NavigationEvent.GoBack,
         rows = listOf(
             DynamicPageLayoutState.Row.Title(AnnotatedString("Title")),
             DynamicPageLayoutState.Row.Banner("https://foo.com/image.jpg"),

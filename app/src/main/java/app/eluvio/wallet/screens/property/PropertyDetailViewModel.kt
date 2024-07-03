@@ -11,9 +11,10 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
-import app.eluvio.wallet.util.rx.mapNotNull
+import app.eluvio.wallet.screens.destinations.PropertySearchDestination
 import app.eluvio.wallet.util.toAnnotatedString
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
@@ -35,18 +36,17 @@ class PropertyDetailViewModel @Inject constructor(
             .addTo(disposables)
 
         propertyStore.observeMediaProperty(propertyId)
-            .mapNotNull { property ->
-                property.mainPage?.let { property to it }
-            }
-            .switchMap { (property, mainPage) ->
+            .switchMap { property ->
+                val mainPage = property.mainPage ?: return@switchMap Flowable.empty()
                 propertyStore.observeSections(property, mainPage)
                     .map { sections -> sections.associateBy { section -> section.id } }
-                    .map { sections -> Triple(property, mainPage, sections) }
+                    .map { sections -> mainPage to sections }
             }
-            .subscribe { (property, mainPage, sections) ->
+            .subscribe { (mainPage, sections) ->
                 updateState {
                     copy(
                         backgroundImagePath = mainPage.backgroundImagePath,
+                        searchNavigationEvent = PropertySearchDestination(propertyId).asPush(),
                         rows = listOfNotNull(
                             logo(mainPage),
                             title(mainPage),

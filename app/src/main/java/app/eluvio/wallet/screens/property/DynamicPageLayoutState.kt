@@ -19,6 +19,8 @@ data class DynamicPageLayoutState(
     val backgroundImagePath: String? = null,
     val rows: List<Row> = emptyList(),
 
+    val searchNavigationEvent: NavigationEvent? = null,
+
     // For cross-app deeplinks
     val backLinkUrl: String? = null,
     val backButtonLogo: String? = null,
