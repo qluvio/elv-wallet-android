@@ -8,6 +8,7 @@ import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
+import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
@@ -29,6 +30,7 @@ private const val SECTION_DEFAULT_DISPLAY_LIMIT = 5
 @HiltViewModel
 class PropertyDetailViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
+    private val propertySearchStore: PropertySearchStore,
     private val apiProvider: ApiProvider,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<DynamicPageLayoutState>(DynamicPageLayoutState()) {
@@ -41,6 +43,12 @@ class PropertyDetailViewModel @Inject constructor(
         apiProvider.getFabricEndpoint()
             .subscribeBy { updateState { copy(imagesBaseUrl = it) } }
             .addTo(disposables)
+
+        // Prefetch search filters
+//        propertySearchStore.getFilters(propertyId, forceRefresh = true)
+//            .ignoreElement()
+//            .subscribe()
+//            .addTo(disposables)
 
         propertyStore.observeMediaProperty(propertyId)
             .switchMap { property ->
