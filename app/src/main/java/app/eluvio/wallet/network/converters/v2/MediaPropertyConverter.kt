@@ -11,6 +11,7 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity {
     return MediaPropertyEntity().apply {
         id = dto.id
         name = dto.name
+        headerLogo = dto.tvHeaderLogo?.path ?: dto.headerLogo.path
         image = dto.image.path
         mainPage = dto.mainPage.toEntity(id)
     }

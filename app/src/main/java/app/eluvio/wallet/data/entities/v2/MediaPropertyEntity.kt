@@ -14,6 +14,7 @@ class MediaPropertyEntity : RealmObject {
     @PrimaryKey
     var id: String = ""
     var name: String = ""
+    var headerLogo: String = ""
     var image: String = ""
 
     // Property can also include a list of pages besides the main page.

@@ -9,6 +9,8 @@ data class MediaPropertyDto(
     val description: String?,
     @field:Json(name = "header_logo")
     val headerLogo: AssetLinkDto,
+    @field:Json(name = "tv_header_logo")
+    val tvHeaderLogo: AssetLinkDto?,
     val id: String,
     val image: AssetLinkDto,
     val name: String,
