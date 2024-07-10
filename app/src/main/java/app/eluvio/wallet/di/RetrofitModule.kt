@@ -1,6 +1,7 @@
 package app.eluvio.wallet.di
 
 import app.eluvio.wallet.network.adapters.AssetLinkAdapter
+import app.eluvio.wallet.network.adapters.emptyStringAsNull
 import app.eluvio.wallet.network.api.Auth0Api
 import app.eluvio.wallet.network.api.FabricConfigApi
 import app.eluvio.wallet.network.interceptors.AccessTokenInterceptor
@@ -53,7 +54,7 @@ object RetrofitModule {
     @Provides
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
-            .addAdapter(Rfc3339DateJsonAdapter())
+            .addAdapter(Rfc3339DateJsonAdapter().emptyStringAsNull())
             .add(AssetLinkAdapter())
             .build()
     }
