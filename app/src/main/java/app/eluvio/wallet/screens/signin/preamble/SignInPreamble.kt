@@ -2,26 +2,29 @@ package app.eluvio.wallet.screens.signin.preamble
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -34,26 +37,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.media3.ui.PlayerView
-import androidx.tv.foundation.ExperimentalTvFoundationApi
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.SelectedEnvEntity
 import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.LocalNavigator
-import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioTab
 import app.eluvio.wallet.screens.common.EluvioTabIndicator
-import app.eluvio.wallet.screens.common.FocusGroup
 import app.eluvio.wallet.screens.common.TvButton
-import app.eluvio.wallet.util.compose.requestInitialFocus
-import app.eluvio.wallet.util.compose.requestOnce
 import app.eluvio.wallet.screens.destinations.SignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.util.isKeyUpOf
-import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -91,21 +88,20 @@ private fun SignInPreamble(
             Spacer(Modifier.weight(1f))
 
             val navigator = LocalNavigator.current
-
-            // Disable env selector for now
-            val hasMultipleEnvs = false
-//        val hasMultipleEnvs by remember {
-//            derivedStateOf { state.availableEnvironments.size > 1 }
-//        }
-//        if (hasMultipleEnvs) {
-//            EnvironmentTabRow(state, navigator, onEnvironmentSelected)
-//        }
-
-            TvButton(
-                stringResource(R.string.sign_in_button),
-                onClick = { navigator(SignInDestination.asPush()) },
-                modifier = if (hasMultipleEnvs) Modifier else Modifier.requestInitialFocus()
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                TvButton(
+                    stringResource(R.string.sign_in_button),
+                    onClick = { navigator(SignInDestination.asPush()) },
+                    modifier = Modifier.requestInitialFocus()
+                )
+                val hasMultipleEnvs by remember {
+                    derivedStateOf { state.availableEnvironments.size > 1 }
+                }
+                if (hasMultipleEnvs) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    EnvironmentTabRow(state, navigator, onEnvironmentSelected)
+                }
+            }
         }
     }
 }
@@ -148,7 +144,7 @@ private fun AnimatedBackground(state: SignInPreambleViewModel.State) {
     )
 }
 
-@OptIn(ExperimentalTvFoundationApi::class, ExperimentalTvFoundationApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EnvironmentTabRow(
     state: SignInPreambleViewModel.State,
@@ -156,47 +152,34 @@ fun EnvironmentTabRow(
     onEnvironmentSelected: (SelectedEnvEntity.Environment) -> Unit
 ) {
     val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
-    FocusGroup(Modifier.onPreviewKeyEvent {
-        // Exit screen when back is pressed while FocusGroup is focused
-        if (it.isKeyUpOf(Key.Back)) {
-            navigator(NavigationEvent.GoBack)
-            return@onPreviewKeyEvent true
-        }
-        false
-    }) {
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            contentColor = Color.White,
-            indicator = { tabPositions, doesTabRowHaveFocus ->
-                EluvioTabIndicator(
-                    selectedTabIndex,
-                    tabPositions,
-                    doesTabRowHaveFocus
-                )
-            }
-        ) {
-            val tabFocusRequesters = remember {
-                List(size = state.availableEnvironments.size, init = { FocusRequester() })
-            }
-            val focusManager = LocalFocusManager.current
-            state.availableEnvironments.forEachIndexed { index, environment ->
-                key(index) {
-                    EluvioTab(
-                        selected = index == selectedTabIndex,
-                        onFocus = { onEnvironmentSelected(environment) },
-                        onClick = { focusManager.moveFocus(FocusDirection.Down) },
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .restorableFocus()
-                            .focusRequester(tabFocusRequesters[index]),
-                    ) {
-                        Text(stringResource(id = environment.prettyEnvName))
-                    }
+    val tabFocusRequesters = remember {
+        List(size = state.availableEnvironments.size, init = { FocusRequester() })
+    }
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        contentColor = Color.White,
+        indicator = { tabPositions, doesTabRowHaveFocus ->
+            EluvioTabIndicator(
+                selectedTabIndex,
+                tabPositions,
+                doesTabRowHaveFocus
+            )
+        },
+        modifier = Modifier.focusRestorer { tabFocusRequesters[selectedTabIndex] }
+    ) {
+        val focusManager = LocalFocusManager.current
+        state.availableEnvironments.forEachIndexed { index, environment ->
+            key(index) {
+                EluvioTab(
+                    selected = index == selectedTabIndex,
+                    onFocus = { onEnvironmentSelected(environment) },
+                    onClick = { focusManager.moveFocus(FocusDirection.Up) },
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .focusRequester(tabFocusRequesters[index]),
+                ) {
+                    Text(stringResource(id = environment.prettyEnvName))
                 }
-            }
-            if (selectedTabIndex != -1) {
-                // Once we have a non-empty state (and only once), request focus on the selected tab
-                tabFocusRequesters[selectedTabIndex].requestOnce()
             }
         }
     }
