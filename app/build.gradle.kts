@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.retrofit.moshi)
     implementation(libs.retrofit.rxjava)
     implementation(libs.okhttp.logginginterceptor)
+    implementation(libs.ok2curl)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)

@@ -1,5 +1,7 @@
 package app.eluvio.wallet.di
 
+import com.moczul.ok2curl.CurlInterceptor
+import com.moczul.ok2curl.logger.Logger
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,5 +22,15 @@ object InterceptorsModule {
             Timber.tag("OkHttp").d(message)
         }
             .setLevel(HttpLoggingInterceptor.Level.BODY)
+    }
+
+    @Provides
+    @IntoSet
+    fun provideCurlInterceptor(): Interceptor {
+        return CurlInterceptor(object : Logger {
+            override fun log(message: String) {
+                Timber.tag("OkHttp").d(message)
+            }
+        })
     }
 }
