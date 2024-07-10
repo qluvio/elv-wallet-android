@@ -38,7 +38,7 @@ class HomeViewModel @Inject constructor(
 
     override fun onResume() {
         super.onResume()
-        Log.e("Started Home with args: $navArgs")
+        Log.v("Started Home with args: $navArgs")
 
         Maybe.fromCallable { navArgs.toDeeplinkRequest() }
             // There's a small risk of a race-condition here, where the install referrer is still
