@@ -15,14 +15,14 @@ data class MediaPageDto(
 @JsonClass(generateAdapter = true)
 data class PageLayoutDto(
     @field:Json(name = "background_image")
-    val backgroundImage: AssetLinkDto,
+    val backgroundImage: AssetLinkDto?,
     @field:Json(name = "background_image_mobile")
-    val backgroundImageMobile: AssetLinkDto,
+    val backgroundImageMobile: AssetLinkDto?,
     val title: String?,
     val description: String?,
     @field:Json(name = "description_rich_text")
     val descriptionRichText: String?,
-    val logo: AssetLinkDto,
+    val logo: AssetLinkDto?,
     @field:Json(name = "logo_alt")
     val logoAlt: String?,
     // Align logo and text to: Left/Right/Center

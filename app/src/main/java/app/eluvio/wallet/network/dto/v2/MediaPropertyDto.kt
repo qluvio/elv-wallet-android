@@ -8,11 +8,11 @@ import com.squareup.moshi.JsonClass
 data class MediaPropertyDto(
     val description: String?,
     @field:Json(name = "header_logo")
-    val headerLogo: AssetLinkDto,
+    val headerLogo: AssetLinkDto?,
     @field:Json(name = "tv_header_logo")
     val tvHeaderLogo: AssetLinkDto?,
     val id: String,
-    val image: AssetLinkDto,
+    val image: AssetLinkDto?,
     val name: String,
     @field:Json(name = "main_page")
     val mainPage: MediaPageDto,

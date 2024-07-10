@@ -11,8 +11,8 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity {
     return MediaPropertyEntity().apply {
         id = dto.id
         name = dto.name
-        headerLogo = dto.tvHeaderLogo?.path ?: dto.headerLogo.path
-        image = dto.image.path
+        headerLogo = dto.tvHeaderLogo?.path ?: dto.headerLogo?.path ?: ""
+        image = dto.image?.path ?: ""
         mainPage = dto.mainPage.toEntity(id)
     }
 }
@@ -25,8 +25,8 @@ private fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
         id = "$propertyId-${dto.id}"
         realId = dto.id
         sectionIds = layout.sections.toRealmList()
-        backgroundImagePath = layout.backgroundImage.path
-        logo = layout.logo.path
+        backgroundImagePath = layout.backgroundImage?.path
+        logo = layout.logo?.path
         title = layout.title
         description = layout.description
         descriptionRichText = layout.descriptionRichText
