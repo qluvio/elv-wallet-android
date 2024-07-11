@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities
 
+import app.eluvio.wallet.screens.common.LiveVideoInfoEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,6 +39,9 @@ class MediaEntity : RealmObject {
     var mediaListItems: RealmList<MediaEntity> = realmListOf()
 
     var lockedState: LockedStateEntity? = null
+
+    // In the mwv2 data model, all video is of type "Video" and this boolean tells live vs on-demand apart.
+    var liveVideoInfo: LiveVideoInfoEntity? = null
 
     fun imageOrLockedImage(): String = with(requireLockedState()) {
         lockedImage?.takeIf { locked } ?: image

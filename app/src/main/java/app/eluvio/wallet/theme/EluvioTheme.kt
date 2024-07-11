@@ -2,6 +2,7 @@ package app.eluvio.wallet.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -32,7 +33,7 @@ fun EluvioTheme(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun EluvioThemePreview(content: @Composable () -> Unit) {
+fun EluvioThemePreview(content: @Composable BoxScope.() -> Unit) {
     EluvioTheme {
         Box(
             modifier = Modifier
@@ -43,8 +44,9 @@ fun EluvioThemePreview(content: @Composable () -> Unit) {
                 LocalNavigator provides {},
                 LocalContentColor provides MaterialTheme.colorScheme.onSurface,
                 LocalSurfaceScale provides LocalSurfaceScale.current,
-                content = content
-            )
+            ) {
+                content()
+            }
         }
     }
 }

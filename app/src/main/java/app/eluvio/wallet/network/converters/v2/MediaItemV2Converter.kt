@@ -7,7 +7,9 @@ import app.eluvio.wallet.network.converters.toPathMap
 import app.eluvio.wallet.network.dto.v2.GalleryItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
 import app.eluvio.wallet.network.dto.v2.UnexpandedMediaListDto
+import app.eluvio.wallet.screens.common.LiveVideoInfoEntity
 import app.eluvio.wallet.util.realm.toRealmDictionaryOrEmpty
+import app.eluvio.wallet.util.realm.toRealmInstant
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import io.realm.kotlin.ext.realmListOf
 
@@ -31,6 +33,9 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         image = imageLink?.path?.let { "$baseUrl$it" } ?: ""
         mediaLinks = dto.mediaLink?.toPathMap().toRealmDictionaryOrEmpty()
         gallery = dto.gallery?.map { it.toEntity() }.toRealmListOrEmpty()
+
+        liveVideoInfo = parseLiveVideoInfo(dto)
+
         // Media Lists will have a list of media items under `media`, while Media Collections
         // will have a list of media lists under `mediaLists`. It is assumed that there will
         // only be one or the other, so we are trying our luck here.
@@ -38,6 +43,19 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
             (dto.media?.map { it.toEntity(baseUrl) }
                 ?: dto.mediaLists?.map { it.toEntity(baseUrl) })
                 .toRealmListOrEmpty()
+    }
+}
+
+private fun parseLiveVideoInfo(dto: MediaItemV2Dto): LiveVideoInfoEntity? {
+    if (dto.liveVideo != true) {
+        return null
+    }
+    return LiveVideoInfoEntity().apply {
+        title = dto.title
+        subtitle = dto.subtitle
+        headers = dto.headers.toRealmListOrEmpty()
+        startTime = dto.startTime?.toRealmInstant()
+        endTime = dto.endTime?.toRealmInstant()
     }
 }
 

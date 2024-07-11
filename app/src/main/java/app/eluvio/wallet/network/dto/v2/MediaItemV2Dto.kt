@@ -4,6 +4,7 @@ import app.eluvio.wallet.network.dto.AssetLinkDto
 import app.eluvio.wallet.network.dto.MediaLinkDto
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import java.util.Date
 
 @JsonClass(generateAdapter = true)
 data class MediaItemV2Dto(
@@ -30,6 +31,16 @@ data class MediaItemV2Dto(
     @field:Json(name = "media_lists")
     val mediaLists: List<UnexpandedMediaListDto>?,
     val gallery: List<GalleryItemV2Dto>?,
+
+    // Live Video info
+    @field:Json(name = "live_video")
+    val liveVideo: Boolean?,
+    @field:Json(name = "start_time")
+    val startTime: Date?,
+    @field:Json(name = "end_time")
+    val endTime: Date?,
+    val subtitle: String?,
+    val headers: List<String>?,
 )
 
 @JsonClass(generateAdapter = true)
