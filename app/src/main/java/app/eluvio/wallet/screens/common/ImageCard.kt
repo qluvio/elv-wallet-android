@@ -3,7 +3,14 @@ package app.eluvio.wallet.screens.common
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -12,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
@@ -21,6 +27,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
+import app.eluvio.wallet.util.compose.requestInitialFocus
 
 /**
  * An image card with a focus border. Image is darkened when focused.
@@ -68,8 +75,29 @@ fun ImageCard(
     }
 }
 
-@Preview(device = Devices.TV_720p)
+@Preview(widthDp = 300, heightDp = 150)
 @Composable
 private fun ImageCardPreview() = EluvioThemePreview {
-    ImageCard(imageUrl = "", contentDescription = "Card Title", onClick = {})
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp)
+    ) {
+        ImageCard(
+            imageUrl = "",
+            contentDescription = "Card Title",
+            onClick = {},
+            modifier = Modifier.size(120.dp)
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        ImageCard(
+            imageUrl = "",
+            contentDescription = "Card Title",
+            onClick = {},
+            modifier = Modifier
+                .size(120.dp)
+                .requestInitialFocus()
+        )
+    }
 }
