@@ -28,6 +28,7 @@ object RetrofitModule {
     @Provides
     @TokenAwareHttpClient
     fun provideHttpClient(
+        /** Requested explicitly instead of adding to to [interceptors] set, to guarantee it's added first. */
         accessTokenInterceptor: AccessTokenInterceptor,
         interceptors: Set<@JvmSuppressWildcards Interceptor>,
     ): OkHttpClient {

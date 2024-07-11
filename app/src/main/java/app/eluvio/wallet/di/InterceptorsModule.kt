@@ -1,36 +1,18 @@
 package app.eluvio.wallet.di
 
-import com.moczul.ok2curl.CurlInterceptor
-import com.moczul.ok2curl.logger.Logger
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
+import dagger.multibindings.Multibinds
 import okhttp3.Interceptor
-import okhttp3.logging.HttpLoggingInterceptor
-import timber.log.Timber
 
-
+/**
+ * Placeholder module to declare interceptor set.
+ * Since all interceptors are currently for Debug builds only, this is required to compile Release.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
-object InterceptorsModule {
-    @Provides
-    @IntoSet
-    fun provideLoggingInterceptor(): Interceptor {
-        return HttpLoggingInterceptor { message ->
-            Timber.tag("OkHttp").d(message)
-        }
-            .setLevel(HttpLoggingInterceptor.Level.BODY)
-    }
-
-    @Provides
-    @IntoSet
-    fun provideCurlInterceptor(): Interceptor {
-        return CurlInterceptor(object : Logger {
-            override fun log(message: String) {
-                Timber.tag("OkHttp").d(message)
-            }
-        })
-    }
+interface InterceptorsModule {
+    @Multibinds
+    fun bindEmptyInterceptorSet(): Set<Interceptor>
 }
