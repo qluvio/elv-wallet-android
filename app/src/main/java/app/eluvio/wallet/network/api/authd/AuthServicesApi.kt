@@ -1,6 +1,6 @@
 package app.eluvio.wallet.network.api.authd
 
-import app.eluvio.wallet.data.entities.SelectedEnvEntity
+import app.eluvio.wallet.data.stores.Environment
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import io.reactivex.rxjava3.core.Single
@@ -60,7 +60,7 @@ data class MetamaskCodeRequest(
     val op: String = "create",
 ) {
     companion object {
-        fun from(environment: SelectedEnvEntity.Environment) =
+        fun from(environment: Environment) =
             MetamaskCodeRequest(walletUrl = environment.walletUrl)
     }
 }

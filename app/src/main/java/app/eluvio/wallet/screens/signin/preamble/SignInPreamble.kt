@@ -40,7 +40,7 @@ import androidx.media3.ui.PlayerView
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.data.entities.SelectedEnvEntity
+import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.navigation.AuthFlowGraph
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
@@ -66,7 +66,7 @@ fun SignInPreamble() {
 @Composable
 private fun SignInPreamble(
     state: SignInPreambleViewModel.State,
-    onEnvironmentSelected: (SelectedEnvEntity.Environment) -> Unit,
+    onEnvironmentSelected: (Environment) -> Unit,
 ) {
     AnimatedBackground(state)
     Box(
@@ -149,7 +149,7 @@ private fun AnimatedBackground(state: SignInPreambleViewModel.State) {
 fun EnvironmentTabRow(
     state: SignInPreambleViewModel.State,
     navigator: Navigator,
-    onEnvironmentSelected: (SelectedEnvEntity.Environment) -> Unit
+    onEnvironmentSelected: (Environment) -> Unit
 ) {
     val selectedTabIndex = state.availableEnvironments.indexOf(state.selectedEnvironment)
     val tabFocusRequesters = remember {
@@ -191,8 +191,8 @@ private fun MultiEnvSelectPreview() = EluvioThemePreview {
     SignInPreamble(
         state = SignInPreambleViewModel.State(
             false,
-            SelectedEnvEntity.Environment.Main,
-            SelectedEnvEntity.Environment.entries,
+            Environment.Main,
+            Environment.entries,
         ),
         onEnvironmentSelected = {},
     )
@@ -204,8 +204,8 @@ private fun SingleEnvSelectPreview() = EluvioThemePreview {
     SignInPreamble(
         state = SignInPreambleViewModel.State(
             false,
-            SelectedEnvEntity.Environment.Main,
-            listOf(SelectedEnvEntity.Environment.Main),
+            Environment.Main,
+            listOf(Environment.Main),
         ),
         onEnvironmentSelected = {},
     )

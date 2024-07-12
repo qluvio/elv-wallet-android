@@ -1,41 +1,59 @@
 package app.eluvio.wallet.data.stores
 
-import app.eluvio.wallet.data.entities.SelectedEnvEntity
-import app.eluvio.wallet.util.realm.asFlowable
+import android.content.Context
+import androidx.annotation.StringRes
+import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder
+import app.eluvio.wallet.R
+import app.eluvio.wallet.util.datastore.readWriteStringPref
 import app.eluvio.wallet.util.rx.mapNotNull
-import io.reactivex.rxjava3.core.Completable
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Flowable
-import io.realm.kotlin.Realm
-import io.realm.kotlin.delete
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class EnvironmentStore @Inject constructor(
-    private val realm: Realm
+enum class Environment(
+    val networkName: String,
+    @StringRes val prettyEnvName: Int,
+    val configUrl: String,
+    val walletUrl: String,
 ) {
-    fun observeSelectedEnvironment(): Flowable<SelectedEnvEntity.Environment> {
-        return realm.query(SelectedEnvEntity::class).asFlowable()
-            .switchMap {
-                if (it.isEmpty()) {
-                    // No env set. Default to Main
-                    setSelectedEnvironment(SelectedEnvEntity.Environment.Main)
-                        .andThen(Flowable.just(it))
-                } else {
-                    // Do nothing, just emit the current value
-                    Flowable.just(it)
-                }
-            }
-            .mapNotNull { it.firstOrNull()?.selectedEnv }
+    Main(
+        "main",
+        R.string.env_main_name,
+        "https://main.net955305.contentfabric.io/config",
+        "https://wallet.contentfabric.io?action=login&mode=login&response=code&source=code#/login"
+    ),
+    Demo(
+        "demov3",
+        R.string.env_demo_name,
+        "https://demov3.net955210.contentfabric.io/config",
+        "https://wallet.demov3.contentfabric.io?action=login&mode=login&response=code&source=code#/login"
+    )
+}
+
+@Singleton
+class EnvironmentStore @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+
+    private val dataStore = RxPreferenceDataStoreBuilder(context, "selected_env_store").build()
+    private val selectedEnvName = dataStore.readWriteStringPref("selected_env")
+
+    fun setSelectedEnvironment(environment: Environment) {
+        selectedEnvName.set(environment.networkName)
     }
 
-    fun setSelectedEnvironment(environment: SelectedEnvEntity.Environment): Completable {
-        return Completable.fromAction {
-            realm.writeBlocking {
-                delete<SelectedEnvEntity>()
-                val entity = SelectedEnvEntity().apply {
-                    selectedEnv = environment
+    fun observeSelectedEnvironment(): Flowable<Environment> {
+        return selectedEnvName.observe()
+            .mapNotNull { optionalEnv ->
+                val envName = optionalEnv.orDefault(null)
+                val environment = Environment.entries
+                    .firstOrNull { it.networkName == envName }
+                if (environment == null) {
+                    // No env set. Default to Main
+                    setSelectedEnvironment(Environment.Main)
                 }
-                copyToRealm(entity)
+                environment
             }
-        }
     }
 }

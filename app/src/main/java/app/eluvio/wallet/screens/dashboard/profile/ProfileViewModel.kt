@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.SignOutHandler
-import app.eluvio.wallet.data.entities.SelectedEnvEntity
+import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
@@ -29,7 +29,7 @@ class ProfileViewModel @Inject constructor(
     data class State(
         val address: String = "",
         val userId: String = "",
-        val network: SelectedEnvEntity.Environment? = null,
+        val network: Environment? = null,
         val fabricNode: String = "",
         val authNode: String = "",
         val ethNode: String = "",
@@ -58,7 +58,7 @@ class ProfileViewModel @Inject constructor(
 
     fun signOut() {
         signOutHandler.signOut("Sign out successful")
-            // No action needed. SignoutHandler takes care of restarting the app
+            // No action needed. SignOutHandler takes care of restarting the app
             .subscribeBy(onError = { Log.e("error logging out", it) })
             .addTo(disposables)
     }

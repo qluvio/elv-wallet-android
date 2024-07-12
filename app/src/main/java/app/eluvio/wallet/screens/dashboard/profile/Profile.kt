@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import app.eluvio.wallet.data.entities.SelectedEnvEntity
+import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.withAlpha
@@ -72,7 +72,9 @@ private fun Profile(state: ProfileViewModel.State, onSignOut: () -> Unit) {
             TvButton(
                 text = "Sign Out",
                 onClick = onSignOut,
-                Modifier.align(Alignment.CenterHorizontally).requestInitialFocus()
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .requestInitialFocus()
             )
         }
     }
@@ -106,7 +108,7 @@ private fun ProfilePreview() = EluvioThemePreview {
         ProfileViewModel.State(
             address = "0x00f9f89f8f98",
             userId = "ius1f1fd2d8d82e21d",
-            network = SelectedEnvEntity.Environment.Demo,
+            network = Environment.Demo,
             fabricNode = "https://host-2-2-2-2.cf.io",
             authNode = "https://host-2-2-2-2.cf.io/as",
             ethNode = "https://host-2-2-2-2.cf.io/eth",

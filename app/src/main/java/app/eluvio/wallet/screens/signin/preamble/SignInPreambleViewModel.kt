@@ -9,7 +9,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.entities.SelectedEnvEntity.Environment
+import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -68,7 +68,5 @@ class SignInPreambleViewModel @Inject constructor(
 
     fun selectEnvironment(environment: Environment) {
         environmentStore.setSelectedEnvironment(environment)
-            .subscribe()
-            .addTo(disposables)
     }
 }
