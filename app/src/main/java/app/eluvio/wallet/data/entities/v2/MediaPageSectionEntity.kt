@@ -57,27 +57,12 @@ class MediaPageSectionEntity : RealmObject {
         /** Not every item is of type Media, so this field is optional. */
         var media: MediaEntity? = null
 
-        /**
-         *  Only applies to Lists and Collections.
-         *  When `false`, the list itself will appear in the section, linking to a list details page.
-         *  When `true`, the items in the list will be inlined into the containing section.
-         */
-        var expand: Boolean = false
-
         /** This section item links to another Property. */
         var subpropertyId: String? = null
         var subpropertyImage: String? = null
 
-        companion object {
-            private const val MEDIA_TYPE_LIST = "list"
-            private const val MEDIA_TYPE_COLLECTION = "collection"
-
-            // Convenience to include both type of media containers
-            val MEDIA_CONTAINERS = listOf(MEDIA_TYPE_LIST, MEDIA_TYPE_COLLECTION)
-        }
-
         override fun toString(): String {
-            return "SectionItemEntity(mediaType=$mediaType, media=$media, expand=$expand, subpropertyId=$subpropertyId, subpropertyImage=$subpropertyImage)"
+            return "SectionItemEntity(mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, subpropertyImage=$subpropertyImage)"
         }
     }
 

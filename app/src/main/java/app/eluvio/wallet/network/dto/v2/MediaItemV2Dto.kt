@@ -25,11 +25,11 @@ data class MediaItemV2Dto(
     @field:Json(name = "thumbnail_image_square")
     val thumbnailSquare: AssetLinkDto?,
     val title: String?,
-    // Media of type "list" will have a list of media items
-    val media: List<MediaItemV2Dto>?,
-    // Media of type "collection" will have a list of media lists
+    // Media of type "list" will have a list of media item ids
+    val media: List<String>?,
+    // Media of type "collection" will have a list of media list ids
     @field:Json(name = "media_lists")
-    val mediaLists: List<UnexpandedMediaListDto>?,
+    val mediaLists: List<String>?,
     val gallery: List<GalleryItemV2Dto>?,
 
     // Live Video info
@@ -55,25 +55,4 @@ data class GalleryItemV2Dto(
     //    val imageAspectRatio: String?,
 
     //    val video: ...?
-)
-
-/**
- * Very similar to [MediaItemV2Dto], but for Media Lists that contain a
- * list of Media ID Strings instead of fully inlined Media Objects.
- */
-@JsonClass(generateAdapter = true)
-data class UnexpandedMediaListDto(
-    val id: String,
-    val media: List<String>,
-    @field:Json(name = "media_file")
-    val mediaFile: AssetLinkDto?,
-    @field:Json(name = "media_type")
-    val mediaType: String?,
-    @field:Json(name = "thumbnail_image_landscape")
-    val thumbnailLandscape: AssetLinkDto?,
-    @field:Json(name = "thumbnail_image_portrait")
-    val thumbnailPortrait: AssetLinkDto?,
-    @field:Json(name = "thumbnail_image_square")
-    val thumbnailSquare: AssetLinkDto?,
-    val title: String?,
 )

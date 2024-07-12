@@ -25,7 +25,6 @@ private fun SectionItemDto.toEntity(baseUrl: String): MediaPageSectionEntity.Sec
     return MediaPageSectionEntity.SectionItemEntity().apply {
         mediaType = dto.mediaType
         media = dto.media?.toEntity(baseUrl)
-        expand = dto.expand == true
 
         subpropertyId = dto.subpropertyId
         val imageLink = dto.display?.thumbnailSquare

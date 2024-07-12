@@ -18,7 +18,6 @@ import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.property.CarouselItemCard
-import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_53
@@ -66,24 +65,28 @@ private fun MediaGrid(state: MediaGridViewModel.State) {
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun MediaGridPreview() = EluvioThemePreview {
-    MediaGrid(MediaGridViewModel.State(
-        title = "Grid Title!",
-        items = listOf(
-            DynamicPageLayoutState.CarouselItem.Media(
-                entity = MediaEntity().apply {
-                    id = "1"
-                    name = "Media 1"
-                    mediaType = "image"
-                }
-            ),
-            DynamicPageLayoutState.CarouselItem.RedeemableOffer(
-                offerId = "1",
-                name = "Offer 1",
-                fulfillmentState = RedeemableOfferEntity.FulfillmentState.AVAILABLE,
-                contractAddress = "0x123",
-                tokenId = "1",
-                imageUrl = "https://via.placeholder.com/150",
-                animation = null
+    MediaGrid(
+        MediaGridViewModel.State(
+            title = "Grid Title!",
+            items = listOf(
+                CarouselItem.Media(
+                    entity = MediaEntity().apply {
+                        id = "1"
+                        name = "Media 1"
+                        mediaType = "image"
+                    },
+                    propertyId = "property1"
+                ),
+                CarouselItem.RedeemableOffer(
+                    offerId = "1",
+                    name = "Offer 1",
+                    fulfillmentState = RedeemableOfferEntity.FulfillmentState.AVAILABLE,
+                    contractAddress = "0x123",
+                    tokenId = "1",
+                    imageUrl = "https://via.placeholder.com/150",
+                    animation = null
+                )
             )
-        )))
+        )
+    )
 }

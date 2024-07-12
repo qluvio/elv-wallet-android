@@ -29,6 +29,7 @@ class MediaPropertyEntity : RealmObject {
 
         if (id != other.id) return false
         if (name != other.name) return false
+        if (headerLogo != other.headerLogo) return false
         if (image != other.image) return false
         if (mainPage != other.mainPage) return false
 
@@ -38,13 +39,14 @@ class MediaPropertyEntity : RealmObject {
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
+        result = 31 * result + headerLogo.hashCode()
         result = 31 * result + image.hashCode()
         result = 31 * result + (mainPage?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPropertyEntity(id='$id', name='$name', image='$image', mainPage=$mainPage)"
+        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage)"
     }
 
     @Module

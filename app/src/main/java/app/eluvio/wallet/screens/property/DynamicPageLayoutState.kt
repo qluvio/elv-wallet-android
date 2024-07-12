@@ -58,7 +58,7 @@ data class DynamicPageLayoutState(
 
     sealed interface CarouselItem {
         @Immutable
-        data class Media(val entity: MediaEntity) : CarouselItem
+        data class Media(val entity: MediaEntity, val propertyId: String) : CarouselItem
 
         @Immutable
         data class SubpropertyLink(

@@ -41,6 +41,34 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
         @IntoSet
         fun provideEntity(): KClass<out TypedRealmObject> = LiveVideoInfoEntity::class
     }
+
+    override fun toString(): String {
+        return "LiveVideoInfoEntity(title=$title, subtitle=$subtitle, headers=$headers, startTime=$startTime, endTime=$endTime)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LiveVideoInfoEntity
+
+        if (title != other.title) return false
+        if (subtitle != other.subtitle) return false
+        if (headers != other.headers) return false
+        if (startTime != other.startTime) return false
+        if (endTime != other.endTime) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = title?.hashCode() ?: 0
+        result = 31 * result + (subtitle?.hashCode() ?: 0)
+        result = 31 * result + headers.hashCode()
+        result = 31 * result + (startTime?.hashCode() ?: 0)
+        result = 31 * result + (endTime?.hashCode() ?: 0)
+        return result
+    }
 }
 
 fun LiveVideoInfoEntity.getStartDateTimeString(context: Context): String? =

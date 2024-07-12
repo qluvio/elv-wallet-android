@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
+import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
@@ -18,6 +19,12 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
+
+/**
+ * If a section doesn't have a displayLimit, we still need to limit how many items the
+ * client will load.
+ */
+private const val SECTION_DEFAULT_DISPLAY_LIMIT = 5
 
 @HiltViewModel
 class PropertyDetailViewModel @Inject constructor(
@@ -94,13 +101,18 @@ class PropertyDetailViewModel @Inject constructor(
         // is defined by the Page's sectionIds.
         return mainPage.sectionIds.mapNotNull { sections[it] }
             .map { section ->
-                val items = section.items.toCarouselItems()
+                val items = section.items.toCarouselItems(propertyId)
                 DynamicPageLayoutState.Row.Carousel(
                     title = section.title,
                     subtitle = section.subtitle,
                     items = items,
-                    showAllNavigationEvent = MediaGridDestination(sectionId = section.id)
-                        .takeIf { items.size > (section.displayLimit ?: 5) }
+                    showAllNavigationEvent = MediaGridDestination(
+                        propertyId = propertyId,
+                        sectionId = section.id
+                    )
+                        .takeIf {
+                            items.size > (section.displayLimit ?: SECTION_DEFAULT_DISPLAY_LIMIT)
+                        }
                         ?.asPush()
                 )
             }

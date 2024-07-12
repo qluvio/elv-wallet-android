@@ -36,7 +36,7 @@ class MediaEntity : RealmObject {
     var gallery: RealmList<GalleryItemEntity> = realmListOf()
 
     // Only applies to Media Lists and Media Collections
-    var mediaListItems: RealmList<MediaEntity> = realmListOf()
+    var mediaItemsIds: RealmList<String> = realmListOf()
 
     var lockedState: LockedStateEntity? = null
 
@@ -86,7 +86,8 @@ class MediaEntity : RealmObject {
         if (mediaLinks != other.mediaLinks) return false
         if (tvBackgroundImage != other.tvBackgroundImage) return false
         if (gallery != other.gallery) return false
-        if (mediaListItems != other.mediaListItems) return false
+        if (mediaItemsIds != other.mediaItemsIds) return false
+        if (liveVideoInfo != other.liveVideoInfo) return false
         if (lockedState != other.lockedState) return false
 
         return true
@@ -103,13 +104,14 @@ class MediaEntity : RealmObject {
         result = 31 * result + mediaLinks.hashCode()
         result = 31 * result + tvBackgroundImage.hashCode()
         result = 31 * result + gallery.hashCode()
-        result = 31 * result + mediaListItems.hashCode()
+        result = 31 * result + mediaItemsIds.hashCode()
+        result = 31 * result + liveVideoInfo.hashCode()
         result = 31 * result + (lockedState?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaListItems=$mediaListItems, lockedState=$lockedState)"
+        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo)"
     }
 
     companion object {
@@ -121,8 +123,6 @@ class MediaEntity : RealmObject {
         const val MEDIA_TYPE_LIVE = "Live"
         const val MEDIA_TYPE_VIDEO = "Video"
         const val MEDIA_TYPE_LIVE_VIDEO = "Live Video"
-
-        const val MEDIA_TYPE_LIST = "list"
 
         const val ASPECT_RATIO_SQUARE = 1f
         const val ASPECT_RATIO_WIDE = 16f / 9f // A.K.A. "Landscape"

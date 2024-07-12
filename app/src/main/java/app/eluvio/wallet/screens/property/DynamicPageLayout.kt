@@ -213,7 +213,8 @@ private fun DynamicPageLayoutPreview() = EluvioThemePreview {
                             id = "1"
                             name = "Media 1"
                             mediaType = "image"
-                        }
+                        },
+                        propertyId = "property1"
                     ),
                     DynamicPageLayoutState.CarouselItem.RedeemableOffer(
                         offerId = "1",

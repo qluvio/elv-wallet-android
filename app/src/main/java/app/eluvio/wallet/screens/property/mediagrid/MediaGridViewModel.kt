@@ -31,13 +31,14 @@ class MediaGridViewModel @Inject constructor(
     )
 
     private val navArgs = MediaGridDestination.argsFrom(savedStateHandle)
+    private val propertyId = navArgs.propertyId
 
     override fun onResume() {
         super.onResume()
 
         when {
             navArgs.sectionId != null -> loadSectionItems(navArgs.sectionId)
-            navArgs.mediaListId != null -> loadMediaItems(navArgs.mediaListId)
+            navArgs.mediaContainerId != null -> loadMediaItems(navArgs.mediaContainerId)
             else -> {
                 Log.e("MediaGrid launched with no Section or MediaList ID.")
                 toaster.toast("Error loading items.")
@@ -52,8 +53,8 @@ class MediaGridViewModel @Inject constructor(
                 updateState {
                     copy(
                         title = mediaList.name,
-                        items = mediaList.mediaListItems
-                            .map { DynamicPageLayoutState.CarouselItem.Media(it) }
+//                        items = mediaList.mediaListItems
+//                            .map { DynamicPageLayoutState.CarouselItem.Media(it, propertyId) }
                     )
                 }
             }
@@ -66,7 +67,7 @@ class MediaGridViewModel @Inject constructor(
                 updateState {
                     copy(
                         title = section.title,
-                        items = section.items.toCarouselItems()
+                        items = section.items.toCarouselItems(propertyId)
                     )
                 }
             }

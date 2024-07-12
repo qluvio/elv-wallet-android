@@ -38,7 +38,6 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.ExternalMediaQrDialogDestination
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import app.eluvio.wallet.screens.destinations.LockedMediaDialogDestination
-import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
@@ -224,10 +223,6 @@ fun defaultMediaItemClickHandler(navigator: Navigator): (media: MediaEntity) -> 
                 MediaEntity.MEDIA_TYPE_IMAGE,
                 MediaEntity.MEDIA_TYPE_GALLERY -> {
                     navigator(ImageGalleryDestination(media.id).asPush())
-                }
-
-                MediaEntity.MEDIA_TYPE_LIST -> {
-                    navigator(MediaGridDestination(mediaListId = media.id).asPush())
                 }
 
                 else -> {
