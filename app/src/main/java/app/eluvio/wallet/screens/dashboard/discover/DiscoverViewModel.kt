@@ -33,6 +33,10 @@ class DiscoverViewModel @Inject constructor(
             .addTo(disposables)
 
         propertyStore.observeMediaProperties(true)
+            .map { properties ->
+                // We can't handle properties without images
+                properties.filter { property -> property.image.isNotEmpty() }
+            }
             .subscribeBy(
                 onNext = { properties ->
                     // Assume that Properties will never be empty once fetched from Server
