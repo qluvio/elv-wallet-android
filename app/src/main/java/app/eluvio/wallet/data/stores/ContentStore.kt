@@ -7,16 +7,21 @@ import app.eluvio.wallet.data.entities.NftId
 import app.eluvio.wallet.data.entities.NftTemplateEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.GatewayApi
+import app.eluvio.wallet.network.api.mwv2.MediaWalletV2Api
 import app.eluvio.wallet.network.converters.toEntity
 import app.eluvio.wallet.network.converters.toNfts
+import app.eluvio.wallet.network.converters.v2.toEntity
 import app.eluvio.wallet.network.dto.TokenIdDto
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.rx.mapNotNull
+import app.eluvio.wallet.util.rx.zipWithGenerator
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.kotlin.zipWith
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.Sort
@@ -174,6 +179,77 @@ class ContentStore @Inject constructor(
             mediaId
         ).asFlowable()
             .mapNotNull { it.firstOrNull() }
+    }
+
+    /**
+     * Returns a list of media items for a given list of media ids.
+     * Sorts the list by the order of the [mediaIds].
+     */
+    fun observeMediaItems(
+        propertyId: String,
+        mediaIds: List<String>,
+        forceRefresh: Boolean = true,
+    ): Flowable<List<MediaEntity>> {
+        val orderMap = mediaIds
+            .mapIndexed { index, mediaId -> mediaId to index }
+            .toMap()
+            .withDefault { Int.MAX_VALUE }
+        return realm.query<MediaEntity>(
+            "${MediaEntity::id.name} IN $0",
+            mediaIds
+        )
+            .asFlowable()
+            // Whenever the DB emits, this will combine with the [forceRefresh] value for the
+            // first item, but [false] for the rest. That way we can hit the network only once,
+            // rather than every time the DB emits.
+            .zipWithGenerator(forceRefresh) { false }
+            .distinctUntilChanged(
+                // This avoids an infinite loop when we can't fetch all media in one page,
+                // because until we implement pagination, there will always be missing media.
+            )
+            .switchMap { (mediaItems, refreshAll) ->
+                val existingItems = if (refreshAll) {
+                    Log.w("Force refreshing media items, ignoring existing items.")
+                    emptySet()
+                } else {
+                    mediaItems.map { it.id }.toSet()
+                }
+                Log.w("Existing media items (will NOT be fetched): $existingItems")
+                fetchMissingMediaItems(propertyId, mediaIds, existingItems)
+                    .startWith(Flowable.just(mediaItems))
+            }
+            .map {
+                // Sort according to the order of mediaIds
+                it.sortedWith { a, b ->
+                    // Use .getValue or else .withDefault from above does nothing
+                    orderMap.getValue(a.id).compareTo(orderMap.getValue(b.id))
+                }
+            }
+    }
+
+    private fun fetchMissingMediaItems(
+        propertyId: String,
+        requiredMediaIds: List<String>,
+        existingMediaIds: Set<String>
+    ): Completable {
+        val missingItems = requiredMediaIds.toSet().subtract(existingMediaIds)
+        return if (missingItems.isEmpty()) {
+            Completable.complete()
+                .doOnSubscribe {
+                    Log.d("All Media objects are already in the database. Nothing to fetch.")
+                }
+        } else {
+            apiProvider.getApi(MediaWalletV2Api::class)
+                .doOnSubscribe { Log.d("Fetching missing Media Items: $missingItems") }
+                .flatMap { api -> api.getMediaItemsById(propertyId, missingItems.toList()) }
+                .doOnError { Log.e("Error fetching Media Items", it) }
+                .zipWith(apiProvider.getFabricEndpoint())
+                .map { (response, baseUrl) ->
+                    response.contents.orEmpty().map { mediaDto -> mediaDto.toEntity(baseUrl) }
+                }
+                .saveTo(realm, clearTable = false)
+                .ignoreElement()
+        }
     }
 
     fun fetchWalletData(): Single<List<NftEntity>> {

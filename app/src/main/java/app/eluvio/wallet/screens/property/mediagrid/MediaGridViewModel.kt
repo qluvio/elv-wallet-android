@@ -49,12 +49,17 @@ class MediaGridViewModel @Inject constructor(
 
     private fun loadMediaItems(mediaListId: String) {
         contentStore.observeMediaItem(mediaListId)
-            .subscribeBy { mediaList ->
+            .switchMap { mediaList -> // Technically could be a MediaCollection or MediaList
+                contentStore.observeMediaItems(propertyId, mediaList.mediaItemsIds)
+                    .map { mediaItems -> mediaList to mediaItems }
+            }
+            .subscribeBy { (mediaList, mediaItems) ->
                 updateState {
                     copy(
                         title = mediaList.name,
-//                        items = mediaList.mediaListItems
-//                            .map { DynamicPageLayoutState.CarouselItem.Media(it, propertyId) }
+                        items = mediaItems.map {
+                            DynamicPageLayoutState.CarouselItem.Media(it, propertyId)
+                        }
                     )
                 }
             }

@@ -2,6 +2,7 @@ package app.eluvio.wallet.network.api.mwv2
 
 import app.eluvio.wallet.network.api.authd.AuthdApi
 import app.eluvio.wallet.network.dto.PagedContent
+import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
 import io.reactivex.rxjava3.core.Single
@@ -28,4 +29,10 @@ interface MediaWalletV2Api : AuthdApi {
 
     @GET("mw/properties/{propertyId}")
     fun getProperty(@Path("propertyId") propertyId: String): Single<MediaPropertyDto>
+
+    @POST("mw/properties/{propertyId}/media_items")
+    fun getMediaItemsById(
+        @Path("propertyId") propertyId: String,
+        @Body request: List<String>
+    ): Single<PagedContent<MediaItemV2Dto>>
 }
