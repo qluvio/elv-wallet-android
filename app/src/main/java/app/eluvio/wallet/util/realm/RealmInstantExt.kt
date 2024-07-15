@@ -8,11 +8,7 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Converts a [RealmInstant] to a [Date].
  */
-fun RealmInstant.toDate() =
-    Date(
-        epochSeconds.seconds.inWholeMilliseconds +
-                nanosecondsOfSecond.nanoseconds.inWholeMilliseconds
-    )
+fun RealmInstant.toDate() = Date(this.millis)
 
 /**
  * Only accurate to seconds (when minSdk >= 26 we can use LocalDateTime instead).
@@ -20,3 +16,6 @@ fun RealmInstant.toDate() =
 fun Date.toRealmInstant(): RealmInstant {
     return RealmInstant.from(time / 1000, 0)
 }
+
+val RealmInstant.millis: Long
+    get() = (epochSeconds.seconds + nanosecondsOfSecond.nanoseconds).inWholeMilliseconds

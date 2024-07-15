@@ -1,6 +1,5 @@
 package app.eluvio.wallet.data.entities
 
-import app.eluvio.wallet.screens.common.LiveVideoInfoEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

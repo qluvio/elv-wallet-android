@@ -30,8 +30,10 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaEntity.Companion.ASPECT_RATIO_WIDE
+import app.eluvio.wallet.data.entities.getStartDateTimeString
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
@@ -175,7 +177,7 @@ private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
                 color = Color(0xFFA5A6A8),
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 6.dp)
             )
         }
         liveVideo.title?.takeIf { it.isNotEmpty() }?.let { title ->
@@ -193,7 +195,7 @@ private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.label_24.copy(fontSize = 11.sp),
                 color = Color(0xFF818590),
-                modifier = Modifier.padding(top = 6.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }

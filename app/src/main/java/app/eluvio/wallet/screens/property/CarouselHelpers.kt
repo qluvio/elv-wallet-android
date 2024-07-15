@@ -8,6 +8,7 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.defaultMediaItemClickHandler
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
+import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.screens.property.items.OfferCard
 import app.eluvio.wallet.screens.property.items.SubpropertyCard
@@ -37,16 +38,30 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp) {
             carouselItem.entity,
             cardHeight = cardHeight,
             onMediaItemClick = { media ->
-                if (media.mediaItemsIds.isNotEmpty()) {
-                    // This media item is a container for other media (e.g. a media list/collection)
-                    navigator(
-                        MediaGridDestination(
-                            propertyId = carouselItem.propertyId,
-                            mediaContainerId = media.id
-                        ).asPush()
-                    )
-                } else {
-                    defaultMediaItemClickHandler(navigator).invoke(media)
+                when {
+                    media.mediaItemsIds.isNotEmpty() -> {
+                        // This media item is a container for other media (e.g. a media list/collection)
+                        navigator(
+                            MediaGridDestination(
+                                propertyId = carouselItem.propertyId,
+                                mediaContainerId = media.id
+                            ).asPush()
+                        )
+                    }
+
+                    media.liveVideoInfo?.started == false -> {
+                        // this is a live video that hasn't started yet.
+                        navigator(
+                            UpcomingVideoDestination(
+                                propertyId = carouselItem.propertyId,
+                                mediaItemId = media.id,
+                            ).asPush()
+                        )
+                    }
+
+                    else -> {
+                        defaultMediaItemClickHandler(navigator).invoke(media)
+                    }
                 }
             }
         )

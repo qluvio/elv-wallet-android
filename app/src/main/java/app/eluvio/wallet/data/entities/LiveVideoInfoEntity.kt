@@ -1,8 +1,7 @@
-package app.eluvio.wallet.screens.common
+package app.eluvio.wallet.data.entities
 
 import android.content.Context
 import android.text.format.DateFormat
-import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.util.realm.toDate
 import dagger.Module
 import dagger.Provides
@@ -24,6 +23,9 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
     var subtitle: String? = null
     var headers: RealmList<String> = realmListOf()
 
+    // icon image paths.
+    var icons: RealmList<String> = realmListOf()
+
     var startTime: RealmInstant? = null
 
     @Ignore
@@ -43,7 +45,7 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
     }
 
     override fun toString(): String {
-        return "LiveVideoInfoEntity(title=$title, subtitle=$subtitle, headers=$headers, startTime=$startTime, endTime=$endTime)"
+        return "LiveVideoInfoEntity(title=$title, subtitle=$subtitle, headers=$headers, icons=$icons, startTime=$startTime, endTime=$endTime)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -55,6 +57,7 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
         if (title != other.title) return false
         if (subtitle != other.subtitle) return false
         if (headers != other.headers) return false
+        if (icons != other.icons) return false
         if (startTime != other.startTime) return false
         if (endTime != other.endTime) return false
 
@@ -65,6 +68,7 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
         var result = title?.hashCode() ?: 0
         result = 31 * result + (subtitle?.hashCode() ?: 0)
         result = 31 * result + headers.hashCode()
+        result = 31 * result + icons.hashCode()
         result = 31 * result + (startTime?.hashCode() ?: 0)
         result = 31 * result + (endTime?.hashCode() ?: 0)
         return result

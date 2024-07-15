@@ -6,7 +6,7 @@ import app.eluvio.wallet.network.converters.ConverterUtils
 import app.eluvio.wallet.network.converters.toPathMap
 import app.eluvio.wallet.network.dto.v2.GalleryItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
-import app.eluvio.wallet.screens.common.LiveVideoInfoEntity
+import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.util.realm.toRealmDictionaryOrEmpty
 import app.eluvio.wallet.util.realm.toRealmInstant
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
@@ -49,6 +49,7 @@ private fun parseLiveVideoInfo(dto: MediaItemV2Dto): LiveVideoInfoEntity? {
         title = dto.title
         subtitle = dto.subtitle
         headers = dto.headers.toRealmListOrEmpty()
+        icons = dto.icons?.mapNotNull { it.icon?.path }.toRealmListOrEmpty()
         startTime = dto.startTime?.toRealmInstant()
         endTime = dto.endTime?.toRealmInstant()
     }

@@ -41,6 +41,12 @@ data class MediaItemV2Dto(
     val endTime: Date?,
     val subtitle: String?,
     val headers: List<String>?,
+    val icons: List<MediaIconDto>?,
+)
+
+@JsonClass(generateAdapter = true)
+data class MediaIconDto(
+    val icon: AssetLinkDto?,
 )
 
 @JsonClass(generateAdapter = true)
