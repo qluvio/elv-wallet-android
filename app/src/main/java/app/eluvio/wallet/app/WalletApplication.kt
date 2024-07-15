@@ -10,6 +10,7 @@ import app.eluvio.wallet.di.TokenAwareHttpClient
 import app.eluvio.wallet.util.logging.Log
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.decode.SvgDecoder
 import dagger.hilt.android.HiltAndroidApp
 import io.reactivex.rxjava3.disposables.Disposable
 import okhttp3.OkHttpClient
@@ -43,7 +44,10 @@ class WalletApplication : Application(), ImageLoaderFactory {
         // Coil checks if Application implements ImageLoaderFactory and calls this automatically.
         // We provide our own OkHttpClient so image requests include fabric token headers.
         return ImageLoader.Builder(this).okHttpClient(httpClient)
-            .components { add(ContentFabricSizingInterceptor()) }
+            .components {
+                add(SvgDecoder.Factory())
+                add(ContentFabricSizingInterceptor())
+            }
             .build()
     }
 }

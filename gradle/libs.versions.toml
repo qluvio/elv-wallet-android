@@ -25,7 +25,7 @@ rxkotlin = "3.0.1"
 #Wrongfully flagged as un-used. Search: "kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()"
 compose-compiler = "1.5.11"
 moshi = "1.15.0"
-coil = "2.4.0"
+coil = "2.6.0"
 media3 = "1.3.1"
 okhttp = "4.11.0"
 realm = "1.10.2"
@@ -59,7 +59,8 @@ androidx-media3-ui-leanback = { module = "androidx.media3:media3-ui-leanback", v
 compose-destinations = { module = "io.github.raamcosta.compose-destinations:core", version.ref = "compose-destinations" }
 compose-destinations-ksp = { module = "io.github.raamcosta.compose-destinations:ksp", version.ref = "compose-destinations" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
-coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }

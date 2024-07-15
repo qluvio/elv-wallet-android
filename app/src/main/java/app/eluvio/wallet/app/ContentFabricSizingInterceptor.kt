@@ -17,6 +17,7 @@ class ContentFabricSizingInterceptor : Interceptor {
         val heightPx = chain.size.height.pxOrElse { -1 }
         if (widthPx > 0 && heightPx > 0 &&
             data is String && data.contains("contentfabric.io")
+            && !data.contains(".svg")
         ) {
             val url = data.toHttpUrl()
                 .newBuilder()

@@ -80,7 +80,8 @@ dependencies {
     implementation(libs.compose.destinations)
     ksp(libs.compose.destinations.ksp)
 
-    implementation(libs.coil)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
 
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
