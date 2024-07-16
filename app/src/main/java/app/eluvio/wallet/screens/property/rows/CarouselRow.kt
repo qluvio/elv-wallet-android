@@ -29,7 +29,7 @@ fun CarouselRow(item: DynamicPageLayoutState.Row.Carousel) {
         return
     }
     Spacer(modifier = Modifier.height(16.dp))
-    item.title?.let {
+    item.title?.takeIf { it.isNotEmpty() }?.let {
         Row {
             Text(
                 it,

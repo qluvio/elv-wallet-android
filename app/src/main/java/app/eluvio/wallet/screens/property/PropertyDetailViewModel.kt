@@ -1,12 +1,11 @@
 package app.eluvio.wallet.screens.property
 
 import androidx.compose.ui.text.AnnotatedString
-import androidx.core.text.HtmlCompat
+import androidx.core.text.parseAsHtml
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
-import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.di.ApiProvider
@@ -95,9 +94,7 @@ class PropertyDetailViewModel @Inject constructor(
             // Only fallback to RichText if neither title nor description are present.
             ?.takeIf { mainPage.title.isNullOrEmpty() && mainPage.description.isNullOrEmpty() }
             ?.let {
-                DynamicPageLayoutState.Row.Description(
-                    HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_LEGACY).toAnnotatedString()
-                )
+                DynamicPageLayoutState.Row.Description(it.parseAsHtml().toAnnotatedString())
             }
     }
 
