@@ -15,7 +15,11 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
         items = dto.content?.mapNotNull { it.toEntity(baseUrl) }.toRealmListOrEmpty()
         title = dto.display?.title
         subtitle = dto.display?.subtitle
-        displayLimit = dto.display?.displayLimit
+        displayLimit = dto.display?.displayLimit?.takeIf {
+            // Display limit of 0 means no limit. Which is the same handling we do for null, so just
+            // turn zeros to null.
+            it != 0
+        }
     }
 }
 
