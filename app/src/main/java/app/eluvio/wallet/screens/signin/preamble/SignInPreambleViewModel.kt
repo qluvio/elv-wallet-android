@@ -26,7 +26,7 @@ class SignInPreambleViewModel @Inject constructor(
         .setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
         .build()
         .apply {
-            addMediaItem(MediaItem.fromUri(Uri.parse("asset:///DiscoverNoText-1920x1080.mp4")))
+            addMediaItem(MediaItem.fromUri(Uri.parse("asset:///DiscoverNoText-1920x1080.webm")))
             repeatMode = Player.REPEAT_MODE_ONE
             playWhenReady = true
             prepare()
