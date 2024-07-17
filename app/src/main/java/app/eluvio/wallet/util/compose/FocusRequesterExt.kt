@@ -11,7 +11,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import kotlinx.coroutines.delay
@@ -63,3 +65,22 @@ fun Modifier.focusRestorer(oneTimeFallback: FocusRequester): Modifier = composed
         }
     }
 }
+
+/**
+ * Prevent focus from leaving the current focus group in the specified directions.
+ *
+ * Note: Generic type is only a workaround for using varags with value classes.
+ *
+ * See: [KT-33565](https://youtrack.jetbrains.com/issue/KT-33565/Allow-vararg-parameter-of-inline-class-type#focus=Comments-27-6413844.0-0)
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+fun <T : FocusDirection> Modifier.focusTrap(vararg directions: T): Modifier =
+    focusProperties {
+        exit = { direction ->
+            if (direction in directions) {
+                FocusRequester.Cancel
+            } else {
+                FocusRequester.Default
+            }
+        }
+    }

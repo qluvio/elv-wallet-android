@@ -106,18 +106,17 @@ class PropertyDetailViewModel @Inject constructor(
         // is defined by the Page's sectionIds.
         return mainPage.sectionIds.mapNotNull { sections[it] }
             .map { section ->
+                val displayLimit = section.displayLimit ?: SECTION_DEFAULT_DISPLAY_LIMIT
                 val items = section.items.toCarouselItems(propertyId)
                 DynamicPageLayoutState.Row.Carousel(
                     title = section.title,
                     subtitle = section.subtitle,
-                    items = items,
+                    items = items.take(displayLimit),
                     showAllNavigationEvent = MediaGridDestination(
                         propertyId = propertyId,
                         sectionId = section.id
                     )
-                        .takeIf {
-                            items.size > (section.displayLimit ?: SECTION_DEFAULT_DISPLAY_LIMIT)
-                        }
+                        .takeIf { items.size > displayLimit }
                         ?.asPush()
                 )
             }
