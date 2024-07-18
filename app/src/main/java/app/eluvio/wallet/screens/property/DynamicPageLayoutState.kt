@@ -51,7 +51,7 @@ data class DynamicPageLayoutState(
         data class Carousel(
             val title: String? = null,
             val subtitle: String? = null,
-            val showAllNavigationEvent: NavigationEvent? = null,
+            val viewAllNavigationEvent: NavigationEvent? = null,
             val items: List<CarouselItem>
         ) : Row
     }

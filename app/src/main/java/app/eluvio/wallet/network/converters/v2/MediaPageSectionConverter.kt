@@ -18,7 +18,7 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
         displayLimit = dto.display?.displayLimit?.takeIf {
             // Display limit of 0 means no limit. Which is the same handling we do for null, so just
             // turn zeros to null.
-            it != 0
+            it > 0
         }
     }
 }

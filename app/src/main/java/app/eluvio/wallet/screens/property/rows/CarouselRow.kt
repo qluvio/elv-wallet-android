@@ -54,7 +54,7 @@ fun CarouselRow(item: DynamicPageLayoutState.Row.Carousel) {
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
-            item.showAllNavigationEvent?.let {
+            item.viewAllNavigationEvent?.let {
                 val navigator = LocalNavigator.current
                 TvButton(
                     text = "View All",

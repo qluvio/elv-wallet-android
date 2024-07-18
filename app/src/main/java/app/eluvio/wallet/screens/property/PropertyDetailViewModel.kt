@@ -21,10 +21,9 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
 
 /**
- * If a section doesn't have a displayLimit, we still need to limit how many items the
- * client will load.
+ * The maximum number of items to display in a carousel before showing a "View All" button.
  */
-private const val SECTION_DEFAULT_DISPLAY_LIMIT = 5
+private const val VIEW_ALL_THRESHOLD = 5
 
 @HiltViewModel
 class PropertyDetailViewModel @Inject constructor(
@@ -106,17 +105,18 @@ class PropertyDetailViewModel @Inject constructor(
         // is defined by the Page's sectionIds.
         return mainPage.sectionIds.mapNotNull { sections[it] }
             .map { section ->
-                val displayLimit = section.displayLimit ?: SECTION_DEFAULT_DISPLAY_LIMIT
                 val items = section.items.toCarouselItems(propertyId)
+                val displayLimit = section.displayLimit?.takeIf { it > 0 } ?: items.size
+                val showViewAll = items.size > displayLimit || items.size > VIEW_ALL_THRESHOLD
                 DynamicPageLayoutState.Row.Carousel(
                     title = section.title,
                     subtitle = section.subtitle,
                     items = items.take(displayLimit),
-                    showAllNavigationEvent = MediaGridDestination(
+                    viewAllNavigationEvent = MediaGridDestination(
                         propertyId = propertyId,
                         sectionId = section.id
                     )
-                        .takeIf { items.size > displayLimit }
+                        .takeIf { showViewAll }
                         ?.asPush()
                 )
             }
