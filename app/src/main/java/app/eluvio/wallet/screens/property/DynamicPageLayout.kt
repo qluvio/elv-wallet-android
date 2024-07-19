@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -76,7 +75,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
                             focusManager.moveFocus(FocusDirection.Down)
                         }
                     })
-            } else {
+            } else if (state.captureTopFocus) {
                 // Empty item to make top of list focusable
                 Spacer(
                     Modifier

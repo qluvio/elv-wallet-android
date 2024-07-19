@@ -25,11 +25,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -43,7 +43,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
@@ -57,9 +56,11 @@ import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
+import app.eluvio.wallet.screens.property.DynamicPageLayout
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.button_24
 import app.eluvio.wallet.theme.carousel_48
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -83,14 +84,16 @@ private fun PropertySearch(state: PropertySearchViewModel.State) {
         LoadingSpinner(modifier = bgModifier)
         return
     }
-    TvLazyColumn(modifier = bgModifier) {
-        item { Header(state) }
+    Column(modifier = bgModifier) {
+        Header(state)
         if (state.loadingResults) {
-            item {
-                LoadingSpinner(Modifier
+            LoadingSpinner(
+                Modifier
                     .fillMaxWidth()
-                    .padding(56.dp))
-            }
+                    .padding(56.dp)
+            )
+        } else {
+            DynamicPageLayout(state = state.searchResults)
         }
     }
 }
@@ -127,7 +130,7 @@ private fun Header(state: PropertySearchViewModel.State) {
 
 @Composable
 private fun SearchBox(state: PropertySearchViewModel.State) {
-    var query by remember { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(query) {
         state.onQueryChanged(query)
     }
@@ -186,9 +189,9 @@ private fun SearchBox(state: PropertySearchViewModel.State) {
                 }
             },
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = 12.dp)
-                .focusRequester(textFocusRequester)
+                .requestInitialFocus(textFocusRequester)
         )
     }
 }

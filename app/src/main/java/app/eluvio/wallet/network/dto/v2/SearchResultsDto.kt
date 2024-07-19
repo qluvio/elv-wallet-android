@@ -6,8 +6,7 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class SearchResultsDto(
     val tags: List<String>,
-    val grouping:SearchGroupingDto,
-    val content: List<MediaItemDto>,
+    val content: List<MediaPageSectionDto>,
 )
 
 @JsonClass(generateAdapter = true)

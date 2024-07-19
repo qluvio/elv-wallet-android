@@ -2,7 +2,9 @@ package app.eluvio.wallet.screens.property
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
+import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity.SectionItemEntity
+import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.MediaItemCard
@@ -12,6 +14,37 @@ import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.screens.property.items.OfferCard
 import app.eluvio.wallet.screens.property.items.SubpropertyCard
+
+/**
+ * The maximum number of items to display in a carousel before showing a "View All" button.
+ */
+private const val VIEW_ALL_THRESHOLD = 5
+
+fun MediaPageSectionEntity.toCarousel(
+    propertyId: String,
+    filters: SearchFiltersEntity? = null,
+    viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
+): DynamicPageLayoutState.Section.Carousel {
+    val items = items.toCarouselItems(propertyId)
+    val displayLimit = displayLimit?.takeIf { it > 0 } ?: items.size
+    val showViewAll = items.size > displayLimit || items.size > viewAllThreshold
+    val filterAttribute = primaryFilter?.let { primaryFilter ->
+        filters?.attributes?.firstOrNull { it.id == primaryFilter }
+    }
+    return DynamicPageLayoutState.Section.Carousel(
+        title = title,
+        subtitle = subtitle,
+        items = items.take(displayLimit),
+        showAsGrid = displayFormat == MediaPageSectionEntity.DisplayFormat.GRID,
+        filterAttribute = filterAttribute,
+        viewAllNavigationEvent = MediaGridDestination(
+            propertyId = propertyId,
+            sectionId = id
+        )
+            .takeIf { showViewAll }
+            ?.asPush()
+    )
+}
 
 fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselItem> {
     return mapNotNull { item ->

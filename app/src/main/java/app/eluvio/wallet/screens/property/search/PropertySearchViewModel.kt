@@ -3,11 +3,13 @@ package app.eluvio.wallet.screens.property.search
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.network.dto.v2.SearchResultsDto
-import app.eluvio.wallet.screens.destinations.PropertySearchDestination
+import app.eluvio.wallet.screens.navArgs
+import app.eluvio.wallet.screens.property.DynamicPageLayoutState
+import app.eluvio.wallet.screens.property.toCarousel
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Single
@@ -32,11 +34,12 @@ class PropertySearchViewModel @Inject constructor(
         val baseUrl: String? = null,
         val headerLogo: String? = null,
         val propertyName: String? = null,
+        val searchResults: DynamicPageLayoutState = DynamicPageLayoutState(captureTopFocus = false),
         val onQueryChanged: (String) -> Unit = {},
         val onSearchClicked: () -> Unit = {},
     )
 
-    private val navArgs = PropertySearchDestination.argsFrom(savedStateHandle)
+    private val navArgs = savedStateHandle.navArgs<PropertySearchNavArgs>()
     private val query = BehaviorProcessor.create<String>()
     private val manualSearch = BehaviorProcessor.create<String>()
 
@@ -53,7 +56,14 @@ class PropertySearchViewModel @Inject constructor(
         observeQuery()
 
         apiProvider.getFabricEndpoint()
-            .subscribeBy { updateState { copy(baseUrl = it) } }
+            .subscribeBy {
+                updateState {
+                    copy(
+                        baseUrl = it,
+                        searchResults = searchResults.copy(imagesBaseUrl = it)
+                    )
+                }
+            }
             .addTo(disposables)
 
         propertyStore.observeMediaProperty(navArgs.propertyId)
@@ -76,20 +86,25 @@ class PropertySearchViewModel @Inject constructor(
             .mergeWith(manualSearch)
             .distinctUntilChanged()
             .switchMapSingle { fetchResults(it) }
-            .subscribeBy { Log.w("stav: actually search: $it") }
+            .subscribeBy { results ->
+                Log.w("stav: actually search: $results")
+                val sections = results.map { section ->
+                    section.toCarousel(
+                        navArgs.propertyId,
+                        // Never show ViewAll button for search results
+                        viewAllThreshold = Int.MAX_VALUE
+                    )
+                }
+                updateState {
+                    copy(searchResults = searchResults.copy(sections = sections))
+                }
+            }
             .addTo(disposables)
     }
 
-    private fun fetchResults(query: String): Single<String> {
-        return Single.just("foo")
-//    private fun fetchResults(query: String): Single<List<SearchResultsDto>> {
-//        return searchStore.search(query)
-            .doOnSubscribe {
-                updateState { copy(loadingResults = true) }
-            }
-            .delay(1, TimeUnit.SECONDS)
-            .doFinally {
-                updateState { copy(loadingResults = false) }
-            }
+    private fun fetchResults(query: String): Single<List<MediaPageSectionEntity>> {
+        return searchStore.search(navArgs.propertyId, query)
+            .doOnSubscribe { updateState { copy(loadingResults = true) } }
+            .doFinally { updateState { copy(loadingResults = false) } }
     }
 }
