@@ -41,10 +41,10 @@ class PropertySearchStore @Inject constructor(
 
     fun search(propertyId: String, query: String): Single<List<MediaPageSectionEntity>> {
         return apiProvider.getApi(SearchApi::class)
-            .flatMap {
-                it.search(
+            .flatMap { api ->
+                api.search(
                     propertyId,
-                    SearchRequest(search_term = query)
+                    SearchRequest(searchTerm = query)
                 )
             }
             .zipWith(apiProvider.getFabricEndpoint())

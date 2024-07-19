@@ -18,8 +18,8 @@ fun SearchFiltersDto.toEntity(propId: String): SearchFiltersEntity {
             .mapValues { (_, attr) -> attr.toEntity() }
         attributes = attributeMap.values.toRealmList()
 
-        primaryFilter = attributeMap[dto.primary_filter]
-        secondaryFilter = attributeMap[dto.secondary_filter]
+        primaryFilter = attributeMap[dto.primaryFilter]
+        secondaryFilter = attributeMap[dto.secondaryFilter]
     }
 }
 
