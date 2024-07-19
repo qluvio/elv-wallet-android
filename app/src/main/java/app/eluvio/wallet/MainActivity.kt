@@ -71,22 +71,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-//private val backgroundBrush: ShaderBrush = object : ShaderBrush() {
-//    override fun createShader(size: Size): Shader {
-//        return RadialGradientShader(
-//            colors = listOf(Color(0xff202020), Color.Black),
-//            center = size.toRect().topCenter,
-//            radius = size.width / 4f,
-//            colorStops = listOf(0f, 0.95f)
-//        )
-//    }
-//}
-
-private fun Collection<NavBackStackEntry>.print(prefix: String = "stack") {
+private fun Collection<NavBackStackEntry>.print(prefix: String = "navstack") {
     fun NavBackStackEntry.routeWithArgs(): String {
         val fallback = destination.route ?: ""
         return arguments?.keySet()?.fold(fallback) { route, key ->
-            route.replace("{$key}", arguments?.get(key)?.toString() ?: "{$key}")
+            route.replace("{$key}", arguments?.getString(key) ?: "{$key}")
         } ?: fallback
     }
 
