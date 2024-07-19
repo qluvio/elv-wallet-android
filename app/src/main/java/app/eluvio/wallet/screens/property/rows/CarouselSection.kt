@@ -3,9 +3,12 @@ package app.eluvio.wallet.screens.property.rows
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -14,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -38,7 +40,6 @@ import app.eluvio.wallet.util.compose.focusTrap
 
 private val CARD_HEIGHT = 170.dp
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
     if (item.items.isEmpty()) {
@@ -80,7 +81,7 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
             )
         }
 
-        var selectedFilter by remember { mutableStateOf<Pair<String, String>?>(null) }
+        val selectedFilter by remember { mutableStateOf<Pair<String, String>?>(null) }
         // Disable for now - it brings on a BUNCH of focus issues.
 //        item.filterAttribute?.let { attribute ->
 //            FilterSelectorRow(attribute.tags, onTagSelected = { tag ->
@@ -90,25 +91,57 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
         val filteredItems = rememberFilteredItems(item.items, selectedFilter)
 
         Spacer(modifier = Modifier.height(16.dp))
-        // The 'key' function prevents from focusRestorer() from breaking when crashing when
-        // filteredItems changes.
-        // From what I could tell it's kind of like 'remember' but for Composable.
-        key(filteredItems) {
-            TvLazyRow(
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier.focusRestorer() // TODO: figure this shit out
-            ) {
-                spacer(width = 28.dp)
-                items(filteredItems) { item ->
-                    CarouselItemCard(
-                        carouselItem = item,
-                        cardHeight = CARD_HEIGHT,
-                    )
-                }
-                spacer(width = 28.dp)
-            }
+        if (item.showAsGrid) {
+            ItemGrid(filteredItems)
+        } else {
+            ItemRow(filteredItems)
         }
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
+@Composable
+private fun ItemGrid(items: List<CarouselItem>, modifier: Modifier = Modifier) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRestorer()
+            .padding(horizontal = 48.dp)
+    ) {
+        items.forEach { item ->
+            key(item) {
+                CarouselItemCard(
+                    carouselItem = item,
+                    cardHeight = CARD_HEIGHT,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun ItemRow(items: List<CarouselItem>, modifier: Modifier = Modifier) {
+    // The 'key' function prevents from focusRestorer() from breaking when crashing when
+    // filteredItems changes.
+    // From what I could tell it's kind of like 'remember' but for Composable.
+    key(items) {
+        TvLazyRow(
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier.focusRestorer()
+        ) {
+            spacer(width = 28.dp)
+            items(items) { item ->
+                CarouselItemCard(
+                    carouselItem = item,
+                    cardHeight = CARD_HEIGHT,
+                )
+            }
+            spacer(width = 28.dp)
+        }
     }
 }
 
