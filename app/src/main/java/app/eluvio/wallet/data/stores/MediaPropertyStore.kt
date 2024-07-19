@@ -24,28 +24,12 @@ class MediaPropertyStore @Inject constructor(
 ) {
 
     fun observeMediaProperties(forceRefresh: Boolean = true): Flowable<List<MediaPropertyEntity>> {
-        return realm.query<MediaPropertyEntity>()
-            .asFlowable()
-            .mergeWith(
-                if (forceRefresh) {
-                    // There's an assumption here the Properties will never be empty,
-                    // or we'll get an infinite spinner.
-                    // See [ContentStore] for a more robust implementation.
-                    // But it's safe to assume properties will never be empty because we're getting
-                    // something even if we don't own anything yet.
-                    fetchMediaProperties()
-                } else {
-                    Completable.complete()
-                }
-            )
-            .switchMap {
-                // In theory can be an infinite network request loop, but assuming server will never return empty
-                if (it.isEmpty()) {
-                    fetchMediaProperties().andThen(Flowable.just(it))
-                } else {
-                    Flowable.just(it)
-                }
+        return observeRealmAndFetch(
+            realmQuery = realm.query<MediaPropertyEntity>().asFlowable(),
+            fetchOperation = { _, isFirstState ->
+                fetchMediaProperties().takeIf { isFirstState && forceRefresh }
             }
+        )
     }
 
     private fun fetchMediaProperties(): Completable {
