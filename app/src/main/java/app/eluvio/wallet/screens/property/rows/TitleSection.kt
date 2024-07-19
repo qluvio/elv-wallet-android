@@ -11,7 +11,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.theme.body_32
 
 @Composable
-fun TitleRow(item: DynamicPageLayoutState.Row.Title) {
+fun TitleSection(item: DynamicPageLayoutState.Section.Title) {
     Text(
         item.text,
         style = MaterialTheme.typography.body_32,

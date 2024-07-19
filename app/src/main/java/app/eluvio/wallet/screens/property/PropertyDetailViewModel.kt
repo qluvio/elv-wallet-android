@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
+import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.di.ApiProvider
@@ -42,65 +43,66 @@ class PropertyDetailViewModel @Inject constructor(
             .subscribeBy { updateState { copy(imagesBaseUrl = it) } }
             .addTo(disposables)
 
-        // Prefetch search filters
-//        propertySearchStore.getFilters(propertyId, forceRefresh = true)
-//            .ignoreElement()
-//            .subscribe()
-//            .addTo(disposables)
-
-        propertyStore.observeMediaProperty(propertyId)
+        val pageLayout = propertyStore.observeMediaProperty(propertyId)
             .switchMap { property ->
                 val mainPage = property.mainPage ?: return@switchMap Flowable.empty()
                 propertyStore.observeSections(property, mainPage)
                     .map { sections -> sections.associateBy { section -> section.id } }
                     .map { sections -> mainPage to sections }
             }
-            .subscribe { (mainPage, sections) ->
+        val searchFilters = propertySearchStore.getFilters(propertyId)
+            .onErrorReturnItem(SearchFiltersEntity())
+
+        Flowable.combineLatest(pageLayout, searchFilters) { (page, sections), filters ->
+            Triple(page, sections, filters)
+        }
+            .subscribe { (mainPage, sections, filters) ->
                 updateState {
                     copy(
                         backgroundImagePath = mainPage.backgroundImagePath,
                         searchNavigationEvent = PropertySearchDestination(propertyId).asPush(),
-                        rows = listOfNotNull(
+                        sections = listOfNotNull(
                             logo(mainPage),
                             title(mainPage),
                             description(mainPage),
                             descriptionRichText(mainPage),
-                        ) + sections(mainPage, sections)
+                        ) + sections(mainPage, sections, filters)
                     )
                 }
             }
             .addTo(disposables)
     }
 
-    private fun logo(mainPage: MediaPageEntity): DynamicPageLayoutState.Row? {
-        return mainPage.logo?.let { DynamicPageLayoutState.Row.Banner(it) }
+    private fun logo(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
+        return mainPage.logo?.let { DynamicPageLayoutState.Section.Banner(it) }
     }
 
-    private fun title(mainPage: MediaPageEntity): DynamicPageLayoutState.Row? {
+    private fun title(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
         return mainPage.title
             ?.takeIf { it.isNotEmpty() }
-            ?.let { DynamicPageLayoutState.Row.Title(AnnotatedString(it)) }
+            ?.let { DynamicPageLayoutState.Section.Title(AnnotatedString(it)) }
     }
 
-    private fun description(mainPage: MediaPageEntity): DynamicPageLayoutState.Row? {
+    private fun description(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
         return mainPage.description
             ?.takeIf { it.isNotEmpty() }
-            ?.let { DynamicPageLayoutState.Row.Description(AnnotatedString(it)) }
+            ?.let { DynamicPageLayoutState.Section.Description(AnnotatedString(it)) }
     }
 
-    private fun descriptionRichText(mainPage: MediaPageEntity): DynamicPageLayoutState.Row? {
+    private fun descriptionRichText(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
         return mainPage.descriptionRichText
             // Only fallback to RichText if neither title nor description are present.
             ?.takeIf { mainPage.title.isNullOrEmpty() && mainPage.description.isNullOrEmpty() }
             ?.let {
-                DynamicPageLayoutState.Row.Description(it.parseAsHtml().toAnnotatedString())
+                DynamicPageLayoutState.Section.Description(it.parseAsHtml().toAnnotatedString())
             }
     }
 
     private fun sections(
         mainPage: MediaPageEntity,
-        sections: Map<String, MediaPageSectionEntity>
-    ): List<DynamicPageLayoutState.Row> {
+        sections: Map<String, MediaPageSectionEntity>,
+        filters: SearchFiltersEntity
+    ): List<DynamicPageLayoutState.Section> {
         // We can't just iterate over [sections] because the order of sections is important and it
         // is defined by the Page's sectionIds.
         return mainPage.sectionIds.mapNotNull { sections[it] }
@@ -108,10 +110,15 @@ class PropertyDetailViewModel @Inject constructor(
                 val items = section.items.toCarouselItems(propertyId)
                 val displayLimit = section.displayLimit?.takeIf { it > 0 } ?: items.size
                 val showViewAll = items.size > displayLimit || items.size > VIEW_ALL_THRESHOLD
-                DynamicPageLayoutState.Row.Carousel(
+                val filterAttribute = section.primaryFilter?.let { primaryFilter ->
+                    filters.attributes.firstOrNull { it.id == primaryFilter }
+                }
+                DynamicPageLayoutState.Section.Carousel(
                     title = section.title,
                     subtitle = section.subtitle,
                     items = items.take(displayLimit),
+                    showAsGrid = section.displayFormat == MediaPageSectionEntity.DisplayFormat.GRID,
+                    filterAttribute = filterAttribute,
                     viewAllNavigationEvent = MediaGridDestination(
                         propertyId = propertyId,
                         sectionId = section.id

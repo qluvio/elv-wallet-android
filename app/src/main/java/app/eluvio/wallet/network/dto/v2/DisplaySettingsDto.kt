@@ -14,6 +14,11 @@ data class DisplaySettingsDto(
     val thumbnailPortrait: AssetLinkDto?,
     @field:Json(name = "thumbnail_image_square")
     val thumbnailSquare: AssetLinkDto?,
+
     @field:Json(name = "display_limit")
-    val displayLimit: Int?
+    val displayLimit: Int?,
+    @field:Json(name = "display_limit_type")
+    val displayLimitType: String?,
+    @field:Json(name = "display_format")
+    val displayFormat: String?,
 )

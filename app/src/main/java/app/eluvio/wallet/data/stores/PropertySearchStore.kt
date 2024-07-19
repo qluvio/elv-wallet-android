@@ -1,11 +1,17 @@
 package app.eluvio.wallet.data.stores
 
+import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.mwv2.SearchApi
-import app.eluvio.wallet.network.dto.v2.SearchFiltersDto
+import app.eluvio.wallet.network.converters.v2.toEntity
 import app.eluvio.wallet.network.dto.v2.SearchResultsDto
+import app.eluvio.wallet.util.realm.asFlowable
+import app.eluvio.wallet.util.realm.saveTo
+import app.eluvio.wallet.util.rx.mapNotNull
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.realm.kotlin.Realm
+import io.realm.kotlin.ext.query
 import javax.inject.Inject
 
 class PropertySearchStore @Inject constructor(
@@ -13,10 +19,22 @@ class PropertySearchStore @Inject constructor(
     private val realm: Realm,
 ) {
 
-    fun getFilters(propertyId: String, forceRefresh: Boolean = false): Single<SearchFiltersDto> {
-        return apiProvider.getApi(SearchApi::class)
-            .flatMap { it.getSearchFilters(propertyId) }
-//            .map { TODO() }
+    fun getFilters(propertyId: String): Flowable<SearchFiltersEntity> {
+        return observeRealmAndFetch(
+            realmQuery = realm.query<SearchFiltersEntity>(
+                "${SearchFiltersEntity::propertyId.name} == $0",
+                propertyId
+            ).asFlowable(),
+            fetchOperation = { _, isFirstState ->
+                if (isFirstState) {
+                    apiProvider.getApi(SearchApi::class)
+                        .flatMap { it.getSearchFilters(propertyId) }
+                        .map { it.toEntity(propertyId) }
+                        .saveTo(realm)
+                        .ignoreElement()
+                } else null
+            })
+            .mapNotNull { it.firstOrNull() }
     }
 
     fun search(query: String): Single<List<SearchResultsDto>> {

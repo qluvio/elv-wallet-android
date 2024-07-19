@@ -17,7 +17,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.theme.body_32
 
 @Composable
-fun DescriptionRow(item: DynamicPageLayoutState.Row.Description) {
+fun DescriptionSection(item: DynamicPageLayoutState.Section.Description) {
     var isClickable by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     Text(

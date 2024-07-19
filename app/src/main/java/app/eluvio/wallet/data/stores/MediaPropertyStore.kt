@@ -10,7 +10,6 @@ import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.rx.mapNotNull
-import app.eluvio.wallet.util.rx.zipWithGenerator
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.zipWith
@@ -79,34 +78,19 @@ class MediaPropertyStore @Inject constructor(
         propertyId: String,
         forceRefresh: Boolean = true
     ): Flowable<MediaPropertyEntity> {
-        return realm.query<MediaPropertyEntity>(
-            "${MediaPropertyEntity::id.name} == $0",
-            propertyId
-        )
-            .asFlowable()
-            // Force refresh on first DB emit only
-            .zipWithGenerator(forceRefresh) { false }
-            .switchMap { (properties, refresh) ->
-                val cachedProperty = properties.firstOrNull()
-                when {
-                    cachedProperty == null -> {
-                        // Won't actually emit anything, we're just waiting for it to complete and
-                        // save to DB.
-                        Log.v("No cached property for id $propertyId, fetching from network.")
-                        fetchMediaProperty(propertyId).toFlowable()
-                    }
-
-                    refresh -> {
-                        Log.v("Force refreshing property for id $propertyId.")
-                        Flowable.just(cachedProperty).mergeWith(fetchMediaProperty(propertyId))
-                    }
-
-                    else -> {
-                        // Just emit the cached property
-                        Flowable.just(cachedProperty)
-                    }
-                }
+        return observeRealmAndFetch(
+            realmQuery = realm.query<MediaPropertyEntity>(
+                "${MediaPropertyEntity::id.name} == $0",
+                propertyId
+            )
+                .asFlowable(),
+            fetchOperation = { properties, isFirstState ->
+                fetchMediaProperty(propertyId)
+                    .doOnSubscribe { Log.d("Fetching MediaProperty: $propertyId") }
+                    .takeIf { properties.isEmpty() || (isFirstState && forceRefresh) }
             }
+        )
+            .mapNotNull { it.firstOrNull() }
     }
 
     fun observeSections(
@@ -114,29 +98,21 @@ class MediaPropertyStore @Inject constructor(
         page: MediaPageEntity,
         forceRefresh: Boolean = true
     ): Flowable<List<MediaPageSectionEntity>> {
-        return realm.query<MediaPageSectionEntity>(
-            "${MediaPageSectionEntity::id.name} IN $0",
-            page.sectionIds
-        )
-            .asFlowable()
-            // Whenever the DB emits, this will combine with the [forceRefresh] value for the
-            // first item, but [false] for the rest. That way we can hit the network only once,
-            // rather than every time the DB emits.
-            .zipWithGenerator(forceRefresh) { false }
-            .distinctUntilChanged(
-                // This avoids an infinite loop when we can't fetch all sections in one page,
-                // because until we implement pagination, there will always be missing sections.
-            )
-            .switchMap { (sections, refreshAll) ->
-                val existingSections = if (refreshAll) {
+        return observeRealmAndFetch(
+            realmQuery = realm.query<MediaPageSectionEntity>(
+                "${MediaPageSectionEntity::id.name} IN $0",
+                page.sectionIds
+            ).asFlowable(),
+            fetchOperation = { sections, isFirst ->
+                val existingSections = if (forceRefresh && isFirst) {
                     emptySet()
                 } else {
                     sections.map { it.id }.toSet()
                 }
                 Log.w("Existing sections (will NOT be fetched): $existingSections")
                 fetchMissingSections(property.id, page, existingSections)
-                    .startWith(Flowable.just(sections))
             }
+        )
     }
 
     fun observeSection(sectionId: String): Flowable<MediaPageSectionEntity> {

@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities
 
+import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,6 +42,10 @@ class MediaEntity : RealmObject {
 
     // In the mwv2 data model, all video is of type "Video" and this boolean tells live vs on-demand apart.
     var liveVideoInfo: LiveVideoInfoEntity? = null
+
+    // Search API
+    var attributes: RealmList<SearchFiltersEntity.Attribute> = realmListOf()
+    var tags: RealmList<String> = realmListOf()
 
     fun imageOrLockedImage(): String = with(requireLockedState()) {
         lockedImage?.takeIf { locked } ?: image
@@ -86,8 +91,10 @@ class MediaEntity : RealmObject {
         if (tvBackgroundImage != other.tvBackgroundImage) return false
         if (gallery != other.gallery) return false
         if (mediaItemsIds != other.mediaItemsIds) return false
-        if (liveVideoInfo != other.liveVideoInfo) return false
         if (lockedState != other.lockedState) return false
+        if (liveVideoInfo != other.liveVideoInfo) return false
+        if (attributes != other.attributes) return false
+        if (tags != other.tags) return false
 
         return true
     }
@@ -104,13 +111,15 @@ class MediaEntity : RealmObject {
         result = 31 * result + tvBackgroundImage.hashCode()
         result = 31 * result + gallery.hashCode()
         result = 31 * result + mediaItemsIds.hashCode()
-        result = 31 * result + liveVideoInfo.hashCode()
         result = 31 * result + (lockedState?.hashCode() ?: 0)
+        result = 31 * result + (liveVideoInfo?.hashCode() ?: 0)
+        result = 31 * result + attributes.hashCode()
+        result = 31 * result + tags.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo)"
+        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo, attributes=$attributes, tags=$tags)"
     }
 
     companion object {

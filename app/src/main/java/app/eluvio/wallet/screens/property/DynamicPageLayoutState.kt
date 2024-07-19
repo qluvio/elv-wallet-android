@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.navigation.NavigationEvent
 
 /**
@@ -17,7 +18,7 @@ data class DynamicPageLayoutState(
     val imagesBaseUrl: String? = null,
 
     val backgroundImagePath: String? = null,
-    val rows: List<Row> = emptyList(),
+    val sections: List<Section> = emptyList(),
 
     val searchNavigationEvent: NavigationEvent? = null,
 
@@ -25,7 +26,7 @@ data class DynamicPageLayoutState(
     val backLinkUrl: String? = null,
     val backButtonLogo: String? = null,
 ) {
-    fun isEmpty() = rows.isEmpty() && backgroundImagePath == null
+    fun isEmpty() = sections.isEmpty() && backgroundImagePath == null
 
     /**
      * Returns the full URL for a given path, using [imagesBaseUrl] if available.
@@ -35,25 +36,28 @@ data class DynamicPageLayoutState(
         return imagesBaseUrl?.let { "$it$path" } ?: path
     }
 
-    sealed interface Row {
+    sealed interface Section {
         // TODO: maybe combine Title and Description into a single "Text" Row type,
         //  but then we'd have to start passing around predefined styles or something
         @Immutable
-        data class Title(val text: AnnotatedString) : Row
+        data class Title(val text: AnnotatedString) : Section
 
         @Immutable
-        data class Description(val text: AnnotatedString) : Row
+        data class Description(val text: AnnotatedString) : Section
 
         @Immutable
-        data class Banner(val imagePath: String) : Row
+        data class Banner(val imagePath: String) : Section
 
         @Immutable
         data class Carousel(
             val title: String? = null,
             val subtitle: String? = null,
             val viewAllNavigationEvent: NavigationEvent? = null,
-            val items: List<CarouselItem>
-        ) : Row
+            val items: List<CarouselItem>,
+            // Whether to show this as a row or a grid
+            val showAsGrid: Boolean = false,
+            val filterAttribute: SearchFiltersEntity.Attribute? = null,
+        ) : Section
     }
 
     sealed interface CarouselItem {

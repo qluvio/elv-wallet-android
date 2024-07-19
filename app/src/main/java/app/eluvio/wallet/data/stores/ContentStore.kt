@@ -16,7 +16,6 @@ import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.rx.mapNotNull
-import app.eluvio.wallet.util.rx.zipWithGenerator
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
@@ -194,21 +193,14 @@ class ContentStore @Inject constructor(
             .mapIndexed { index, mediaId -> mediaId to index }
             .toMap()
             .withDefault { Int.MAX_VALUE }
-        return realm.query<MediaEntity>(
-            "${MediaEntity::id.name} IN $0",
-            mediaIds
-        )
-            .asFlowable()
-            // Whenever the DB emits, this will combine with the [forceRefresh] value for the
-            // first item, but [false] for the rest. That way we can hit the network only once,
-            // rather than every time the DB emits.
-            .zipWithGenerator(forceRefresh) { false }
-            .distinctUntilChanged(
-                // This avoids an infinite loop when we can't fetch all media in one page,
-                // because until we implement pagination, there will always be missing media.
+        return observeRealmAndFetch(
+            realmQuery = realm.query<MediaEntity>(
+                "${MediaEntity::id.name} IN $0",
+                mediaIds
             )
-            .switchMap { (mediaItems, refreshAll) ->
-                val existingItems = if (refreshAll) {
+                .asFlowable(),
+            fetchOperation = { mediaItems, isFirst ->
+                val existingItems = if (forceRefresh && isFirst) {
                     Log.w("Force refreshing media items, ignoring existing items.")
                     emptySet()
                 } else {
@@ -216,8 +208,8 @@ class ContentStore @Inject constructor(
                 }
                 Log.w("Existing media items (will NOT be fetched): $existingItems")
                 fetchMissingMediaItems(propertyId, mediaIds, existingItems)
-                    .startWith(Flowable.just(mediaItems))
             }
+        )
             .map {
                 // Sort according to the order of mediaIds
                 it.sortedWith { a, b ->

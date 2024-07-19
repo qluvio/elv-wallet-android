@@ -20,6 +20,15 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
             // turn zeros to null.
             it > 0
         }
+        displayLimitType = dto.display?.displayLimitType
+        displayFormat = dto.display?.displayFormat?.let { format ->
+            MediaPageSectionEntity.DisplayFormat.entries
+                .firstOrNull { enum -> enum.value == format }
+        }
+            ?: MediaPageSectionEntity.DisplayFormat.UNKNOWN
+
+        primaryFilter = dto.primaryFilter
+        secondaryFilter = dto.secondaryFilter
     }
 }
 

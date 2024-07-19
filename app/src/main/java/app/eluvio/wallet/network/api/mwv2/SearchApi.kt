@@ -10,7 +10,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface SearchApi : AuthdApi {
-    @GET("mw/properties/{propertyId}/get_filters")
+    @GET("mw/properties/{propertyId}/filters")
     fun getSearchFilters(@Path("propertyId") propertyId: String): Single<SearchFiltersDto>
 
     @GET("ms/properties/{propertyId}/search")

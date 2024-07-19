@@ -1,12 +1,13 @@
 package app.eluvio.wallet.network.converters.v2
 
 import app.eluvio.wallet.data.entities.GalleryItemEntity
+import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.network.converters.ConverterUtils
 import app.eluvio.wallet.network.converters.toPathMap
 import app.eluvio.wallet.network.dto.v2.GalleryItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
-import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.util.realm.toRealmDictionaryOrEmpty
 import app.eluvio.wallet.util.realm.toRealmInstant
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
@@ -24,7 +25,7 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         name = dto.title ?: ""
         mediaFile = imageFile?.path ?: ""
         imageAspectRatio = aspectRatio
-        mediaType = dto.mediaType ?: dto.type ?: ""
+        mediaType = dto.mediaType ?: dto.type
         val imageLink = dto.thumbnailSquare
             ?: dto.thumbnailPortrait
             ?: dto.thumbnailLandscape
@@ -38,6 +39,14 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         // will have a list of media lists under `mediaLists`. It is assumed that there will
         // only be one or the other, so we're just trying both with no real priority.
         mediaItemsIds = (dto.media ?: dto.mediaLists).toRealmListOrEmpty()
+
+        attributes = dto.attributes?.map { (key, value) ->
+            SearchFiltersEntity.Attribute().apply {
+                id = key
+                tags = value.toRealmListOrEmpty()
+            }
+        }.toRealmListOrEmpty()
+        tags = dto.tags.toRealmListOrEmpty()
     }
 }
 

@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,10 +38,10 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
 import app.eluvio.wallet.screens.common.spacer
-import app.eluvio.wallet.screens.property.rows.BannerRow
-import app.eluvio.wallet.screens.property.rows.CarouselRow
-import app.eluvio.wallet.screens.property.rows.DescriptionRow
-import app.eluvio.wallet.screens.property.rows.TitleRow
+import app.eluvio.wallet.screens.property.rows.BannerSection
+import app.eluvio.wallet.screens.property.rows.CarouselSection
+import app.eluvio.wallet.screens.property.rows.DescriptionSection
+import app.eluvio.wallet.screens.property.rows.TitleSection
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.logging.Log
 import coil.compose.AsyncImage
@@ -64,7 +65,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
     TvLazyColumn(pivotOffsets = PivotOffsets(0.6f)) {
         item(contentType = "search", key = "search") {
             if (state.searchNavigationEvent != null) {
-                var firstFocus by remember { mutableStateOf(true) }
+                var firstFocus by rememberSaveable { mutableStateOf(true) }
                 val focusManager = LocalFocusManager.current
                 SearchButton(
                     searchNavigationEvent = state.searchNavigationEvent,
@@ -84,17 +85,17 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
                 )
             }
         }
-        state.rows.forEach { row ->
-            item(contentType = row::class) {
-                when (row) {
-                    is DynamicPageLayoutState.Row.Banner -> BannerRow(
-                        item = row,
+        state.sections.forEach { section ->
+            item(contentType = section::class) {
+                when (section) {
+                    is DynamicPageLayoutState.Section.Banner -> BannerSection(
+                        item = section,
                         state
                     )
 
-                    is DynamicPageLayoutState.Row.Carousel -> CarouselRow(item = row)
-                    is DynamicPageLayoutState.Row.Description -> DescriptionRow(item = row)
-                    is DynamicPageLayoutState.Row.Title -> TitleRow(item = row)
+                    is DynamicPageLayoutState.Section.Carousel -> CarouselSection(item = section)
+                    is DynamicPageLayoutState.Section.Description -> DescriptionSection(item = section)
+                    is DynamicPageLayoutState.Section.Title -> TitleSection(item = section)
                 }
             }
         }
@@ -137,11 +138,11 @@ private fun DynamicPageLayoutPreview() = EluvioThemePreview {
     DynamicPageLayout(
         DynamicPageLayoutState(
             searchNavigationEvent = NavigationEvent.GoBack,
-            rows = listOf(
-                DynamicPageLayoutState.Row.Title(AnnotatedString("Title")),
-                DynamicPageLayoutState.Row.Banner("https://foo.com/image.jpg"),
-                DynamicPageLayoutState.Row.Description(AnnotatedString("Description")),
-                DynamicPageLayoutState.Row.Carousel(
+            sections = listOf(
+                DynamicPageLayoutState.Section.Title(AnnotatedString("Title")),
+                DynamicPageLayoutState.Section.Banner("https://foo.com/image.jpg"),
+                DynamicPageLayoutState.Section.Description(AnnotatedString("Description")),
+                DynamicPageLayoutState.Section.Carousel(
                     title = "Carousel",
                     subtitle = "Subtitle",
                     items = listOf(

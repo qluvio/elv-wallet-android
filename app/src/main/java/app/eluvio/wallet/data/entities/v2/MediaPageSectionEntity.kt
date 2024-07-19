@@ -1,6 +1,8 @@
 package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.util.realm.RealmEnum
+import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,10 +12,18 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
 class MediaPageSectionEntity : RealmObject {
+
+    enum class DisplayFormat(override val value: String) : RealmEnum {
+        UNKNOWN("unknown"),
+        CAROUSEL("carousel"),
+        GRID("grid");
+    }
+
     @PrimaryKey
     var id: String = ""
     var items = realmListOf<SectionItemEntity>()
@@ -21,6 +31,14 @@ class MediaPageSectionEntity : RealmObject {
     var title: String? = null
     var subtitle: String? = null
     var displayLimit: Int? = null
+    var displayLimitType: String? = null
+
+    @Ignore
+    var displayFormat: DisplayFormat by realmEnum(::displayFormatStr)
+    private var displayFormatStr: String = DisplayFormat.UNKNOWN.value
+
+    var primaryFilter: String? = null
+    var secondaryFilter: String? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -33,6 +51,10 @@ class MediaPageSectionEntity : RealmObject {
         if (title != other.title) return false
         if (subtitle != other.subtitle) return false
         if (displayLimit != other.displayLimit) return false
+        if (displayLimitType != other.displayLimitType) return false
+        if (displayFormatStr != other.displayFormatStr) return false
+        if (primaryFilter != other.primaryFilter) return false
+        if (secondaryFilter != other.secondaryFilter) return false
 
         return true
     }
@@ -43,11 +65,15 @@ class MediaPageSectionEntity : RealmObject {
         result = 31 * result + (title?.hashCode() ?: 0)
         result = 31 * result + (subtitle?.hashCode() ?: 0)
         result = 31 * result + (displayLimit ?: 0)
+        result = 31 * result + (displayLimitType?.hashCode() ?: 0)
+        result = 31 * result + displayFormatStr.hashCode()
+        result = 31 * result + (primaryFilter?.hashCode() ?: 0)
+        result = 31 * result + (secondaryFilter?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPageSectionEntity(id='$id', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit)"
+        return "MediaPageSectionEntity(id='$id', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter)"
     }
 
     class SectionItemEntity : EmbeddedRealmObject {

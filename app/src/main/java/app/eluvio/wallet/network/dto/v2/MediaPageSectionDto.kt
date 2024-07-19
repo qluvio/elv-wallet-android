@@ -12,6 +12,10 @@ data class MediaPageSectionDto(
     val id: String,
     val type: String,
     val display: DisplaySettingsDto?,
+    @field:Json(name = "primary_filter")
+    val primaryFilter: String?,
+    @field:Json(name = "secondary_filter")
+    val secondaryFilter: String?,
 )
 
 @JsonClass(generateAdapter = true)

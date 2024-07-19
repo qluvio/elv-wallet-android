@@ -42,6 +42,10 @@ data class MediaItemV2Dto(
     val subtitle: String?,
     val headers: List<String>?,
     val icons: List<MediaIconDto>?,
+
+    // Search related stuff
+    val attributes: Map<String, List<String>>?,
+    val tags: List<String>?,
 )
 
 @JsonClass(generateAdapter = true)
