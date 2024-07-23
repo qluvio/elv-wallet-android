@@ -178,7 +178,9 @@ private fun rememberFilteredItems(
                 .filter {
                     it.entity.attributes
                         .firstOrNull { attribute -> attribute.id == selectedFilter.first }
-                        ?.tags?.contains(selectedFilter.second) == true
+                        ?.tags
+                        ?.map { tag -> tag.value }
+                        ?.contains(selectedFilter.second) == true
                 }
         }
     }

@@ -26,7 +26,18 @@ class SearchFiltersEntity : RealmObject {
     class Attribute : EmbeddedRealmObject {
         var id: String = ""
         var title: String = ""
-        var tags: RealmList<String> = realmListOf()
+        var tags: RealmList<AttributeValue> = realmListOf()
+    }
+
+    class AttributeValue : EmbeddedRealmObject {
+        companion object {
+            const val ALL = "All"
+            fun from(tag: String) = AttributeValue().apply { value = tag }
+        }
+
+        var value: String = ""
+        var nextFilterAttribute: String? = null
+        var image: String? = null
     }
 
     override fun equals(other: Any?): Boolean {
@@ -63,6 +74,6 @@ class SearchFiltersEntity : RealmObject {
         @Provides
         @ElementsIntoSet
         fun provideEntity(): Set<KClass<out TypedRealmObject>> =
-            setOf(SearchFiltersEntity::class, Attribute::class)
+            setOf(SearchFiltersEntity::class, Attribute::class, AttributeValue::class)
     }
 }

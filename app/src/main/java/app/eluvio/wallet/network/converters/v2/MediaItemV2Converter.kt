@@ -43,7 +43,7 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         attributes = dto.attributes?.map { (key, value) ->
             SearchFiltersEntity.Attribute().apply {
                 id = key
-                tags = value.toRealmListOrEmpty()
+                tags = value.map { SearchFiltersEntity.AttributeValue.from(it) }.toRealmListOrEmpty()
             }
         }.toRealmListOrEmpty()
         tags = dto.tags.toRealmListOrEmpty()

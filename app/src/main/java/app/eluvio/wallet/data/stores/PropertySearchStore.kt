@@ -39,13 +39,15 @@ class PropertySearchStore @Inject constructor(
             .mapNotNull { it.firstOrNull() }
     }
 
-    fun search(propertyId: String, query: String): Single<List<MediaPageSectionEntity>> {
+    fun search(propertyId: String, request: SearchRequest): Single<List<MediaPageSectionEntity>> {
+        val sanitizedRequest = request.copy(
+            // Any attribute with a tag of "All" should be omitted from the request
+            attributes = request.attributes
+                ?.filterNot { (_, tags) -> tags.contains(SearchFiltersEntity.AttributeValue.ALL) }
+        )
         return apiProvider.getApi(SearchApi::class)
             .flatMap { api ->
-                api.search(
-                    propertyId,
-                    SearchRequest(searchTerm = query)
-                )
+                api.search(propertyId, sanitizedRequest)
             }
             .zipWith(apiProvider.getFabricEndpoint())
             .map { (response, baseUrl) ->

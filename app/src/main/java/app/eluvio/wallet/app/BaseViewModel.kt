@@ -87,7 +87,7 @@ abstract class BaseViewModel<State : Any>(
         singleThreadScheduler.scheduleDirect {
             _state.value?.mapper()?.let { newState ->
                 _state.onNext(newState)
-                if (savedStateHandle!=null && newState is Parcelable) {
+                if (savedStateHandle != null && newState is Parcelable) {
                     savedStateHandle[STATE_KEY] = newState
                 }
             }
