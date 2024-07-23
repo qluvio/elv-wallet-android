@@ -27,6 +27,15 @@ class SearchFiltersEntity : RealmObject {
         var id: String = ""
         var title: String = ""
         var tags: RealmList<AttributeValue> = realmListOf()
+
+        fun copy(): Attribute {
+            val src = this
+            return Attribute().apply {
+                id = src.id
+                title = src.title
+                tags = src.tags
+            }
+        }
     }
 
     class AttributeValue : EmbeddedRealmObject {

@@ -16,6 +16,7 @@ import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.toCarousel
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.Optional
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
@@ -45,22 +46,34 @@ class PropertySearchViewModel @Inject constructor(
         val propertyName: String? = null,
 
         // Primary filters will be displayed before search results
-        val primaryFilters: List<SearchFiltersEntity.AttributeValue>? = null,
+        val primaryFilter: SearchFiltersEntity.Attribute? = null,
         val searchResults: DynamicPageLayoutState = DynamicPageLayoutState(captureTopFocus = false),
-    )
+        val selectedFilter: SelectedFilter? = null,
+    ) {
+        data class SelectedFilter(
+            val selectedFilterValue: String,
+            val nextFilter: SearchFiltersEntity.Attribute?
+        )
+    }
 
     private val navArgs = savedStateHandle.navArgs<PropertySearchNavArgs>()
 
     private val query = BehaviorProcessor.createDefault(QueryUpdate("", true))
     private val manualSearch = PublishProcessor.create<Unit>()
 
-    // Empty string means no filter selected
-    private val selectedPrimaryFilter = BehaviorProcessor.createDefault("")
+    private val selectedPrimaryFilter =
+        BehaviorProcessor.createDefault(Optional.empty<State.SelectedFilter>())
 
     private var searchFilters: SearchFiltersEntity? = null
 
     override fun onResume() {
         super.onResume()
+
+        selectedPrimaryFilter
+            .subscribeBy {
+                updateState { copy(selectedFilter = it.orDefault(null)) }
+            }
+            .addTo(disposables)
 
         observeSearchTriggers()
 
@@ -84,7 +97,7 @@ class PropertySearchViewModel @Inject constructor(
                         loading = false,
                         headerLogo = property.headerLogo,
                         propertyName = property.name,
-                        primaryFilters = searchFilters?.primaryFilter?.tags,
+                        primaryFilter = searchFilters?.primaryFilter,
                     )
                 }
             }
@@ -98,8 +111,8 @@ class PropertySearchViewModel @Inject constructor(
                 query.onNext(QueryUpdate("", immediate = true))
             }
 
-            selectedPrimaryFilter.value?.isNotEmpty() == true -> {
-                selectedPrimaryFilter.onNext("")
+            selectedPrimaryFilter.value?.isPresent == true -> {
+                selectedPrimaryFilter.onNext(Optional.empty())
             }
             // Using [GoBack] sends us into an infinite loop, so instead we assume we
             // know the current destination, and pop it.
@@ -107,8 +120,16 @@ class PropertySearchViewModel @Inject constructor(
         }
     }
 
-    fun onPrimaryFilterSelected(filter: String) {
-        selectedPrimaryFilter.onNext(filter)
+    fun onPrimaryFilterSelected(filter: SearchFiltersEntity.AttributeValue?) {
+        val selectedFilter = filter?.let { primaryFilterValue ->
+            val nextFilter = searchFilters?.attributes
+                ?.find { it.id == primaryFilterValue.nextFilterAttribute }
+            State.SelectedFilter(
+                selectedFilterValue = primaryFilterValue.value,
+                nextFilter = nextFilter
+            )
+        }
+        selectedPrimaryFilter.onNext(Optional.of(selectedFilter))
     }
 
     fun onQueryChanged(query: String) {
@@ -145,7 +166,7 @@ class PropertySearchViewModel @Inject constructor(
         val searchClicked = manualSearch
             .map { SearchTriggers.QueryChanged(query.value?.query ?: "") }
         val primaryFilterChanged = selectedPrimaryFilter
-            .map { SearchTriggers.PrimaryFilterChanged(it) }
+            .map { SearchTriggers.PrimaryFilterChanged(it.orDefault(null)?.selectedFilterValue) }
 
         Flowable.merge(
             queryChanged,
@@ -158,7 +179,6 @@ class PropertySearchViewModel @Inject constructor(
                     is SearchTriggers.PrimaryFilterChanged -> {
                         val primaryFilterAttribute = searchFilters?.primaryFilter?.id
                         val primaryFilterValue = trigger.value
-                            .takeIf { it.isNotEmpty() }
                         if (primaryFilterAttribute != null && primaryFilterValue != null) {
                             request.copy(
                                 attributes = mapOf(
@@ -180,13 +200,13 @@ class PropertySearchViewModel @Inject constructor(
                     // Don't show primary filters anymore, we got a search term
                     fetchResults(request).toMaybe()
                         .doOnSubscribe {
-                            updateState { copy(primaryFilters = null) }
+                            updateState { copy(primaryFilter = null) }
                         }
                 } else {
                     // When search term is emptied, but no filter is selected, show primary filters again
                     Maybe.never<List<MediaPageSectionEntity>>()
                         .doOnSubscribe {
-                            updateState { copy(primaryFilters = searchFilters?.primaryFilter?.tags) }
+                            updateState { copy(primaryFilter = searchFilters?.primaryFilter) }
                         }
                 }
             }
@@ -214,5 +234,5 @@ private data class QueryUpdate(val query: String, val immediate: Boolean)
 
 private sealed interface SearchTriggers {
     data class QueryChanged(val query: String) : SearchTriggers
-    data class PrimaryFilterChanged(val value: String) : SearchTriggers
+    data class PrimaryFilterChanged(val value: String?) : SearchTriggers
 }

@@ -2,10 +2,12 @@ package app.eluvio.wallet.screens.property.search
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -15,10 +17,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -33,9 +37,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -48,6 +54,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.list.TvLazyRow
+import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
@@ -57,10 +65,12 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.Overscan
+import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.WrapContentText
 import app.eluvio.wallet.screens.property.DynamicPageLayout
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -103,21 +113,23 @@ fun PropertySearch() {
 @Composable
 private fun PropertySearch(
     state: PropertySearchViewModel.State, query: String,
-    onPrimaryFilterSelected: (String) -> Unit,
+    onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue) -> Unit,
     onQueryChanged: (String) -> Unit,
     onSearchClicked: () -> Unit,
 ) {
     val bgModifier = Modifier
         .fillMaxSize()
         .background(Brush.linearGradient(listOf(Color(0xFF16151F), Color(0xFF0C0C10))))
-        .padding(Overscan.defaultPadding())
     if (state.loading) {
         LoadingSpinner(modifier = bgModifier)
         return
     }
     Column(modifier = bgModifier) {
         Header(state, query, onQueryChanged, onSearchClicked)
-        if (state.primaryFilters != null) {
+        if (state.selectedFilter != null) {
+            SecondaryFilterSelector(state)
+        }
+        if (state.primaryFilter != null) {
             PrimaryFilterSelector(state, onPrimaryFilterSelected)
         } else if (state.loadingResults) {
             LoadingSpinner(
@@ -141,9 +153,9 @@ private fun LoadingSpinner(modifier: Modifier) {
 @Composable
 private fun PrimaryFilterSelector(
     state: PropertySearchViewModel.State,
-    onPrimaryFilterSelected: (String) -> Unit
+    onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue) -> Unit
 ) {
-    val items = state.primaryFilters.orEmpty()
+    val items = state.primaryFilter?.tags.orEmpty()
     val cardSpacing = 20.dp
     TvLazyVerticalGrid(
         columns = TvGridCells.Fixed(3),
@@ -156,7 +168,7 @@ private fun PrimaryFilterSelector(
             ImageCard(
                 imageUrl = "${state.baseUrl}${item.image}",
                 contentDescription = tag,
-                onClick = { onPrimaryFilterSelected(tag) },
+                onClick = { onPrimaryFilterSelected(item) },
                 modifier = Modifier.aspectRatio(16f / 9f),
                 focusedOverlay = {
                     Box(
@@ -181,6 +193,36 @@ private fun PrimaryFilterSelector(
 }
 
 @Composable
+private fun SecondaryFilterSelector(state: PropertySearchViewModel.State) {
+    val filter = state.selectedFilter ?: return
+    TvLazyRow(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = Overscan.horizontalPadding, vertical = 22.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(Color(0xFF939393)),
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.size(12.dp, 30.dp)
+                )
+                TvButton(
+                    text = filter.selectedFilterValue,
+                    onClick = { /*TODO*/ },
+                    shape = ClickableSurfaceDefaults.shape(CircleShape)
+                )
+            }
+        }
+        items(filter.nextFilter?.tags.orEmpty()) { tag ->
+            TvButton(text = tag.value, onClick = { /*TODO*/ })
+        }
+    }
+}
+
+@Composable
 private fun Header(
     state: PropertySearchViewModel.State,
     query: String,
@@ -192,7 +234,7 @@ private fun Header(
     } else {
         null
     }
-    Row {
+    Row(Modifier.padding(Overscan.defaultPadding(excludeBottom = true))) {
         AsyncImage(
             model = "${state.baseUrl}${state.headerLogo}",
             contentDescription = "Logo",
