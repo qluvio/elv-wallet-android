@@ -218,9 +218,13 @@ class PropertySearchViewModel @Inject constructor(
             }
             .distinctUntilChanged()
             .switchMapMaybe { request ->
-                // Don't run empty searches before primary filter is selected
                 val runSearch =
-                    request.searchTerm?.isNotEmpty() == true || request.attributes != null
+                    // No filters are defined on the property, so we can search right away
+                    searchFilters?.primaryFilter == null ||
+                            // We have a search term, so can search regardless of filters
+                            request.searchTerm?.isNotEmpty() == true ||
+                            // Some filter is defined, we should run a search
+                            request.attributes != null
                 if (runSearch) {
                     // Don't show primary filters anymore, we got a search term
                     fetchResults(request).toMaybe()
