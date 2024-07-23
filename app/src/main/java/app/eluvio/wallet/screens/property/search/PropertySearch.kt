@@ -113,7 +113,7 @@ fun PropertySearch() {
 @Composable
 private fun PropertySearch(
     state: PropertySearchViewModel.State, query: String,
-    onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue) -> Unit,
+    onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue?) -> Unit,
     onQueryChanged: (String) -> Unit,
     onSearchClicked: () -> Unit,
 ) {
@@ -127,7 +127,9 @@ private fun PropertySearch(
     Column(modifier = bgModifier) {
         Header(state, query, onQueryChanged, onSearchClicked)
         if (state.selectedFilter != null) {
-            SecondaryFilterSelector(state)
+            SecondaryFilterSelector(
+                state,
+                onPrimaryFilterCleared = { onPrimaryFilterSelected(null) })
         }
         if (state.primaryFilter != null) {
             PrimaryFilterSelector(state, onPrimaryFilterSelected)
@@ -193,7 +195,10 @@ private fun PrimaryFilterSelector(
 }
 
 @Composable
-private fun SecondaryFilterSelector(state: PropertySearchViewModel.State) {
+private fun SecondaryFilterSelector(
+    state: PropertySearchViewModel.State,
+    onPrimaryFilterCleared: () -> Unit
+) {
     val filter = state.selectedFilter ?: return
     TvLazyRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -211,7 +216,7 @@ private fun SecondaryFilterSelector(state: PropertySearchViewModel.State) {
                 )
                 TvButton(
                     text = filter.selectedFilterValue,
-                    onClick = { /*TODO*/ },
+                    onClick = onPrimaryFilterCleared,
                     shape = ClickableSurfaceDefaults.shape(CircleShape)
                 )
             }
