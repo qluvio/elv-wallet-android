@@ -50,10 +50,21 @@ class PropertySearchViewModel @Inject constructor(
         val searchResults: DynamicPageLayoutState = DynamicPageLayoutState(captureTopFocus = false),
         val selectedFilters: SelectedFilters? = null,
     ) {
+        /**
+         * Represents the currently selected filters.
+         * All instances represent a non-empty selection of at least Primary filter and value.
+         */
         data class SelectedFilters(
             val primaryFilterAttribute: SearchFiltersEntity.Attribute,
             val primaryFilterValue: String,
+            /**
+             * The secondary filter matching the selected primary filter value.
+             * The existence of this field doesn't mean that a secondary filter is selected yet.
+             */
             val secondaryFilterAttribute: SearchFiltersEntity.Attribute?,
+            /**
+             * When this field is non-null, the secondary filter is actually selected.
+             */
             val secondaryFilterValue: String? = null,
         )
     }
@@ -111,14 +122,22 @@ class PropertySearchViewModel @Inject constructor(
     }
 
     fun onBackPressed() {
+        val selectedFilter = selectedPrimaryFilter.value?.orDefault(null)
         when {
             query.value?.query?.isNotEmpty() == true -> {
                 fireEvent(ResetQueryEvent)
                 query.onNext(QueryUpdate("", immediate = true))
             }
 
-            selectedPrimaryFilter.value?.isPresent == true -> {
-                selectedPrimaryFilter.onNext(Optional.empty())
+            selectedFilter != null -> {
+                if (selectedFilter.secondaryFilterValue != null) {
+                    // Secondary filter is selected, clear it
+                    val updatedFilter = selectedFilter.copy(secondaryFilterValue = null)
+                    selectedPrimaryFilter.onNext(Optional.of(updatedFilter))
+                } else {
+                    // Only primary filter is selected, clear it.
+                    selectedPrimaryFilter.onNext(Optional.empty())
+                }
             }
             // Using [GoBack] sends us into an infinite loop, so instead we assume we
             // know the current destination, and pop it.
@@ -244,14 +263,13 @@ private sealed interface SearchTriggers {
     data class FilterChanged(
         val filter: PropertySearchViewModel.State.SelectedFilters?
     ) : SearchTriggers {
-         fun toAttributeMap(): Map<String, List<String>>? {
-            filter ?: return null
-            return buildMap {
-                put(filter.primaryFilterAttribute.id, listOfNotNull(filter.primaryFilterValue))
-                if (filter.secondaryFilterAttribute != null && filter.secondaryFilterValue != null) {
+        fun toAttributeMap(): Map<String, List<String>>? = filter?.run {
+            buildMap {
+                put(primaryFilterAttribute.id, listOf(primaryFilterValue))
+                if (secondaryFilterAttribute != null && secondaryFilterValue != null) {
                     put(
-                        filter.secondaryFilterAttribute.id,
-                        listOfNotNull(filter.secondaryFilterValue)
+                        secondaryFilterAttribute.id,
+                        listOf(secondaryFilterValue)
                     )
                 }
             }
