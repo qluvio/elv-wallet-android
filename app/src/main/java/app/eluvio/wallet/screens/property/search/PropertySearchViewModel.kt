@@ -48,11 +48,13 @@ class PropertySearchViewModel @Inject constructor(
         // Primary filters will be displayed before search results
         val primaryFilter: SearchFiltersEntity.Attribute? = null,
         val searchResults: DynamicPageLayoutState = DynamicPageLayoutState(captureTopFocus = false),
-        val selectedFilter: SelectedFilter? = null,
+        val selectedFilters: SelectedFilters? = null,
     ) {
-        data class SelectedFilter(
-            val selectedFilterValue: String,
-            val nextFilter: SearchFiltersEntity.Attribute?
+        data class SelectedFilters(
+            val primaryFilterAttribute: SearchFiltersEntity.Attribute,
+            val primaryFilterValue: String,
+            val secondaryFilterAttribute: SearchFiltersEntity.Attribute?,
+            val secondaryFilterValue: String? = null,
         )
     }
 
@@ -62,7 +64,7 @@ class PropertySearchViewModel @Inject constructor(
     private val manualSearch = PublishProcessor.create<Unit>()
 
     private val selectedPrimaryFilter =
-        BehaviorProcessor.createDefault(Optional.empty<State.SelectedFilter>())
+        BehaviorProcessor.createDefault(Optional.empty<State.SelectedFilters>())
 
     private var searchFilters: SearchFiltersEntity? = null
 
@@ -71,7 +73,7 @@ class PropertySearchViewModel @Inject constructor(
 
         selectedPrimaryFilter
             .subscribeBy {
-                updateState { copy(selectedFilter = it.orDefault(null)) }
+                updateState { copy(selectedFilters = it.orDefault(null)) }
             }
             .addTo(disposables)
 
@@ -104,6 +106,10 @@ class PropertySearchViewModel @Inject constructor(
             .addTo(disposables)
     }
 
+    fun onQueryChanged(query: String) {
+        this.query.onNext(QueryUpdate(query, immediate = false))
+    }
+
     fun onBackPressed() {
         when {
             query.value?.query?.isNotEmpty() == true -> {
@@ -120,20 +126,29 @@ class PropertySearchViewModel @Inject constructor(
         }
     }
 
-    fun onPrimaryFilterSelected(filter: SearchFiltersEntity.AttributeValue?) {
-        val selectedFilter = filter?.let { primaryFilterValue ->
+    fun onPrimaryFilterSelected(primaryFilterValue: SearchFiltersEntity.AttributeValue?) {
+        val primaryFilterAttribute = searchFilters?.primaryFilter
+        val selectedFilter = if (primaryFilterAttribute != null && primaryFilterValue != null) {
             val nextFilter = searchFilters?.attributes
                 ?.find { it.id == primaryFilterValue.nextFilterAttribute }
-            State.SelectedFilter(
-                selectedFilterValue = primaryFilterValue.value,
-                nextFilter = nextFilter
+            State.SelectedFilters(
+                primaryFilterAttribute = primaryFilterAttribute,
+                primaryFilterValue = primaryFilterValue.value,
+                secondaryFilterAttribute = nextFilter,
             )
-        }
+        } else null
         selectedPrimaryFilter.onNext(Optional.of(selectedFilter))
     }
 
-    fun onQueryChanged(query: String) {
-        this.query.onNext(QueryUpdate(query, immediate = false))
+    fun onSecondaryFilterClicked(value: String) {
+        val selectedFilter = selectedPrimaryFilter.value?.orDefault(null)
+            ?: return Log.w("Secondary filter selected without primary filter?!")
+        val updatedFilter = selectedFilter.copy(
+            secondaryFilterValue = value
+                // If clicked the currently selected filter, deselect it.
+                .takeIf { it != selectedFilter.secondaryFilterValue }
+        )
+        selectedPrimaryFilter.onNext(Optional.of(updatedFilter))
     }
 
     fun onSearchClicked() {
@@ -165,29 +180,20 @@ class PropertySearchViewModel @Inject constructor(
             .map { SearchTriggers.QueryChanged(it) }
         val searchClicked = manualSearch
             .map { SearchTriggers.QueryChanged(query.value?.query ?: "") }
-        val primaryFilterChanged = selectedPrimaryFilter
-            .map { SearchTriggers.PrimaryFilterChanged(it.orDefault(null)?.selectedFilterValue) }
+        val filterChanged = selectedPrimaryFilter
+            .map { SearchTriggers.FilterChanged(it.orDefault(null)) }
+            .distinctUntilChanged()
 
         Flowable.merge(
             queryChanged,
             searchClicked,
-            primaryFilterChanged
+            filterChanged
         )
             .scan(SearchRequest()) { request, trigger ->
                 when (trigger) {
                     is SearchTriggers.QueryChanged -> request.copy(searchTerm = trigger.query)
-                    is SearchTriggers.PrimaryFilterChanged -> {
-                        val primaryFilterAttribute = searchFilters?.primaryFilter?.id
-                        val primaryFilterValue = trigger.value
-                        if (primaryFilterAttribute != null && primaryFilterValue != null) {
-                            request.copy(
-                                attributes = mapOf(
-                                    primaryFilterAttribute to listOf(primaryFilterValue)
-                                )
-                            )
-                        } else {
-                            request.copy(attributes = null)
-                        }
+                    is SearchTriggers.FilterChanged -> {
+                        request.copy(attributes = trigger.toAttributeMap())
                     }
                 }
             }
@@ -234,5 +240,22 @@ private data class QueryUpdate(val query: String, val immediate: Boolean)
 
 private sealed interface SearchTriggers {
     data class QueryChanged(val query: String) : SearchTriggers
-    data class PrimaryFilterChanged(val value: String?) : SearchTriggers
+
+    data class FilterChanged(
+        val filter: PropertySearchViewModel.State.SelectedFilters?
+    ) : SearchTriggers {
+         fun toAttributeMap(): Map<String, List<String>>? {
+            filter ?: return null
+            return buildMap {
+                put(filter.primaryFilterAttribute.id, listOfNotNull(filter.primaryFilterValue))
+                if (filter.secondaryFilterAttribute != null && filter.secondaryFilterValue != null) {
+                    put(
+                        filter.secondaryFilterAttribute.id,
+                        listOfNotNull(filter.secondaryFilterValue)
+                    )
+                }
+            }
+        }
+    }
 }
+

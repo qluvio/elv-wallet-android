@@ -26,14 +26,14 @@ class SearchFiltersEntity : RealmObject {
     class Attribute : EmbeddedRealmObject {
         var id: String = ""
         var title: String = ""
-        var tags: RealmList<AttributeValue> = realmListOf()
+        var values: RealmList<AttributeValue> = realmListOf()
 
         fun copy(): Attribute {
             val src = this
             return Attribute().apply {
                 id = src.id
                 title = src.title
-                tags = src.tags
+                values = src.values
             }
         }
     }
@@ -41,7 +41,7 @@ class SearchFiltersEntity : RealmObject {
     class AttributeValue : EmbeddedRealmObject {
         companion object {
             const val ALL = "All"
-            fun from(tag: String) = AttributeValue().apply { value = tag }
+            fun from(value: String) = AttributeValue().apply { this.value = value }
         }
 
         var value: String = ""

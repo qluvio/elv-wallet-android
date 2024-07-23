@@ -29,7 +29,8 @@ data class SearchFiltersDto(
 data class SearchFilterAttributeDto(
     val id: String,
     val title: String?,
-    val tags: List<String>?,
+    @field:Json(name = "tags")
+    val values: List<String>?,
 )
 
 @JsonClass(generateAdapter = true)

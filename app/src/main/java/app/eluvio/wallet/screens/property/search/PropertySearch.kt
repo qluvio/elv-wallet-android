@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -75,6 +76,7 @@ import app.eluvio.wallet.screens.common.WrapContentText
 import app.eluvio.wallet.screens.property.DynamicPageLayout
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_48
+import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.compose.KeyboardClosedHandler
 import app.eluvio.wallet.util.subscribeToState
@@ -92,11 +94,12 @@ fun PropertySearch() {
             PropertySearch(
                 state,
                 query,
-                onPrimaryFilterSelected = vm::onPrimaryFilterSelected,
                 onQueryChanged = {
                     query = it
                     vm.onQueryChanged(it)
                 },
+                onPrimaryFilterSelected = vm::onPrimaryFilterSelected,
+                onSecondaryFilterClick = vm::onSecondaryFilterClicked,
                 onSearchClicked = vm::onSearchClicked
             )
         },
@@ -112,9 +115,11 @@ fun PropertySearch() {
 
 @Composable
 private fun PropertySearch(
-    state: PropertySearchViewModel.State, query: String,
-    onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue?) -> Unit,
+    state: PropertySearchViewModel.State,
+    query: String,
     onQueryChanged: (String) -> Unit,
+    onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue?) -> Unit,
+    onSecondaryFilterClick: (String) -> Unit,
     onSearchClicked: () -> Unit,
 ) {
     val bgModifier = Modifier
@@ -126,10 +131,12 @@ private fun PropertySearch(
     }
     Column(modifier = bgModifier) {
         Header(state, query, onQueryChanged, onSearchClicked)
-        if (state.selectedFilter != null) {
+        if (state.selectedFilters != null) {
             SecondaryFilterSelector(
                 state,
-                onPrimaryFilterCleared = { onPrimaryFilterSelected(null) })
+                onPrimaryFilterCleared = { onPrimaryFilterSelected(null) },
+                onSecondaryFilterClick = onSecondaryFilterClick
+            )
         }
         if (state.primaryFilter != null) {
             PrimaryFilterSelector(state, onPrimaryFilterSelected)
@@ -157,7 +164,7 @@ private fun PrimaryFilterSelector(
     state: PropertySearchViewModel.State,
     onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue) -> Unit
 ) {
-    val items = state.primaryFilter?.tags.orEmpty()
+    val items = state.primaryFilter?.values.orEmpty()
     val cardSpacing = 20.dp
     TvLazyVerticalGrid(
         columns = TvGridCells.Fixed(3),
@@ -197,9 +204,10 @@ private fun PrimaryFilterSelector(
 @Composable
 private fun SecondaryFilterSelector(
     state: PropertySearchViewModel.State,
-    onPrimaryFilterCleared: () -> Unit
+    onPrimaryFilterCleared: () -> Unit,
+    onSecondaryFilterClick: (String) -> Unit,
 ) {
-    val filter = state.selectedFilter ?: return
+    val filter = state.selectedFilters ?: return
     TvLazyRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         contentPadding = PaddingValues(horizontal = Overscan.horizontalPadding, vertical = 22.dp),
@@ -215,14 +223,48 @@ private fun SecondaryFilterSelector(
                     modifier = Modifier.size(12.dp, 30.dp)
                 )
                 TvButton(
-                    text = filter.selectedFilterValue,
+                    text = filter.primaryFilterValue,
                     onClick = onPrimaryFilterCleared,
                     shape = ClickableSurfaceDefaults.shape(CircleShape)
                 )
             }
         }
-        items(filter.nextFilter?.tags.orEmpty()) { tag ->
-            TvButton(text = tag.value, onClick = { /*TODO*/ })
+        items(filter.secondaryFilterAttribute?.values.orEmpty()) { attributeValue ->
+            FilterChip(filter, attributeValue, onSecondaryFilterClick)
+        }
+    }
+}
+
+@Composable
+private fun FilterChip(
+    filter: PropertySearchViewModel.State.SelectedFilters,
+    attributeValue: SearchFiltersEntity.AttributeValue,
+    onSecondaryFilterClick: (String) -> Unit
+) {
+    val selected = filter.secondaryFilterValue == attributeValue.value
+    TvButton(
+        onClick = { onSecondaryFilterClick(attributeValue.value) }) {
+        Row(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(
+                    top = 5.dp,
+                    bottom = 5.dp,
+                    start = 20.dp,
+                    end = if (selected) 8.dp else 20.dp
+                )
+        ) {
+            Text(
+                text = attributeValue.value,
+                style = MaterialTheme.typography.label_40,
+            )
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = "Clear",
+                    Modifier.padding(start = 3.dp)
+                )
+            }
         }
     }
 }
@@ -335,6 +377,7 @@ private fun PropertySearchPreview() = EluvioThemePreview {
         ),
         query = "",
         onPrimaryFilterSelected = {},
+        onSecondaryFilterClick = {},
         onQueryChanged = {},
         onSearchClicked = {}
     )

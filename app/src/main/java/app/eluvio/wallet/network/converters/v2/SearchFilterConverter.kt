@@ -32,10 +32,10 @@ private fun Attribute.applyFilterOptions(
 ) = apply {
     if (filterOptions.isNullOrEmpty()) {
         // Update nextFilter to global secondary filter
-        tags.forEach { it.nextFilterAttribute = globalSecondaryFilter?.id }
+        values.forEach { it.nextFilterAttribute = globalSecondaryFilter?.id }
     } else {
         // Nuke any existing tags. If they don't exist in the filter options, they're don't matter.
-        tags = filterOptions.map { option ->
+        values = filterOptions.map { option ->
             SearchFiltersEntity.AttributeValue().apply {
                 // Server sends empty string as an "all" filter options
                 value = option.primaryFilterValue.takeIf { it.isNotEmpty() }
@@ -52,6 +52,8 @@ private fun SearchFilterAttributeDto.toEntity(): Attribute {
     return Attribute().apply {
         id = dto.id
         title = dto.title ?: ""
-        tags = dto.tags?.map { SearchFiltersEntity.AttributeValue.from(it) }.toRealmListOrEmpty()
+        values = dto.values
+            ?.map { SearchFiltersEntity.AttributeValue.from(it) }
+            .toRealmListOrEmpty()
     }
 }
