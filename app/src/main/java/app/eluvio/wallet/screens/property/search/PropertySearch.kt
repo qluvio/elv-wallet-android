@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -180,24 +181,43 @@ private fun PrimaryFilterSelector(
                 onClick = { onPrimaryFilterSelected(item) },
                 modifier = Modifier.aspectRatio(16f / 9f),
                 focusedOverlay = {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        WrapContentText(
+                    PrimaryFilterOverlay(text = tag)
+                },
+                unFocusedOverlay = {
+                    if (item.image == null) {
+                        //
+                        PrimaryFilterOverlay(
                             text = tag,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.title_62,
-                            color = Color.White,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 20.dp)
+                            Modifier
+                                .border(
+                                    2.dp,
+                                    LocalContentColor.current,
+                                    shape = MaterialTheme.shapes.medium
+                                )
                         )
                     }
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun PrimaryFilterOverlay(text: String, modifier: Modifier = Modifier) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize() then modifier
+    ) {
+        WrapContentText(
+            text = text,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.title_62,
+            color = Color.White,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(horizontal = 10.dp, vertical = 20.dp)
+        )
     }
 }
 
