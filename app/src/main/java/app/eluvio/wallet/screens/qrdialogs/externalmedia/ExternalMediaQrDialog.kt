@@ -1,8 +1,8 @@
 package app.eluvio.wallet.screens.qrdialogs.externalmedia
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,10 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import app.eluvio.wallet.R
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.FullscreenDialogStyle
 import app.eluvio.wallet.screens.common.Overscan
+import app.eluvio.wallet.screens.common.generateQrCodeBlocking
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.subscribeToState
@@ -49,6 +49,8 @@ private fun ExternalMediaQrDialog(state: ExternalMediaQrDialogViewModel.State) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
+            // Scrim broke? do it manually i guess
+            .background(Color.Black.copy(alpha = 0.8f))
             .padding(Overscan.defaultPadding())
     ) {
         if (state.error) {
@@ -91,11 +93,9 @@ private fun ErrorView() {
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun QrDialogPreviewSuccess() = EluvioThemePreview {
-    val bitmap = BitmapFactory.decodeResource(
-        LocalContext.current.resources,
-        R.mipmap.ic_launcher
+    ExternalMediaQrDialog(
+        ExternalMediaQrDialogViewModel.State(generateQrCodeBlocking("http://cf.io"))
     )
-    ExternalMediaQrDialog(ExternalMediaQrDialogViewModel.State(bitmap))
 }
 
 @Composable
