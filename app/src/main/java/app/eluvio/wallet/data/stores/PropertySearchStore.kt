@@ -7,6 +7,7 @@ import app.eluvio.wallet.network.api.mwv2.SearchApi
 import app.eluvio.wallet.network.converters.v2.toEntity
 import app.eluvio.wallet.network.dto.v2.SearchRequest
 import app.eluvio.wallet.util.realm.asFlowable
+import app.eluvio.wallet.util.realm.saveAsync
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Flowable
@@ -54,6 +55,12 @@ class PropertySearchStore @Inject constructor(
                 response.contents
                     ?.map { section -> section.toEntity(baseUrl) }
                     .orEmpty()
+            }
+            .flatMap { sections ->
+                // Persist only the MediaItems, not the Sections or SectionItems
+                val mediaItems = sections.flatMap { it.items }.mapNotNull { it.media }
+                saveAsync(realm, mediaItems)
+                    .toSingleDefault(sections)
             }
     }
 }

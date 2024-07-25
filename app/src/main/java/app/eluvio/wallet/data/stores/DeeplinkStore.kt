@@ -36,10 +36,10 @@ class DeeplinkStore @Inject constructor(
             .asFlowable()
             .firstElement()
             .mapNotNull { it.firstOrNull() }
-            .flatMap { deeplink ->
+            .flatMapSingle { deeplink ->
                 Log.d("Deeplink found in DB, passing along and removing from db")
                 saveAsync(realm, emptyList<DeeplinkRequestEntity>(), clearTable = true)
-                    .andThen(Maybe.just(deeplink))
+                    .toSingleDefault(deeplink)
             }
     }
 

@@ -28,7 +28,7 @@ inline fun <reified T : RealmObject> Single<T>.saveTo(
 ): Single<T> {
     return flatMap { entity ->
         saveAsync(realm, listOf(entity), clearTable, updatePolicy)
-            .andThen(Single.just(entity))
+            .toSingleDefault(entity)
     }
 }
 
@@ -44,7 +44,7 @@ inline fun <reified T : RealmObject> Single<List<T>>.saveTo(
 ): Single<List<T>> {
     return flatMap { list ->
         saveAsync(realm, list, clearTable, updatePolicy)
-            .andThen(Single.just(list))
+            .toSingleDefault(list)
     }
 }
 

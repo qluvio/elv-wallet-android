@@ -16,6 +16,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.navigation.MainGraph
+import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.property.CarouselItemCard
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
@@ -29,7 +30,11 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Composable
 fun MediaGrid() {
     hiltViewModel<MediaGridViewModel>().subscribeToState { vm, state ->
-        MediaGrid(state)
+        if (state.loading) {
+            DelayedFullscreenLoader()
+        } else {
+            MediaGrid(state)
+        }
     }
 }
 

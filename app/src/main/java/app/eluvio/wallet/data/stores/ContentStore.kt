@@ -172,12 +172,21 @@ class ContentStore @Inject constructor(
             .distinctUntilChanged()
     }
 
-    fun observeMediaItem(mediaId: String): Flowable<MediaEntity> {
-        return realm.query<MediaEntity>(
-            "${MediaEntity::id.name} == $0",
-            mediaId
-        ).asFlowable()
-            .mapNotNull { it.firstOrNull() }
+    /**
+     * Observes local cache only, unless [propertyId] is provided,
+     * in which case it will fetch from the server if needed.
+     */
+    fun observeMediaItem(mediaId: String, propertyId: String? = null): Flowable<MediaEntity> {
+        return if (propertyId == null) {
+            realm.query<MediaEntity>(
+                "${MediaEntity::id.name} == $0",
+                mediaId
+            ).asFlowable()
+                .mapNotNull { it.firstOrNull() }
+        } else {
+            observeMediaItems(propertyId, listOf(mediaId), forceRefresh = false)
+                .mapNotNull { it.firstOrNull() }
+        }
     }
 
     /**
@@ -259,7 +268,7 @@ class ContentStore @Inject constructor(
                     // This is a fabric error. Probably Bad/expired token and we need to sign out.
                     signOutHandler.signOut("Token expired. Please sign in again.")
                         // Consume the error. App will restart.
-                        .andThen(Single.just(emptyList()))
+                        .toSingleDefault(emptyList())
                 } else {
                     Single.error(error)
                 }
