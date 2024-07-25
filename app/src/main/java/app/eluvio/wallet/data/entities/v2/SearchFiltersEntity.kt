@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
+import io.realm.kotlin.ext.parent
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmList
@@ -36,6 +37,33 @@ class SearchFiltersEntity : RealmObject {
                 values = src.values
             }
         }
+
+        // Backlink to parent searchFilters
+        fun searchFilters(): SearchFiltersEntity = parent<SearchFiltersEntity>()
+
+        override fun toString(): String {
+            return "Attribute(id='$id', title='$title', values=$values)"
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Attribute
+
+            if (id != other.id) return false
+            if (title != other.title) return false
+            if (values != other.values) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = id.hashCode()
+            result = 31 * result + title.hashCode()
+            result = 31 * result + values.hashCode()
+            return result
+        }
     }
 
     class AttributeValue : EmbeddedRealmObject {
@@ -47,6 +75,34 @@ class SearchFiltersEntity : RealmObject {
         var value: String = ""
         var nextFilterAttribute: String? = null
         var image: String? = null
+
+        // Backlink to parent attribute
+        fun attribute(): Attribute = parent<Attribute>()
+
+        override fun toString(): String {
+            return "AttributeValue(value='$value', nextFilterAttribute=$nextFilterAttribute, image=$image)"
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as AttributeValue
+
+            if (value != other.value) return false
+            if (nextFilterAttribute != other.nextFilterAttribute) return false
+            if (image != other.image) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = value.hashCode()
+            result = 31 * result + (nextFilterAttribute?.hashCode() ?: 0)
+            result = 31 * result + (image?.hashCode() ?: 0)
+            return result
+        }
+
     }
 
     override fun equals(other: Any?): Boolean {

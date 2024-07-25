@@ -90,6 +90,28 @@ class MediaPageSectionEntity : RealmObject {
         override fun toString(): String {
             return "SectionItemEntity(mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, subpropertyImage=$subpropertyImage)"
         }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as SectionItemEntity
+
+            if (mediaType != other.mediaType) return false
+            if (media != other.media) return false
+            if (subpropertyId != other.subpropertyId) return false
+            if (subpropertyImage != other.subpropertyImage) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = mediaType?.hashCode() ?: 0
+            result = 31 * result + (media?.hashCode() ?: 0)
+            result = 31 * result + (subpropertyId?.hashCode() ?: 0)
+            result = 31 * result + (subpropertyImage?.hashCode() ?: 0)
+            return result
+        }
     }
 
     @Module

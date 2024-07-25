@@ -5,6 +5,7 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import app.eluvio.wallet.BuildConfig
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.asSharedState
@@ -14,6 +15,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
+import io.realm.kotlin.types.BaseRealmObject
+import kotlin.reflect.full.memberProperties
 
 private const val STATE_KEY = "viewmodel_state"
 
@@ -36,8 +39,18 @@ abstract class BaseViewModel<State : Any>(
         .doOnSubscribe {
             Log.d("${this.javaClass.simpleName} has started streaming state")
         }
-        .doOnNext {
-            Log.d("Next state emitted: $it")
+        .distinctUntilChanged()
+        .scan { previousState, newState ->
+            val msg = takeIf { BuildConfig.DEBUG }
+                ?.let { diffStates(previousState, newState) }
+                ?.let { diff ->
+                    // Timber will truncate long enough diffs (>4000 chars)
+                    "Diff:\n${diff}"
+                }
+                ?: "$newState"
+            val className = newState.javaClass.name.substringAfterLast('.')
+            Log.d("Next $className emitted: $msg")
+            newState
         }
         .asSharedState()
 
@@ -92,5 +105,44 @@ abstract class BaseViewModel<State : Any>(
                 }
             }
         }
+    }
+}
+
+/**
+ * Use reflection to diff all declared members of two objects, recursively, and return a human-readable diff.
+ * Returns null on either failure, or no diff.
+ */
+private fun diffStates(oldState: Any, newState: Any): String? {
+    fun Any.properties(): List<Pair<String, Any?>> {
+        // Assume order is stable and consistent for a given KClass
+        return this::class.memberProperties
+            .map { prop ->
+                prop.name to prop.getter.call(this)
+            }
+    }
+
+    fun Any.isDiffable(): Boolean = this::class.isData || this is BaseRealmObject
+    try {
+        return oldState.properties()
+            .zip(newState.properties())
+            .mapNotNull { (oldKV, newKV) ->
+                val (key, oldValue) = oldKV
+                val (_, newValue) = newKV
+                if (oldValue != newValue) {
+                    if (oldValue != null && newValue != null && oldValue.isDiffable()) {
+                        "$key:\n${diffStates(oldValue, newValue)?.prependIndent()}"
+                    } else {
+                        "$key: $oldValue -> $newValue"
+                    }
+                } else {
+                    // No diff
+                    null
+                }
+            }
+            .joinToString("\n")
+            .takeIf { it.isNotEmpty() }
+            ?.prependIndent()
+    } catch (e: Exception) {
+        return null
     }
 }
