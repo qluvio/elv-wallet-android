@@ -22,7 +22,6 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.processors.BehaviorProcessor
 import io.reactivex.rxjava3.processors.PublishProcessor
@@ -77,8 +76,6 @@ class PropertySearchViewModel @Inject constructor(
     private val selectedPrimaryFilter =
         BehaviorProcessor.createDefault(Optional.empty<State.SelectedFilters>())
 
-    private var searchFilters: SearchFiltersEntity? = null
-
     override fun onResume() {
         super.onResume()
 
@@ -87,8 +84,6 @@ class PropertySearchViewModel @Inject constructor(
                 updateState { copy(selectedFilters = it.orDefault(null)) }
             }
             .addTo(disposables)
-
-        observeSearchTriggers()
 
         apiProvider.getFabricEndpoint()
             .subscribeBy {
@@ -102,18 +97,35 @@ class PropertySearchViewModel @Inject constructor(
             .addTo(disposables)
 
         propertyStore.observeMediaProperty(navArgs.propertyId)
-            .combineLatest(searchStore.getFilters(navArgs.propertyId))
-            .subscribeBy { (property, filters) ->
-                searchFilters = filters
+            .subscribeBy {
                 updateState {
                     copy(
-                        loading = false,
-                        headerLogo = property.headerLogo,
-                        propertyName = property.name,
-                        primaryFilter = searchFilters?.primaryFilter,
+                        headerLogo = it.headerLogo,
+                        propertyName = it.name
                     )
                 }
             }
+            .addTo(disposables)
+
+
+        searchStore.getFilters(navArgs.propertyId)
+            .firstOrError(
+                // We don't actually want to observe changes, because in the rare case that filters
+                // change WHILE we're already showing them, the user can get into a weird state.
+            )
+            .subscribeBy(onSuccess = { filters ->
+                updateState {
+                    copy(
+                        // Technically we might not have finished loading the Property at this point,
+                        // but we still know the filters, so we can show them.
+                        loading = false,
+                        primaryFilter = filters.primaryFilter
+                    )
+                }
+
+                // Now that everything is ready, we can start observing search triggers.
+                observeSearchTriggers(filters)
+            })
             .addTo(disposables)
     }
 
@@ -146,16 +158,16 @@ class PropertySearchViewModel @Inject constructor(
     }
 
     fun onPrimaryFilterSelected(primaryFilterValue: SearchFiltersEntity.AttributeValue?) {
-        val primaryFilterAttribute = searchFilters?.primaryFilter
-        val selectedFilter = if (primaryFilterAttribute != null && primaryFilterValue != null) {
-            val nextFilter = searchFilters?.attributes
-                ?.find { it.id == primaryFilterValue.nextFilterAttribute }
+        val selectedFilter = primaryFilterValue?.let {
+            val primaryFilterAttribute = primaryFilterValue.attribute()
+            val nextFilter = primaryFilterAttribute.searchFilters().attributes
+                .find { it.id == primaryFilterValue.nextFilterAttribute }
             State.SelectedFilters(
                 primaryFilterAttribute = primaryFilterAttribute,
                 primaryFilterValue = primaryFilterValue.value,
                 secondaryFilterAttribute = nextFilter,
             )
-        } else null
+        }
         selectedPrimaryFilter.onNext(Optional.of(selectedFilter))
     }
 
@@ -186,7 +198,7 @@ class PropertySearchViewModel @Inject constructor(
             }
     }
 
-    private fun observeSearchTriggers() {
+    private fun observeSearchTriggers(searchFilters: SearchFiltersEntity) {
         val queryChanged = query
             .switchMapSingle { (query, immediate) ->
                 if (immediate) {
@@ -220,7 +232,7 @@ class PropertySearchViewModel @Inject constructor(
             .switchMapMaybe { request ->
                 val runSearch =
                     // No filters are defined on the property, so we can search right away
-                    searchFilters?.primaryFilter == null ||
+                    searchFilters.primaryFilter == null ||
                             // We have a search term, so can search regardless of filters
                             request.searchTerm?.isNotEmpty() == true ||
                             // Some filter is defined, we should run a search
@@ -235,7 +247,12 @@ class PropertySearchViewModel @Inject constructor(
                     // When search term is emptied, but no filter is selected, show primary filters again
                     Maybe.never<List<MediaPageSectionEntity>>()
                         .doOnSubscribe {
-                            updateState { copy(primaryFilter = searchFilters?.primaryFilter) }
+                            updateState {
+                                copy(
+                                    primaryFilter = searchFilters.primaryFilter,
+                                    searchResults = searchResults.copy(sections = emptyList())
+                                )
+                            }
                         }
                 }
             }
@@ -280,4 +297,3 @@ private sealed interface SearchTriggers {
         }
     }
 }
-
