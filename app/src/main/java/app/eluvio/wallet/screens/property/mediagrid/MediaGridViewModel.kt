@@ -73,6 +73,7 @@ class MediaGridViewModel @Inject constructor(
             .subscribe { section ->
                 updateState {
                     copy(
+                        loading = false,
                         title = section.title,
                         items = section.items.toCarouselItems(propertyId)
                     )
