@@ -75,7 +75,9 @@ private fun Collection<NavBackStackEntry>.print(prefix: String = "navstack") {
     fun NavBackStackEntry.routeWithArgs(): String {
         val fallback = destination.route ?: ""
         return arguments?.keySet()?.fold(fallback) { route, key ->
-            route.replace("{$key}", arguments?.getString(key) ?: "{$key}")
+            @Suppress("DEPRECATION")
+            val value = arguments?.get(key)?.takeIf { it is String }?.toString() ?: "{$key}"
+            route.replace("{$key}", value)
         } ?: fallback
     }
 
