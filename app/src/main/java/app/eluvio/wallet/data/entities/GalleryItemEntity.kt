@@ -18,6 +18,26 @@ class GalleryItemEntity : EmbeddedRealmObject {
         return "GalleryItemEntity(name='$name', imagePath=$imagePath)"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as GalleryItemEntity
+
+        if (name != other.name) return false
+        if (imagePath != other.imagePath) return false
+        if (imageAspectRatio != other.imageAspectRatio) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name?.hashCode() ?: 0
+        result = 31 * result + (imagePath?.hashCode() ?: 0)
+        result = 31 * result + (imageAspectRatio?.hashCode() ?: 0)
+        return result
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {

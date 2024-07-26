@@ -82,7 +82,8 @@ class MediaEntity : RealmObject {
 
         if (id != other.id) return false
         if (name != other.name) return false
-        if (image != other.image) return false
+        if (image.substringAfter("contentfabric.io") != other.image.substringAfter("contentfabric.io")) return false
+        if (!image.equalsIgnoreHost(other.image)) return false
         if (posterImagePath != other.posterImagePath) return false
         if (mediaType != other.mediaType) return false
         if (imageAspectRatio != other.imageAspectRatio) return false
@@ -97,6 +98,11 @@ class MediaEntity : RealmObject {
         if (tags != other.tags) return false
 
         return true
+    }
+
+    private fun String?.equalsIgnoreHost(other: String?): Boolean {
+        val host = "contentfabric.io"
+        return this?.substringAfter(host) != other?.substringAfter(host)
     }
 
     override fun hashCode(): Int {

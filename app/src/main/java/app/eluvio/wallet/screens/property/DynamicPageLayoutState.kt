@@ -39,19 +39,22 @@ data class DynamicPageLayoutState(
     }
 
     sealed interface Section {
+        val sectionId: String
+
         // TODO: maybe combine Title and Description into a single "Text" Row type,
         //  but then we'd have to start passing around predefined styles or something
         @Immutable
-        data class Title(val text: AnnotatedString) : Section
+        data class Title(override val sectionId: String, val text: AnnotatedString) : Section
 
         @Immutable
-        data class Description(val text: AnnotatedString) : Section
+        data class Description(override val sectionId: String, val text: AnnotatedString) : Section
 
         @Immutable
-        data class Banner(val imagePath: String) : Section
+        data class Banner(override val sectionId: String, val imagePath: String) : Section
 
         @Immutable
         data class Carousel(
+            override val sectionId: String,
             val title: String? = null,
             val subtitle: String? = null,
             val viewAllNavigationEvent: NavigationEvent? = null,

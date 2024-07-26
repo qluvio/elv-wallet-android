@@ -273,7 +273,12 @@ class PropertySearchViewModel @Inject constructor(
                     )
                 }.ifEmpty {
                     // Show a message when no results are found
-                    listOf(DynamicPageLayoutState.Section.Title(AnnotatedString("No results found")))
+                    listOf(
+                        DynamicPageLayoutState.Section.Title(
+                            "no_results",
+                            AnnotatedString("No results found")
+                        )
+                    )
                 }
                 updateState {
                     copy(searchResults = searchResults.copy(sections = sections))

@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.property
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity.SectionItemEntity
@@ -32,6 +33,7 @@ fun MediaPageSectionEntity.toCarousel(
         filters?.attributes?.firstOrNull { it.id == primaryFilter }
     }
     return DynamicPageLayoutState.Section.Carousel(
+        sectionId = id,
         title = title,
         subtitle = subtitle,
         items = items.take(displayLimit),
@@ -64,11 +66,12 @@ fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselIt
 }
 
 @Composable
-fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp) {
+fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.current
     when (carouselItem) {
         is CarouselItem.Media -> MediaItemCard(
             carouselItem.entity,
+            modifier = modifier,
             cardHeight = cardHeight,
             onMediaItemClick = { media ->
                 when {

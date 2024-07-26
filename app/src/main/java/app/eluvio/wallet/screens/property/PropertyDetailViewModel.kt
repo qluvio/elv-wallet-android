@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.property
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.core.text.parseAsHtml
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
@@ -11,10 +12,10 @@ import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
-import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.PropertySearchDestination
 import app.eluvio.wallet.util.toAnnotatedString
+import app.eluvio.wallet.util.trim
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -69,19 +70,19 @@ class PropertyDetailViewModel @Inject constructor(
     }
 
     private fun logo(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
-        return mainPage.logo?.let { DynamicPageLayoutState.Section.Banner(it) }
+        return mainPage.logo?.let { DynamicPageLayoutState.Section.Banner("logo", it) }
     }
 
     private fun title(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
         return mainPage.title
             ?.takeIf { it.isNotEmpty() }
-            ?.let { DynamicPageLayoutState.Section.Title(AnnotatedString(it)) }
+            ?.let { DynamicPageLayoutState.Section.Title("title", AnnotatedString(it)) }
     }
 
     private fun description(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
         return mainPage.description
             ?.takeIf { it.isNotEmpty() }
-            ?.let { DynamicPageLayoutState.Section.Description(AnnotatedString(it)) }
+            ?.let { DynamicPageLayoutState.Section.Description("description", AnnotatedString(it)) }
     }
 
     private fun descriptionRichText(mainPage: MediaPageEntity): DynamicPageLayoutState.Section? {
@@ -89,7 +90,10 @@ class PropertyDetailViewModel @Inject constructor(
             // Only fallback to RichText if neither title nor description are present.
             ?.takeIf { mainPage.title.isNullOrEmpty() && mainPage.description.isNullOrEmpty() }
             ?.let {
-                DynamicPageLayoutState.Section.Description(it.parseAsHtml().toAnnotatedString())
+                DynamicPageLayoutState.Section.Description(
+                    "desc_rt",
+                    AnnotatedString.fromHtml(it).trim()
+                )
             }
     }
 

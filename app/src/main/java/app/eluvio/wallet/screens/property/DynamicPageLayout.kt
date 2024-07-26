@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -25,9 +27,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.tv.foundation.PivotOffsets
-import androidx.tv.foundation.lazy.list.TvLazyColumn
-import androidx.tv.foundation.lazy.list.TvLazyListItemScope
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Surface
@@ -61,7 +60,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
         )
     }
     // Used to prevent Search button from getting focus before other page elements
-    TvLazyColumn(pivotOffsets = PivotOffsets(0.6f)) {
+    LazyColumn {
         item(contentType = "search", key = "search") {
             if (state.searchNavigationEvent != null) {
                 var firstFocus by rememberSaveable { mutableStateOf(true) }
@@ -104,7 +103,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
 }
 
 @Composable
-private fun TvLazyListItemScope.SearchButton(
+private fun LazyItemScope.SearchButton(
     searchNavigationEvent: NavigationEvent,
     modifier: Modifier = Modifier
 ) {
@@ -138,10 +137,11 @@ private fun DynamicPageLayoutPreview() = EluvioThemePreview {
         DynamicPageLayoutState(
             searchNavigationEvent = NavigationEvent.GoBack,
             sections = listOf(
-                DynamicPageLayoutState.Section.Title(AnnotatedString("Title")),
-                DynamicPageLayoutState.Section.Banner("https://foo.com/image.jpg"),
-                DynamicPageLayoutState.Section.Description(AnnotatedString("Description")),
+                DynamicPageLayoutState.Section.Title("1", AnnotatedString("Title")),
+                DynamicPageLayoutState.Section.Banner("2", "https://foo.com/image.jpg"),
+                DynamicPageLayoutState.Section.Description("3", AnnotatedString("Description")),
                 DynamicPageLayoutState.Section.Carousel(
+                    sectionId = "4",
                     title = "Carousel",
                     subtitle = "Subtitle",
                     items = listOf(
