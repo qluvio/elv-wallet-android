@@ -30,8 +30,11 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.screens.common.Overscan
@@ -42,6 +45,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.carousel_36
+import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.compose.focusTrap
 
 private val CARD_HEIGHT = 170.dp
@@ -88,11 +92,12 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
             )
         }
 
-        var selectedFilter by remember { mutableStateOf<Pair<String, String>?>(null) }
+        var selectedFilter by remember { mutableStateOf<AttributeAndValue?>(null) }
         val filterRowFocusRequester = remember { FocusRequester() }
         // Disable for now - it brings on a BUNCH of focus issues.
         item.filterAttribute?.let { attribute ->
             FilterSelectorRow(
+                selectedValue = selectedFilter?.second,
                 attributeValues = attribute.values.map { it.value },
                 onValueSelected = { tag -> selectedFilter = tag?.let { attribute.id to it } },
                 modifier = Modifier
@@ -183,6 +188,7 @@ private fun ItemRow(items: List<CarouselItem>, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun FilterSelectorRow(
+    selectedValue: String?,
     attributeValues: List<String>,
     onValueSelected: (String?) -> Unit,
     modifier: Modifier = Modifier
@@ -196,29 +202,53 @@ private fun FilterSelectorRow(
         spacer(width = 20.dp)
         // TODO: there might not always be an "All" option (e.g. Season 1/2/3 etc)
         item {
-            TvButton(
+            FilterTab(
                 text = "All",
-                onClick = { onValueSelected(null) },
-                modifier = Modifier
-                    .focusRequester(firstItemFocusRequester)
-                    .onFocusChanged {
-                        if (it.hasFocus) {
-                            onValueSelected(null)
-                        }
-                    },
+                value = null,
+                onSelected = onValueSelected,
+                selected = selectedValue == null,
+                modifier = Modifier.focusRequester(firstItemFocusRequester)
             )
         }
-        items(attributeValues) { tag ->
-            TvButton(
-                text = tag,
-                onClick = { onValueSelected(tag) },
-                modifier = Modifier.onFocusChanged {
-                    if (it.hasFocus) {
-                        onValueSelected(tag)
-                    }
-                })
+        items(attributeValues) { attributeValue ->
+            FilterTab(
+                text = attributeValue,
+                selected = selectedValue == attributeValue,
+                onSelected = onValueSelected
+            )
         }
         spacer(width = 20.dp)
+    }
+}
+
+@Composable
+private fun FilterTab(
+    text: String,
+    selected: Boolean,
+    onSelected: (String?) -> Unit,
+    modifier: Modifier = Modifier,
+    value: String? = text,
+) {
+    Surface(
+        onClick = { onSelected(value) },
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color.Transparent,
+            contentColor = if (selected) Color.White else Color(0xFF7B7B7B),
+            pressedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+        ),
+        modifier = modifier
+            .onFocusChanged {
+                if (it.hasFocus) {
+                    onSelected(value)
+                }
+            }
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.label_40,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+        )
     }
 }
 
@@ -243,3 +273,5 @@ private fun rememberFilteredItems(
         }
     }
 }
+
+typealias AttributeAndValue = Pair<String, String>
