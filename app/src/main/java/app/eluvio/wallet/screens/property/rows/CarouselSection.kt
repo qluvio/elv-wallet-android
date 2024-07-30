@@ -1,5 +1,6 @@
 package app.eluvio.wallet.screens.property.rows
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -32,13 +34,14 @@ import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.LocalNavigator
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.Overscan
-import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.property.CarouselItemCard
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
@@ -74,12 +77,7 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
             }
             Spacer(modifier = Modifier.width(16.dp))
             item.viewAllNavigationEvent?.let {
-                val navigator = LocalNavigator.current
-                TvButton(
-                    text = "View All",
-                    textStyle = MaterialTheme.typography.body_32,
-                    onClick = { navigator(it) },
-                )
+                ViewAllButton(it)
             }
         }
         item.subtitle?.takeIf { it.isNotEmpty() }?.let {
@@ -137,6 +135,30 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
             ItemRow(filteredItems, modifier = exitFocusModifier)
         }
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun ViewAllButton(navigationEvent: NavigationEvent) {
+    val navigator = LocalNavigator.current
+    Surface(
+        onClick = { navigator(navigationEvent) },
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color.Transparent,
+        ),
+        border = ClickableSurfaceDefaults.border(
+            border = Border(BorderStroke(2.dp, Color.White)),
+            focusedBorder = Border.None
+        ),
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(3.dp))
+    ) {
+        Text(
+            "View All",
+            style = MaterialTheme.typography.body_32,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 20.dp, vertical = 5.dp)
+        )
     }
 }
 
