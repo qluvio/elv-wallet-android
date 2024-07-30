@@ -18,14 +18,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,9 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -56,8 +61,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
-import androidx.tv.foundation.lazy.list.TvLazyRow
-import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
@@ -120,7 +123,7 @@ private fun PropertySearch(
     query: String,
     onQueryChanged: (String) -> Unit,
     onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue?) -> Unit,
-    onSecondaryFilterClick: (String) -> Unit,
+    onSecondaryFilterClick: (String?) -> Unit,
     onSearchClicked: () -> Unit,
 ) {
     val bgModifier = Modifier
@@ -221,17 +224,21 @@ private fun PrimaryFilterOverlay(text: String, modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SecondaryFilterSelector(
     state: PropertySearchViewModel.State,
     onPrimaryFilterCleared: () -> Unit,
-    onSecondaryFilterClick: (String) -> Unit,
+    onSecondaryFilterClick: (String?) -> Unit,
 ) {
     val filter = state.selectedFilters ?: return
-    TvLazyRow(
+    val firstItemFocusRequester = remember { FocusRequester() }
+    LazyRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         contentPadding = PaddingValues(horizontal = Overscan.horizontalPadding, vertical = 22.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRestorer { firstItemFocusRequester }
     ) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -245,7 +252,14 @@ private fun SecondaryFilterSelector(
                 TvButton(
                     text = filter.primaryFilterValue,
                     onClick = onPrimaryFilterCleared,
-                    shape = ClickableSurfaceDefaults.shape(CircleShape)
+                    shape = ClickableSurfaceDefaults.shape(CircleShape),
+                    modifier = Modifier
+                        .focusRequester(firstItemFocusRequester)
+                        .onFocusChanged {
+                            if (it.hasFocus) {
+                                onSecondaryFilterClick(null)
+                            }
+                        }
                 )
             }
         }
@@ -262,8 +276,14 @@ private fun FilterChip(
     onSecondaryFilterClick: (String) -> Unit
 ) {
     val selected = filter.secondaryFilterValue == attributeValue.value
-    TvButton(
-        onClick = { onSecondaryFilterClick(attributeValue.value) }) {
+    Surface(
+        onClick = { onSecondaryFilterClick(attributeValue.value) },
+        modifier = Modifier.onFocusChanged {
+            if (it.hasFocus) {
+                onSecondaryFilterClick(attributeValue.value)
+            }
+        }
+    ) {
         Row(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -280,7 +300,7 @@ private fun FilterChip(
             )
             if (selected) {
                 Icon(
-                    imageVector = Icons.Default.Clear,
+                    imageVector = Icons.Outlined.CheckCircle,
                     contentDescription = "Clear",
                     Modifier.padding(start = 3.dp)
                 )

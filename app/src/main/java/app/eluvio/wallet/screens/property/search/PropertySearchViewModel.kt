@@ -179,13 +179,14 @@ class PropertySearchViewModel @Inject constructor(
         selectedPrimaryFilter.onNext(Optional.of(selectedFilter))
     }
 
-    fun onSecondaryFilterClicked(value: String) {
+    fun onSecondaryFilterClicked(value: String?) {
         val selectedFilter = selectedPrimaryFilter.value?.orDefault(null)
             ?: return Log.w("Secondary filter selected without primary filter?!")
         val updatedFilter = selectedFilter.copy(
             secondaryFilterValue = value
                 // If clicked the currently selected filter, deselect it.
-                .takeIf { it != selectedFilter.secondaryFilterValue }
+                // Disabled for now, since we switched to select by highlighting.
+                // .takeIf { it != selectedFilter.secondaryFilterValue }
         )
         selectedPrimaryFilter.onNext(Optional.of(updatedFilter))
     }

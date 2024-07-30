@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -28,6 +29,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -93,7 +95,9 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
             FilterSelectorRow(
                 attributeValues = attribute.values.map { it.value },
                 onValueSelected = { tag -> selectedFilter = tag?.let { attribute.id to it } },
-                modifier = Modifier.focusRequester(filterRowFocusRequester)
+                modifier = Modifier
+                    .focusRequester(filterRowFocusRequester)
+                    .padding(top = 8.dp)
             )
         }
 
@@ -112,7 +116,17 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
             }
             .focusGroup() // Required to make focusRestorer() work down the line
         val filteredItems = rememberFilteredItems(item.items, selectedFilter)
-        if (item.showAsGrid) {
+        if (selectedFilter != null && filteredItems.isEmpty()) {
+            // This shouldn't happen on a properly configured tenant, but just in case,
+            // we want to make sure the row height stays relatively consistent.
+            Text(
+                text = "Nothing here... yet?",
+                modifier = Modifier
+                    .padding(horizontal = Overscan.horizontalPadding)
+                    .height(CARD_HEIGHT)
+                    .wrapContentHeight(Alignment.CenterVertically)
+            )
+        } else if (item.showAsGrid) {
             ItemGrid(filteredItems, modifier = exitFocusModifier)
         } else {
             ItemRow(filteredItems, modifier = exitFocusModifier)
@@ -185,11 +199,24 @@ private fun FilterSelectorRow(
             TvButton(
                 text = "All",
                 onClick = { onValueSelected(null) },
-                modifier = Modifier.focusRequester(firstItemFocusRequester)
+                modifier = Modifier
+                    .focusRequester(firstItemFocusRequester)
+                    .onFocusChanged {
+                        if (it.hasFocus) {
+                            onValueSelected(null)
+                        }
+                    },
             )
         }
         items(attributeValues) { tag ->
-            TvButton(text = tag, onClick = { onValueSelected(tag) })
+            TvButton(
+                text = tag,
+                onClick = { onValueSelected(tag) },
+                modifier = Modifier.onFocusChanged {
+                    if (it.hasFocus) {
+                        onValueSelected(tag)
+                    }
+                })
         }
         spacer(width = 20.dp)
     }
