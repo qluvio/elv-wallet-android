@@ -82,7 +82,6 @@ class MediaEntity : RealmObject {
 
         if (id != other.id) return false
         if (name != other.name) return false
-        if (image.substringAfter("contentfabric.io") != other.image.substringAfter("contentfabric.io")) return false
         if (!image.equalsIgnoreHost(other.image)) return false
         if (posterImagePath != other.posterImagePath) return false
         if (mediaType != other.mediaType) return false
@@ -102,7 +101,7 @@ class MediaEntity : RealmObject {
 
     private fun String?.equalsIgnoreHost(other: String?): Boolean {
         val host = "contentfabric.io"
-        return this?.substringAfter(host) != other?.substringAfter(host)
+        return this?.substringAfter(host) == other?.substringAfter(host)
     }
 
     override fun hashCode(): Int {
