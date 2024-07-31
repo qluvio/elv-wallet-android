@@ -21,4 +21,12 @@ data class DisplaySettingsDto(
     val displayLimitType: String?,
     @field:Json(name = "display_format")
     val displayFormat: String?,
+
+    val logo: AssetLinkDto?,
+    @field:Json(name = "logo_text")
+    val logoText: String?,
+    @field:Json(name = "inline_background_color")
+    val backgroundColor: String?,
+    @field:Json(name = "inline_background_image")
+    val backgroundImage: AssetLinkDto?,
 )

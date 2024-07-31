@@ -91,7 +91,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
                         state
                     )
 
-                    is DynamicPageLayoutState.Section.Carousel -> CarouselSection(item = section)
+                    is DynamicPageLayoutState.Section.Carousel -> CarouselSection(item = section, state.imagesBaseUrl)
                     is DynamicPageLayoutState.Section.Description -> DescriptionSection(item = section)
                     is DynamicPageLayoutState.Section.Title -> TitleSection(item = section)
                 }

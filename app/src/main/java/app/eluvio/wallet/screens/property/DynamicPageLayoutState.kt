@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.property
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -62,6 +63,11 @@ data class DynamicPageLayoutState(
             // Whether to show this as a row or a grid
             val showAsGrid: Boolean = false,
             val filterAttribute: SearchFiltersEntity.Attribute? = null,
+
+            val backgroundColor: Color? = null,
+            val backgroundImagePath: String? = null,
+            val logoPath: String? = null,
+            val logoText: String? = null,
         ) : Section
     }
 

@@ -8,3 +8,7 @@ import androidx.compose.ui.Modifier
 fun Modifier.thenIf(condition: Boolean, block: Modifier.() -> Modifier): Modifier {
     return if (condition) then(Modifier.block()) else this
 }
+
+fun <T> Modifier.thenIfNotNull(value: T?, block: Modifier.(T) -> Modifier): Modifier {
+    return if (value != null) then(Modifier.block(value)) else this
+}

@@ -33,6 +33,15 @@ class MediaPageSectionEntity : RealmObject {
     var displayLimit: Int? = null
     var displayLimitType: String? = null
 
+    // Shows to the left of first item
+    var logoPath: String? = null
+    var logoText: String? = null
+
+    var backgroundImagePath: String? = null
+
+    // Hex color
+    var backgroundColor: String? = null
+
     @Ignore
     var displayFormat: DisplayFormat by realmEnum(::displayFormatStr)
     private var displayFormatStr: String = DisplayFormat.UNKNOWN.value
@@ -52,6 +61,10 @@ class MediaPageSectionEntity : RealmObject {
         if (subtitle != other.subtitle) return false
         if (displayLimit != other.displayLimit) return false
         if (displayLimitType != other.displayLimitType) return false
+        if (logoPath != other.logoPath) return false
+        if (logoText != other.logoText) return false
+        if (backgroundImagePath != other.backgroundImagePath) return false
+        if (backgroundColor != other.backgroundColor) return false
         if (displayFormatStr != other.displayFormatStr) return false
         if (primaryFilter != other.primaryFilter) return false
         if (secondaryFilter != other.secondaryFilter) return false
@@ -66,6 +79,10 @@ class MediaPageSectionEntity : RealmObject {
         result = 31 * result + (subtitle?.hashCode() ?: 0)
         result = 31 * result + (displayLimit ?: 0)
         result = 31 * result + (displayLimitType?.hashCode() ?: 0)
+        result = 31 * result + (logoPath?.hashCode() ?: 0)
+        result = 31 * result + (logoText?.hashCode() ?: 0)
+        result = 31 * result + (backgroundImagePath?.hashCode() ?: 0)
+        result = 31 * result + (backgroundColor?.hashCode() ?: 0)
         result = 31 * result + displayFormatStr.hashCode()
         result = 31 * result + (primaryFilter?.hashCode() ?: 0)
         result = 31 * result + (secondaryFilter?.hashCode() ?: 0)
@@ -73,7 +90,7 @@ class MediaPageSectionEntity : RealmObject {
     }
 
     override fun toString(): String {
-        return "MediaPageSectionEntity(id='$id', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter)"
+        return "MediaPageSectionEntity(id='$id', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, logoPath=$logoPath, logoText=$logoText, backgroundImagePath=$backgroundImagePath, backgroundColor=$backgroundColor, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter)"
     }
 
     class SectionItemEntity : EmbeddedRealmObject {

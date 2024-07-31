@@ -2,6 +2,7 @@ package app.eluvio.wallet.screens.property
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity.SectionItemEntity
@@ -15,6 +16,7 @@ import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.screens.property.items.OfferCard
 import app.eluvio.wallet.screens.property.items.SubpropertyCard
+import app.eluvio.wallet.util.compose.fromHex
 
 /**
  * The maximum number of items to display in a carousel before showing a "View All" button.
@@ -37,6 +39,10 @@ fun MediaPageSectionEntity.toCarousel(
         title = title,
         subtitle = subtitle,
         items = items.take(displayLimit),
+        backgroundColor = backgroundColor?.let { Color.fromHex(it) },
+        backgroundImagePath = backgroundImagePath,
+        logoPath = logoPath,
+        logoText = logoText,
         showAsGrid = displayFormat == MediaPageSectionEntity.DisplayFormat.GRID,
         filterAttribute = filterAttribute,
         viewAllNavigationEvent = MediaGridDestination(

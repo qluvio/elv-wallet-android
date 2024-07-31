@@ -27,6 +27,12 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
         }
             ?: MediaPageSectionEntity.DisplayFormat.UNKNOWN
 
+        logoPath = dto.display?.logo?.path
+        logoText = dto.display?.logoText
+
+        backgroundImagePath = dto.display?.backgroundImage?.path
+        backgroundColor = dto.display?.backgroundColor?.takeIf { it.isNotEmpty() }
+
         primaryFilter = dto.primaryFilter
         secondaryFilter = dto.secondaryFilter
     }

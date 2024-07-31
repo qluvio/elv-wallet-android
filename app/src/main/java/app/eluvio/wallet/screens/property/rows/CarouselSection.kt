@@ -1,11 +1,15 @@
 package app.eluvio.wallet.screens.property.rows
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +37,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
@@ -50,91 +56,164 @@ import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.compose.focusTrap
+import app.eluvio.wallet.util.compose.thenIfNotNull
+import coil.compose.AsyncImage
 
 private val CARD_HEIGHT = 170.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel) {
+fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl: String?) {
     if (item.items.isEmpty()) {
         return
     }
-    Spacer(modifier = Modifier.height(16.dp))
-    Column(
-        Modifier
-            .focusTrap(FocusDirection.Left, FocusDirection.Right)
-            .focusGroup() // Required to make focusRestorer() work down the line
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .thenIfNotNull(item.backgroundColor) { Modifier.background(it) }
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = Overscan.horizontalPadding)
-        ) {
-            item.title?.takeIf { it.isNotEmpty() }?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.carousel_36,
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            item.viewAllNavigationEvent?.let {
-                ViewAllButton(it)
+        if (item.backgroundImagePath != null) {
+            AsyncImage(
+                model = "$imagesBaseUrl${item.backgroundImagePath}",
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopStart,
+                modifier = Modifier.matchParentSize()
+            )
+        }
+        Row {
+            Logo(item, imagesBaseUrl)
+            Column(
+                Modifier
+                    .focusTrap(FocusDirection.Left, FocusDirection.Right)
+                    .focusGroup() // Required to make focusRestorer() work down the line
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+                var selectedFilter by remember { mutableStateOf<AttributeAndValue?>(null) }
+                val filterRowFocusRequester = remember { FocusRequester() }
+
+                val title = item.title?.takeIf { it.isNotEmpty() }
+                val subtitle = item.subtitle?.takeIf { it.isNotEmpty() }
+                val hasTitleRow = title != null || subtitle != null
+                if (hasTitleRow) {
+                    TitleRow(title, subtitle, item.viewAllNavigationEvent, imagesBaseUrl)
+                }
+                if (item.filterAttribute != null) {
+                    FilterSelectorRow(
+                        selectedValue = selectedFilter?.second,
+                        attributeValues = item.filterAttribute.values.map { it.value },
+                        onValueSelected = { tag ->
+                            selectedFilter = tag?.let { item.filterAttribute.id to it }
+                        },
+                        modifier = Modifier
+                            .focusRequester(filterRowFocusRequester)
+                            .padding(top = 8.dp),
+                        item.viewAllNavigationEvent?.takeIf { !hasTitleRow }
+                    )
+                } else if (!hasTitleRow && item.viewAllNavigationEvent != null) {
+                    ViewAllButton(item.viewAllNavigationEvent)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val exitFocusModifier = Modifier
+                    .focusProperties {
+                        exit = {
+                            if (it == FocusDirection.Up && item.filterAttribute != null) {
+                                // Prevent focus from skipping over the filter row
+                                filterRowFocusRequester
+                            } else {
+                                FocusRequester.Default
+                            }
+                        }
+                    }
+                    .focusGroup() // Required to make focusRestorer() work down the line
+                val filteredItems = rememberFilteredItems(item.items, selectedFilter)
+                if (selectedFilter != null && filteredItems.isEmpty()) {
+                    // This shouldn't happen on a properly configured tenant, but just in case,
+                    // we want to make sure the row height stays relatively consistent.
+                    Text(
+                        text = "Nothing here... yet?",
+                        modifier = Modifier
+                            .padding(horizontal = Overscan.horizontalPadding)
+                            .height(CARD_HEIGHT)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                    )
+                } else if (item.showAsGrid) {
+                    ItemGrid(filteredItems, modifier = exitFocusModifier)
+                } else {
+                    ItemRow(filteredItems, modifier = exitFocusModifier)
+                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
-        item.subtitle?.takeIf { it.isNotEmpty() }?.let {
+    }
+}
+
+@Composable
+private fun Logo(
+    item: DynamicPageLayoutState.Section.Carousel,
+    imagesBaseUrl: String?,
+) {
+    item.logoPath ?: return
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .padding(start = Overscan.horizontalPadding, top = 60.dp)
+            .width(150.dp)
+    ) {
+        AsyncImage(
+            model = "$imagesBaseUrl${item.logoPath}",
+            contentDescription = "Logo"
+        )
+        if (item.logoText != null) {
+            Text(
+                item.logoText,
+                style = MaterialTheme.typography.body_32,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.TitleRow(
+    title: String?,
+    subtitle: String?,
+    viewAllNavigationEvent: NavigationEvent?,
+    imagesBaseUrl: String?
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .height(IntrinsicSize.Max)
+            .padding(horizontal = Overscan.horizontalPadding)
+    ) {
+        title?.let {
             Text(
                 it,
-                style = MaterialTheme.typography.body_32,
-                modifier = Modifier
-                    .padding(horizontal = Overscan.horizontalPadding)
-                    .padding(top = 4.dp)
+                style = MaterialTheme.typography.carousel_36,
             )
         }
+        Spacer(modifier = Modifier.width(16.dp))
 
-        var selectedFilter by remember { mutableStateOf<AttributeAndValue?>(null) }
-        val filterRowFocusRequester = remember { FocusRequester() }
-        // Disable for now - it brings on a BUNCH of focus issues.
-        item.filterAttribute?.let { attribute ->
-            FilterSelectorRow(
-                selectedValue = selectedFilter?.second,
-                attributeValues = attribute.values.map { it.value },
-                onValueSelected = { tag -> selectedFilter = tag?.let { attribute.id to it } },
-                modifier = Modifier
-                    .focusRequester(filterRowFocusRequester)
-                    .padding(top = 8.dp)
-            )
+        viewAllNavigationEvent?.let {
+            ViewAllButton(it)
         }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val exitFocusModifier = Modifier
-            .focusProperties {
-                exit = {
-                    if (it == FocusDirection.Up && item.filterAttribute != null) {
-                        // Prevent focus from skipping over the filter row
-                        filterRowFocusRequester
-                    } else {
-                        FocusRequester.Default
-                    }
-                }
-            }
-            .focusGroup() // Required to make focusRestorer() work down the line
-        val filteredItems = rememberFilteredItems(item.items, selectedFilter)
-        if (selectedFilter != null && filteredItems.isEmpty()) {
-            // This shouldn't happen on a properly configured tenant, but just in case,
-            // we want to make sure the row height stays relatively consistent.
-            Text(
-                text = "Nothing here... yet?",
-                modifier = Modifier
-                    .padding(horizontal = Overscan.horizontalPadding)
-                    .height(CARD_HEIGHT)
-                    .wrapContentHeight(Alignment.CenterVertically)
-            )
-        } else if (item.showAsGrid) {
-            ItemGrid(filteredItems, modifier = exitFocusModifier)
-        } else {
-            ItemRow(filteredItems, modifier = exitFocusModifier)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+    subtitle?.let {
+        Text(
+            it,
+            style = MaterialTheme.typography.body_32,
+            fontWeight = FontWeight.Light,
+            modifier = Modifier
+                .padding(horizontal = Overscan.horizontalPadding)
+                .padding(top = 4.dp)
+        )
     }
 }
 
@@ -147,17 +226,17 @@ private fun ViewAllButton(navigationEvent: NavigationEvent) {
             containerColor = Color.Transparent,
         ),
         border = ClickableSurfaceDefaults.border(
-            border = Border(BorderStroke(2.dp, Color.White)),
+            border = Border(BorderStroke(1.dp, Color.White)),
             focusedBorder = Border.None
         ),
         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(3.dp))
     ) {
         Text(
-            "View All",
+            "VIEW ALL",
             style = MaterialTheme.typography.body_32,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 20.dp, vertical = 5.dp)
+                .padding(horizontal = 16.dp, vertical = 5.dp)
         )
     }
 }
@@ -213,11 +292,13 @@ private fun FilterSelectorRow(
     selectedValue: String?,
     attributeValues: List<String>,
     onValueSelected: (String?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewAllNavigationEvent: NavigationEvent?
 ) {
     val firstItemFocusRequester = remember { FocusRequester() }
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
         contentPadding = PaddingValues(horizontal = 20.dp),
         modifier = modifier.focusRestorer { firstItemFocusRequester },
     ) {
@@ -238,6 +319,10 @@ private fun FilterSelectorRow(
                 selected = selectedValue == attributeValue,
                 onSelected = onValueSelected
             )
+        }
+
+        viewAllNavigationEvent?.let {
+            item { ViewAllButton(it) }
         }
         spacer(width = 20.dp)
     }
