@@ -113,7 +113,10 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl
                         item.viewAllNavigationEvent?.takeIf { !hasTitleRow }
                     )
                 } else if (!hasTitleRow && item.viewAllNavigationEvent != null) {
-                    ViewAllButton(item.viewAllNavigationEvent)
+                    ViewAllButton(
+                        item.viewAllNavigationEvent,
+                        modifier = Modifier.padding(start = Overscan.horizontalPadding)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -218,7 +221,10 @@ private fun ColumnScope.TitleRow(
 }
 
 @Composable
-private fun ViewAllButton(navigationEvent: NavigationEvent) {
+private fun ViewAllButton(
+    navigationEvent: NavigationEvent,
+    modifier: Modifier = Modifier,
+) {
     val navigator = LocalNavigator.current
     Surface(
         onClick = { navigator(navigationEvent) },
@@ -229,7 +235,8 @@ private fun ViewAllButton(navigationEvent: NavigationEvent) {
             border = Border(BorderStroke(1.dp, Color.White)),
             focusedBorder = Border.None
         ),
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(3.dp))
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(3.dp)),
+        modifier = modifier
     ) {
         Text(
             "VIEW ALL",
@@ -244,6 +251,7 @@ private fun ViewAllButton(navigationEvent: NavigationEvent) {
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
 private fun ItemGrid(items: List<CarouselItem>, modifier: Modifier = Modifier) {
+    // TODO: make lazy
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -83,22 +84,37 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
                 )
             }
         }
-        state.sections.forEach { section ->
-            item(contentType = section::class) {
-                when (section) {
-                    is DynamicPageLayoutState.Section.Banner -> BannerSection(
-                        item = section,
-                        state
-                    )
 
-                    is DynamicPageLayoutState.Section.Carousel -> CarouselSection(item = section, state.imagesBaseUrl)
-                    is DynamicPageLayoutState.Section.Description -> DescriptionSection(item = section)
-                    is DynamicPageLayoutState.Section.Title -> TitleSection(item = section)
-                }
-            }
-        }
+        sections(state.sections, state.imagesBaseUrl)
 
         spacer(height = 32.dp)
+    }
+}
+
+/**
+ * Renders the [sections] inside a [LazyColumn].
+ */
+fun LazyListScope.sections(
+    sections: List<DynamicPageLayoutState.Section>,
+    imagesBaseUrl: String?
+) {
+    sections.forEach { section ->
+        item(contentType = section::class) {
+            when (section) {
+                is DynamicPageLayoutState.Section.Banner -> BannerSection(
+                    item = section,
+                    imagesBaseUrl
+                )
+
+                is DynamicPageLayoutState.Section.Carousel -> CarouselSection(
+                    item = section,
+                    imagesBaseUrl
+                )
+
+                is DynamicPageLayoutState.Section.Description -> DescriptionSection(item = section)
+                is DynamicPageLayoutState.Section.Title -> TitleSection(item = section)
+            }
+        }
     }
 }
 

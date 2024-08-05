@@ -91,5 +91,13 @@ data class DynamicPageLayoutState(
             val imageUrl: String?,
             val animation: MediaSource?,
         ) : CarouselItem
+
+        @Immutable
+        data class CustomCard(
+            val imageUrl: String?,
+            val title: String,
+            val aspectRatio: Float = 1f,
+            val onClick: (() -> Unit)
+        ) : CarouselItem
     }
 }

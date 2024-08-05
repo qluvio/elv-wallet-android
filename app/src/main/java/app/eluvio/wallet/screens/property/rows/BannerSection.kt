@@ -12,11 +12,11 @@ import coil.compose.AsyncImage
 @Composable
 fun BannerSection(
     item: DynamicPageLayoutState.Section.Banner,
-    state: DynamicPageLayoutState,
+    baseUrl: String?,
     modifier: Modifier = Modifier
 ) {
     AsyncImage(
-        model = state.urlForPath(item.imagePath),
+        model = baseUrl?.let { "$it${item.imagePath}" },
         contentDescription = "Logo",
         modifier
             .heightIn(max = 240.dp)

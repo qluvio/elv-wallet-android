@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.entities.MediaEntity.Companion.ASPECT_RATIO_WIDE
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -20,7 +21,6 @@ import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.Optional
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -46,11 +46,12 @@ class PropertySearchViewModel @Inject constructor(
         val headerLogo: String? = null,
         val propertyName: String? = null,
 
-        // Primary filters will be displayed before search results
-        val primaryFilter: SearchFiltersEntity.Attribute? = null,
-        val searchResults: DynamicPageLayoutState = DynamicPageLayoutState(captureTopFocus = false),
+        val primaryFilters: DynamicPageLayoutState.Section? = null,
+        val searchResults: List<DynamicPageLayoutState.Section> = emptyList(),
         val selectedFilters: SelectedFilters? = null,
     ) {
+        val allSections = listOfNotNull(primaryFilters) + searchResults
+
         /**
          * Represents the currently selected filters.
          * All instances represent a non-empty selection of at least Primary filter and value.
@@ -89,12 +90,7 @@ class PropertySearchViewModel @Inject constructor(
 
         apiProvider.getFabricEndpoint()
             .subscribeBy {
-                updateState {
-                    copy(
-                        baseUrl = it,
-                        searchResults = searchResults.copy(imagesBaseUrl = it)
-                    )
-                }
+                updateState { copy(baseUrl = it) }
             }
             .addTo(disposables)
 
@@ -122,7 +118,7 @@ class PropertySearchViewModel @Inject constructor(
                             // Technically we might not have finished loading the Property at this point,
                             // but we still know the filters, so we can show them.
                             loading = false,
-                            primaryFilter = filters.primaryFilter
+                            primaryFilters = filters.primaryFilter?.toCustomCardsSection(baseUrl)
                         )
                     }
 
@@ -184,9 +180,9 @@ class PropertySearchViewModel @Inject constructor(
             ?: return Log.w("Secondary filter selected without primary filter?!")
         val updatedFilter = selectedFilter.copy(
             secondaryFilterValue = value
-                // If clicked the currently selected filter, deselect it.
-                // Disabled for now, since we switched to select by highlighting.
-                // .takeIf { it != selectedFilter.secondaryFilterValue }
+            // If clicked the currently selected filter, deselect it.
+            // Disabled for now, since we switched to select by highlighting.
+            // .takeIf { it != selectedFilter.secondaryFilterValue }
         )
         selectedPrimaryFilter.onNext(Optional.of(updatedFilter))
     }
@@ -221,6 +217,15 @@ class PropertySearchViewModel @Inject constructor(
         val searchClicked = manualSearch
             .map { SearchTriggers.QueryChanged(query.value?.query ?: "") }
         val filterChanged = selectedPrimaryFilter
+            .doOnNext {
+                val primaryFilterSelected = it.orDefault(null)?.primaryFilterValue != null
+                updateState {
+                    copy(primaryFilters = searchFilters.primaryFilter
+                        // only show primary filters while non are selected
+                        ?.takeIf { !primaryFilterSelected }
+                        ?.toCustomCardsSection(baseUrl))
+                }
+            }
             .map { SearchTriggers.FilterChanged(it.orDefault(null)) }
             .distinctUntilChanged()
 
@@ -238,33 +243,7 @@ class PropertySearchViewModel @Inject constructor(
                 }
             }
             .distinctUntilChanged()
-            .switchMapMaybe { request ->
-                val runSearch =
-                    // No filters are defined on the property, so we can search right away
-                    searchFilters.primaryFilter == null ||
-                            // We have a search term, so can search regardless of filters
-                            request.searchTerm?.isNotEmpty() == true ||
-                            // Some filter is defined, we should run a search
-                            request.attributes != null
-                if (runSearch) {
-                    // Don't show primary filters anymore, we got a search term
-                    fetchResults(request).toMaybe()
-                        .doOnSubscribe {
-                            updateState { copy(primaryFilter = null) }
-                        }
-                } else {
-                    // When search term is emptied, but no filter is selected, show primary filters again
-                    Maybe.never<List<MediaPageSectionEntity>>()
-                        .doOnSubscribe {
-                            updateState {
-                                copy(
-                                    primaryFilter = searchFilters.primaryFilter,
-                                    searchResults = searchResults.copy(sections = emptyList())
-                                )
-                            }
-                        }
-                }
-            }
+            .switchMapSingle { request -> fetchResults(request) }
             .subscribeBy { results ->
                 val sections = results.map { section ->
                     section.toCarousel(
@@ -282,12 +261,26 @@ class PropertySearchViewModel @Inject constructor(
                     )
                 }
                 updateState {
-                    copy(searchResults = searchResults.copy(sections = sections))
+                    copy(searchResults = sections)
                 }
             }
             .addTo(disposables)
     }
 
+    private fun SearchFiltersEntity.Attribute.toCustomCardsSection(imageBaseUrl: String?): DynamicPageLayoutState.Section {
+        return DynamicPageLayoutState.Section.Carousel(
+            sectionId = "PRIMARY_FILTERS",
+            items = values.map { filterValue ->
+                DynamicPageLayoutState.CarouselItem.CustomCard(
+                    imageUrl = filterValue.image?.let { imagePath -> "$imageBaseUrl${imagePath}" },
+                    title = filterValue.value,
+                    aspectRatio = ASPECT_RATIO_WIDE,
+                    onClick = { onPrimaryFilterSelected(filterValue) }
+                )
+            },
+            showAsGrid = true
+        )
+    }
 }
 
 private data class QueryUpdate(val query: String, val immediate: Boolean)

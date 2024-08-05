@@ -14,6 +14,7 @@ import app.eluvio.wallet.screens.common.defaultMediaItemClickHandler
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
+import app.eluvio.wallet.screens.property.items.CustomCard
 import app.eluvio.wallet.screens.property.items.OfferCard
 import app.eluvio.wallet.screens.property.items.SubpropertyCard
 import app.eluvio.wallet.util.compose.fromHex
@@ -117,5 +118,9 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
             carouselItem,
             cardHeight
         )
+
+        is CarouselItem.CustomCard -> {
+            CustomCard(carouselItem, cardHeight, modifier)
+        }
     }
 }
