@@ -31,7 +31,7 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
             ?: dto.thumbnailLandscape
         image = imageLink?.path?.let { "$baseUrl$it" } ?: ""
         mediaLinks = dto.mediaLink?.toPathMap().toRealmDictionaryOrEmpty()
-        gallery = dto.gallery?.map { it.toEntity() }.toRealmListOrEmpty()
+        gallery = dto.gallery?.mapNotNull { it.toEntity() }.toRealmListOrEmpty()
 
         liveVideoInfo = parseLiveVideoInfo(dto)
 
@@ -64,12 +64,12 @@ private fun parseLiveVideoInfo(dto: MediaItemV2Dto): LiveVideoInfoEntity? {
     }
 }
 
-private fun GalleryItemV2Dto.toEntity(): GalleryItemEntity {
+private fun GalleryItemV2Dto.toEntity(): GalleryItemEntity? {
     val dto = this
     return GalleryItemEntity().apply {
         // name = dto.title?
         // TODO: image should take precedence over thumbnail, if it exists
-        imagePath = dto.thumbnail.path
+        imagePath = dto.thumbnail?.path ?: return null
         imageAspectRatio = ConverterUtils.parseAspectRatio(dto.thumbnailAspectRatio)
     }
 }

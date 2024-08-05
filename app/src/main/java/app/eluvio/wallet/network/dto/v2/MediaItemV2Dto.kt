@@ -55,7 +55,7 @@ data class MediaIconDto(
 
 @JsonClass(generateAdapter = true)
 data class GalleryItemV2Dto(
-    val thumbnail: AssetLinkDto,
+    val thumbnail: AssetLinkDto?,
     @field:Json(name = "thumbnail_aspect_ratio")
     val thumbnailAspectRatio: String?,
 
