@@ -34,6 +34,7 @@ fun WrapContentText(
             Text(
                 text = text,
                 style = style,
+                textAlign = textAlign,
                 color = color,
                 maxLines = maxLines,
                 overflow = overflow,
