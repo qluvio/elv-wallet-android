@@ -26,6 +26,7 @@ class MediaPageSectionEntity : RealmObject {
 
     companion object {
         const val TYPE_MANUAL = "manual"
+        const val TYPE_AUTOMATIC = "automatic"
         const val TYPE_SEARCH = "search"
         const val TYPE_HERO = "hero"
     }

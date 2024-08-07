@@ -44,6 +44,7 @@ fun MediaPageSectionEntity.toDynamicSections(
     forceGridView: Boolean = false,
 ): List<DynamicPageLayoutState.Section> {
     return when (type) {
+        MediaPageSectionEntity.TYPE_AUTOMATIC,
         MediaPageSectionEntity.TYPE_MANUAL,
         MediaPageSectionEntity.TYPE_SEARCH -> listOf(
             this.toCarouselSection(
