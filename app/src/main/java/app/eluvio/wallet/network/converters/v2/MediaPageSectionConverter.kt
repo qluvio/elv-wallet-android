@@ -1,18 +1,25 @@
 package app.eluvio.wallet.network.converters.v2
 
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
+import app.eluvio.wallet.network.dto.v2.HeroItemDto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.SectionItemDto
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 
-private val supportedSectionTypes = setOf("media", "subproperty_link")
+private val supportedSectionItemTypes = setOf("media", "subproperty_link")
 
 fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
     val dto = this
 
     return MediaPageSectionEntity().apply {
         id = dto.id
-        items = dto.content?.mapNotNull { it.toEntity(baseUrl) }.toRealmListOrEmpty()
+        type = dto.type
+        items = (
+                dto.content
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.mapNotNull { it.toEntity(baseUrl) }
+                    ?: dto.heroItems?.map { it.toEntity() }
+                ).toRealmListOrEmpty()
         title = dto.display?.title
         subtitle = dto.display?.subtitle
         displayLimit = dto.display?.displayLimit?.takeIf {
@@ -40,8 +47,9 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
 
 private fun SectionItemDto.toEntity(baseUrl: String): MediaPageSectionEntity.SectionItemEntity? {
     val dto = this
-    if (dto.type !in supportedSectionTypes) return null
+    if (dto.type !in supportedSectionItemTypes) return null
     return MediaPageSectionEntity.SectionItemEntity().apply {
+        id = dto.id
         mediaType = dto.mediaType
         media = dto.media?.toEntity(baseUrl)
 
@@ -50,5 +58,14 @@ private fun SectionItemDto.toEntity(baseUrl: String): MediaPageSectionEntity.Sec
             ?: dto.display?.thumbnailPortrait
             ?: dto.display?.thumbnailLandscape
         subpropertyImage = imageLink?.path?.let { "$baseUrl$it" } ?: ""
+    }
+}
+
+private fun HeroItemDto.toEntity(): MediaPageSectionEntity.SectionItemEntity {
+    val dto = this
+    return MediaPageSectionEntity.SectionItemEntity().apply {
+        title = dto.display?.title
+        description = dto.display?.description
+        logoPath = dto.display?.logo?.path
     }
 }

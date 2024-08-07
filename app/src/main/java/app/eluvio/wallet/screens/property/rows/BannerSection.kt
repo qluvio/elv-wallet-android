@@ -19,7 +19,7 @@ fun BannerSection(
         model = baseUrl?.let { "$it${item.imagePath}" },
         contentDescription = "Logo",
         modifier
-            .heightIn(max = 240.dp)
+            .heightIn(max = 90.dp)
             .padding(
                 start = Overscan.horizontalPadding,
                 end = 260.dp

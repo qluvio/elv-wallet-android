@@ -1,5 +1,7 @@
 package app.eluvio.wallet.util.compose.icons
 
+import androidx.compose.foundation.Image
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -7,7 +9,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
+@Preview
+@Composable
+private fun VectorPreview() {
+    Image(EluvioIcons.MyItems, null)
+}
 
 private var _MyItems: ImageVector? = null
 

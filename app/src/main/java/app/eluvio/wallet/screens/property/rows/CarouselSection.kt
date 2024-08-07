@@ -39,6 +39,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
@@ -54,12 +55,13 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.carousel_36
+import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.compose.focusTrap
 import app.eluvio.wallet.util.compose.thenIfNotNull
 import coil.compose.AsyncImage
 
-private val CARD_HEIGHT = 170.dp
+private val CARD_HEIGHT = 120.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -90,6 +92,8 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Whether or not to add padding to the start of the row.
+                val startPadding = if (item.logoPath == null) Overscan.horizontalPadding else 30.dp
 
                 var selectedFilter by remember { mutableStateOf<AttributeAndValue?>(null) }
                 val filterRowFocusRequester = remember { FocusRequester() }
@@ -98,7 +102,13 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl
                 val subtitle = item.subtitle?.takeIf { it.isNotEmpty() }
                 val hasTitleRow = title != null || subtitle != null
                 if (hasTitleRow) {
-                    TitleRow(title, subtitle, item.viewAllNavigationEvent, imagesBaseUrl)
+                    TitleRow(
+                        title,
+                        subtitle,
+                        item.viewAllNavigationEvent,
+                        imagesBaseUrl,
+                        startPadding
+                    )
                 }
                 if (item.filterAttribute != null) {
                     FilterSelectorRow(
@@ -110,7 +120,8 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl
                         modifier = Modifier
                             .focusRequester(filterRowFocusRequester)
                             .padding(top = 8.dp),
-                        item.viewAllNavigationEvent?.takeIf { !hasTitleRow }
+                        item.viewAllNavigationEvent?.takeIf { !hasTitleRow },
+                        startPadding = startPadding
                     )
                 } else if (!hasTitleRow && item.viewAllNavigationEvent != null) {
                     ViewAllButton(
@@ -145,9 +156,9 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl
                             .wrapContentHeight(Alignment.CenterVertically)
                     )
                 } else if (item.showAsGrid) {
-                    ItemGrid(filteredItems, modifier = exitFocusModifier)
+                    ItemGrid(filteredItems, startPadding, modifier = exitFocusModifier)
                 } else {
-                    ItemRow(filteredItems, modifier = exitFocusModifier)
+                    ItemRow(filteredItems, startPadding, modifier = exitFocusModifier)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -165,8 +176,10 @@ private fun Logo(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .padding(start = Overscan.horizontalPadding, top = 60.dp)
-            .width(150.dp)
+            // This doesn't respect overscan, and will start slightly before it.
+            // Go argue with the design team.
+            .padding(start = 30.dp, top = 40.dp)
+            .width(95.dp)
     ) {
         AsyncImage(
             model = "$imagesBaseUrl${item.logoPath}",
@@ -175,8 +188,8 @@ private fun Logo(
         if (item.logoText != null) {
             Text(
                 item.logoText,
-                style = MaterialTheme.typography.body_32,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                style = MaterialTheme.typography.label_24,
+                modifier = Modifier.padding(vertical = 20.dp)
             )
         }
     }
@@ -187,13 +200,14 @@ private fun ColumnScope.TitleRow(
     title: String?,
     subtitle: String?,
     viewAllNavigationEvent: NavigationEvent?,
-    imagesBaseUrl: String?
+    imagesBaseUrl: String?,
+    startPadding: Dp
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .height(IntrinsicSize.Max)
-            .padding(horizontal = Overscan.horizontalPadding)
+            .padding(start = startPadding, end = Overscan.horizontalPadding)
     ) {
         title?.let {
             Text(
@@ -214,8 +228,7 @@ private fun ColumnScope.TitleRow(
             style = MaterialTheme.typography.body_32,
             fontWeight = FontWeight.Light,
             modifier = Modifier
-                .padding(horizontal = Overscan.horizontalPadding)
-                .padding(top = 4.dp)
+                .padding(start = startPadding, end = Overscan.horizontalPadding, top = 4.dp)
         )
     }
 }
@@ -250,7 +263,7 @@ private fun ViewAllButton(
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun ItemGrid(items: List<CarouselItem>, modifier: Modifier = Modifier) {
+private fun ItemGrid(items: List<CarouselItem>, startPadding: Dp, modifier: Modifier = Modifier) {
     // TODO: make lazy
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -258,7 +271,7 @@ private fun ItemGrid(items: List<CarouselItem>, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .focusRestorer()
-            .padding(horizontal = 48.dp)
+            .padding(start = startPadding, end = Overscan.horizontalPadding)
     ) {
         items.forEach { item ->
             key(item) {
@@ -273,23 +286,22 @@ private fun ItemGrid(items: List<CarouselItem>, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun ItemRow(items: List<CarouselItem>, modifier: Modifier = Modifier) {
+private fun ItemRow(items: List<CarouselItem>, startPadding: Dp, modifier: Modifier = Modifier) {
     // The 'key' function prevents from focusRestorer() from breaking when crashing when
     // filteredItems changes.
     // From what I could tell it's kind of like 'remember' but for Composable.
     key(items) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(start = startPadding, end = Overscan.horizontalPadding),
             modifier = modifier.focusRestorer()
         ) {
-            spacer(width = 28.dp)
             items(items) { item ->
                 CarouselItemCard(
                     carouselItem = item,
                     cardHeight = CARD_HEIGHT,
                 )
             }
-            spacer(width = 28.dp)
         }
     }
 }
@@ -301,16 +313,16 @@ private fun FilterSelectorRow(
     attributeValues: List<String>,
     onValueSelected: (String?) -> Unit,
     modifier: Modifier = Modifier,
-    viewAllNavigationEvent: NavigationEvent?
+    viewAllNavigationEvent: NavigationEvent?,
+    startPadding: Dp
 ) {
     val firstItemFocusRequester = remember { FocusRequester() }
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        contentPadding = PaddingValues(horizontal = 20.dp),
+        contentPadding = PaddingValues(start = startPadding, end = Overscan.horizontalPadding),
         modifier = modifier.focusRestorer { firstItemFocusRequester },
     ) {
-        spacer(width = 20.dp)
         // TODO: there might not always be an "All" option (e.g. Season 1/2/3 etc)
         item {
             FilterTab(

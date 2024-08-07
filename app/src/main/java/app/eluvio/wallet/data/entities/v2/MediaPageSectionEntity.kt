@@ -26,6 +26,7 @@ class MediaPageSectionEntity : RealmObject {
 
     @PrimaryKey
     var id: String = ""
+    var type: String = ""
     var items = realmListOf<SectionItemEntity>()
 
     var title: String? = null
@@ -94,7 +95,8 @@ class MediaPageSectionEntity : RealmObject {
     }
 
     class SectionItemEntity : EmbeddedRealmObject {
-        // Technically these have IDs, but we don't use them for anything.
+        var id: String = ""
+
         var mediaType: String? = null
 
         /** Not every item is of type Media, so this field is optional. */
@@ -104,8 +106,12 @@ class MediaPageSectionEntity : RealmObject {
         var subpropertyId: String? = null
         var subpropertyImage: String? = null
 
+        var title: String? = null
+        var description: String? = null
+        var logoPath: String? = null
+
         override fun toString(): String {
-            return "SectionItemEntity(mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, subpropertyImage=$subpropertyImage)"
+            return "SectionItemEntity(mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, subpropertyImage=$subpropertyImage, logoPath=$logoPath, title=$title, description=$description)"
         }
 
         override fun equals(other: Any?): Boolean {
@@ -118,6 +124,9 @@ class MediaPageSectionEntity : RealmObject {
             if (media != other.media) return false
             if (subpropertyId != other.subpropertyId) return false
             if (subpropertyImage != other.subpropertyImage) return false
+            if (logoPath != other.logoPath) return false
+            if (title != other.title) return false
+            if (description != other.description) return false
 
             return true
         }
@@ -127,6 +136,9 @@ class MediaPageSectionEntity : RealmObject {
             result = 31 * result + (media?.hashCode() ?: 0)
             result = 31 * result + (subpropertyId?.hashCode() ?: 0)
             result = 31 * result + (subpropertyImage?.hashCode() ?: 0)
+            result = 31 * result + (logoPath?.hashCode() ?: 0)
+            result = 31 * result + (title?.hashCode() ?: 0)
+            result = 31 * result + (description?.hashCode() ?: 0)
             return result
         }
     }

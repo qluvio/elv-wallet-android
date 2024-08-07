@@ -14,7 +14,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
-import app.eluvio.wallet.theme.body_32
+import app.eluvio.wallet.theme.label_24
 
 @Composable
 fun DescriptionSection(item: DynamicPageLayoutState.Section.Description) {
@@ -22,7 +22,7 @@ fun DescriptionSection(item: DynamicPageLayoutState.Section.Description) {
     var expanded by remember { mutableStateOf(false) }
     Text(
         text = item.text,
-        style = MaterialTheme.typography.body_32,
+        style = MaterialTheme.typography.label_24,
         maxLines = if (expanded) Int.MAX_VALUE else 10,
         overflow = TextOverflow.Ellipsis,
         onTextLayout = { textLayoutResult ->
@@ -33,9 +33,9 @@ fun DescriptionSection(item: DynamicPageLayoutState.Section.Description) {
             .clickable(enabled = isClickable, onClick = { expanded = !expanded })
             .padding(
                 start = Overscan.horizontalPadding,
-                end = 260.dp,
+                end = 380.dp,
                 top = 16.dp,
-                bottom = 16.dp
+                bottom = 26.dp
             )
     )
 }

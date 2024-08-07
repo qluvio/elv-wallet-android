@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.property
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity.SectionItemEntity
@@ -24,7 +25,30 @@ import app.eluvio.wallet.util.compose.fromHex
  */
 private const val VIEW_ALL_THRESHOLD = 5
 
-fun MediaPageSectionEntity.toCarousel(
+/**
+ * Converts a [MediaPageSectionEntity] to a list of [DynamicPageLayoutState.Section]s.
+ * Usually this will be a single section, but in the case of a hero section, it may be multiple.
+ */
+fun MediaPageSectionEntity.toDynamicSections(
+    propertyId: String,
+    filters: SearchFiltersEntity? = null,
+    viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
+): List<DynamicPageLayoutState.Section> {
+    return when (type) {
+        MediaPageSectionEntity.TYPE_MANUAL -> listOf(
+            this.toCarouselSection(
+                propertyId,
+                filters,
+                viewAllThreshold
+            )
+        )
+
+        MediaPageSectionEntity.TYPE_HERO -> this.toHeroSections()
+        else -> emptyList()
+    }
+}
+
+private fun MediaPageSectionEntity.toCarouselSection(
     propertyId: String,
     filters: SearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
@@ -53,6 +77,29 @@ fun MediaPageSectionEntity.toCarousel(
             .takeIf { showViewAll }
             ?.asPush()
     )
+}
+
+private fun MediaPageSectionEntity.toHeroSections(): List<DynamicPageLayoutState.Section> {
+    return items.flatMap { item ->
+        val sectionIdPrefix = "${this.id}-${item.id}"
+        listOfNotNull(
+            item.logoPath?.let {
+                DynamicPageLayoutState.Section.Banner("${sectionIdPrefix}-banner", it)
+            },
+            item.title?.let {
+                DynamicPageLayoutState.Section.Title(
+                    sectionId = "$sectionIdPrefix-title",
+                    text = AnnotatedString(it)
+                )
+            },
+            item.description?.let {
+                DynamicPageLayoutState.Section.Description(
+                    sectionId = "$sectionIdPrefix-description",
+                    text = AnnotatedString(it)
+                )
+            }
+        )
+    }
 }
 
 fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselItem> {

@@ -15,7 +15,7 @@ import app.eluvio.wallet.network.dto.v2.SearchRequest
 import app.eluvio.wallet.screens.destinations.PropertySearchDestination
 import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
-import app.eluvio.wallet.screens.property.toCarousel
+import app.eluvio.wallet.screens.property.toDynamicSections
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.Optional
@@ -245,8 +245,8 @@ class PropertySearchViewModel @Inject constructor(
             .distinctUntilChanged()
             .switchMapSingle { request -> fetchResults(request) }
             .subscribeBy { results ->
-                val sections = results.map { section ->
-                    section.toCarousel(
+                val sections = results.flatMap { section ->
+                    section.toDynamicSections(
                         navArgs.propertyId,
                         // Never show ViewAll button for search results
                         viewAllThreshold = Int.MAX_VALUE

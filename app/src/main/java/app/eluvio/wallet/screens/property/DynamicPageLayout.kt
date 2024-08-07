@@ -42,6 +42,8 @@ import app.eluvio.wallet.screens.property.rows.CarouselSection
 import app.eluvio.wallet.screens.property.rows.DescriptionSection
 import app.eluvio.wallet.screens.property.rows.TitleSection
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.util.compose.icons.Eluvio
+import app.eluvio.wallet.util.compose.icons.Search
 import app.eluvio.wallet.util.logging.Log
 import coil.compose.AsyncImage
 
@@ -133,10 +135,10 @@ private fun LazyItemScope.SearchButton(
             shape = ClickableSurfaceDefaults.shape(CircleShape),
             modifier = modifier
                 .padding(8.dp)
-                .size(32.dp),
+                .size(30.dp),
         ) {
             Icon(
-                imageVector = Icons.Default.Search,
+                imageVector = Icons.Eluvio.Search,
                 contentDescription = "Search",
                 modifier = Modifier
                     .fillMaxSize()
