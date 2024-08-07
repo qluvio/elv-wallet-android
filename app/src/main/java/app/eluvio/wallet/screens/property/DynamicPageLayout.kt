@@ -1,32 +1,39 @@
 package app.eluvio.wallet.screens.property
 
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
@@ -36,7 +43,6 @@ import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
-import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.property.rows.BannerSection
 import app.eluvio.wallet.screens.property.rows.CarouselSection
 import app.eluvio.wallet.screens.property.rows.DescriptionSection
@@ -46,6 +52,7 @@ import app.eluvio.wallet.util.compose.icons.Eluvio
 import app.eluvio.wallet.util.compose.icons.Search
 import app.eluvio.wallet.util.logging.Log
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 
 @Composable
 fun DynamicPageLayout(state: DynamicPageLayoutState) {
@@ -62,34 +69,21 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
             modifier = Modifier.fillMaxSize()
         )
     }
-    // Used to prevent Search button from getting focus before other page elements
-    LazyColumn {
-        item(contentType = "search", key = "search") {
-            if (state.searchNavigationEvent != null) {
-                var firstFocus by rememberSaveable { mutableStateOf(true) }
-                val focusManager = LocalFocusManager.current
-                SearchButton(
-                    searchNavigationEvent = state.searchNavigationEvent,
-                    modifier = Modifier.onFocusChanged {
-                        if (it.isFocused && firstFocus) {
-                            Log.d("Skipping Search button focus, moving down.")
-                            firstFocus = false
-                            focusManager.moveFocus(FocusDirection.Down)
-                        }
-                    })
-            } else if (state.captureTopFocus) {
-                // Empty item to make top of list focusable
-                Spacer(
-                    Modifier
-                        .height(32.dp)
-                        .focusable()
-                )
-            }
-        }
-
+    val listFocusRequester = remember { FocusRequester() }
+    val scrollState = rememberLazyListState()
+    if (state.searchNavigationEvent != null) {
+        SearchButton(
+            searchNavigationEvent = state.searchNavigationEvent,
+            scrollState,
+            listFocusRequester,
+        )
+    }
+    LazyColumn(
+        state = scrollState,
+        contentPadding = PaddingValues(top = 66.dp, bottom = 32.dp),
+        modifier = Modifier.focusRequester(listFocusRequester)
+    ) {
         sections(state.sections, state.imagesBaseUrl)
-
-        spacer(height = 32.dp)
     }
 }
 
@@ -121,20 +115,52 @@ fun LazyListScope.sections(
 }
 
 @Composable
-private fun LazyItemScope.SearchButton(
+private fun SearchButton(
     searchNavigationEvent: NavigationEvent,
+    listScrollState: LazyListState,
+    listFocusRequester: FocusRequester,
     modifier: Modifier = Modifier
 ) {
+    var firstFocus by rememberSaveable { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    val offset by remember(listScrollState) {
+        derivedStateOf {
+            if (listScrollState.firstVisibleItemIndex == 0) {
+                listScrollState.firstVisibleItemScrollOffset
+            } else {
+                // This assumes that the first item in the list is tall enough to make the search
+                // button completely scroll off the screen
+                Int.MAX_VALUE
+            }
+        }
+    }
     Box(
         contentAlignment = Alignment.TopEnd,
-        modifier = Modifier.fillParentMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         val navigator = LocalNavigator.current
         Surface(
             onClick = { navigator(searchNavigationEvent) },
             shape = ClickableSurfaceDefaults.shape(CircleShape),
             modifier = modifier
-                .padding(8.dp)
+                .offset { IntOffset(0, -offset) }
+                .focusProperties { down = listFocusRequester }
+                .onFocusChanged {
+                    if (it.hasFocus) {
+                        if (firstFocus) {
+                            // Prevent Search button from getting focus before other page elements
+                            Log.d("Skipping Search button focus, moving down.")
+                            firstFocus = false
+                            listFocusRequester.requestFocus()
+                        } else {
+                            // When search button gains focus, make sure list is scrolled to the top
+                            scope.launch {
+                                listScrollState.animateScrollToItem(0)
+                            }
+                        }
+                    }
+                }
+                .padding(top = 37.dp, end = 47.dp)
                 .size(30.dp),
         ) {
             Icon(
@@ -142,7 +168,8 @@ private fun LazyItemScope.SearchButton(
                 contentDescription = "Search",
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(6.dp)
+                    .background(Color(0xFF2d2d2d))
+                    .padding(7.dp)
             )
         }
     }

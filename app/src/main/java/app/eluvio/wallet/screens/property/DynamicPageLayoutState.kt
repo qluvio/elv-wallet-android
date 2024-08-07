@@ -26,8 +26,6 @@ data class DynamicPageLayoutState(
     // For cross-app deeplinks
     val backLinkUrl: String? = null,
     val backButtonLogo: String? = null,
-
-    val captureTopFocus: Boolean = true,
 ) {
     fun isEmpty() = sections.isEmpty() && backgroundImagePath == null
 
