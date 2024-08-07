@@ -20,6 +20,8 @@ class ComposeNavigator(
     override fun invoke(event: NavigationEvent) {
         when (event) {
             NavigationEvent.GoBack -> {
+                // TODO: figure out why I decided to use onBackPressedDispatcherOwner here instead
+                //  of navController.popBackStack(). I'm sure there was a reason..
                 onBackPressedDispatcherOwner.onBackPressedDispatcher.onBackPressed()
             }
 

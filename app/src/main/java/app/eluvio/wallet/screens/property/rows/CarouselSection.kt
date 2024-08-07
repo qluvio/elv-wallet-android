@@ -56,7 +56,6 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
-import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.compose.focusTrap
 import app.eluvio.wallet.util.compose.thenIfNotNull
 import coil.compose.AsyncImage
@@ -212,7 +211,7 @@ private fun ColumnScope.TitleRow(
         title?.let {
             Text(
                 it,
-                style = MaterialTheme.typography.carousel_36,
+                style = MaterialTheme.typography.body_32,
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -373,7 +372,7 @@ private fun FilterTab(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.label_40,
+            style = MaterialTheme.typography.body_32,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
         )
     }

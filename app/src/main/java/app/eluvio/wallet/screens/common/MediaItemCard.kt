@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +46,6 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.button_24
 import app.eluvio.wallet.theme.label_24
-import app.eluvio.wallet.theme.label_37
 import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.logging.Log
 import io.realm.kotlin.ext.realmListOf
@@ -134,14 +134,17 @@ private fun BoxScope.LiveVideoUnFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
         liveVideo.started -> {
             Text(
                 "LIVE",
-                style = MaterialTheme.typography.button_24,
+                style = MaterialTheme.typography.button_24.copy(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                ),
                 textAlign = TextAlign.Center,
                 color = Color.White,
                 modifier = Modifier
                     .padding(15.dp)
                     .background(Color.Red, shape = RoundedCornerShape(2.dp))
                     .align(Alignment.BottomEnd)
-                    .padding(horizontal = 6.dp, vertical = 4.dp)
+                    .padding(horizontal = 5.dp, vertical = 3.dp)
             )
         }
 
@@ -175,7 +178,7 @@ private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
                 text = headers,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
+                style = MaterialTheme.typography.label_24.copy(fontSize = 8.sp),
                 color = Color(0xFFA5A6A8),
                 modifier = Modifier.padding(bottom = 6.dp)
             )
@@ -185,7 +188,7 @@ private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
                 text = title,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_37.copy(fontSize = 14.sp),
+                style = MaterialTheme.typography.label_24.copy(fontSize = 12.sp),
             )
         }
         liveVideo.subtitle?.takeIf { it.isNotEmpty() }?.let { subtitle ->
@@ -193,7 +196,7 @@ private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
                 text = subtitle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 11.sp),
+                style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
                 color = Color(0xFF818590),
                 modifier = Modifier.padding(top = 4.dp)
             )
