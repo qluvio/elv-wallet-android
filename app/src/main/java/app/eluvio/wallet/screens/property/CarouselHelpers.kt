@@ -136,10 +136,9 @@ fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselIt
 fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.current
     when (carouselItem) {
-        is CarouselItem.Media -> Column {
+        is CarouselItem.Media -> Column(modifier = modifier) {
             MediaItemCard(
                 carouselItem.entity,
-                modifier = modifier,
                 cardHeight = cardHeight,
                 onMediaItemClick = { media ->
                     when {

@@ -1,16 +1,22 @@
 package app.eluvio.wallet.screens.property.mediagrid
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.foundation.PivotOffsets
-import androidx.tv.foundation.lazy.grid.TvGridCells
-import androidx.tv.foundation.lazy.grid.TvGridItemSpan
-import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
-import androidx.tv.foundation.lazy.grid.items
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -21,7 +27,7 @@ import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.property.CarouselItemCard
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.header_53
+import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -38,31 +44,34 @@ fun MediaGrid() {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MediaGrid(state: MediaGridViewModel.State) {
-    val cardSpacing = 20.dp
-    val cardHeight = 200.dp
-
-    val hasAnyWideItems = state.items.any {
-        // TODO: this won't look good if there's a mix of 1:1 and 16:9 items, but a lazy-loading
-        //  FlowRow doesn't exist yet on TV, so I'm sacrificing visuals for performance.
-        it is CarouselItem.Media && it.entity.aspectRatio() > 1f
-    }
-    val columnCount = if (hasAnyWideItems) 2 else 4
-    TvLazyVerticalGrid(
-        columns = TvGridCells.Fixed(columnCount),
-        horizontalArrangement = Arrangement.spacedBy(cardSpacing),
-        verticalArrangement = Arrangement.spacedBy(cardSpacing),
-        contentPadding = Overscan.defaultPadding(),
-        pivotOffsets = PivotOffsets(0.2f),
+    val cardHeight = 120.dp
+    FlowRow(
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalArrangement = Arrangement.spacedBy(22.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.linearGradient(listOf(Color(0xFF16151F), Color(0xFF0C0C10))))
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 27.dp, vertical = Overscan.verticalPadding)
     ) {
         state.title?.let {
-            item(span = { TvGridItemSpan(maxLineSpan) }) {
-                Text(text = it, style = MaterialTheme.typography.header_53)
-            }
+            Text(
+                text = it,
+                style = MaterialTheme.typography.body_32,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start=7.dp)
+            )
         }
-        items(state.items) { item ->
-            CarouselItemCard(carouselItem = item, cardHeight = cardHeight)
+        state.items.forEach { item ->
+            CarouselItemCard(
+                carouselItem = item,
+                cardHeight = cardHeight,
+                modifier = Modifier.padding(horizontal = 7.dp)
+            )
         }
     }
 }
