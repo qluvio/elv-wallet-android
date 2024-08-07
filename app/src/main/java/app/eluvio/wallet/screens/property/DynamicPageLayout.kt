@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.property
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -141,6 +140,7 @@ private fun SearchButton(
         val navigator = LocalNavigator.current
         Surface(
             onClick = { navigator(searchNavigationEvent) },
+            colors = ClickableSurfaceDefaults.colors(containerColor = Color(0xFF2d2d2d)),
             shape = ClickableSurfaceDefaults.shape(CircleShape),
             modifier = modifier
                 .offset { IntOffset(0, -offset) }
@@ -168,7 +168,6 @@ private fun SearchButton(
                 contentDescription = "Search",
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF2d2d2d))
                     .padding(7.dp)
             )
         }

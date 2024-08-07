@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,6 +34,8 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.util.compose.KeyboardClosedHandler
+import app.eluvio.wallet.util.compose.icons.Eluvio
+import app.eluvio.wallet.util.compose.icons.Search
 
 
 @Composable
@@ -70,6 +71,7 @@ fun SearchBox(
             .fillMaxWidth()
             .focusRequester(surfaceFocusRequester)
     ) {
+        val hintColor = Color(0xFFDBDBDB)
         BasicTextField(
             value = query,
             onValueChange = onQueryChanged,
@@ -84,16 +86,19 @@ fun SearchBox(
             decorationBox = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Search,
+                        imageVector = Icons.Eluvio.Search,
+                        tint = hintColor,
                         contentDescription = "Search",
                         modifier = Modifier.size(24.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(15.dp))
                     Box(contentAlignment = Alignment.CenterStart) {
                         it()
                         if (query.isEmpty()) {
                             Text(
                                 hint,
+                                color = hintColor,
+                                style = MaterialTheme.typography.carousel_48,
                                 modifier = Modifier.graphicsLayer { alpha = 0.6f })
                         }
                     }
