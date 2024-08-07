@@ -245,22 +245,25 @@ class PropertySearchViewModel @Inject constructor(
             .distinctUntilChanged()
             .switchMapSingle { request -> fetchResults(request) }
             .subscribeBy { results ->
-                val sections = results.flatMap { section ->
-                    section.toDynamicSections(
-                        navArgs.propertyId,
-                        // Never show ViewAll button for search results
-                        viewAllThreshold = Int.MAX_VALUE
-                    )
-                }.ifEmpty {
-                    // Show a message when no results are found
-                    listOf(
-                        DynamicPageLayoutState.Section.Title(
-                            "no_results",
-                            AnnotatedString("No results found")
-                        )
-                    )
-                }
                 updateState {
+                    // If filters aren't defined for this tenant, always show results as a grid
+                    val forceGrid = primaryFilters == null
+                    val sections = results.flatMap { section ->
+                        section.toDynamicSections(
+                            navArgs.propertyId,
+                            // Never show ViewAll button for search results
+                            viewAllThreshold = Int.MAX_VALUE,
+                            forceGridView = forceGrid
+                        )
+                    }.ifEmpty {
+                        // Show a message when no results are found
+                        listOf(
+                            DynamicPageLayoutState.Section.Title(
+                                "no_results",
+                                AnnotatedString("No results found")
+                            )
+                        )
+                    }
                     copy(searchResults = sections)
                 }
             }

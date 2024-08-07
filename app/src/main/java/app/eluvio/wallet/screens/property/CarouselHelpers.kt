@@ -41,13 +41,16 @@ fun MediaPageSectionEntity.toDynamicSections(
     propertyId: String,
     filters: SearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
+    forceGridView: Boolean = false,
 ): List<DynamicPageLayoutState.Section> {
     return when (type) {
-        MediaPageSectionEntity.TYPE_MANUAL -> listOf(
+        MediaPageSectionEntity.TYPE_MANUAL,
+        MediaPageSectionEntity.TYPE_SEARCH -> listOf(
             this.toCarouselSection(
                 propertyId,
                 filters,
-                viewAllThreshold
+                viewAllThreshold,
+                forceGridView
             )
         )
 
@@ -60,6 +63,7 @@ private fun MediaPageSectionEntity.toCarouselSection(
     propertyId: String,
     filters: SearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
+    forceGridView: Boolean,
 ): DynamicPageLayoutState.Section.Carousel {
     val items = items.toCarouselItems(propertyId)
     val displayLimit = displayLimit?.takeIf { it > 0 } ?: items.size
@@ -76,7 +80,7 @@ private fun MediaPageSectionEntity.toCarouselSection(
         backgroundImagePath = backgroundImagePath,
         logoPath = logoPath,
         logoText = logoText,
-        showAsGrid = displayFormat == MediaPageSectionEntity.DisplayFormat.GRID,
+        showAsGrid = forceGridView || displayFormat == MediaPageSectionEntity.DisplayFormat.GRID,
         filterAttribute = filterAttribute,
         viewAllNavigationEvent = MediaGridDestination(
             propertyId = propertyId,

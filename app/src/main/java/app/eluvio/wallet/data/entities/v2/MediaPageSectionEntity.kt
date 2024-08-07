@@ -24,6 +24,12 @@ class MediaPageSectionEntity : RealmObject {
         GRID("grid");
     }
 
+    companion object {
+        const val TYPE_MANUAL = "manual"
+        const val TYPE_SEARCH = "search"
+        const val TYPE_HERO = "hero"
+    }
+
     @PrimaryKey
     var id: String = ""
     var type: String = ""
