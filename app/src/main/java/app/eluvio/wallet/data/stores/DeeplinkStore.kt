@@ -38,13 +38,13 @@ class DeeplinkStore @Inject constructor(
             .mapNotNull { it.firstOrNull() }
             .flatMapSingle { deeplink ->
                 Log.d("Deeplink found in DB, passing along and removing from db")
-                saveAsync(realm, emptyList<DeeplinkRequestEntity>(), clearTable = true)
+                realm.saveAsync(emptyList<DeeplinkRequestEntity>(), clearTable = true)
                     .toSingleDefault(deeplink)
             }
     }
 
     @CheckResult("Subscribe to the returned Completable to perform the operation")
     fun setDeeplinkRequest(request: DeeplinkRequestEntity): Completable {
-        return saveAsync(realm, listOf(request), clearTable = true)
+        return realm.saveAsync(listOf(request), clearTable = true)
     }
 }

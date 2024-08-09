@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
+import dagger.multibindings.ElementsIntoSet
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -49,11 +49,20 @@ class MediaPropertyEntity : RealmObject {
         return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage)"
     }
 
+    // Index can't be saved as part of the PropertyEntity object because it will get overridden
+    // when fetching a single property from the API.
+    class PropertyOrderEntity : RealmObject {
+        @PrimaryKey
+        var propertyId: String = ""
+        var index: Int = Int.MAX_VALUE
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {
         @Provides
-        @IntoSet
-        fun provideEntity(): KClass<out TypedRealmObject> = MediaPropertyEntity::class
+        @ElementsIntoSet
+        fun provideEntities(): Set<KClass<out TypedRealmObject>> =
+            setOf(MediaPropertyEntity::class, PropertyOrderEntity::class)
     }
 }

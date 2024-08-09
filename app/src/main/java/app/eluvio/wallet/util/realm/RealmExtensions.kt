@@ -27,7 +27,7 @@ inline fun <reified T : RealmObject> Single<T>.saveTo(
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ): Single<T> {
     return flatMap { entity ->
-        saveAsync(realm, listOf(entity), clearTable, updatePolicy)
+        realm.saveAsync(listOf(entity), clearTable, updatePolicy)
             .toSingleDefault(entity)
     }
 }
@@ -43,19 +43,18 @@ inline fun <reified T : RealmObject> Single<List<T>>.saveTo(
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ): Single<List<T>> {
     return flatMap { list ->
-        saveAsync(realm, list, clearTable, updatePolicy)
+        realm.saveAsync(list, clearTable, updatePolicy)
             .toSingleDefault(list)
     }
 }
 
-inline fun <reified T : RealmObject> saveAsync(
-    realm: Realm,
+inline fun <reified T : RealmObject> Realm.saveAsync(
     list: List<T>,
     clearTable: Boolean = false,
     updatePolicy: UpdatePolicy = UpdatePolicy.ALL
 ): Completable {
     return rxCompletable {
-        realm.write {
+        write {
             if (clearTable) {
                 Log.w("Clearing table ${T::class.simpleName}")
                 delete<T>()

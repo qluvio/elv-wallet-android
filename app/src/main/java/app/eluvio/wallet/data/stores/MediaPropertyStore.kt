@@ -8,6 +8,7 @@ import app.eluvio.wallet.network.api.mwv2.MediaWalletV2Api
 import app.eluvio.wallet.network.converters.v2.toEntity
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
+import app.eluvio.wallet.util.realm.saveAsync
 import app.eluvio.wallet.util.realm.saveTo
 import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Completable
@@ -24,8 +25,18 @@ class MediaPropertyStore @Inject constructor(
 ) {
 
     fun observeMediaProperties(forceRefresh: Boolean = true): Flowable<List<MediaPropertyEntity>> {
+        val orderedProperties =
+            Flowable.combineLatest(
+                realm.query<MediaPropertyEntity>().asFlowable(),
+                realm.query<MediaPropertyEntity.PropertyOrderEntity>().asFlowable()
+                    .distinctUntilChanged()
+                    .map { list -> list.associateBy { it.propertyId } }
+            ) { properties, orderMap ->
+                properties.sortedBy { orderMap[it.id]?.index ?: Int.MAX_VALUE }
+            }
+
         return observeRealmAndFetch(
-            realmQuery = realm.query<MediaPropertyEntity>().asFlowable(),
+            realmQuery = orderedProperties,
             fetchOperation = { _, isFirstState ->
                 fetchMediaProperties().takeIf { isFirstState && forceRefresh }
             }
@@ -51,11 +62,24 @@ class MediaPropertyStore @Inject constructor(
                 // Maybe some day.
                 3
             )
-            .map { response ->
-                response.contents.orEmpty().map { propertyDto -> propertyDto.toEntity() }
+            .flatMapCompletable { response ->
+                val properties =
+                    response.contents.orEmpty().map { propertyDto -> propertyDto.toEntity() }
+                val order = properties
+                    .mapIndexed { index, property ->
+                        MediaPropertyEntity.PropertyOrderEntity().apply {
+                            this.propertyId = property.id
+                            // This will need to be updated once we support pagination
+                            val page = 0
+                            this.index = (page * 1000) + index
+                        }
+                    }
+
+                Completable.mergeArray(
+                    realm.saveAsync(properties),
+                    realm.saveAsync(order)
+                )
             }
-            .saveTo(realm)
-            .ignoreElement()
     }
 
     fun observeMediaProperty(

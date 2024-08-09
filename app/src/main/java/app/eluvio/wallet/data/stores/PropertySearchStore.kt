@@ -59,7 +59,7 @@ class PropertySearchStore @Inject constructor(
             .flatMap { sections ->
                 // Persist only the MediaItems, not the Sections or SectionItems
                 val mediaItems = sections.flatMap { it.items }.mapNotNull { it.media }
-                saveAsync(realm, mediaItems)
+                realm.saveAsync(mediaItems)
                     .toSingleDefault(sections)
             }
     }
