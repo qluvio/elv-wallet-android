@@ -1,31 +1,13 @@
 package app.eluvio.wallet.screens.property
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity.SectionItemEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
-import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
-import app.eluvio.wallet.screens.common.MediaItemCard
-import app.eluvio.wallet.screens.common.defaultMediaItemClickHandler
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
-import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
-import app.eluvio.wallet.screens.property.items.CustomCard
-import app.eluvio.wallet.screens.property.items.OfferCard
-import app.eluvio.wallet.screens.property.items.SubpropertyCard
-import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.compose.fromHex
 
 /**
@@ -128,65 +110,6 @@ fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselIt
             item.media != null -> CarouselItem.Media(item.media!!, propertyId)
 
             else -> null
-        }
-    }
-}
-
-@Composable
-fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.current
-    when (carouselItem) {
-        is CarouselItem.Media -> Column(modifier = modifier) {
-            MediaItemCard(
-                carouselItem.entity,
-                cardHeight = cardHeight,
-                onMediaItemClick = { media ->
-                    when {
-                        media.mediaItemsIds.isNotEmpty() -> {
-                            // This media item is a container for other media (e.g. a media list/collection)
-                            navigator(
-                                MediaGridDestination(
-                                    propertyId = carouselItem.propertyId,
-                                    mediaContainerId = media.id
-                                ).asPush()
-                            )
-                        }
-
-                        media.liveVideoInfo?.started == false -> {
-                            // this is a live video that hasn't started yet.
-                            navigator(
-                                UpcomingVideoDestination(
-                                    propertyId = carouselItem.propertyId,
-                                    mediaItemId = media.id,
-                                ).asPush()
-                            )
-                        }
-
-                        else -> {
-                            defaultMediaItemClickHandler(navigator).invoke(media)
-                        }
-                    }
-                }
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                carouselItem.entity.name,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp)
-            )
-        }
-
-        is CarouselItem.RedeemableOffer -> OfferCard(
-            carouselItem,
-            cardHeight
-        )
-
-        is CarouselItem.SubpropertyLink -> SubpropertyCard(
-            carouselItem,
-            cardHeight
-        )
-
-        is CarouselItem.CustomCard -> {
-            CustomCard(carouselItem, cardHeight, modifier)
         }
     }
 }

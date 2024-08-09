@@ -50,9 +50,9 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.spacer
-import app.eluvio.wallet.screens.property.CarouselItemCard
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
+import app.eluvio.wallet.screens.property.items.CarouselItemCard
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24

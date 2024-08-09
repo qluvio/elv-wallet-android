@@ -24,8 +24,8 @@ import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
 import app.eluvio.wallet.screens.common.Overscan
-import app.eluvio.wallet.screens.property.CarouselItemCard
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
+import app.eluvio.wallet.screens.property.items.CarouselItemCard
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.util.subscribeToState
