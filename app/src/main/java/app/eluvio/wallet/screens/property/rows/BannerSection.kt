@@ -1,7 +1,8 @@
 package app.eluvio.wallet.screens.property.rows
 
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,10 +20,12 @@ fun BannerSection(
         model = baseUrl?.let { "$it${item.imagePath}" },
         contentDescription = "Logo",
         modifier
-            .heightIn(max = 90.dp)
             .padding(
                 start = Overscan.horizontalPadding,
-                end = 260.dp
+                end = 260.dp,
+                bottom = 40.dp
             )
+            .height(90.dp)
+            .widthIn(max = 680.dp)
     )
 }

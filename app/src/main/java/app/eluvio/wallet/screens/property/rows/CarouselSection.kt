@@ -54,7 +54,6 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.screens.property.items.CarouselItemCard
 import app.eluvio.wallet.theme.body_32
-import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.compose.focusTrap
 import app.eluvio.wallet.util.compose.thenIfNotNull
@@ -129,7 +128,12 @@ fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // If we have at least one element in after the last spacer, add another one. It's
+                // brittle and duplicates the logic above, but compose makes it annoyingly hard to
+                // do any other way
+                if (hasTitleRow || item.filterAttribute != null || item.viewAllNavigationEvent != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
                 val exitFocusModifier = Modifier
                     .focusProperties {

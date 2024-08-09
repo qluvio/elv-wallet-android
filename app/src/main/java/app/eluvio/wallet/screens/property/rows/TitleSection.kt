@@ -18,7 +18,9 @@ fun TitleSection(item: DynamicPageLayoutState.Section.Title) {
         style = MaterialTheme.typography.carousel_48.copy(fontWeight = FontWeight.Bold),
         modifier = Modifier.padding(
             start = Overscan.horizontalPadding,
-            top = 26.dp
+            top = 0.dp,
+            end = 380.dp,
+            bottom = 20.dp
         )
     )
 }

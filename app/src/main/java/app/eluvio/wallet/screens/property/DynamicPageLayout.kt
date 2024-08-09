@@ -79,7 +79,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
     }
     LazyColumn(
         state = scrollState,
-        contentPadding = PaddingValues(top = 66.dp, bottom = 32.dp),
+        contentPadding = PaddingValues(top = 50.dp, bottom = 32.dp),
         modifier = Modifier.focusRequester(listFocusRequester)
     ) {
         sections(state.sections, state.imagesBaseUrl)

@@ -152,7 +152,10 @@ private fun BoxScope.LiveVideoUnFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
             val startTime = liveVideo.getStartDateTimeString(LocalContext.current)
             Text(
                 "UPCOMING\n$startTime",
-                style = MaterialTheme.typography.button_24,
+                style = MaterialTheme.typography.button_24.copy(
+                    fontSize = 7.sp,
+                    fontWeight = FontWeight.Medium
+                ),
                 textAlign = TextAlign.Center,
                 color = Color(0xFFB3B3B3),
                 modifier = Modifier

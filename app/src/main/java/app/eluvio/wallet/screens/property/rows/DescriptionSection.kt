@@ -23,7 +23,7 @@ fun DescriptionSection(item: DynamicPageLayoutState.Section.Description) {
     Text(
         text = item.text,
         style = MaterialTheme.typography.label_24,
-        maxLines = if (expanded) Int.MAX_VALUE else 10,
+        maxLines = if (expanded) Int.MAX_VALUE else 3,
         overflow = TextOverflow.Ellipsis,
         onTextLayout = { textLayoutResult ->
             // Only clickable if there's actually overflow.
@@ -34,8 +34,7 @@ fun DescriptionSection(item: DynamicPageLayoutState.Section.Description) {
             .padding(
                 start = Overscan.horizontalPadding,
                 end = 380.dp,
-                top = 16.dp,
-                bottom = 26.dp
+                bottom = 36.dp
             )
     )
 }
