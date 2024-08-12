@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,7 +57,10 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.screens.property.items.CarouselItemCard
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.label_24
+import app.eluvio.wallet.util.compose.focusCapturingGroup
+import app.eluvio.wallet.util.compose.focusCapturingLazyList
 import app.eluvio.wallet.util.compose.focusTrap
+import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.compose.thenIfNotNull
 import coil.compose.AsyncImage
 
@@ -63,12 +68,16 @@ private val CARD_HEIGHT = 120.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CarouselSection(item: DynamicPageLayoutState.Section.Carousel, imagesBaseUrl: String?) {
+fun CarouselSection(
+    item: DynamicPageLayoutState.Section.Carousel,
+    imagesBaseUrl: String?,
+    modifier: Modifier = Modifier
+) {
     if (item.items.isEmpty()) {
         return
     }
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .thenIfNotNull(item.backgroundColor) { Modifier.background(it) }
     ) {
@@ -264,45 +273,50 @@ private fun ViewAllButton(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ItemGrid(items: List<CarouselItem>, startPadding: Dp, modifier: Modifier = Modifier) {
     // TODO: make lazy
+    val firstChildFocusRequester = remember { FocusRequester() }
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
             .fillMaxWidth()
-            .focusRestorer()
+            .focusCapturingGroup(firstChildFocusRequester)
             .padding(start = startPadding, end = Overscan.horizontalPadding)
     ) {
-        items.forEach { item ->
+        items.forEachIndexed { index, item ->
             key(item) {
                 CarouselItemCard(
                     carouselItem = item,
                     cardHeight = CARD_HEIGHT,
+                    modifier = Modifier.thenIf(index == 0) { focusRequester(firstChildFocusRequester) }
                 )
             }
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun ItemRow(items: List<CarouselItem>, startPadding: Dp, modifier: Modifier = Modifier) {
     // The 'key' function prevents from focusRestorer() from breaking when crashing when
     // filteredItems changes.
     // From what I could tell it's kind of like 'remember' but for Composable.
     key(items) {
+        val scrollState = rememberLazyListState()
+        val childFocusRequesters = remember(items.size) { List(items.size) { FocusRequester() } }
         LazyRow(
+            state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(start = startPadding, end = Overscan.horizontalPadding),
-            modifier = modifier.focusRestorer()
+            modifier = modifier.focusCapturingLazyList(scrollState, childFocusRequesters)
         ) {
-            items(items) { item ->
+            itemsIndexed(items) { index, item ->
                 CarouselItemCard(
                     carouselItem = item,
                     cardHeight = CARD_HEIGHT,
+                    modifier = Modifier.focusRequester(childFocusRequesters[index])
                 )
             }
         }
