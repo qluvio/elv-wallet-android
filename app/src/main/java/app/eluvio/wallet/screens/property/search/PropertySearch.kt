@@ -7,6 +7,7 @@ import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,6 +54,7 @@ import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.SearchBox
 import app.eluvio.wallet.screens.common.SearchFilterChip
 import app.eluvio.wallet.screens.common.TvButton
+import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.sections
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
@@ -125,7 +127,7 @@ private fun PropertySearch(
                     .padding(56.dp)
             )
         } else {
-            LazyColumn {
+            LazyColumn(contentPadding = PaddingValues(vertical = 20.dp)) {
                 sections(state.allSections, state.baseUrl)
             }
         }
@@ -262,7 +264,18 @@ private fun PropertySearchPreview() = EluvioThemePreview {
     PropertySearch(
         PropertySearchViewModel.State(
             loading = false,
-            propertyName = "FlixVerse"
+            propertyName = "FlixVerse",
+            primaryFilters =
+            DynamicPageLayoutState.Section.Carousel(
+                sectionId = "4",
+                items = List(4) {
+                    DynamicPageLayoutState.CarouselItem.CustomCard(
+                        title = "Primary Filter Value ${it + 1}",
+                        imageUrl = null,
+                        aspectRatio = 16f / 9f,
+                        onClick = {})
+                }
+            ),
         ),
         query = "",
         onPrimaryFilterSelected = {},
