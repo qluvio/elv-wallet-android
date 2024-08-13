@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.common
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -21,12 +20,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.LocalSurfaceScale
+import app.eluvio.wallet.theme.borders
+import app.eluvio.wallet.theme.focusedBorder
 import app.eluvio.wallet.util.compose.requestInitialFocus
 
 /**
@@ -44,11 +44,9 @@ fun ImageCard(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val focusedBorder =
-        Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer), shape = shape)
     Surface(
         onClick = onClick,
-        border = ClickableSurfaceDefaults.border(focusedBorder = focusedBorder),
+        border = MaterialTheme.borders.focusedBorder,
         scale = LocalSurfaceScale.current,
         shape = ClickableSurfaceDefaults.shape(shape),
         interactionSource = interactionSource,

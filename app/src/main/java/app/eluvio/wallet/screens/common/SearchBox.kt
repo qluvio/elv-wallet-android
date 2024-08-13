@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.common
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +23,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.LocalContentColor
@@ -32,7 +30,9 @@ import androidx.tv.material3.LocalTextStyle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import app.eluvio.wallet.theme.borders
 import app.eluvio.wallet.theme.carousel_48
+import app.eluvio.wallet.theme.focusedBorder
 import app.eluvio.wallet.util.compose.KeyboardClosedHandler
 import app.eluvio.wallet.util.compose.icons.Eluvio
 import app.eluvio.wallet.util.compose.icons.Search
@@ -64,9 +64,7 @@ fun SearchBox(
             disabledContainerColor = Color.Transparent,
             disabledContentColor = Color.Transparent
         ),
-        border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(BorderStroke(2.dp, textColor))
-        ),
+        border = MaterialTheme.borders.focusedBorder,
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(surfaceFocusRequester)

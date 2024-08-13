@@ -1,6 +1,5 @@
 package app.eluvio.wallet.screens.dashboard.discover
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -40,7 +39,6 @@ import androidx.tv.foundation.lazy.grid.TvGridItemSpan
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.itemsIndexed
 import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
-import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
@@ -53,6 +51,8 @@ import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.borders
+import app.eluvio.wallet.theme.focusedBorder
 import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
@@ -194,9 +194,7 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                     lastClickedProperty = property.id
                     onPropertyClicked(property)
                 },
-                border = ClickableSurfaceDefaults.border(
-                    focusedBorder = Border(BorderStroke(2.dp, MaterialTheme.colorScheme.border))
-                ),
+                border = MaterialTheme.borders.focusedBorder,
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(2.dp)),
                 modifier = Modifier
                     .focusRequester(focusRequester)
