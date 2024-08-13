@@ -40,6 +40,7 @@ import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -276,14 +277,21 @@ private fun ViewAllButton(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ItemGrid(items: List<CarouselItem>, startPadding: Dp, modifier: Modifier = Modifier) {
-    // TODO: make lazy
     val firstChildFocusRequester = remember { FocusRequester() }
+    var firstChildPositioned by remember { mutableStateOf(false) }
+    // TODO: make lazy
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
             .fillMaxWidth()
-            .focusCapturingGroup(firstChildFocusRequester)
+            .focusCapturingGroup {
+                if (firstChildPositioned) {
+                    firstChildFocusRequester
+                } else {
+                    FocusRequester.Default
+                }
+            }
             .padding(start = startPadding, end = Overscan.horizontalPadding)
     ) {
         items.forEachIndexed { index, item ->
@@ -291,7 +299,12 @@ private fun ItemGrid(items: List<CarouselItem>, startPadding: Dp, modifier: Modi
                 CarouselItemCard(
                     carouselItem = item,
                     cardHeight = CARD_HEIGHT,
-                    modifier = Modifier.thenIf(index == 0) { focusRequester(firstChildFocusRequester) }
+                    modifier = Modifier.thenIf(index == 0) {
+                        onGloballyPositioned {
+                            firstChildPositioned = true
+                        }
+                            .focusRequester(firstChildFocusRequester)
+                    }
                 )
             }
         }

@@ -37,6 +37,8 @@ fun Modifier.focusCapturingLazyList(
 
 /**
  * NOTE: Do NOT use this for Lazy Lists. Use [focusCapturingLazyList] instead.
+ * NOTE2: Make sure you are providing a FocusRequester that is actually attached.
+ *   During fast scrolling, this could be invoked on the parent before children are positioned.
  *
  * Compose focus handing HEAVILY prefers moving focus in the direction of the scroll. This can be a
  * problem when you have a row where the focusable elements are offset a few pixels to the side, and
@@ -45,13 +47,13 @@ fun Modifier.focusCapturingLazyList(
  * the focus to [focusRestorer].
  */
 @OptIn(ExperimentalComposeUiApi::class)
-fun Modifier.focusCapturingGroup(someChildFocusRequester: FocusRequester) =
+fun Modifier.focusCapturingGroup(someChildFocusRequester: () -> FocusRequester) =
     focusProperties {
         enter = {
             // Doesn't actually matter that it doesn't match the "correct" index, because
             // "focusRestorer" will take care of it down the line. All we need to make sure is to
             // return a FocusRequester that isn't Default, and is attached to the screen.
-            someChildFocusRequester
+            someChildFocusRequester()
         }
     }
         .focusGroup() // Required to make .focusable() work
