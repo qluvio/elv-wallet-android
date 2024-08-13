@@ -92,7 +92,8 @@ fun CarouselSection(
             )
         }
         Row {
-            Logo(item, imagesBaseUrl)
+            // TODO: Re-enable once we figure out focus issues with offset rows
+            // Logo(item, imagesBaseUrl)
             Column(
                 Modifier
                     .focusTrap(FocusDirection.Left, FocusDirection.Right)

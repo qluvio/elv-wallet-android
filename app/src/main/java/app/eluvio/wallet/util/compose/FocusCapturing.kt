@@ -21,19 +21,19 @@ import androidx.compose.ui.focus.focusRestorer
 fun Modifier.focusCapturingLazyList(
     listState: LazyListState,
     childFocusRequesters: List<FocusRequester>
-) =
-    focusProperties {
-        enter = {
-            // Doesn't actually matter that it doesn't match the "correct" index, because
-            // "focusRestorer" will take care of it down the line. All we need to make sure is to
-            // return a FocusRequester that isn't Default, and is attached to the screen.
-            childFocusRequesters[listState.firstVisibleItemIndex]
-        }
-    }
-        .focusGroup() // Required to make .focusable() work
-        .focusable() // Actually captures focus so we get the enter callback
-        .focusGroup() // Required to make .focusRestorer() work
-        .focusRestorer() // Handles restoring focus to the last focused item.
+) =this
+//    focusProperties {
+//        enter = {
+//            // Doesn't actually matter that it doesn't match the "correct" index, because
+//            // "focusRestorer" will take care of it down the line. All we need to make sure is to
+//            // return a FocusRequester that isn't Default, and is attached to the screen.
+//            childFocusRequesters[listState.firstVisibleItemIndex]
+//        }
+//    }
+//        .focusGroup() // Required to make .focusable() work
+//        .focusable() // Actually captures focus so we get the enter callback
+//        .focusGroup() // Required to make .focusRestorer() work
+//        .focusRestorer() // Handles restoring focus to the last focused item.
 
 /**
  * NOTE: Do NOT use this for Lazy Lists. Use [focusCapturingLazyList] instead.
@@ -48,18 +48,19 @@ fun Modifier.focusCapturingLazyList(
  */
 @OptIn(ExperimentalComposeUiApi::class)
 fun Modifier.focusCapturingGroup(someChildFocusRequester: () -> FocusRequester) =
-    focusProperties {
-        enter = {
-            // Doesn't actually matter that it doesn't match the "correct" index, because
-            // "focusRestorer" will take care of it down the line. All we need to make sure is to
-            // return a FocusRequester that isn't Default, and is attached to the screen.
-            someChildFocusRequester()
-        }
-    }
-        .focusGroup() // Required to make .focusable() work
-        .focusable() // Actually captures focus so we get the enter callback
-        .focusGroup() // Required to make .focusRestorer() work
-        .focusRestorer() // Handles restoring focus to the last focused item.
-        // I don't know why this last .focusGroup() is needed in the non-lazy version,
-        // yet it breaks the lazy version, but here we are :shrug:.
-        .focusGroup()
+    this
+//    focusProperties {
+//        enter = {
+//            // Doesn't actually matter that it doesn't match the "correct" index, because
+//            // "focusRestorer" will take care of it down the line. All we need to make sure is to
+//            // return a FocusRequester that isn't Default, and is attached to the screen.
+//            someChildFocusRequester()
+//        }
+//    }
+//        .focusGroup() // Required to make .focusable() work
+//        .focusable() // Actually captures focus so we get the enter callback
+//        .focusGroup() // Required to make .focusRestorer() work
+//        .focusRestorer() // Handles restoring focus to the last focused item.
+//        // I don't know why this last .focusGroup() is needed in the non-lazy version,
+//        // yet it breaks the lazy version, but here we are :shrug:.
+//        .focusGroup()
