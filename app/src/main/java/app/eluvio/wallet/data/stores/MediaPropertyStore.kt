@@ -64,7 +64,7 @@ class MediaPropertyStore @Inject constructor(
             )
             .flatMapCompletable { response ->
                 val properties =
-                    response.contents.orEmpty().map { propertyDto -> propertyDto.toEntity() }
+                    response.contents.orEmpty().mapNotNull { propertyDto -> propertyDto.toEntity() }
                 val order = properties
                     .mapIndexed { index, property ->
                         MediaPropertyEntity.PropertyOrderEntity().apply {
@@ -136,7 +136,7 @@ class MediaPropertyStore @Inject constructor(
         return apiProvider.getApi(MediaWalletV2Api::class)
             .flatMap { api -> api.getProperty(propertyId) }
             .doOnError { Log.e("Error fetching property: $it") }
-            .map { response -> response.toEntity() }
+            .mapNotNull { response -> response.toEntity() }
             .saveTo(realm)
             .ignoreElement()
     }

@@ -6,13 +6,14 @@ import app.eluvio.wallet.network.dto.v2.MediaPageDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
 import io.realm.kotlin.ext.toRealmList
 
-fun MediaPropertyDto.toEntity(): MediaPropertyEntity {
+fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
     val dto = this
     return MediaPropertyEntity().apply {
         id = dto.id
         name = dto.name
         headerLogo = dto.tvHeaderLogo?.path ?: dto.headerLogo?.path ?: ""
-        image = dto.image?.path ?: ""
+        // We can't handle properties without images
+        image = dto.image?.path?.takeIf { it.isNotEmpty() } ?: return null
         mainPage = dto.mainPage.toEntity(id)
     }
 }
