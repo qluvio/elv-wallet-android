@@ -50,7 +50,6 @@ import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.borders
 import app.eluvio.wallet.theme.focusedBorder
-import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
@@ -207,10 +206,6 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                             lastClickedProperty = null
                             onPropertyFocused(property)
                         }
-                    }
-                    .thenIf(index == 0) {
-                        // First property will ask for focus only for the very first composition.
-                        requestInitialFocus()
                     }
             ) {
                 ShimmerImage(
