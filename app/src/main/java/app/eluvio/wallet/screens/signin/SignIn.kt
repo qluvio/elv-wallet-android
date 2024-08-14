@@ -48,15 +48,15 @@ import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.offsetAndFakeSize
-import app.eluvio.wallet.util.compose.requestOnce
 import app.eluvio.wallet.screens.destinations.MetamaskSignInDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.util.compose.requestOnce
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
-@AuthFlowGraph
+@AuthFlowGraph(start = true)
 @Destination
 @Composable
 fun SignIn() {

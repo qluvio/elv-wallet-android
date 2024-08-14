@@ -44,14 +44,15 @@ class MediaPropertyStore @Inject constructor(
     }
 
     private fun fetchMediaProperties(): Completable {
-        if (!tokenStore.isLoggedIn) {
+        // TODO: find a way to not leak data between Demo and Main
+        //        if (!tokenStore.isLoggedIn) {
             // Since getProperties is a public API, this can be called right after SignOut.
             // It's not a huge deal because it only "leaks" public data, but it still causes
             // problems when switching between Main and Demo envs, so adding this safety check here.
             // Also worth noting, that if we ever bring back a no-auth experience, we'll have to
             // fix this a different way.
-            return Completable.complete()
-        }
+        //            return Completable.complete()
+        //        }
         return apiProvider.getApi(MediaWalletV2Api::class)
             .flatMap { api -> api.getProperties() }
             .doOnError {

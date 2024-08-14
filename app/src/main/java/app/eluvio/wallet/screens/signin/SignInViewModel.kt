@@ -2,9 +2,10 @@ package app.eluvio.wallet.screens.signin
 
 import android.graphics.Bitmap
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.AfterSignInDestination
 import app.eluvio.wallet.data.AuthenticationService
 import app.eluvio.wallet.data.stores.DeviceActivationStore
-import app.eluvio.wallet.navigation.asNewRoot
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.network.api.DeviceActivationData
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.generateQrCode
@@ -94,7 +95,11 @@ class SignInViewModel @Inject constructor(
                 .subscribeBy(
                     onSuccess = {
                         Log.d("Got a token $it")
-                        navigateTo(NavGraphs.preLaunchGraph.asNewRoot())
+                        navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
+                        val nextDestination = AfterSignInDestination.direction.getAndSet(null)
+                        if (nextDestination != null) {
+                            navigateTo(NavigationEvent.Push(nextDestination))
+                        }
                     }
                 )
                 .addTo(disposables)

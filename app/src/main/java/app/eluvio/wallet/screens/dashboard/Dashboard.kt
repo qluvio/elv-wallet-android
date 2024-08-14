@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.itemsIndexed
 import androidx.tv.material3.DrawerValue
@@ -54,6 +55,7 @@ import app.eluvio.wallet.util.compose.focusRestorer
 import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.rememberToaster
+import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import coil.drawable.CrossfadeDrawable
 import coil.request.ImageRequest
@@ -61,12 +63,18 @@ import com.ramcosta.composedestinations.annotation.Destination
 import io.reactivex.rxjava3.processors.PublishProcessor
 import java.util.concurrent.TimeUnit
 
-@MainGraph(start = true)
+@MainGraph
 @Destination
 @Composable
 fun Dashboard() {
-    val tabs = Tabs.AuthTabs
-    var selectedTab by rememberSaveable { mutableStateOf(tabs.first()) }
+    hiltViewModel<DashboardViewModel>().subscribeToState { _, tabs ->
+        Dashboard(tabs)
+    }
+}
+
+@Composable
+fun Dashboard(tabs: List<Tabs>) {
+    var selectedTab by rememberSaveable(tabs) { mutableStateOf(tabs.first()) }
     if (selectedTab !in tabs) {
         // This is a vestige of the never-used no-auth flow.
         selectedTab = tabs.first()
@@ -79,16 +87,18 @@ fun Dashboard() {
     ModalNavigationDrawer(
         scrimBrush = Brush.horizontalGradient(listOf(Color.Black, Color.Transparent)),
         drawerContent = { drawerValue ->
-            DrawerContent(
-                drawerValue,
-                tabs,
-                selectedTab,
-                onTabSelected = {
-                    selectedTab = it
-                    contentFocusRequester.requestFocus()
-                },
-                onDrawerClosed = { contentFocusRequester.requestFocus() }
-            )
+            if (tabs.size > 1) {
+                DrawerContent(
+                    drawerValue,
+                    tabs,
+                    selectedTab,
+                    onTabSelected = {
+                        selectedTab = it
+                        contentFocusRequester.requestFocus()
+                    },
+                    onDrawerClosed = { contentFocusRequester.requestFocus() }
+                )
+            }
         },
         content = {
             val modifier = Modifier

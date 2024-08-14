@@ -15,12 +15,11 @@ enum class Tabs(
 ) {
     Discover(R.string.dashboard_tab_discover, Icons.Default.Home),
     MyItems(R.string.dashboard_tab_my_items, Icons.Eluvio.MyItems),
-//    MyMedia(R.string.dashboard_tab_my_media),
     Profile(R.string.dashboard_tab_profile, Icons.Default.AccountCircle),
     ;
 
     companion object {
-        val NoAuthTabs = listOf(Discover, Profile)
+        val NoAuthTabs = listOf(Discover)
         val AuthTabs = listOf(Discover, MyItems, Profile)
     }
 }
