@@ -8,6 +8,6 @@ data class LoginState(
     val loading: Boolean = true,
     val qrCode: Bitmap? = null,
     val userCode: String? = null,
-    val bgImageUrl: String? = null
-    // TODO: add property logo
+    val bgImageUrl: String? = null,
+    val logoUrl: String? = null,
 )

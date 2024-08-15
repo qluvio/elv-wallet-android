@@ -51,16 +51,21 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
         super.onResume()
         observeActivationData()
 
-        propertyId?.let {
+        propertyId?.let { propertyId ->
             apiProvider.getFabricEndpoint()
                 .flatMapPublisher { baseUrl ->
                     propertyStore.observeMediaProperty(propertyId, forceRefresh = false)
                         .mapNotNull { property ->
-                            property.mainPage?.backgroundImagePath?.let { "$baseUrl$it" }
+                            baseUrl to property.mainPage
                         }
                 }
-                .subscribeBy {
-                    updateState { copy(bgImageUrl = it) }
+                .subscribeBy { (baseUrl, mainPage) ->
+                    updateState {
+                        copy(
+                            bgImageUrl = mainPage?.backgroundImagePath?.let { "$baseUrl$it" },
+                            logoUrl = mainPage?.logo?.let { "$baseUrl$it" }
+                        )
+                    }
                 }
         }
     }
