@@ -1,9 +1,8 @@
-package app.eluvio.wallet.screens.signin
+package app.eluvio.wallet.screens.signin.auth0
 
 import android.graphics.BitmapFactory
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,19 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,19 +42,22 @@ import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.offsetAndFakeSize
 import app.eluvio.wallet.screens.destinations.MetamaskSignInDestination
+import app.eluvio.wallet.screens.signin.common.LoginState
+import app.eluvio.wallet.screens.signin.common.QrData
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.header_30
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.compose.requestOnce
 import app.eluvio.wallet.util.subscribeToState
+import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 
-@AuthFlowGraph(start = true)
-@Destination
+@AuthFlowGraph
+@Destination(navArgsDelegate = Auth0SignInNavArgs::class)
 @Composable
-fun SignIn() {
-    hiltViewModel<SignInViewModel>().subscribeToState { vm, state ->
-        SignIn(
+fun Auth0SignIn() {
+    hiltViewModel<Auth0SignInViewModel>().subscribeToState { vm, state ->
+        Auth0SignIn(
             state,
             onRequestNewToken = vm::requestNewToken
         )
@@ -69,10 +65,12 @@ fun SignIn() {
 }
 
 @Composable
-private fun SignIn(
-    state: SignInViewModel.State,
-    onRequestNewToken: (qrSize: Int) -> Unit,
-) {
+private fun Auth0SignIn(state: LoginState, onRequestNewToken: () -> Unit) {
+    AsyncImage(
+        model = state.bgImageUrl,
+        contentDescription = null,
+        Modifier.fillMaxSize()
+    )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -96,22 +94,14 @@ private fun SignIn(
             modifier = Modifier.fillMaxWidth(0.3f)
         )
         Spacer(modifier = Modifier.height(10.dp))
-        var size by remember { mutableStateOf(0.dp) }
-        BoxWithConstraints(
+        Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.weight(1f)
         ) {
-            size = maxHeight
             if (state.loading) {
                 EluvioLoadingSpinner()
             } else {
-                QrData(state)
-            }
-        }
-        val sizePx = with(LocalDensity.current) { size.toPx().toInt() }
-        LaunchedEffect(sizePx) {
-            if (sizePx > 0) {
-                onRequestNewToken(sizePx)
+                QrData(state.qrCode, state.userCode)
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -120,7 +110,7 @@ private fun SignIn(
                 val focusRequester = remember { FocusRequester() }
                 TvButton(
                     stringResource(R.string.request_new_code),
-                    onClick = { onRequestNewToken(sizePx) },
+                    onClick = onRequestNewToken,
                     contentPadding = PaddingValues(horizontal = 40.dp, vertical = 5.dp),
                     modifier = Modifier.focusRequester(focusRequester)
                 )
@@ -146,37 +136,16 @@ private fun SignIn(
     }
 }
 
-@Composable
-fun QrData(state: SignInViewModel.State) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(
-            text = state.userCode ?: "",
-            style = MaterialTheme.typography.title_62
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        if (state.qrCode != null) {
-            Image(
-                bitmap = state.qrCode.asImageBitmap(),
-                contentDescription = "qr code",
-            )
-        }
-    }
-}
-
 @Preview(device = Devices.TV_720p)
 @Composable
-private fun SignInPreview() = EluvioThemePreview {
+private fun Auth0SignInPreview() = EluvioThemePreview {
     val bitmap = BitmapFactory.decodeResource(
         LocalContext.current.resources,
         R.mipmap.ic_launcher
     )
 
-    SignIn(
-        state = SignInViewModel.State(
+    Auth0SignIn(
+        state = LoginState(
             loading = false,
             qrCode = bitmap,
             userCode = "ABC-DEF",

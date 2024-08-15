@@ -1,6 +1,5 @@
-package app.eluvio.wallet.screens.signin.metamask
+package app.eluvio.wallet.screens.signin.ory
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,19 +29,25 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.subscribeToState
+import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 
 @AuthFlowGraph
-@Destination
+@Destination(navArgsDelegate = OrySignInNavArgs::class)
 @Composable
-fun MetamaskSignIn() {
-    hiltViewModel<MetamaskSignInViewModel>().subscribeToState { vm, state ->
-        MetamaskSignIn(state, onRequestNewToken = vm::requestNewToken)
+fun OrySignIn() {
+    hiltViewModel<OrySignInViewModel>().subscribeToState { vm, state ->
+        OrySignIn(state, onRequestNewToken = vm::requestNewToken)
     }
 }
 
 @Composable
-private fun MetamaskSignIn(state: LoginState, onRequestNewToken: () -> Unit) {
+private fun OrySignIn(state: LoginState, onRequestNewToken: () -> Unit) {
+    AsyncImage(
+        model = state.bgImageUrl,
+        contentDescription = null,
+        Modifier.fillMaxSize()
+    )
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
         AppLogo(
             Modifier
@@ -51,14 +55,9 @@ private fun MetamaskSignIn(state: LoginState, onRequestNewToken: () -> Unit) {
                 .padding(Overscan.defaultPadding())
         )
         Text(
-            stringResource(R.string.metamask_sign_on_title),
+            "ORY SIGN IN",
             style = MaterialTheme.typography.title_62,
             modifier = Modifier.offsetAndFakeSize(yOffset = (-24).dp)
-        )
-        Image(
-            painterResource(R.drawable.metamask_fox),
-            contentDescription = "MetaMask Logo",
-            modifier = Modifier.height(75.dp)
         )
         Box(
             contentAlignment = Alignment.Center,
@@ -82,6 +81,6 @@ private fun MetamaskSignIn(state: LoginState, onRequestNewToken: () -> Unit) {
 
 @Composable
 @Preview(device = Devices.TV_720p)
-private fun MetamaskSignInPreview() = EluvioThemePreview {
-    MetamaskSignIn(LoginState(), onRequestNewToken = {})
+private fun OrySignInPreview() = EluvioThemePreview {
+    OrySignIn(LoginState(), onRequestNewToken = {})
 }

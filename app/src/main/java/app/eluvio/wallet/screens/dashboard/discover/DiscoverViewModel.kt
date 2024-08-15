@@ -9,8 +9,8 @@ import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
-import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
+import app.eluvio.wallet.screens.destinations.SignInRouterDestination
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
@@ -58,7 +58,7 @@ class DiscoverViewModel @Inject constructor(
         } else {
             Log.d("User not signed in, navigating to authFlow and saving propertyId: ${property.id}")
             AfterSignInDestination.direction.set(destination)
-            navigateTo(NavGraphs.authFlowGraph.asPush())
+            navigateTo(SignInRouterDestination(property.loginProvider, property.id).asPush())
         }
     }
 }

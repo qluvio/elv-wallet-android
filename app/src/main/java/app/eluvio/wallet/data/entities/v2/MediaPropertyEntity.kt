@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -7,6 +8,7 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
@@ -20,6 +22,11 @@ class MediaPropertyEntity : RealmObject {
     // Property can also include a list of pages besides the main page.
     // But the TV apps have no use for it currently.
     var mainPage: MediaPageEntity? = null
+
+    private var _loginProvider: String = LoginProviders.UNKNOWN.value
+
+    @Ignore
+    var loginProvider: LoginProviders by realmEnum(::_loginProvider)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

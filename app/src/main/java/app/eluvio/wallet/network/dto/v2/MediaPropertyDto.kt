@@ -16,4 +16,12 @@ data class MediaPropertyDto(
     val name: String,
     @field:Json(name = "main_page")
     val mainPage: MediaPageDto,
+
+    val login: LoginInfoDto?
 )
+
+@JsonClass(generateAdapter = true)
+data class LoginInfoDto(val settings: LoginSettingsDto?)
+
+@JsonClass(generateAdapter = true)
+data class LoginSettingsDto(val provider: String?)
