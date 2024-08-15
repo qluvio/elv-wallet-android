@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 class MediaPropertyStore @Inject constructor(
     private val apiProvider: ApiProvider,
-    private val tokenStore: TokenStore,
     private val realm: Realm,
 ) {
 
