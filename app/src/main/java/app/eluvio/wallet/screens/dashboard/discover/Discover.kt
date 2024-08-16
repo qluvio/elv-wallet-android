@@ -4,11 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +46,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
+import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.ShimmerImage
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.borders
@@ -142,7 +143,7 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
         horizontalArrangement = Arrangement.spacedBy(cardSpacing),
         verticalArrangement = Arrangement.spacedBy(cardSpacing),
         contentPadding = PaddingValues(horizontal = horizontalPadding),
-        pivotOffsets = PivotOffsets(0.3f),
+        pivotOffsets = PivotOffsets(0.45f),
         modifier = Modifier
             .onFocusChanged {
                 if (it.hasFocus && lastClickedProperty == null) {
@@ -167,15 +168,14 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
             }
     ) {
         item(contentType = { "header" }, span = { TvGridItemSpan(maxLineSpan) }) {
-            Column {
-                Spacer(Modifier.height(60.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.discover_logo),
-                    contentDescription = "Eluvio Logo",
-                    modifier = Modifier.height(70.dp)
-                )
-                Spacer(Modifier.height(30.dp))
-            }
+            Image(
+                painter = painterResource(id = R.drawable.discover_logo),
+                contentDescription = "Eluvio Logo",
+                alignment = Alignment.CenterStart,
+                modifier = Modifier
+                    .padding(top = Overscan.verticalPadding)
+                    .height(105.dp)
+            )
         }
         itemsIndexed(
             properties,
