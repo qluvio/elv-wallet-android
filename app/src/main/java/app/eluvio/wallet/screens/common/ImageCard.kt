@@ -35,7 +35,7 @@ import app.eluvio.wallet.util.compose.requestInitialFocus
 @Composable
 fun ImageCard(
     imageUrl: String?,
-    contentDescription: String,
+    contentDescription: String?,
     modifier: Modifier = Modifier,
     focusedOverlay: @Composable (BoxScope.() -> Unit)? = null,
     unFocusedOverlay: @Composable (BoxScope.() -> Unit)? = null,

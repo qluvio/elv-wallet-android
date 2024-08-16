@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities
 
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import dagger.Module
 import dagger.Provides
@@ -57,13 +58,13 @@ class MediaEntity : RealmObject {
 
     /**
      * Returns the aspect ratio of the image, or the locked aspect ratio if locked.
-     * If neither are set, returns [ASPECT_RATIO_SQUARE].
+     * If neither are set, returns [AspectRatio.SQUARE].
      */
     fun aspectRatio(): Float {
         val lockedState = requireLockedState()
         return lockedState.imageAspectRatio.takeIf { lockedState.locked }
             ?: imageAspectRatio
-            ?: ASPECT_RATIO_SQUARE
+            ?: AspectRatio.SQUARE
     }
 
     fun requireLockedState(): LockedStateEntity {
@@ -136,10 +137,6 @@ class MediaEntity : RealmObject {
         const val MEDIA_TYPE_LIVE = "Live"
         const val MEDIA_TYPE_VIDEO = "Video"
         const val MEDIA_TYPE_LIVE_VIDEO = "Live Video"
-
-        const val ASPECT_RATIO_SQUARE = 1f
-        const val ASPECT_RATIO_WIDE = 16f / 9f // A.K.A. "Landscape"
-        const val ASPECT_RATIO_POSTER = 2f / 3f // A.K.A. "Portrait"
     }
 
     class LockedStateEntity : EmbeddedRealmObject {

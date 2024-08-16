@@ -27,6 +27,7 @@ import androidx.tv.foundation.lazy.list.rememberTvLazyListState
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
@@ -119,7 +120,7 @@ fun FeaturedMediaRow(featuredMedia: List<MediaEntity>, baseUrl: String?) {
                 imageUrl = url,
                 shape = RoundedCornerShape(0.dp),
                 cardHeight = 300.dp,
-                aspectRatio = MediaEntity.ASPECT_RATIO_POSTER,
+                aspectRatio = AspectRatio.POSTER,
             )
         }
         spacer(width = listSpacerSize)

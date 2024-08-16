@@ -1,0 +1,57 @@
+package app.eluvio.wallet.screens.common
+
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
+import app.eluvio.wallet.theme.label_24
+
+@Composable
+fun BoxScope.MetadataTexts(
+    headers: List<String>,
+    title: String?,
+    subtitle: String?
+) {
+    Column(
+        Modifier
+            .align(Alignment.BottomStart)
+            .padding(23.dp)
+    ) {
+        if (headers.isNotEmpty()) {
+            Text(
+                text = headers.joinToString(separator = "   "),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.label_24.copy(fontSize = 8.sp),
+                color = Color(0xFFA5A6A8),
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+        }
+        title?.takeIf { it.isNotEmpty() }?.let { title ->
+            Text(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.label_24.copy(fontSize = 12.sp),
+            )
+        }
+        subtitle?.takeIf { it.isNotEmpty() }?.let { subtitle ->
+            Text(
+                text = subtitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
+                color = Color(0xFF818590),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}

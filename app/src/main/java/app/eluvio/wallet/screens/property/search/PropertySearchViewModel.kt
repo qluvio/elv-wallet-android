@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.entities.MediaEntity.Companion.ASPECT_RATIO_WIDE
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -277,7 +277,7 @@ class PropertySearchViewModel @Inject constructor(
                 DynamicPageLayoutState.CarouselItem.CustomCard(
                     imageUrl = filterValue.image?.let { imagePath -> "$imageBaseUrl${imagePath}" },
                     title = filterValue.value,
-                    aspectRatio = ASPECT_RATIO_WIDE,
+                    aspectRatio = AspectRatio.WIDE,
                     onClick = { onPrimaryFilterSelected(filterValue) }
                 )
             },

@@ -103,7 +103,11 @@ fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselIt
             item.subpropertyId != null -> {
                 CarouselItem.SubpropertyLink(
                     subpropertyId = item.subpropertyId!!,
-                    imageUrl = item.subpropertyImage
+                    imageUrl = item.subpropertyImage,
+                    imageAspectRatio = item.subpropertyImageAspectRatio,
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    headers = item.headers
                 )
             }
 

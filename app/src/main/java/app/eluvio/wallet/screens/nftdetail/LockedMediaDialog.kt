@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.FullscreenDialogStyle
 import app.eluvio.wallet.screens.common.Overscan
@@ -61,6 +61,6 @@ private fun LockedMediaDialogPreview() = EluvioThemePreview {
         "Batarang AR (Locked)",
         "http://example.com/image.png",
         "Find this in the experience to unlock!",
-        MediaEntity.ASPECT_RATIO_SQUARE,
+        AspectRatio.SQUARE,
     )
 }

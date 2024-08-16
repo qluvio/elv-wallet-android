@@ -1,5 +1,6 @@
 package app.eluvio.wallet.network.converters
 
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.GalleryItemEntity
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
@@ -94,7 +95,7 @@ fun MediaItemDto.toEntity(idPrefix: String): MediaEntity {
         image = dto.image ?: ""
         posterImagePath = dto.poster_image?.path
         mediaType = dto.media_type ?: ""
-        imageAspectRatio = ConverterUtils.parseAspectRatio(dto.image_aspect_ratio)
+        imageAspectRatio = AspectRatio.parse(dto.image_aspect_ratio)
         mediaFile = dto.media_file?.path ?: ""
         mediaLinks = dto.media_link.toPathMap()
         tvBackgroundImage = dto.background_image_tv?.path ?: ""
@@ -111,7 +112,7 @@ private fun MediaItemDto.getLockedState(): MediaEntity.LockedStateEntity {
         hideWhenLocked = dto.locked_state?.hide_when_locked == true
         lockedImage = dto.locked_state?.image
         lockedName = dto.locked_state?.name
-        imageAspectRatio = ConverterUtils.parseAspectRatio(dto.locked_state?.image_aspect_ratio)
+        imageAspectRatio = AspectRatio.parse(dto.locked_state?.image_aspect_ratio)
         subtitle = dto.locked_state?.subtitle_1
     }
 }

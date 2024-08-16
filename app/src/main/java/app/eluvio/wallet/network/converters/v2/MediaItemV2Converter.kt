@@ -1,10 +1,10 @@
 package app.eluvio.wallet.network.converters.v2
 
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.GalleryItemEntity
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
-import app.eluvio.wallet.network.converters.ConverterUtils
 import app.eluvio.wallet.network.converters.toPathMap
 import app.eluvio.wallet.network.dto.v2.GalleryItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
@@ -16,9 +16,9 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
     val dto = this
 
     val (imageFile, aspectRatio) = dto.mediaFile?.let { it to null }
-        ?: dto.thumbnailSquare?.let { it to MediaEntity.ASPECT_RATIO_SQUARE }
-        ?: dto.thumbnailPortrait?.let { it to MediaEntity.ASPECT_RATIO_POSTER }
-        ?: dto.thumbnailLandscape?.let { it to MediaEntity.ASPECT_RATIO_WIDE }
+        ?: dto.thumbnailSquare?.let { it to AspectRatio.SQUARE }
+        ?: dto.thumbnailPortrait?.let { it to AspectRatio.POSTER }
+        ?: dto.thumbnailLandscape?.let { it to AspectRatio.WIDE }
         ?: (null to null)
     return MediaEntity().apply {
         id = dto.id
@@ -43,7 +43,8 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         attributes = dto.attributes?.map { (key, value) ->
             SearchFiltersEntity.Attribute().apply {
                 id = key
-                values = value.map { SearchFiltersEntity.AttributeValue.from(it) }.toRealmListOrEmpty()
+                values =
+                    value.map { SearchFiltersEntity.AttributeValue.from(it) }.toRealmListOrEmpty()
             }
         }.toRealmListOrEmpty()
         tags = dto.tags.toRealmListOrEmpty()
@@ -70,6 +71,6 @@ private fun GalleryItemV2Dto.toEntity(): GalleryItemEntity? {
         // name = dto.title?
         // TODO: image should take precedence over thumbnail, if it exists
         imagePath = dto.thumbnail?.path ?: return null
-        imageAspectRatio = ConverterUtils.parseAspectRatio(dto.thumbnailAspectRatio)
+        imageAspectRatio = AspectRatio.parse(dto.thumbnailAspectRatio)
     }
 }

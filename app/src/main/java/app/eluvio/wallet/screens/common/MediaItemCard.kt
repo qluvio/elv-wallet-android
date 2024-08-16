@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
-import app.eluvio.wallet.data.entities.MediaEntity.Companion.ASPECT_RATIO_WIDE
 import app.eluvio.wallet.data.entities.getStartDateTimeString
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
@@ -45,7 +45,6 @@ import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.button_24
-import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.logging.Log
 import io.realm.kotlin.ext.realmListOf
@@ -170,41 +169,11 @@ private fun BoxScope.LiveVideoUnFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
 
 @Composable
 private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
-    Column(
-        Modifier
-            .align(Alignment.BottomStart)
-            .padding(23.dp)
-    ) {
-        val headers = liveVideo.headers.joinToString(separator = "   ")
-        if (headers.isNotEmpty()) {
-            Text(
-                text = headers,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 8.sp),
-                color = Color(0xFFA5A6A8),
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-        }
-        liveVideo.title?.takeIf { it.isNotEmpty() }?.let { title ->
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 12.sp),
-            )
-        }
-        liveVideo.subtitle?.takeIf { it.isNotEmpty() }?.let { subtitle ->
-            Text(
-                text = subtitle,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
-                color = Color(0xFF818590),
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
-    }
+    MetadataTexts(
+        headers = liveVideo.headers,
+        title = liveVideo.title,
+        subtitle = liveVideo.subtitle
+    )
 }
 
 /**
@@ -266,7 +235,7 @@ fun VideoCardPreview() = EluvioThemePreview {
         id = "id"
         name = "NFT Media Item"
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-        imageAspectRatio = ASPECT_RATIO_WIDE
+        imageAspectRatio = AspectRatio.WIDE
     }
     Column(modifier = Modifier.padding(10.dp)) {
         MediaItemCard(media)
@@ -282,7 +251,7 @@ fun LiveVideoCardPreview() = EluvioThemePreview {
         id = "id"
         name = "NFT Media Item"
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-        imageAspectRatio = ASPECT_RATIO_WIDE
+        imageAspectRatio = AspectRatio.WIDE
         liveVideoInfo = LiveVideoInfoEntity().apply {
             startTime = RealmInstant.MIN
             title = "Tenacious D"
@@ -304,7 +273,7 @@ fun UpcomingLiveVideoCardPreview() = EluvioThemePreview {
         id = "id"
         name = "NFT Media Item"
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-        imageAspectRatio = ASPECT_RATIO_WIDE
+        imageAspectRatio = AspectRatio.WIDE
         liveVideoInfo = LiveVideoInfoEntity().apply {
             startTime = RealmInstant.MAX
             title = "Tenacious D"
@@ -326,7 +295,7 @@ fun EndedLiveVideoCardPreview() = EluvioThemePreview {
         id = "id"
         name = "NFT Media Item"
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-        imageAspectRatio = ASPECT_RATIO_WIDE
+        imageAspectRatio = AspectRatio.WIDE
         liveVideoInfo = LiveVideoInfoEntity().apply {
             endTime = RealmInstant.MIN
         }

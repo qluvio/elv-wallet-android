@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.navigation.MainGraph
@@ -103,7 +104,7 @@ private fun calcCardHeight(
     // Padding on each side of the container
     horizPadding: Dp,
     // The widest card we expect to display
-    widestAspectRatio: Float = MediaEntity.ASPECT_RATIO_WIDE,
+    widestAspectRatio: Float = AspectRatio.WIDE,
 ): Dp {
     val totalPadding = horizPadding * 2
     val totalSpacing = horizCardSpacing * (minColumnCount - 1)

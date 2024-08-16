@@ -77,6 +77,10 @@ data class DynamicPageLayoutState(
         data class SubpropertyLink(
             val subpropertyId: String,
             val imageUrl: String?,
+            val imageAspectRatio: Float?,
+            val title: String?,
+            val subtitle: String?,
+            val headers: List<String>
         ) : CarouselItem
 
         @Immutable

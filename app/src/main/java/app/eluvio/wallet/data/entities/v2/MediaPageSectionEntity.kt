@@ -114,8 +114,11 @@ class MediaPageSectionEntity : RealmObject {
         /** This section item links to another Property. */
         var subpropertyId: String? = null
         var subpropertyImage: String? = null
+        var subpropertyImageAspectRatio: Float? = null
 
         var title: String? = null
+        var subtitle: String? = null
+        var headers = realmListOf<String>()
         var description: String? = null
         var logoPath: String? = null
 

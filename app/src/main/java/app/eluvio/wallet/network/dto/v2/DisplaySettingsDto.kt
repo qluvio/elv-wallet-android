@@ -8,6 +8,7 @@ import com.squareup.moshi.JsonClass
 data class DisplaySettingsDto(
     val title: String?,
     val subtitle: String?,
+    val headers: List<String>?,
     val description: String?,
     @field:Json(name = "thumbnail_image_landscape")
     val thumbnailLandscape: AssetLinkDto?,

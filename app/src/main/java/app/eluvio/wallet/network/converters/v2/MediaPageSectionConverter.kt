@@ -1,6 +1,8 @@
 package app.eluvio.wallet.network.converters.v2
 
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
+import app.eluvio.wallet.network.dto.v2.DisplaySettingsDto
 import app.eluvio.wallet.network.dto.v2.HeroItemDto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.SectionItemDto
@@ -54,18 +56,31 @@ private fun SectionItemDto.toEntity(baseUrl: String): MediaPageSectionEntity.Sec
         media = dto.media?.toEntity(baseUrl)
 
         subpropertyId = dto.subpropertyId
-        val imageLink = dto.display?.thumbnailSquare
-            ?: dto.display?.thumbnailPortrait
-            ?: dto.display?.thumbnailLandscape
+        val (imageLink, aspectRatio) =
+            dto.display?.thumbnailSquare?.let { it to AspectRatio.SQUARE }
+                ?: dto.display?.thumbnailPortrait?.let { it to AspectRatio.POSTER }
+                ?: dto.display?.thumbnailLandscape?.let { it to AspectRatio.WIDE }
+                ?: (null to null)
         subpropertyImage = imageLink?.path?.let { "$baseUrl$it" } ?: ""
+        subpropertyImageAspectRatio = aspectRatio
+
+        setDisplayFields(dto.display)
     }
 }
 
 private fun HeroItemDto.toEntity(): MediaPageSectionEntity.SectionItemEntity {
-    val dto = this
     return MediaPageSectionEntity.SectionItemEntity().apply {
-        title = dto.display?.title
-        description = dto.display?.description
-        logoPath = dto.display?.logo?.path
+        setDisplayFields(display)
     }
+}
+
+/**
+ * Mutates the [MediaPageSectionEntity.SectionItemEntity] to set the display fields from the [DisplaySettingsDto].
+ */
+private fun MediaPageSectionEntity.SectionItemEntity.setDisplayFields(dto: DisplaySettingsDto?) {
+    title = dto?.title
+    subtitle = dto?.subtitle
+    headers = dto?.headers.toRealmListOrEmpty()
+    description = dto?.description
+    logoPath = dto?.logo?.path
 }

@@ -93,7 +93,10 @@ fun CarouselSection(
         }
         Row {
             // TODO: Re-enable once we figure out focus issues with offset rows
-            // Logo(item, imagesBaseUrl)
+            val showLogo = item.logoPath != null
+            if (showLogo) {
+                Logo(item, imagesBaseUrl)
+            }
             Column(
                 Modifier
                     .focusTrap(FocusDirection.Left, FocusDirection.Right)
@@ -102,7 +105,7 @@ fun CarouselSection(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Whether or not to add padding to the start of the row.
-                val startPadding = if (item.logoPath == null) Overscan.horizontalPadding else 30.dp
+                val startPadding = if (showLogo) 30.dp else Overscan.horizontalPadding
 
                 var selectedFilter by remember { mutableStateOf<AttributeAndValue?>(null) }
                 val filterRowFocusRequester = remember { FocusRequester() }
@@ -190,9 +193,16 @@ private fun Logo(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            // This doesn't respect overscan, and will start slightly before it.
-            // Go argue with the design team.
-            .padding(start = 30.dp, top = 40.dp)
+            .padding(start = Overscan.horizontalPadding)
+            .then(
+                if (item.logoText != null) {
+                    Modifier.padding(top = 40.dp)
+                } else {
+                    Modifier
+                        .padding(top = 16.dp)
+                        .height(CARD_HEIGHT)
+                }
+            )
             .width(95.dp)
     ) {
         AsyncImage(
