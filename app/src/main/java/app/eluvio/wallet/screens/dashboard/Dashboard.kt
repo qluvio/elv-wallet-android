@@ -83,11 +83,12 @@ fun Dashboard(tabs: List<Tabs>) {
 
     AnimatedBackground(url = backgroundImage)
 
+    val showDrawer = tabs.size > 1
     val contentFocusRequester = remember { FocusRequester() }
     ModalNavigationDrawer(
         scrimBrush = Brush.horizontalGradient(listOf(Color.Black, Color.Transparent)),
         drawerContent = { drawerValue ->
-            if (tabs.size > 1) {
+            if (showDrawer) {
                 DrawerContent(
                     drawerValue,
                     tabs,
@@ -105,7 +106,9 @@ fun Dashboard(tabs: List<Tabs>) {
                 .fillMaxSize()
                 .focusRequester(contentFocusRequester)
                 // Drawer width is hardcoded for now, but might change in the future?
-                .padding(start = NavigationDrawerItemDefaults.CollapsedDrawerItemWidth)
+                .thenIf(showDrawer) {
+                    padding(start = NavigationDrawerItemDefaults.CollapsedDrawerItemWidth)
+                }
             if (LocalInspectionMode.current) {
                 // Don't load real content in preview mode
                 Text(
