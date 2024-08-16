@@ -39,7 +39,12 @@ class DiscoverViewModel @Inject constructor(
             .subscribeBy { updateState { copy(baseUrl = it) } }
             .addTo(disposables)
 
-        propertyStore.observeMediaProperties(true)
+        tokenStore.loggedInObservable
+            .distinctUntilChanged()
+            .switchMap {
+                // Restart property observing when log-in state changes
+                propertyStore.observeMediaProperties(true)
+            }
             .subscribeBy(
                 onNext = { properties ->
                     // Assume that Properties will never be empty once fetched from Server
