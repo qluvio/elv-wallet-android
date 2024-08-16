@@ -1,6 +1,5 @@
 package app.eluvio.wallet.data.entities.v2
 
-import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,10 +22,11 @@ class MediaPropertyEntity : RealmObject {
     // But the TV apps have no use for it currently.
     var mainPage: MediaPageEntity? = null
 
-    private var _loginProvider: String = LoginProviders.UNKNOWN.value
+    var loginInfo: PropertyLoginInfoRealmEntity? = null
 
     @Ignore
-    var loginProvider: LoginProviders by realmEnum(::_loginProvider)
+    val loginProvider: LoginProviders
+        get() = loginInfo?.loginProvider ?: LoginProviders.UNKNOWN
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -39,6 +39,7 @@ class MediaPropertyEntity : RealmObject {
         if (headerLogo != other.headerLogo) return false
         if (image != other.image) return false
         if (mainPage != other.mainPage) return false
+        if (loginInfo != other.loginInfo) return false
 
         return true
     }
@@ -49,11 +50,12 @@ class MediaPropertyEntity : RealmObject {
         result = 31 * result + headerLogo.hashCode()
         result = 31 * result + image.hashCode()
         result = 31 * result + (mainPage?.hashCode() ?: 0)
+        result = 31 * result + (loginInfo?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage)"
+        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage, loginInfo=$loginInfo)"
     }
 
     // Index can't be saved as part of the PropertyEntity object because it will get overridden
@@ -62,6 +64,28 @@ class MediaPropertyEntity : RealmObject {
         @PrimaryKey
         var propertyId: String = ""
         var index: Int = Int.MAX_VALUE
+
+        override fun toString(): String {
+            return "PropertyOrderEntity(propertyId='$propertyId', index=$index)"
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as PropertyOrderEntity
+
+            if (propertyId != other.propertyId) return false
+            if (index != other.index) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = propertyId.hashCode()
+            result = 31 * result + index
+            return result
+        }
     }
 
     @Module

@@ -3,6 +3,8 @@ package app.eluvio.wallet.network.converters.v2
 import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
+import app.eluvio.wallet.data.entities.v2.PropertyLoginInfoRealmEntity
+import app.eluvio.wallet.network.dto.v2.LoginInfoDto
 import app.eluvio.wallet.network.dto.v2.MediaPageDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
 import io.realm.kotlin.ext.toRealmList
@@ -16,7 +18,16 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
         // We can't handle properties without images
         image = dto.image?.path?.takeIf { it.isNotEmpty() } ?: return null
         mainPage = dto.mainPage.toEntity(id)
-        loginProvider = LoginProviders.from(dto.login?.settings?.provider)
+        loginInfo = dto.login?.toEntity()
+    }
+}
+
+private fun LoginInfoDto.toEntity(): PropertyLoginInfoRealmEntity {
+    val dto = this
+    return PropertyLoginInfoRealmEntity().apply {
+        backgroundImagePath = dto.styling?.backgroundImageDesktop?.path
+        logoPath = dto.styling?.logo?.path
+        loginProvider = LoginProviders.from(dto.settings?.provider)
     }
 }
 

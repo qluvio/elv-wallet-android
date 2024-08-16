@@ -21,7 +21,17 @@ data class MediaPropertyDto(
 )
 
 @JsonClass(generateAdapter = true)
-data class LoginInfoDto(val settings: LoginSettingsDto?)
+data class LoginInfoDto(
+    val settings: LoginSettingsDto?,
+    val styling: LoginStylingDto?,
+)
 
 @JsonClass(generateAdapter = true)
 data class LoginSettingsDto(val provider: String?)
+
+@JsonClass(generateAdapter = true)
+data class LoginStylingDto(
+    @field:Json(name = "background_image_desktop")
+    val backgroundImageDesktop: AssetLinkDto?,
+    val logo: AssetLinkDto?
+)

@@ -56,14 +56,14 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
                 .flatMapPublisher { baseUrl ->
                     propertyStore.observeMediaProperty(propertyId, forceRefresh = false)
                         .mapNotNull { property ->
-                            baseUrl to property.mainPage
+                            baseUrl to property.loginInfo
                         }
                 }
-                .subscribeBy { (baseUrl, mainPage) ->
+                .subscribeBy { (baseUrl, loginInfo) ->
                     updateState {
                         copy(
-                            bgImageUrl = mainPage?.backgroundImagePath?.let { "$baseUrl$it" },
-                            logoUrl = mainPage?.logo?.let { "$baseUrl$it" }
+                            bgImageUrl = loginInfo?.backgroundImagePath?.let { "$baseUrl$it" },
+                            logoUrl = loginInfo?.logoPath?.let { "$baseUrl$it" }
                         )
                     }
                 }

@@ -64,6 +64,7 @@ class MediaPageSectionEntity : RealmObject {
         other as MediaPageSectionEntity
 
         if (id != other.id) return false
+        if (type != other.type) return false
         if (items != other.items) return false
         if (title != other.title) return false
         if (subtitle != other.subtitle) return false
@@ -82,6 +83,7 @@ class MediaPageSectionEntity : RealmObject {
 
     override fun hashCode(): Int {
         var result = id.hashCode()
+        result = 31 * result + type.hashCode()
         result = 31 * result + items.hashCode()
         result = 31 * result + (title?.hashCode() ?: 0)
         result = 31 * result + (subtitle?.hashCode() ?: 0)
@@ -98,7 +100,7 @@ class MediaPageSectionEntity : RealmObject {
     }
 
     override fun toString(): String {
-        return "MediaPageSectionEntity(id='$id', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, logoPath=$logoPath, logoText=$logoText, backgroundImagePath=$backgroundImagePath, backgroundColor=$backgroundColor, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter)"
+        return "MediaPageSectionEntity(id='$id', type='$type', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, logoPath=$logoPath, logoText=$logoText, backgroundImagePath=$backgroundImagePath, backgroundColor=$backgroundColor, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter)"
     }
 
     class SectionItemEntity : EmbeddedRealmObject {
