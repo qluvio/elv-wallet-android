@@ -67,6 +67,7 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
                         )
                     }
                 }
+                .addTo(disposables)
         }
     }
 
