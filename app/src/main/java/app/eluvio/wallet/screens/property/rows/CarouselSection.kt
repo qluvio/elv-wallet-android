@@ -57,6 +57,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.screens.property.items.CarouselItemCard
 import app.eluvio.wallet.theme.body_32
+import app.eluvio.wallet.theme.button_24
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.compose.focusCapturingGroup
 import app.eluvio.wallet.util.compose.focusCapturingLazyList
@@ -277,10 +278,10 @@ private fun ViewAllButton(
     ) {
         Text(
             "VIEW ALL",
-            style = MaterialTheme.typography.body_32,
+            style = MaterialTheme.typography.button_24.copy(fontWeight = FontWeight.Normal),
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 16.dp, vertical = 5.dp)
+                .padding(horizontal = 10.dp, vertical = 5.dp)
         )
     }
 }
