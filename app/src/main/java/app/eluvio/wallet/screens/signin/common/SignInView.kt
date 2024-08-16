@@ -46,7 +46,7 @@ fun SignInView(state: LoginState, onRequestNewToken: () -> Unit, showMetamaskLin
     AsyncImage(
         model = state.bgImageUrl,
         contentDescription = null,
-        alpha = 0.8f,
+        alpha = 0.7f,
         modifier = Modifier.fillMaxSize()
     )
     Column(
