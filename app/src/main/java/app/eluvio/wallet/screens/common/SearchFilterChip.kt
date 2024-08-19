@@ -17,18 +17,19 @@ import app.eluvio.wallet.theme.label_40
 
 
 @Composable
-fun SearchFilterChip(
+fun <Value> SearchFilterChip(
     title: String,
+    value: Value,
     selected: Boolean,
     modifier: Modifier = Modifier,
-    value: String = title,
-    onSelected: (String) -> Unit,
+    onClicked: (Value) -> Unit,
+    onHighlighted: (Value) -> Unit = onClicked,
 ) {
     Surface(
-        onClick = { onSelected(value) },
+        onClick = { onClicked(value) },
         modifier = modifier.onFocusChanged {
             if (it.hasFocus) {
-                onSelected(value)
+                onHighlighted(value)
             }
         }
     ) {

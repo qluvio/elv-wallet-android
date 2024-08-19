@@ -214,8 +214,9 @@ private fun SecondaryFilterSelector(
         secondaryFilters.forEachIndexed { index, attributeValue ->
             SearchFilterChip(
                 title = attributeValue.value,
+                value = attributeValue.value,
                 selected = filter.secondaryFilterValue == attributeValue.value,
-                onSelected = onSecondaryFilterClick,
+                onClicked = onSecondaryFilterClick,
                 modifier = Modifier
                     .focusRequester(filterFocusRequesters[index])
                     .padding(horizontal = 5.dp)

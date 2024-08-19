@@ -10,13 +10,14 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface MediaWalletV2Api : AuthdApi {
     /**
      * Get a list of all properties we have access to.
      */
     @GET("mw/properties")
-    fun getProperties(): Single<PagedContent<MediaPropertyDto>>
+    fun getProperties(@Query("include_public") includePublic: Boolean = true): Single<PagedContent<MediaPropertyDto>>
 
     /**
      * Request a list of sections by their IDs.

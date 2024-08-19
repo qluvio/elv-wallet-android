@@ -44,8 +44,9 @@ fun SearchBox(
     hint: String = "",
     onQueryChanged: (String) -> Unit,
     onSearchClicked: () -> Unit,
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    val (textFocusRequester, surfaceFocusRequester) = remember { FocusRequester.createRefs() }
+    val textFocusRequester = remember { FocusRequester() }
     // Copied from TV Material Text, since BasicTextField is a non-TV component
     val textColor = LocalTextStyle.current.color.takeOrElse {
         LocalContentColor.current
@@ -53,7 +54,7 @@ fun SearchBox(
 
     KeyboardClosedHandler {
         // Prevents the user from having to press Back just to go from textview to Surface
-        surfaceFocusRequester.requestFocus()
+        focusRequester.requestFocus()
     }
     Surface(
         onClick = { textFocusRequester.requestFocus() },
@@ -67,7 +68,7 @@ fun SearchBox(
         border = MaterialTheme.borders.focusedBorder,
         modifier = Modifier
             .fillMaxWidth()
-            .focusRequester(surfaceFocusRequester)
+            .focusRequester(focusRequester)
     ) {
         val hintColor = Color(0xFFDBDBDB)
         BasicTextField(
