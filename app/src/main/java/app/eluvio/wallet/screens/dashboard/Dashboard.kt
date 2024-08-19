@@ -211,7 +211,6 @@ private fun TabContent(
             })
 
             Tabs.MyItems -> MyItems()
-//            Tabs.MyMedia -> MyMedia()
             Tabs.Profile -> Profile()
         }
     }
