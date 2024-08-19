@@ -11,19 +11,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -33,12 +39,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.foundation.PivotOffsets
-import androidx.tv.foundation.lazy.grid.TvGridCells
-import androidx.tv.foundation.lazy.grid.TvGridItemSpan
-import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
-import androidx.tv.foundation.lazy.grid.itemsIndexed
-import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.app.Events
@@ -52,7 +52,6 @@ import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.compose.focusRestorer
-import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
@@ -71,7 +70,7 @@ fun MyItems() {
             }
         },
         onState = { vm, state ->
-            MyItems(state, vm::onPropertySelected)
+            MyItems(state, vm::onPropertySelected, vm::onQueryChanged)
         }
     )
 }
@@ -79,33 +78,29 @@ fun MyItems() {
 @Composable
 private fun MyItems(
     state: MyItemsViewModel.State,
-    onPropertySelected: (MyItemsViewModel.State.PropertyInfo?) -> Unit
+    onPropertySelected: (MyItemsViewModel.State.PropertyInfo?) -> Unit,
+    onQueryChanged: (String) -> Unit
 ) {
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        if (state.allMedia.loading) {
-            EluvioLoadingSpinner()
-        } else if (state.allMedia.media.isEmpty()) {
-            Text(stringResource(R.string.no_content_warning))
-        } else {
-            val navigator = LocalNavigator.current
-            val toaster = rememberToaster()
-            MyItemsGrid(
-                state,
-                onItemClick = {
-                    if (it.propertyId != null) {
-                        navigator(PropertyDetailDestination(it.propertyId).asPush())
-                    } else if (it.tokenId == null) {
-                        toaster.toast("NFT Packs not supported yet")
-                    } else {
-                        navigator(NftDetailDestination(it.contractAddress, it.tokenId).asPush())
-                    }
-                },
-                onPropertySelected = onPropertySelected
-            )
-        }
+        val navigator = LocalNavigator.current
+        val toaster = rememberToaster()
+        MyItemsGrid(
+            state,
+            onItemClick = {
+                if (it.propertyId != null) {
+                    navigator(PropertyDetailDestination(it.propertyId).asPush())
+                } else if (it.tokenId == null) {
+                    toaster.toast("NFT Packs not supported yet")
+                } else {
+                    navigator(NftDetailDestination(it.contractAddress, it.tokenId).asPush())
+                }
+            },
+            onPropertySelected = onPropertySelected,
+            onQueryChanged = onQueryChanged
+        )
     }
 }
 
@@ -113,7 +108,8 @@ private fun MyItems(
 private fun BoxWithConstraintsScope.MyItemsGrid(
     state: MyItemsViewModel.State,
     onItemClick: (AllMediaProvider.Media) -> Unit,
-    onPropertySelected: (MyItemsViewModel.State.PropertyInfo?) -> Unit
+    onPropertySelected: (MyItemsViewModel.State.PropertyInfo?) -> Unit,
+    onQueryChanged: (String) -> Unit
 ) {
     val width by rememberUpdatedState(maxWidth)
     val horizontalPadding = 100.dp
@@ -126,19 +122,24 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
             (availableWidth / cardWidth).roundToInt()
         }
     }
-    val scrollState = rememberTvLazyGridState()
+    val scrollState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
-    val firstItemFocusRequester = remember { FocusRequester() }
     val searchBoxFocusRequester = remember { FocusRequester() }
-    TvLazyVerticalGrid(
+
+    var searchQuery by remember { mutableStateOf("") }
+    BackHandler(enabled = searchQuery.isNotEmpty()) {
+        searchQuery = ""
+        onQueryChanged("")
+    }
+
+    LazyVerticalGrid(
         state = scrollState,
-        columns = TvGridCells.Fixed(columnCount),
+        columns = GridCells.Fixed(columnCount),
         horizontalArrangement = Arrangement.spacedBy(cardSpacing),
         verticalArrangement = Arrangement.spacedBy(cardSpacing),
         contentPadding = PaddingValues(horizontal = horizontalPadding),
-        pivotOffsets = PivotOffsets(0.1f),
         modifier = Modifier
-            .focusRestorer(firstItemFocusRequester)
+            .focusRestorer(searchBoxFocusRequester)
             .fillMaxSize()
             .onPreviewKeyEvent {
                 if (it.isKeyUpOf(Key.Back) && scrollState.firstVisibleItemIndex > 0) {
@@ -151,15 +152,18 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
                 false
             }
     ) {
-        item(span = { TvGridItemSpan(maxLineSpan) }, contentType = "spacer") {
+        item(span = { GridItemSpan(maxLineSpan) }, contentType = "spacer") {
             Spacer(Modifier.height(10.dp))
         }
-        item(span = { TvGridItemSpan(maxLineSpan) }, contentType = "search") {
+        item(span = { GridItemSpan(maxLineSpan) }, contentType = "search") {
             Column {
                 SearchBox(
-                    query = "",
+                    query = searchQuery,
                     hint = "Search My Items",
-                    onQueryChanged = {},
+                    onQueryChanged = {
+                        searchQuery = it
+                        onQueryChanged(it)
+                    },
                     onSearchClicked = {},
                     focusRequester = searchBoxFocusRequester
                 )
@@ -168,20 +172,27 @@ private fun BoxWithConstraintsScope.MyItemsGrid(
                 PropertyFilterRow(state, onPropertySelected)
             }
         }
-        itemsIndexed(
-            state.allMedia.media,
-            key = { _, mediaItem -> mediaItem.key },
-            contentType = { _, _ -> "media" }
-        ) { index, mediaItem ->
-            MediaCard(
-                mediaItem,
-                onClick = { onItemClick(mediaItem) },
-                modifier = Modifier.thenIf(index == 0) {
-                    focusRequester(firstItemFocusRequester)
-                }
-            )
+        if (state.allMedia.loading) {
+            item(span = { GridItemSpan(maxLineSpan) }, contentType = { "spinner" }) {
+                EluvioLoadingSpinner()
+            }
+        } else if (state.allMedia.media.isEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }, contentType = "label") {
+                Text(stringResource(R.string.no_content_warning))
+            }
+        } else {
+            items(
+                state.allMedia.media,
+                key = { mediaItem -> mediaItem.key },
+                contentType = { "media" }
+            ) { mediaItem ->
+                MediaCard(
+                    mediaItem,
+                    onClick = { onItemClick(mediaItem) },
+                )
+            }
         }
-        item(span = { TvGridItemSpan(maxLineSpan) }, contentType = "spacer") {
+        item(span = { GridItemSpan(maxLineSpan) }, contentType = "spacer") {
             Spacer(Modifier.height(20.dp))
         }
     }
@@ -253,11 +264,15 @@ private fun MyItemsPreview() = EluvioThemePreview {
                 MyItemsViewModel.State.PropertyInfo("Property 1", "id_1"),
                 MyItemsViewModel.State.PropertyInfo("Property 2", "_2")
             ),
-        ), onPropertySelected = {})
+        ), onPropertySelected = {}, onQueryChanged = {})
 }
 
 @Composable
 @Preview(device = Devices.TV_720p)
 private fun MyItemsPreviewLoading() = EluvioThemePreview {
-    MyItems(MyItemsViewModel.State(AllMediaProvider.State(loading = true)), onPropertySelected = {})
+    MyItems(
+        MyItemsViewModel.State(AllMediaProvider.State(loading = true)),
+        onPropertySelected = {},
+        onQueryChanged = {}
+    )
 }

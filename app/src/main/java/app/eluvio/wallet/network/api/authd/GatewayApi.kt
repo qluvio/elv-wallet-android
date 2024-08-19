@@ -7,6 +7,7 @@ import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.QueryMap
 
 interface GatewayApi : AuthdApi {
     @GET("apigw/nfts")
@@ -15,6 +16,9 @@ interface GatewayApi : AuthdApi {
         // pagination support, it'll help us get around bugs in SKU/Entitlement flows.
         @Query("limit") limit: Int = 100
     ): Single<PagedContent<NftDto>>
+
+    @GET("apigw/nfts")
+    fun search(@QueryMap queryMap: Map<String, String>): Single<PagedContent<NftDto>>
 
     @GET("apigw/marketplaces/{marketplaceId}/sku/{sku}")
     fun getNftForSku(

@@ -36,6 +36,18 @@ class ContentStore @Inject constructor(
     private val signOutHandler: SignOutHandler,
 ) {
 
+    fun search(propertyId: String?, displayName: String?): Flowable<List<NftEntity>> {
+        val queryMap = buildMap {
+            if (propertyId != null) put("property_id", propertyId)
+            if (displayName != null) put("filter", "meta/display_name:co:$displayName")
+        }
+        return apiProvider.getApi(GatewayApi::class)
+            .flatMap { api -> api.search(queryMap) }
+            .map { response -> response.contents.orEmpty().toNfts() }
+            .saveTo(realm)
+            .toFlowable()
+    }
+
     /** Returns either the NFT template to display, or the owned token for this SKU/Entitlement. */
     fun observeNftBySku(
         marketplace: String,
