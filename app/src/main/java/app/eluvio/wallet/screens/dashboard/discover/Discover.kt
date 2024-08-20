@@ -202,16 +202,7 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
             item(contentType = { "spinner" }, span = { TvGridItemSpan(maxLineSpan) }) {
                 EluvioLoadingSpinner(Modifier.padding(top = 100.dp))
             }
-        } else if (state.showRetryButton) {
-            item(contentType = "button", span = { TvGridItemSpan(maxLineSpan) }) {
-                RetryButton(onRetryClicked, Modifier.padding(top = 100.dp))
-            }
-        } else if (state.properties.isEmpty()) {
-            // Technically unreachable code, because [loading = (properties.isEmpty())]
-            item(span = { TvGridItemSpan(maxLineSpan) }, contentType = "label") {
-                Text(stringResource(R.string.no_content_warning))
-            }
-        } else {
+        } else if (state.properties.isNotEmpty()) {
             itemsIndexed(
                 properties,
                 contentType = { _, _ -> "property_card" },
@@ -277,6 +268,15 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                         scrollState.animateScrollToItem(index + 1)
                     }
                 }
+            }
+        } else if (state.showRetryButton) {
+            item(contentType = "button", span = { TvGridItemSpan(maxLineSpan) }) {
+                RetryButton(onRetryClicked, Modifier.padding(top = 100.dp))
+            }
+        } else {
+            // Technically unreachable code, because [loading = (properties.isEmpty())]
+            item(span = { TvGridItemSpan(maxLineSpan) }, contentType = "label") {
+                Text(stringResource(R.string.no_content_warning))
             }
         }
         item(contentType = { "footer" }, span = { TvGridItemSpan(maxLineSpan) }) {
