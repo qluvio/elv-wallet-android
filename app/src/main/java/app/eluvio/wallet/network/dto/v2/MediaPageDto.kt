@@ -26,7 +26,7 @@ data class PageLayoutDto(
     @field:Json(name = "logo_alt")
     val logoAlt: String?,
     // Align logo and text to: Left/Right/Center
-    val position: String,
+    val position: String?,
     // List of section IDs.
     val sections: List<String>,
 )
