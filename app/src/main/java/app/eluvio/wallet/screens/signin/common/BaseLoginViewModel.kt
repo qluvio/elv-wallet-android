@@ -25,7 +25,7 @@ import kotlin.time.Duration
  */
 abstract class BaseLoginViewModel<ActivationData : Any>(
     // The bg image / logo will be fetched from the property, if available
-    private val propertyId: String?,
+    protected val propertyId: String?,
     // Just for convenience, we always provide this, even if we don't use it (propertyId=null)
     private val propertyStore: MediaPropertyStore,
     private val apiProvider: ApiProvider,

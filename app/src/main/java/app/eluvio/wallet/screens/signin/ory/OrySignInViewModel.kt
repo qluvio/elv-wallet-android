@@ -43,6 +43,11 @@ class OrySignInViewModel @Inject constructor(
         return Uri.parse(url)
             .buildUpon()
             .appendQueryParameter("ory", "")
+            .apply {
+                if (propertyId != null) {
+                    appendQueryParameter("pid", propertyId)
+                }
+            }
             .toString()
     }
 
