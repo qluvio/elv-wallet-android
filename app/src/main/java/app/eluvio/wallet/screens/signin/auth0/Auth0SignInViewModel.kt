@@ -28,7 +28,7 @@ class Auth0SignInViewModel @Inject constructor(
     apiProvider,
     savedStateHandle
 ) {
-    override fun fetchActivationDate(): Flowable<DeviceActivationData> =
+    override fun fetchActivationData(): Flowable<DeviceActivationData> =
         deviceActivationStore.observeActivationData().toFlowable(BackpressureStrategy.BUFFER)
 
     override fun DeviceActivationData.getPollingInterval(): Duration = intervalSeconds.seconds

@@ -32,7 +32,7 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
     savedStateHandle: SavedStateHandle? = null
 ) : BaseViewModel<LoginState>(LoginState(), savedStateHandle) {
 
-    abstract fun fetchActivationDate(): Flowable<ActivationData>
+    abstract fun fetchActivationData(): Flowable<ActivationData>
 
     /**
      * Check if token has been activated and handle the result.
@@ -77,7 +77,7 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
 
     private fun observeActivationData() {
         activationDataDisposable?.dispose()
-        activationDataDisposable = fetchActivationDate()
+        activationDataDisposable = fetchActivationData()
             .doOnNext {
                 observeActivationComplete(it)
             }

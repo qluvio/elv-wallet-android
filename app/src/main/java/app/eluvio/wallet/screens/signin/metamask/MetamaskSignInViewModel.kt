@@ -25,7 +25,7 @@ class MetamaskSignInViewModel @Inject constructor(
     apiProvider,
     savedStateHandle
 ) {
-    override fun fetchActivationDate(): Flowable<MetamaskActivationData> =
+    override fun fetchActivationData(): Flowable<MetamaskActivationData> =
         metamaskActivationStore.observeMetamaskActivationData()
 
     override fun MetamaskActivationData.checkToken(): Maybe<*> =

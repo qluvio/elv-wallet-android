@@ -27,7 +27,7 @@ class OrySignInViewModel @Inject constructor(
     apiProvider,
     savedStateHandle
 ) {
-    override fun fetchActivationDate(): Flowable<MetamaskActivationData> {
+    override fun fetchActivationData(): Flowable<MetamaskActivationData> {
         return metamaskActivationStore.observeMetamaskActivationData()
     }
 
