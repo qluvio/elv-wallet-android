@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -34,8 +35,10 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.grid.TvGridCells
@@ -50,6 +53,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
 import app.eluvio.wallet.app.Events
+import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
@@ -222,6 +226,9 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                     border = MaterialTheme.borders.focusedBorder,
                     shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(2.dp)),
                     modifier = Modifier
+                        // Assume aspect ratio,
+                        // this will avoid un-selectable cards
+                        .aspectRatio(AspectRatio.POSTER)
                         .focusRequester(focusRequester)
                         .thenIf(property.id == lastClickedProperty) {
                             onGloballyPositioned {
@@ -239,10 +246,27 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                             }
                         }
                 ) {
-                    ShimmerImage(
-                        model = "${state.baseUrl}${property.image}",
-                        contentDescription = property.name
-                    )
+                    val url = "${state.baseUrl}${property.image}"
+                    var showImage by remember(url) { mutableStateOf(true) }
+                    if (showImage) {
+                        ShimmerImage(
+                            model = url,
+                            contentDescription = property.name,
+                            onError = { showImage = false },
+                        )
+                    } else {
+                        Text(
+                            text = property.name,
+                            style = MaterialTheme.typography.label_40.copy(
+                                fontSize = 22.sp,
+                                lineHeight = 24.sp
+                            ),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(10.dp)
+                        )
+                    }
                 }
                 LaunchedEffect(property.id == onDemandFocusRestore) {
                     if (property.id == onDemandFocusRestore) {
@@ -288,6 +312,24 @@ private fun RetryButton(onRetryClicked: () -> Unit, modifier: Modifier = Modifie
             }
         }
     }
+}
+
+@Composable
+@Preview(device = RealisticDevices.TV_720p)
+private fun DiscoverPreview() = EluvioThemePreview {
+    Discover(
+        DiscoverViewModel.State(
+            loading = false, properties = (1..50).map {
+                MediaPropertyEntity().apply {
+                    id = "$it"
+                    name = "Property #$it"
+                }
+            }
+        ),
+        onBackgroundImageSet = {},
+        onPropertyClicked = {},
+        onRetryClicked = {},
+    )
 }
 
 @Composable

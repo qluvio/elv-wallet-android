@@ -28,12 +28,16 @@ fun ShimmerImage(
     contentScale: ContentScale = ContentScale.Fit,
     alpha: Float = DefaultAlpha,
     onSuccess: ((AsyncImagePainter.State.Success) -> Unit)? = null,
+    onError: ((AsyncImagePainter.State.Error) -> Unit)? = null,
 ) {
     var showPlaceholder by remember { mutableStateOf(true) }
     AsyncImage(
         model = model,
         onLoading = { showPlaceholder = true },
-        onError = { showPlaceholder = false },
+        onError = {
+            onError?.invoke(it)
+            showPlaceholder = false
+        },
         onSuccess = {
             onSuccess?.invoke(it)
             showPlaceholder = false
