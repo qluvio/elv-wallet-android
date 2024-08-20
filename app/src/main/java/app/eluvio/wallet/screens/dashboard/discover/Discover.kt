@@ -2,14 +2,19 @@ package app.eluvio.wallet.screens.dashboard.discover
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +34,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,29 +44,43 @@ import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.itemsIndexed
 import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
 import androidx.tv.material3.ClickableSurfaceDefaults
+import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.ShimmerImage
+import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.borders
 import app.eluvio.wallet.theme.focusedBorder
+import app.eluvio.wallet.theme.label_40
+import app.eluvio.wallet.util.compose.RealisticDevices
 import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
 fun Discover(onBackgroundImageSet: (String?) -> Unit) {
-    hiltViewModel<DiscoverViewModel>().subscribeToState { vm, state ->
-        Discover(state, onBackgroundImageSet, vm::onPropertyClicked)
-    }
+    val toaster = rememberToaster()
+    hiltViewModel<DiscoverViewModel>().subscribeToState(
+        onState = { vm, state ->
+            Discover(state, onBackgroundImageSet, vm::onPropertyClicked, vm::retry)
+        },
+        onEvent = { event ->
+            when (event) {
+                is Events.NetworkError -> toaster.toast(event.defaultMessage)
+            }
+        }
+    )
 }
 
 @Composable
@@ -70,27 +88,23 @@ private fun Discover(
     state: DiscoverViewModel.State,
     onBackgroundImageSet: (String?) -> Unit,
     onPropertyClicked: (MediaPropertyEntity) -> Unit,
+    onRetryClicked: () -> Unit,
 ) {
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        if (state.loading) {
-            EluvioLoadingSpinner()
-        } else if (state.properties.isEmpty()) {
-            Text(stringResource(R.string.no_content_warning))
-        } else {
-            DiscoverGrid(
-                state,
-                onPropertyFocused = { property ->
-                    val bgImage = property.mainPage?.backgroundImagePath?.let {
-                        "${state.baseUrl}${it}"
-                    }
-                    onBackgroundImageSet(bgImage)
-                },
-                onPropertyClicked = onPropertyClicked
-            )
-        }
+        DiscoverGrid(
+            state,
+            onPropertyFocused = { property ->
+                val bgImage = property.mainPage?.backgroundImagePath?.let {
+                    "${state.baseUrl}${it}"
+                }
+                onBackgroundImageSet(bgImage)
+            },
+            onPropertyClicked = onPropertyClicked,
+            onRetryClicked = onRetryClicked
+        )
     }
 }
 
@@ -99,7 +113,8 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
     state: DiscoverViewModel.State,
     onPropertyFocused: (MediaPropertyEntity) -> Unit,
     onPropertyClicked: (MediaPropertyEntity) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRetryClicked: () -> Unit
 ) {
     val width by rememberUpdatedState(maxWidth)
     val horizontalPadding = 50.dp
@@ -145,6 +160,7 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
         contentPadding = PaddingValues(horizontal = horizontalPadding),
         pivotOffsets = PivotOffsets(0.45f),
         modifier = Modifier
+            .fillMaxHeight()
             .onFocusChanged {
                 if (it.hasFocus && lastClickedProperty == null) {
                     // We're gaining focus, but don't have a last clicked property: this means we
@@ -154,8 +170,8 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                 }
             }
             .onPreviewKeyEvent {
-                val firstPropertyId = properties.first().id
-                if (it.isKeyUpOf(Key.Back) && currentFocusedProperty != firstPropertyId) {
+                val firstPropertyId = properties.firstOrNull()?.id
+                if (firstPropertyId != null && it.isKeyUpOf(Key.Back) && currentFocusedProperty != firstPropertyId) {
                     // User clicked back while not focused on first item. Scroll to top and
                     // trigger focus request.
                     scope.launch {
@@ -177,49 +193,65 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                     .height(105.dp)
             )
         }
-        itemsIndexed(
-            properties,
-            contentType = { _, _ -> "property_card" },
-            key = { _, property -> property.id }
-        ) { index, property ->
-            val focusRequester = remember { FocusRequester() }
-            Surface(
-                onClick = {
-                    lastClickedProperty = property.id
-                    onPropertyClicked(property)
-                },
-                border = MaterialTheme.borders.focusedBorder,
-                shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(2.dp)),
-                modifier = Modifier
-                    .focusRequester(focusRequester)
-                    .thenIf(property.id == lastClickedProperty) {
-                        onGloballyPositioned {
-                            Log.e("Restoring focus after navigation to ${property.id} ")
-                            focusRequester.requestFocus()
-                        }
-                    }
-                    .onFocusChanged {
-                        if (it.hasFocus) {
-                            currentFocusedProperty = property.id
-                            // When any items gains focus, clear lastClickedProperty. It either
-                            // doesn't need handling, or has already been handled.
-                            lastClickedProperty = null
-                            onPropertyFocused(property)
-                        }
-                    }
-            ) {
-                ShimmerImage(
-                    model = "${state.baseUrl}${property.image}",
-                    contentDescription = property.name
-                )
+
+        if (state.loading) {
+            item(contentType = { "spinner" }, span = { TvGridItemSpan(maxLineSpan) }) {
+                EluvioLoadingSpinner(Modifier.padding(top = 100.dp))
             }
-            LaunchedEffect(property.id == onDemandFocusRestore) {
-                if (property.id == onDemandFocusRestore) {
-                    Log.e("On-demand focus restore for: ${property.id}")
-                    onDemandFocusRestore = null
-                    focusRequester.requestFocus()
-                    // +1 because header is at index 0
-                    scrollState.animateScrollToItem(index + 1)
+        } else if (state.showRetryButton) {
+            item(contentType = "button", span = { TvGridItemSpan(maxLineSpan) }) {
+                RetryButton(onRetryClicked, Modifier.padding(top = 100.dp))
+            }
+        } else if (state.properties.isEmpty()) {
+            // Technically unreachable code, because [loading = (properties.isEmpty())]
+            item(span = { TvGridItemSpan(maxLineSpan) }, contentType = "label") {
+                Text(stringResource(R.string.no_content_warning))
+            }
+        } else {
+            itemsIndexed(
+                properties,
+                contentType = { _, _ -> "property_card" },
+                key = { _, property -> property.id }
+            ) { index, property ->
+                val focusRequester = remember { FocusRequester() }
+                Surface(
+                    onClick = {
+                        lastClickedProperty = property.id
+                        onPropertyClicked(property)
+                    },
+                    border = MaterialTheme.borders.focusedBorder,
+                    shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(2.dp)),
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                        .thenIf(property.id == lastClickedProperty) {
+                            onGloballyPositioned {
+                                Log.e("Restoring focus after navigation to ${property.id} ")
+                                focusRequester.requestFocus()
+                            }
+                        }
+                        .onFocusChanged {
+                            if (it.hasFocus) {
+                                currentFocusedProperty = property.id
+                                // When any items gains focus, clear lastClickedProperty. It either
+                                // doesn't need handling, or has already been handled.
+                                lastClickedProperty = null
+                                onPropertyFocused(property)
+                            }
+                        }
+                ) {
+                    ShimmerImage(
+                        model = "${state.baseUrl}${property.image}",
+                        contentDescription = property.name
+                    )
+                }
+                LaunchedEffect(property.id == onDemandFocusRestore) {
+                    if (property.id == onDemandFocusRestore) {
+                        Log.e("On-demand focus restore for: ${property.id}")
+                        onDemandFocusRestore = null
+                        focusRequester.requestFocus()
+                        // +1 because header is at index 0
+                        scrollState.animateScrollToItem(index + 1)
+                    }
                 }
             }
         }
@@ -230,7 +262,63 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
 }
 
 @Composable
-@Preview(device = Devices.TV_720p)
-private fun DiscoverPreview() = EluvioThemePreview {
-    Discover(DiscoverViewModel.State(), onBackgroundImageSet = {}, onPropertyClicked = {})
+private fun RetryButton(onRetryClicked: () -> Unit, modifier: Modifier = Modifier) {
+    Box(contentAlignment = Alignment.Center) {
+        TvButton(
+            onClick = onRetryClicked,
+            modifier = modifier
+        ) {
+            Row(
+                Modifier.padding(
+                    top = 5.dp,
+                    bottom = 5.dp,
+                    start = 20.dp,
+                    end = 14.dp
+                )
+            ) {
+                Text(
+                    text = "Retry",
+                    style = MaterialTheme.typography.label_40,
+                )
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Clear",
+                    Modifier.padding(start = 3.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Preview(device = RealisticDevices.TV_720p)
+private fun DiscoverLoadingPreview() = EluvioThemePreview {
+    Discover(
+        DiscoverViewModel.State(loading = true),
+        onBackgroundImageSet = {},
+        onPropertyClicked = {},
+        onRetryClicked = {},
+    )
+}
+
+@Composable
+@Preview(device = RealisticDevices.TV_720p)
+private fun DiscoverEmptyPreview() = EluvioThemePreview {
+    Discover(
+        DiscoverViewModel.State(loading = false),
+        onBackgroundImageSet = {},
+        onPropertyClicked = {},
+        onRetryClicked = {},
+    )
+}
+
+@Composable
+@Preview(device = RealisticDevices.TV_720p)
+private fun DiscoverRetryPreview() = EluvioThemePreview {
+    Discover(
+        DiscoverViewModel.State(loading = false, showRetryButton = true),
+        onBackgroundImageSet = {},
+        onPropertyClicked = {},
+        onRetryClicked = {},
+    )
 }

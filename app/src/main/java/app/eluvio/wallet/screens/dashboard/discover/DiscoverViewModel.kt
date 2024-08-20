@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.dashboard.discover
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.AfterSignInDestination
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -13,8 +14,10 @@ import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.SignInRouterDestination
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.processors.BehaviorProcessor
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,7 +33,10 @@ class DiscoverViewModel @Inject constructor(
         val loading: Boolean = true,
         val properties: List<MediaPropertyEntity> = emptyList(),
         val baseUrl: String = "",
+        val showRetryButton: Boolean = false,
     )
+
+    private val retryTrigger = BehaviorProcessor.createDefault(Unit)
 
     override fun onResume() {
         super.onResume()
@@ -39,20 +45,40 @@ class DiscoverViewModel @Inject constructor(
             .subscribeBy { updateState { copy(baseUrl = it) } }
             .addTo(disposables)
 
-        tokenStore.loggedInObservable
-            .distinctUntilChanged()
+        retryTrigger
+            .doOnNext { updateState { copy(loading = true, showRetryButton = false) } }
+            .switchMap { tokenStore.loggedInObservable.distinctUntilChanged() }
             .switchMap {
                 // Restart property observing when log-in state changes
                 propertyStore.observeMediaProperties(true)
+                    .doOnError {
+                        Log.e("Error observing properties ${it.message}, offering retry")
+                        fireEvent(Events.NetworkError)
+                        updateState { copy(loading = false, showRetryButton = true) }
+                    }
+                    .onErrorResumeWith(Flowable.never())
             }
             .subscribeBy(
                 onNext = { properties ->
                     // Assume that Properties will never be empty once fetched from Server
-                    updateState { copy(properties = properties, loading = properties.isEmpty()) }
+                    updateState {
+                        copy(
+                            properties = properties,
+                            loading = properties.isEmpty(),
+                            showRetryButton = false
+                        )
+                    }
                 },
-                onError = {}
+                onError = {
+                    Log.e("Reached on onError that should never happen")
+                    throw it
+                }
             )
             .addTo(disposables)
+    }
+
+    fun retry() {
+        retryTrigger.onNext(Unit)
     }
 
     fun onPropertyClicked(property: MediaPropertyEntity) {
