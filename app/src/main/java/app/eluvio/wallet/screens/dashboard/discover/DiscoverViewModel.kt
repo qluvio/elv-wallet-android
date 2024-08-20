@@ -46,7 +46,11 @@ class DiscoverViewModel @Inject constructor(
             .addTo(disposables)
 
         retryTrigger
-            .doOnNext { updateState { copy(loading = true, showRetryButton = false) } }
+            .doOnNext {
+                updateState {
+                    copy(showRetryButton = false, loading = properties.isEmpty())
+                }
+            }
             .switchMap { tokenStore.loggedInObservable.distinctUntilChanged() }
             .switchMap {
                 // Restart property observing when log-in state changes
