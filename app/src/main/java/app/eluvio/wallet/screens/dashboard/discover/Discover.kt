@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvGridItemSpan
+import androidx.tv.foundation.lazy.grid.TvLazyGridState
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.itemsIndexed
 import androidx.tv.foundation.lazy.grid.rememberTvLazyGridState
@@ -141,19 +143,19 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
      * Always keep track of the last focused property, but there's more logic involved in actually
      * restoring focus to it.
      */
-    var currentFocusedProperty by rememberSaveable { mutableStateOf<String?>(null) }
+    val currentFocusedProperty = rememberSaveable { mutableStateOf<String?>(null) }
 
     /**
      * We save a clicked property, so we can restore focus to it when navigating back to this
      * screen. This is different than restoring focus when navigating between other elements on screen.
      */
-    var lastClickedProperty by rememberSaveable { mutableStateOf<String?>(null) }
+    val lastClickedProperty = rememberSaveable { mutableStateOf<String?>(null) }
 
     /**
      * This is a trigger to let the corresponding Property item know that it should request focus
      * right now.
      */
-    var onDemandFocusRestore by rememberSaveable { mutableStateOf<String?>(null) }
+    val onDemandFocusRestore = rememberSaveable { mutableStateOf<String?>(null) }
 
     val properties = state.properties
     TvLazyVerticalGrid(
@@ -166,22 +168,22 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
         modifier = Modifier
             .fillMaxHeight()
             .onFocusChanged {
-                if (it.hasFocus && lastClickedProperty == null) {
+                if (it.hasFocus && lastClickedProperty.value == null) {
                     // We're gaining focus, but don't have a last clicked property: this means we
                     // are gaining focus back from an element on screen, rather than coming back
                     // from a different screen.
-                    onDemandFocusRestore = currentFocusedProperty
+                    onDemandFocusRestore.value = currentFocusedProperty.value
                 }
             }
             .onPreviewKeyEvent {
                 val firstPropertyId = properties.firstOrNull()?.id
-                if (firstPropertyId != null && it.isKeyUpOf(Key.Back) && currentFocusedProperty != firstPropertyId) {
+                if (firstPropertyId != null && it.isKeyUpOf(Key.Back) && currentFocusedProperty.value != firstPropertyId) {
                     // User clicked back while not focused on first item. Scroll to top and
                     // trigger focus request.
                     scope.launch {
                         scrollState.animateScrollToItem(0)
                     }
-                    onDemandFocusRestore = firstPropertyId
+                    onDemandFocusRestore.value = firstPropertyId
                     return@onPreviewKeyEvent true
                 }
                 false
@@ -208,66 +210,17 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                 contentType = { _, _ -> "property_card" },
                 key = { _, property -> property.id }
             ) { index, property ->
-                val focusRequester = remember { FocusRequester() }
-                Surface(
-                    onClick = {
-                        lastClickedProperty = property.id
-                        onPropertyClicked(property)
-                    },
-                    border = MaterialTheme.borders.focusedBorder,
-                    shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(2.dp)),
-                    modifier = Modifier
-                        // Assume aspect ratio,
-                        // this will avoid un-selectable cards
-                        .aspectRatio(AspectRatio.POSTER)
-                        .focusRequester(focusRequester)
-                        .thenIf(property.id == lastClickedProperty) {
-                            onGloballyPositioned {
-                                Log.e("Restoring focus after navigation to ${property.id} ")
-                                focusRequester.requestFocus()
-                            }
-                        }
-                        .onFocusChanged {
-                            if (it.hasFocus) {
-                                currentFocusedProperty = property.id
-                                // When any items gains focus, clear lastClickedProperty. It either
-                                // doesn't need handling, or has already been handled.
-                                lastClickedProperty = null
-                                onPropertyFocused(property)
-                            }
-                        }
-                ) {
-                    val url = "${state.baseUrl}${property.image}"
-                    var showImage by remember(url) { mutableStateOf(true) }
-                    if (showImage) {
-                        ShimmerImage(
-                            model = url,
-                            contentDescription = property.name,
-                            onError = { showImage = false },
-                        )
-                    } else {
-                        Text(
-                            text = property.name,
-                            style = MaterialTheme.typography.label_40.copy(
-                                fontSize = 22.sp,
-                                lineHeight = 24.sp
-                            ),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(10.dp)
-                        )
-                    }
-                }
-                LaunchedEffect(property.id == onDemandFocusRestore) {
-                    if (property.id == onDemandFocusRestore) {
-                        Log.e("On-demand focus restore for: ${property.id}")
-                        onDemandFocusRestore = null
-                        focusRequester.requestFocus()
-                        // +1 because header is at index 0
-                        scrollState.animateScrollToItem(index + 1)
-                    }
-                }
+                PropertyCard(
+                    index = index,
+                    property = property,
+                    baseUrl = state.baseUrl,
+                    scrollState = scrollState,
+                    lastClickedProperty = lastClickedProperty,
+                    currentFocusedProperty = currentFocusedProperty,
+                    onDemandFocusRestore = onDemandFocusRestore,
+                    onPropertyClicked = onPropertyClicked,
+                    onPropertyFocused = onPropertyFocused
+                )
             }
         } else if (state.showRetryButton) {
             item(contentType = "button", span = { TvGridItemSpan(maxLineSpan) }) {
@@ -281,6 +234,80 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
         }
         item(contentType = { "footer" }, span = { TvGridItemSpan(maxLineSpan) }) {
             Spacer(Modifier.height(20.dp))
+        }
+    }
+}
+
+@Composable
+private fun PropertyCard(
+    index: Int,
+    property: MediaPropertyEntity,
+    baseUrl: String,
+    scrollState: TvLazyGridState,
+    lastClickedProperty: MutableState<String?>,
+    currentFocusedProperty: MutableState<String?>,
+    onDemandFocusRestore: MutableState<String?>,
+    onPropertyClicked: (MediaPropertyEntity) -> Unit,
+    onPropertyFocused: (MediaPropertyEntity) -> Unit,
+) {
+    val focusRequester = remember { FocusRequester() }
+    Surface(
+        onClick = {
+            lastClickedProperty.value = property.id
+            onPropertyClicked(property)
+        },
+        border = MaterialTheme.borders.focusedBorder,
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(2.dp)),
+        modifier = Modifier
+            // Assume aspect ratio,
+            // this will avoid un-selectable cards
+            .aspectRatio(AspectRatio.POSTER)
+            .focusRequester(focusRequester)
+            .thenIf(property.id == lastClickedProperty.value) {
+                onGloballyPositioned {
+                    Log.e("Restoring focus after navigation to ${property.id} ")
+                    focusRequester.requestFocus()
+                }
+            }
+            .onFocusChanged {
+                if (it.hasFocus) {
+                    currentFocusedProperty.value = property.id
+                    // When any items gains focus, clear lastClickedProperty. It either
+                    // doesn't need handling, or has already been handled.
+                    lastClickedProperty.value = null
+                    onPropertyFocused(property)
+                }
+            }
+    ) {
+        val url = "${baseUrl}${property.image}"
+        var showImage by remember(url) { mutableStateOf(true) }
+        if (showImage) {
+            ShimmerImage(
+                model = url,
+                contentDescription = property.name,
+                onError = { showImage = false },
+            )
+        } else {
+            Text(
+                text = property.name,
+                style = MaterialTheme.typography.label_40.copy(
+                    fontSize = 22.sp,
+                    lineHeight = 24.sp
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(10.dp)
+            )
+        }
+    }
+    LaunchedEffect(property.id == onDemandFocusRestore.value) {
+        if (property.id == onDemandFocusRestore.value) {
+            Log.e("On-demand focus restore for: ${property.id}")
+            onDemandFocusRestore.value = null
+            focusRequester.requestFocus()
+            // +1 because header is at index 0
+            scrollState.animateScrollToItem(index + 1)
         }
     }
 }
