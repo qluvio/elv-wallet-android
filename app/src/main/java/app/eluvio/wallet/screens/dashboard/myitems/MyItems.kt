@@ -48,8 +48,7 @@ import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.SearchBox
 import app.eluvio.wallet.screens.common.SearchFilterChip
-import app.eluvio.wallet.screens.destinations.NftDetailDestination
-import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
+import app.eluvio.wallet.screens.destinations.LegacyNftDetailDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.compose.focusRestorer
 import app.eluvio.wallet.util.isKeyUpOf
@@ -90,12 +89,22 @@ private fun MyItems(
         MyItemsGrid(
             state,
             onItemClick = {
-                if (it.propertyId != null) {
-                    navigator(PropertyDetailDestination(it.propertyId).asPush())
-                } else if (it.tokenId == null) {
+                if (it.tokenId == null) {
                     toaster.toast("NFT Packs not supported yet")
+//                } else if (it.propertyId != null) {
+//                    navigator(
+//                        NftDetailDestination(
+//                            contractAddress = it.contractAddress,
+//                            tokenId = it.tokenId,
+//                        ).asPush()
+//                    )
                 } else {
-                    navigator(NftDetailDestination(it.contractAddress, it.tokenId).asPush())
+                    navigator(
+                        LegacyNftDetailDestination(
+                            contractAddress = it.contractAddress,
+                            tokenId = it.tokenId,
+                        ).asPush()
+                    )
                 }
             },
             onPropertySelected = onPropertySelected,

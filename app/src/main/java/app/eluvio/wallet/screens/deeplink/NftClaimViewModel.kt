@@ -7,6 +7,7 @@ import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.NftClaimStore
 import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
+import app.eluvio.wallet.screens.destinations.LegacyNftDetailDestination
 import app.eluvio.wallet.screens.destinations.NftClaimDestination
 import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.util.logging.Log
@@ -51,7 +52,7 @@ class NftClaimViewModel @Inject constructor(
                     if (ownership != null) {
                         Log.w("user owns SKU/Entitlement")
                         navigateTo(
-                            NftDetailDestination(
+                            LegacyNftDetailDestination(
                                 contractAddress = ownership.contractAddress,
                                 tokenId = ownership.tokenId,
                                 marketplaceId = navArgs.marketplace,

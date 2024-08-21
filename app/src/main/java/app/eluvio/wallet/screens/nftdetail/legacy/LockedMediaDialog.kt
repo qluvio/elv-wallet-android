@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.nftdetail
+package app.eluvio.wallet.screens.nftdetail.legacy
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio

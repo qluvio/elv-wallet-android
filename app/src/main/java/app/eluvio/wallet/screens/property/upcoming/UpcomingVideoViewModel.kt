@@ -5,7 +5,6 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.di.ApiProvider
-import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.util.realm.millis
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
@@ -19,8 +18,12 @@ class UpcomingVideoViewModel @Inject constructor(
     private val contentStore: ContentStore,
     private val propertyStore: MediaPropertyStore,
     private val apiProvider: ApiProvider,
+    private val navArgs: UpcomingVideoNavArgs,
     savedStateHandle: SavedStateHandle,
-) : BaseViewModel<UpcomingVideoViewModel.State>(State(), savedStateHandle) {
+) : BaseViewModel<UpcomingVideoViewModel.State>(
+    State(mediaItemId = navArgs.mediaItemId),
+    savedStateHandle
+) {
     data class State(
         val imagesBaseUrl: String? = null,
         private val backgroundImagePath: String? = null,
@@ -35,12 +38,8 @@ class UpcomingVideoViewModel @Inject constructor(
                 .takeIf { imagesBaseUrl != null && backgroundImagePath != null }
     }
 
-    private val navArgs = savedStateHandle.navArgs<UpcomingVideoNavArgs>()
-
     override fun onResume() {
         super.onResume()
-
-        updateState { copy(mediaItemId = navArgs.mediaItemId) }
 
         apiProvider.getFabricEndpoint()
             .subscribeBy { updateState { copy(imagesBaseUrl = it) } }

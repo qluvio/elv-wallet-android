@@ -1,4 +1,4 @@
-package app.eluvio.wallet.screens.nftdetail
+package app.eluvio.wallet.screens.nftdetail.legacy
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -76,24 +76,24 @@ import com.ramcosta.composedestinations.annotation.Destination
 import io.realm.kotlin.ext.realmListOf
 
 @MainGraph
-@Destination(navArgsDelegate = NftDetailArgs::class)
+@Destination(navArgsDelegate = LegacyNftDetailArgs::class)
 @Composable
-fun NftDetail() {
+fun LegacyNftDetail() {
     val toaster = rememberToaster()
-    hiltViewModel<NftDetailViewModel>().subscribeToState(
+    hiltViewModel<LegacyNftDetailViewModel>().subscribeToState(
         onEvent = { event ->
             if (event is Events.NftNotFound) {
                 toaster.toast("You don't own this NFT")
             }
         },
         onState = { _, state ->
-            NftDetail(state)
+            LegacyNftDetail(state)
         }
     )
 }
 
 @Composable
-private fun NftDetail(state: NftDetailViewModel.State) {
+private fun LegacyNftDetail(state: LegacyNftDetailViewModel.State) {
     if (state.isEmpty()) {
         DelayedFullscreenLoader()
         return
@@ -262,7 +262,7 @@ private fun DescriptionText(text: AnnotatedString) {
 }
 
 @Composable
-private fun FeaturedMediaAndOffersRow(state: NftDetailViewModel.State) {
+private fun FeaturedMediaAndOffersRow(state: LegacyNftDetailViewModel.State) {
     TvLazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
         spacer(width = 28.dp)
         items(state.featuredMedia) { item -> MediaItemCard(item, cardHeight = CARD_HEIGHT) }
@@ -297,7 +297,7 @@ private fun MediaItemsRow(media: List<MediaEntity>) {
 }
 
 @Composable
-private fun OfferCard(item: NftDetailViewModel.State.Offer, onClick: () -> Unit) {
+private fun OfferCard(item: LegacyNftDetailViewModel.State.Offer, onClick: () -> Unit) {
     // It's possible to layer this Text on top of the card (with explicit zIndex modifiers, see:
     // https://issuetracker.google.com/issues/291642442), but then it won't scale right when
     // the card is focused.
@@ -402,8 +402,8 @@ private val CARD_HEIGHT = 170.dp
 @Preview(device = Devices.TV_720p)
 private fun NftDetailPreview(@PreviewParameter(BackLinkParameterProvider::class) backlink: String) =
     EluvioThemePreview {
-        NftDetail(
-            NftDetailViewModel.State(
+        LegacyNftDetail(
+            LegacyNftDetailViewModel.State(
                 backLinkUrl = backlink,
                 title = "Superman",
                 subtitle = AnnotatedString(
@@ -422,7 +422,7 @@ private fun NftDetailPreview(@PreviewParameter(BackLinkParameterProvider::class)
                     },
                 ),
                 redeemableOffers = listOf(
-                    NftDetailViewModel.State.Offer(
+                    LegacyNftDetailViewModel.State.Offer(
                         "_id",
                         "NFT reward",
                         fulfillmentState = FulfillmentState.AVAILABLE,
@@ -472,7 +472,7 @@ private fun NftDetailPreview(@PreviewParameter(BackLinkParameterProvider::class)
 @Composable
 private fun OfferCardAvailablePreview() = EluvioThemePreview {
     OfferCard(
-        item = NftDetailViewModel.State.Offer(
+        item = LegacyNftDetailViewModel.State.Offer(
             "_id",
             "NFT reward",
             fulfillmentState = FulfillmentState.AVAILABLE,
@@ -489,7 +489,7 @@ private fun OfferCardAvailablePreview() = EluvioThemePreview {
 @Composable
 private fun OfferCardExpiredPreview() = EluvioThemePreview {
     OfferCard(
-        item = NftDetailViewModel.State.Offer(
+        item = LegacyNftDetailViewModel.State.Offer(
             "_id",
             "NFT reward",
             fulfillmentState = FulfillmentState.EXPIRED,
@@ -506,7 +506,7 @@ private fun OfferCardExpiredPreview() = EluvioThemePreview {
 @Composable
 private fun OfferCardClaimedByAnotherPreview() = EluvioThemePreview {
     OfferCard(
-        item = NftDetailViewModel.State.Offer(
+        item = LegacyNftDetailViewModel.State.Offer(
             "_id",
             "NFT reward",
             fulfillmentState = FulfillmentState.CLAIMED_BY_PREVIOUS_OWNER,

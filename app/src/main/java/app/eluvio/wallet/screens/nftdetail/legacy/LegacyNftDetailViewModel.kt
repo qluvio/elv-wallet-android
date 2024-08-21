@@ -1,9 +1,8 @@
-package app.eluvio.wallet.screens.nftdetail
+package app.eluvio.wallet.screens.nftdetail.legacy
 
 import android.text.Html
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.AnnotatedString
-import androidx.lifecycle.SavedStateHandle
 import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
@@ -18,7 +17,6 @@ import app.eluvio.wallet.data.stores.NftNotFoundException
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.network.api.fabric.MarketplaceApi
-import app.eluvio.wallet.screens.destinations.NftDetailDestination
 import app.eluvio.wallet.screens.videoplayer.toMediaSource
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.mapNotNull
@@ -32,13 +30,13 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
 
 @HiltViewModel
-class NftDetailViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+class LegacyNftDetailViewModel @Inject constructor(
     private val contentStore: ContentStore,
     private val fulfillmentStore: FulfillmentStore,
     private val apiProvider: ApiProvider,
     private val videoOptionsFetcher: VideoOptionsFetcher,
-) : BaseViewModel<NftDetailViewModel.State>(State()) {
+    private val navArgs: LegacyNftDetailArgs,
+) : BaseViewModel<LegacyNftDetailViewModel.State>(State()) {
     @Immutable
     data class State(
         val title: String = "",
@@ -65,7 +63,6 @@ class NftDetailViewModel @Inject constructor(
             title.isEmpty() && featuredMedia.isEmpty() && sections.isEmpty() && redeemableOffers.isEmpty() && backgroundImage == null
     }
 
-    private val navArgs = NftDetailDestination.argsFrom(savedStateHandle)
     private var prefetchDisposable: Disposable? = null
     private var offerLoaderDisposable: Disposable? = null
 
