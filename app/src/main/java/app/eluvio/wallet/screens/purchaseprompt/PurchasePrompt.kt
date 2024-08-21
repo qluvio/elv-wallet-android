@@ -1,7 +1,6 @@
 package app.eluvio.wallet.screens.purchaseprompt
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -11,13 +10,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,7 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
@@ -37,7 +33,6 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.compose.RealisticDevices
-import app.eluvio.wallet.util.compose.focusTrap
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -55,9 +50,6 @@ fun PurchasePrompt() {
 
 @Composable
 private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
-    // Put trap at the top so it's the first thing to gain focus
-    FocusTrap()
-
     if (state.bgImageUrl != null) {
         AsyncImage(
             model = state.bgImageUrl,
@@ -81,7 +73,14 @@ private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
             val cardHeight = 250.dp
             state.media?.let { media ->
                 Column(modifier = Modifier.width(IntrinsicSize.Min)) {
-                    MediaItemCard(media, cardHeight = cardHeight, onMediaItemClick = {/*No-Op*/ })
+                    MediaItemCard(
+                        media,
+                        cardHeight = cardHeight,
+                        onMediaItemClick = { /*No-Op*/ },
+                        modifier = Modifier
+                            // Card is just for show. Disable interaction.
+                            .focusProperties { canFocus = false }
+                    )
                     Spacer(Modifier.height(14.dp))
                     Text(
                         media.name,
@@ -101,25 +100,6 @@ private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
             }
         }
     }
-}
-
-// Invisible component that will never let go of focus once obtained.
-@Composable
-private fun FocusTrap() {
-    Surface(
-        onClick = {},
-        content = {},
-        modifier = Modifier
-            .size(1.dp)
-            .alpha(0f)
-            .focusTrap(
-                FocusDirection.Up,
-                FocusDirection.Down,
-                FocusDirection.Left,
-                FocusDirection.Right
-            )
-            .focusGroup()
-    )
 }
 
 @Composable
