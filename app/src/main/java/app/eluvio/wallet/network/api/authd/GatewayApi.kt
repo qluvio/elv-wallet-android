@@ -18,7 +18,10 @@ interface GatewayApi : AuthdApi {
     ): Single<PagedContent<NftDto>>
 
     @GET("apigw/nfts")
-    fun search(@QueryMap queryMap: Map<String, String>): Single<PagedContent<NftDto>>
+    fun search(
+        @QueryMap queryMap: Map<String, String>,
+        @Query("limit") limit: Int = 100
+    ): Single<PagedContent<NftDto>>
 
     @GET("apigw/marketplaces/{marketplaceId}/sku/{sku}")
     fun getNftForSku(
