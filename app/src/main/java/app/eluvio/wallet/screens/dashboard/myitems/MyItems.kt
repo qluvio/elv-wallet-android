@@ -243,24 +243,24 @@ private fun PropertyFilterRow(
 private fun MyItemsPreview() = EluvioThemePreview {
     val items = listOf(
         AllMediaProvider.Media(
-            "key",
-            "contract_address",
-            "https://x",
-            "Single Token",
-            "Special Edition",
-            "desc",
-            "1",
-            1
+            key = "key",
+            contractAddress = "contract_address",
+            imageUrl = "https://x",
+            title = "Single Token",
+            subtitle = "Special Edition",
+            description = "desc",
+            tokenId = "1",
+            tokenCount = 1
         ),
         AllMediaProvider.Media(
-            "key",
-            "contract_address",
-            "https://x",
-            "Token Pack",
-            "Pleab Edition",
-            "desc",
-            null,
-            53
+            key = "key",
+            contractAddress = "contract_address",
+            imageUrl = "https://x",
+            title = "Token Pack",
+            subtitle = "Pleab Edition",
+            description = "desc",
+            tokenId = null,
+            tokenCount = 53
         )
     )
     MyItems(

@@ -1,5 +1,7 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,10 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
@@ -31,8 +37,10 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.network.dto.ContractInfoDto
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
 import app.eluvio.wallet.screens.common.TvButton
+import app.eluvio.wallet.screens.common.generateQrCodeBlocking
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
 import app.eluvio.wallet.screens.dashboard.myitems.MediaCard
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
@@ -49,16 +57,17 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Composable
 fun NftDetail() {
     hiltViewModel<NftDetailViewModel>().subscribeToState { vm, state ->
-        if (state.media != null) {
-            NftDetail(state.media)
-        } else {
+        if (state.loading) {
             DelayedFullscreenLoader()
+        } else {
+            NftDetail(state)
         }
     }
 }
 
 @Composable
-private fun NftDetail(media: AllMediaProvider.Media) {
+private fun NftDetail(state: NftDetailViewModel.State) {
+    val media = state.media ?: return
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(50.dp),
@@ -76,7 +85,7 @@ private fun NftDetail(media: AllMediaProvider.Media) {
                 }
             }
 
-            NftMetadata(media)
+            NftMetadata(state)
         }
     }
 }
@@ -95,7 +104,8 @@ private fun MetadataTitle(text: String) {
 private enum class NftTabs(val title: String) {
     DESCRIPTION("Description") {
         @Composable
-        override fun Content(media: AllMediaProvider.Media) {
+        override fun Content(state: NftDetailViewModel.State) {
+            val media = state.media ?: return
             Column {
                 MetadataTitle(text = media.title)
                 Text(
@@ -110,44 +120,79 @@ private enum class NftTabs(val title: String) {
     },
     MINT_INFO("Mint Info") {
         @Composable
-        override fun Content(media: AllMediaProvider.Media) {
+        override fun Content(state: NftDetailViewModel.State) {
             Column {
-                MetadataTitle("Media URL")
-                Text("http...", Modifier.padding(bottom = 20.dp))
+                // TODO: comment out until we figure what if this makes sense on TV
+//                MetadataTitle("Media URL")
+//                Text("http...", Modifier.padding(bottom = 20.dp))
+//
+//                MetadataTitle("Image URL")
+//                Text("http://..", Modifier.padding(bottom = 20.dp))
 
-                MetadataTitle("Image URL")
-                Text("http://..", Modifier.padding(bottom = 20.dp))
-
-                Text(media.subtitle ?: "")
-                Text("Number Minted: ###")
-                Text("Number in Circulation: ###")
-                Text("Number Burned: ###")
-                Text("Maximum Possible in Circulation: ###")
-                Text("Cap: ###")
+                if (state.contractInfo != null) {
+                    Text(state.media?.subtitle ?: "")
+                    Text("Number Minted: ${state.contractInfo.minted}")
+                    Text("Number in Circulation: ${state.contractInfo.totalSupply}")
+                    Text("Number Burned: ${state.contractInfo.burned}")
+                    Text("Maximum Possible in Circulation: ${state.contractInfo.cap - state.contractInfo.burned}")
+                    Text("Cap: ${state.contractInfo.cap}")
+                }
             }
         }
     },
     CONTRACT_VERSION("Contract & Version") {
         @Composable
-        override fun Content(media: AllMediaProvider.Media) {
+        override fun Content(state: NftDetailViewModel.State) {
             MetadataTitle("Contract Address")
-            Text(media.contractAddress, Modifier.padding(bottom = 20.dp))
+            Text(
+                state.media?.contractAddress ?: "...",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
 
             MetadataTitle("Hash")
-            Text("????")
+            Text(state.media?.versionHash ?: "...", maxLines = 1, overflow = TextOverflow.Ellipsis)
+
+            var showDialog by rememberSaveable { mutableStateOf(false) }
+            if (state.lookoutQr != null) {
+                if (showDialog) {
+                    Dialog(
+                        onDismissRequest = { showDialog = false },
+                        properties = DialogProperties(usePlatformDefaultWidth = false)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.8f))
+                        ) {
+                            Image(
+                                bitmap = state.lookoutQr.asImageBitmap(),
+                                contentDescription = "Eluvio Lookout link",
+                                modifier = Modifier.fillMaxSize(0.45f)
+                            )
+                        }
+                    }
+                }
+                TvButton(
+                    "See more info on Eluvio Lookout",
+                    onClick = { showDialog = true },
+                    Modifier.padding(vertical = 20.dp)
+                )
+            }
         }
     };
 
     @Composable
-    abstract fun Content(media: AllMediaProvider.Media)
+    abstract fun Content(state: NftDetailViewModel.State)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun NftMetadata(media: AllMediaProvider.Media) {
+private fun NftMetadata(state: NftDetailViewModel.State) {
     val tabs = NftTabs.entries
-    var selectedTab by rememberSaveable { mutableStateOf(tabs[1]) }
-//    var selectedTab by rememberSaveable { mutableStateOf(tabs.first()) }
+    var selectedTab by rememberSaveable { mutableStateOf(tabs.first()) }
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(
@@ -164,7 +209,7 @@ private fun NftMetadata(media: AllMediaProvider.Media) {
                 MetadataTab(tab.title, selectedTab == tab, { selectedTab = tab })
             }
         }
-        selectedTab.Content(media = media)
+        selectedTab.Content(state)
     }
 }
 
@@ -203,17 +248,29 @@ private fun MetadataTab(
 @Preview(device = RealisticDevices.TV_720p)
 private fun NftDetailPreview() = EluvioThemePreview {
     NftDetail(
-        media = AllMediaProvider.Media(
-            "key",
-            "contract_address",
-            "https://x",
-            "Single Token",
-            "Special Edition",
-            "desc",
-            "1",
-            1,
-            "tenant",
-            "propertyId",
+        NftDetailViewModel.State(
+            loading = false,
+            media = AllMediaProvider.Media(
+                key = "key",
+                contractAddress = "contract_address",
+                versionHash = "hq__laskdjflkj322k3j4hk23j4nh2kj",
+                imageUrl = "https://x",
+                title = "Single Token",
+                subtitle = "Special Edition",
+                description = "desc",
+                tokenId = "1",
+                tokenCount = 1,
+                tenant = "tenant",
+                propertyId = "propertyId",
+            ),
+            contractInfo = ContractInfoDto(
+                contract = "contract_address",
+                cap = 1000,
+                minted = 23,
+                totalSupply = 400,
+                burned = 3
+            ),
+            lookoutQr = generateQrCodeBlocking("https://eluv.io")
         )
     )
 }

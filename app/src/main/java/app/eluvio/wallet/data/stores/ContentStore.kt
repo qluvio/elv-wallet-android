@@ -1,11 +1,13 @@
 package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.data.SignOutHandler
+import app.eluvio.wallet.data.entities.ContractInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.NftEntity
 import app.eluvio.wallet.data.entities.NftId
 import app.eluvio.wallet.data.entities.NftTemplateEntity
 import app.eluvio.wallet.di.ApiProvider
+import app.eluvio.wallet.network.api.authd.ContractInfoApi
 import app.eluvio.wallet.network.api.authd.GatewayApi
 import app.eluvio.wallet.network.api.mwv2.MediaWalletV2Api
 import app.eluvio.wallet.network.converters.toEntity
@@ -46,6 +48,11 @@ class ContentStore @Inject constructor(
             .map { response -> response.contents.orEmpty().toNfts() }
             .saveTo(realm)
             .toFlowable()
+    }
+
+    fun getContractInfo(contractAddress: String): Single<ContractInfoEntity> {
+        return apiProvider.getApi(ContractInfoApi::class)
+            .flatMap { api -> api.getContractInfo(contractAddress) }
     }
 
     /** Returns either the NFT template to display, or the owned token for this SKU/Entitlement. */

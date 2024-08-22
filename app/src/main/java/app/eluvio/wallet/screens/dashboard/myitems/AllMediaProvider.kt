@@ -27,6 +27,7 @@ class AllMediaProvider @Inject constructor(
     data class Media(
         val key: String,
         val contractAddress: String,
+        val versionHash: String? = null,
         val imageUrl: String,
         val title: String,
         val subtitle: String? = null,
@@ -43,6 +44,7 @@ class AllMediaProvider @Inject constructor(
                 nftTemplateEntity: NftTemplateEntity,
                 imageOverride: String? = null,
                 tokenId: String? = null,
+                versionHash: String? = null,
                 tokenCount: Int = 1
             ) = Media(
                 key = nftTemplateEntity.id,
@@ -53,6 +55,7 @@ class AllMediaProvider @Inject constructor(
                 description = nftTemplateEntity.description,
                 // If there's only one token, we can show the token id
                 tokenId = tokenId,
+                versionHash = versionHash,
                 // TODO: design hasn't settled on how to treat token count, this will always be 1 for now
                 tokenCount = tokenCount,
                 tenant = nftTemplateEntity.tenant,

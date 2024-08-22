@@ -1,8 +1,12 @@
 package app.eluvio.wallet.screens.nftdetail
 
+import android.graphics.Bitmap
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.entities.ContractInfoEntity
 import app.eluvio.wallet.data.stores.ContentStore
+import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider
+import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.addTo
@@ -15,7 +19,12 @@ class NftDetailViewModel @Inject constructor(
     private val contentStore: ContentStore,
 ) : BaseViewModel<NftDetailViewModel.State>(State()) {
 
-    data class State(val media: AllMediaProvider.Media? = null)
+    data class State(
+        val loading: Boolean = true,
+        val media: AllMediaProvider.Media? = null,
+        val contractInfo: ContractInfoEntity? = null,
+        val lookoutQr: Bitmap? = null
+    )
 
     override fun onResume() {
         super.onResume()
@@ -23,10 +32,33 @@ class NftDetailViewModel @Inject constructor(
         contentStore.observeNft(navArgs.contractAddress, navArgs.tokenId)
             .mapNotNull { entity ->
                 entity.nftTemplate?.let {
-                    AllMediaProvider.Media.fromTemplate(it, entity.imageUrl, entity.tokenId)
+                    AllMediaProvider.Media.fromTemplate(
+                        nftTemplateEntity = it,
+                        imageOverride = entity.imageUrl,
+                        tokenId = entity.tokenId,
+                        versionHash = entity.versionHash
+                    )
                 }
             }
-            .subscribeBy { updateState { copy(media = it) } }
+            .subscribeBy { updateState { copy(media = it, loading = false) } }
+            .addTo(disposables)
+
+        contentStore.getContractInfo(navArgs.contractAddress)
+            .subscribeBy(
+                onSuccess = { updateState { copy(contractInfo = it) } },
+                onError = {
+                    Log.e("Error fetching Contract Info for ${navArgs.contractAddress}", it)
+                }
+            )
+            .addTo(disposables)
+
+        generateQrCode("https://explorer.contentfabric.io/address/${navArgs.contractAddress}/transactions")
+            .subscribeBy(
+                onSuccess = { updateState { copy(lookoutQr = it) } },
+                onError = {
+                    Log.e("Error generating Eluvio Lookout QR", it)
+                }
+            )
             .addTo(disposables)
     }
 }

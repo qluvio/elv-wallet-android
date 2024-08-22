@@ -170,14 +170,14 @@ private val subtitleFocusedColor = Color(0xFF646464)
 fun MediaCardPreviewPack() = EluvioThemePreview {
     MediaCard(
         AllMediaProvider.Media(
-            "key",
-            "id1",
-            "https://x",
-            "Goat Pack",
-            "Special Edition",
-            "desc",
-            null,
-            23
+            key = "key",
+            contractAddress = "id1",
+            imageUrl = "https://x",
+            title = "Goat Pack",
+            subtitle = "Special Edition",
+            description = "desc",
+            tokenId = null,
+            tokenCount = 23
         ),
         onClick = {},
     )
@@ -188,14 +188,14 @@ fun MediaCardPreviewPack() = EluvioThemePreview {
 fun MediaCardPreviewSingle() = EluvioThemePreview {
     MediaCard(
         AllMediaProvider.Media(
-            "key",
-            "id1",
-            "https://x",
-            "Single Token",
-            "Special Edition",
-            "desc",
-            "1",
-            1
+            key = "key",
+            contractAddress = "id1",
+            imageUrl = "https://x",
+            title = "Single Token",
+            subtitle = "Special Edition",
+            description = "desc",
+            tokenId = "1",
+            tokenCount = 1
         ),
         onClick = {},
     )

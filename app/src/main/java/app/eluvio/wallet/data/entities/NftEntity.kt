@@ -27,6 +27,7 @@ class NftEntity : RealmObject {
     // still have unstable sorting. AFAIK there's no way to get the actual token creation date currently.
     var createdAt: Long = 0
     var tokenId: String = ""
+    var versionHash: String? = null
     var imageUrl: String = ""
     var displayName: String = ""
     var redeemableOffers: RealmList<RedeemableOfferEntity> = realmListOf()
@@ -60,6 +61,7 @@ class NftEntity : RealmObject {
         if (nftTemplate != other.nftTemplate) return false
         if (createdAt != other.createdAt) return false
         if (tokenId != other.tokenId) return false
+        if (versionHash != other.versionHash) return false
         if (imageUrl != other.imageUrl) return false
         if (displayName != other.displayName) return false
         if (redeemableOffers != other.redeemableOffers) return false
@@ -73,6 +75,7 @@ class NftEntity : RealmObject {
         result = 31 * result + (nftTemplate?.hashCode() ?: 0)
         result = 31 * result + createdAt.hashCode()
         result = 31 * result + tokenId.hashCode()
+        result = 31 * result + versionHash.hashCode()
         result = 31 * result + imageUrl.hashCode()
         result = 31 * result + displayName.hashCode()
         result = 31 * result + redeemableOffers.hashCode()
@@ -81,7 +84,7 @@ class NftEntity : RealmObject {
     }
 
     override fun toString(): String {
-        return "NftEntity(_id='$id', nftTemplate=$nftTemplate, createdAt=$createdAt, tokenId='$tokenId', imageUrl='$imageUrl', displayName='$displayName', redeemableOffers=$redeemableOffers, redeemStates=$redeemStates)"
+        return "NftEntity(id='$id', nftTemplate=$nftTemplate, createdAt=$createdAt, tokenId='$tokenId', versionHash='$versionHash', imageUrl='$imageUrl', displayName='$displayName', redeemableOffers=$redeemableOffers, redeemStates=$redeemStates)"
     }
 
     @Module

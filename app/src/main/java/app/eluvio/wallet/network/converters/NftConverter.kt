@@ -35,6 +35,9 @@ fun List<NftDto>.toNfts(): List<NftEntity> {
             createdAt = dto.created ?: 0
             nftTemplate = dto.nft_template.toEntity(tokenUniqueId)
             tokenId = dto.token_id
+            // TODO: versionHash is currently parsed from token_uri, but in most cases it means it's
+            //  an outdated hash. Once this is added to the API, we should just get it from there.
+            versionHash = dto.token_uri?.split("/")?.firstOrNull { it.startsWith("hq__") }
             imageUrl = dto.meta.image
             displayName = dto.meta.display_name ?: dto.nft_template.display_name ?: ""
 
