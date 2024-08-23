@@ -2,13 +2,14 @@ package app.eluvio.wallet.network.converters.v2
 
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
+import app.eluvio.wallet.data.entities.v2.SectionItemEntity
 import app.eluvio.wallet.network.dto.v2.DisplaySettingsDto
 import app.eluvio.wallet.network.dto.v2.HeroItemDto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.SectionItemDto
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 
-private val supportedSectionItemTypes = setOf("media", "subproperty_link")
+private val supportedSectionItemTypes = setOf("media", "subproperty_link", "item_purchase")
 
 fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
     val dto = this
@@ -47,10 +48,10 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
     }
 }
 
-private fun SectionItemDto.toEntity(baseUrl: String): MediaPageSectionEntity.SectionItemEntity? {
+private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
     val dto = this
     if (dto.type !in supportedSectionItemTypes) return null
-    return MediaPageSectionEntity.SectionItemEntity().apply {
+    return SectionItemEntity().apply {
         id = dto.id
         mediaType = dto.mediaType
         media = dto.media?.toEntity(baseUrl)
@@ -61,15 +62,18 @@ private fun SectionItemDto.toEntity(baseUrl: String): MediaPageSectionEntity.Sec
                 ?: dto.display?.thumbnailPortrait?.let { it to AspectRatio.POSTER }
                 ?: dto.display?.thumbnailLandscape?.let { it to AspectRatio.WIDE }
                 ?: (null to null)
-        subpropertyImage = imageLink?.path?.let { "$baseUrl$it" } ?: ""
-        subpropertyImageAspectRatio = aspectRatio
+        thumbnailUrl = imageLink?.path?.let { "$baseUrl$it" } ?: ""
+        thumbnailAspectRatio = aspectRatio
+
+        purchaseOptionsUrl =
+            "http://fakeurl.com/until/api/provides/this".takeIf { dto.type == "item_purchase" }
 
         setDisplayFields(dto.display)
     }
 }
 
-private fun HeroItemDto.toEntity(): MediaPageSectionEntity.SectionItemEntity {
-    return MediaPageSectionEntity.SectionItemEntity().apply {
+private fun HeroItemDto.toEntity(): SectionItemEntity {
+    return SectionItemEntity().apply {
         setDisplayFields(display)
     }
 }
@@ -77,7 +81,7 @@ private fun HeroItemDto.toEntity(): MediaPageSectionEntity.SectionItemEntity {
 /**
  * Mutates the [MediaPageSectionEntity.SectionItemEntity] to set the display fields from the [DisplaySettingsDto].
  */
-private fun MediaPageSectionEntity.SectionItemEntity.setDisplayFields(dto: DisplaySettingsDto?) {
+private fun SectionItemEntity.setDisplayFields(dto: DisplaySettingsDto?) {
     title = dto?.title
     subtitle = dto?.subtitle
     headers = dto?.headers.toRealmListOrEmpty()

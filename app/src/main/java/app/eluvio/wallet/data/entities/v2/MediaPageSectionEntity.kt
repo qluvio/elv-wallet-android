@@ -1,6 +1,5 @@
 package app.eluvio.wallet.data.entities.v2
 
-import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.util.realm.RealmEnum
 import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
@@ -8,8 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
+import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.Ignore
@@ -103,64 +102,11 @@ class MediaPageSectionEntity : RealmObject {
         return "MediaPageSectionEntity(id='$id', type='$type', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, logoPath=$logoPath, logoText=$logoText, backgroundImagePath=$backgroundImagePath, backgroundColor=$backgroundColor, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter)"
     }
 
-    class SectionItemEntity : EmbeddedRealmObject {
-        var id: String = ""
-
-        var mediaType: String? = null
-
-        /** Not every item is of type Media, so this field is optional. */
-        var media: MediaEntity? = null
-
-        /** This section item links to another Property. */
-        var subpropertyId: String? = null
-        var subpropertyImage: String? = null
-        var subpropertyImageAspectRatio: Float? = null
-
-        var title: String? = null
-        var subtitle: String? = null
-        var headers = realmListOf<String>()
-        var description: String? = null
-        var logoPath: String? = null
-
-        override fun toString(): String {
-            return "SectionItemEntity(mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, subpropertyImage=$subpropertyImage, logoPath=$logoPath, title=$title, description=$description)"
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as SectionItemEntity
-
-            if (mediaType != other.mediaType) return false
-            if (media != other.media) return false
-            if (subpropertyId != other.subpropertyId) return false
-            if (subpropertyImage != other.subpropertyImage) return false
-            if (logoPath != other.logoPath) return false
-            if (title != other.title) return false
-            if (description != other.description) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = mediaType?.hashCode() ?: 0
-            result = 31 * result + (media?.hashCode() ?: 0)
-            result = 31 * result + (subpropertyId?.hashCode() ?: 0)
-            result = 31 * result + (subpropertyImage?.hashCode() ?: 0)
-            result = 31 * result + (logoPath?.hashCode() ?: 0)
-            result = 31 * result + (title?.hashCode() ?: 0)
-            result = 31 * result + (description?.hashCode() ?: 0)
-            return result
-        }
-    }
-
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {
         @Provides
-        @ElementsIntoSet
-        fun provideEntity(): Set<KClass<out TypedRealmObject>> =
-            setOf(MediaPageSectionEntity::class, SectionItemEntity::class)
+        @IntoSet
+        fun provideEntity(): KClass<out TypedRealmObject> = MediaPageSectionEntity::class
     }
 }

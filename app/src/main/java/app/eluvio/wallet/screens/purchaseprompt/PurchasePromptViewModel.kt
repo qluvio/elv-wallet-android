@@ -5,7 +5,6 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
-import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.common.generateQrCode
@@ -18,7 +17,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PurchasePromptViewModel @Inject constructor(
-    private val contentStore: ContentStore,
     private val propertyStore: MediaPropertyStore,
     private val apiProvider: ApiProvider,
     savedStateHandle: SavedStateHandle
@@ -27,9 +25,13 @@ class PurchasePromptViewModel @Inject constructor(
     @Immutable
     data class State(
         val media: MediaEntity? = null,
+        val itemPurchase: State.ItemPurchase? = null,
         val qrImage: Bitmap? = null,
         val bgImageUrl: String? = null
-    )
+    ) {
+        @Immutable
+        data class ItemPurchase(val title: String, val subtitle: String?, val image: String?)
+    }
 
     private val navArgs = savedStateHandle.navArgs<PurchasePromptNavArgs>()
 
@@ -41,27 +43,31 @@ class PurchasePromptViewModel @Inject constructor(
             .subscribeBy { updateState { copy(qrImage = it) } }
             .addTo(disposables)
 
-        navArgs.propertyId?.let { propertyId ->
-            apiProvider.getFabricEndpoint().flatMapPublisher { baseUrl ->
-                propertyStore.observeMediaProperty(propertyId)
-                    .mapNotNull { property ->
-                        property.mainPage?.backgroundImagePath
-                            ?.takeIf { it.isNotEmpty() }
-                            ?.let { "${baseUrl}${it}" }
-                    }
-            }
-                .subscribeBy(
-                    onNext = { updateState { copy(bgImageUrl = it) } },
-                    onError = {}
-                )
-                .addTo(disposables)
+        apiProvider.getFabricEndpoint().flatMapPublisher { baseUrl ->
+            propertyStore.observeMediaProperty(navArgs.propertyId)
+                .mapNotNull { property ->
+                    property.mainPage?.backgroundImagePath
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.let { "${baseUrl}${it}" }
+                }
         }
-
-        contentStore.observeMediaItem(navArgs.mediaId)
             .subscribeBy(
-                onNext = { updateState { copy(media = it) } },
+                onNext = { updateState { copy(bgImageUrl = it) } },
                 onError = {}
             )
+            .addTo(disposables)
+
+        propertyStore.getSectionItem(navArgs.sectionItemId)
+            .subscribeBy(onSuccess = { sectionItem ->
+                val itemPurchase = sectionItem.purchaseOptionsUrl?.let {
+                    State.ItemPurchase(
+                        title = sectionItem.title ?: "",
+                        subtitle = sectionItem.subtitle,
+                        image = sectionItem.thumbnailUrl
+                    )
+                }
+                updateState { copy(media = sectionItem.media, itemPurchase = itemPurchase) }
+            })
             .addTo(disposables)
     }
 }

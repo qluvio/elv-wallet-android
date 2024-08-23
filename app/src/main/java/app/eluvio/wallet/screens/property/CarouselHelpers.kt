@@ -3,8 +3,8 @@ package app.eluvio.wallet.screens.property
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
-import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity.SectionItemEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.SectionItemEntity
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
@@ -103,8 +103,8 @@ fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselIt
             item.subpropertyId != null -> {
                 CarouselItem.SubpropertyLink(
                     subpropertyId = item.subpropertyId!!,
-                    imageUrl = item.subpropertyImage,
-                    imageAspectRatio = item.subpropertyImageAspectRatio,
+                    imageUrl = item.thumbnailUrl,
+                    imageAspectRatio = item.thumbnailAspectRatio,
                     title = item.title,
                     subtitle = item.subtitle,
                     headers = item.headers
@@ -112,6 +112,17 @@ fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselIt
             }
 
             item.media != null -> CarouselItem.Media(item.media!!, propertyId)
+
+            item.purchaseOptionsUrl != null -> {
+                CarouselItem.ItemPurchase(
+                    propertyId = propertyId,
+                    sectionItemId = item.id,
+                    purchaseUrl = item.purchaseOptionsUrl!!,
+                    title = item.title,
+                    imageUrl = item.thumbnailUrl,
+                    imageAspectRatio = item.thumbnailAspectRatio,
+                )
+            }
 
             else -> null
         }

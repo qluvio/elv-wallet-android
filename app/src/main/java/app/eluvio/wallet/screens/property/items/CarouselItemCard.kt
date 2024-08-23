@@ -83,12 +83,14 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
         is CarouselItem.CustomCard -> {
             CustomCard(carouselItem, cardHeight, modifier)
         }
+
+        is CarouselItem.ItemPurchase -> ItemPurchaseCard(item = carouselItem, cardHeight = cardHeight)
     }
 }
 
 @Preview(widthDp = 250, heightDp = 250)
 @Composable
-private fun CarouselItemCardPreview(modifier: Modifier = Modifier) = EluvioThemePreview {
+private fun CarouselItemCardPreview() = EluvioThemePreview {
     CarouselItemCard(
         carouselItem = CarouselItem.Media(
             entity = MediaEntity().apply {

@@ -101,5 +101,15 @@ data class DynamicPageLayoutState(
             val aspectRatio: Float = 1f,
             val onClick: (() -> Unit)
         ) : CarouselItem
+
+        @Immutable
+        data class ItemPurchase(
+            val propertyId: String,
+            val sectionItemId: String,
+            val purchaseUrl: String,
+            val imageUrl: String?,
+            val imageAspectRatio: Float?,
+            val title: String?,
+        ) : CarouselItem
     }
 }

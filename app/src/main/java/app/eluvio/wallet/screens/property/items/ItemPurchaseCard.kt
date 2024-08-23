@@ -1,15 +1,12 @@
 package app.eluvio.wallet.screens.property.items
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,26 +20,33 @@ import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
-import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
+import app.eluvio.wallet.screens.destinations.PurchasePromptDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.label_24
 
 @Composable
-fun SubpropertyCard(
-    item: DynamicPageLayoutState.CarouselItem.SubpropertyLink,
+fun ItemPurchaseCard(
+    item: DynamicPageLayoutState.CarouselItem.ItemPurchase,
     cardHeight: Dp,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier.width(IntrinsicSize.Min)) {
+    Column(modifier = modifier.width(IntrinsicSize.Min)) {
         val navigator = LocalNavigator.current
         ImageCard(
             imageUrl = item.imageUrl,
             contentDescription = item.title,
             focusedOverlay = {
-                MetadataTexts(headers = item.headers, title = item.title, subtitle = item.subtitle)
+                MetadataTexts(title = item.title, subtitle = null, headers = emptyList())
             },
-            onClick = { navigator(PropertyDetailDestination(item.subpropertyId).asPush()) },
+            onClick = {
+                navigator(
+                    PurchasePromptDestination(
+                        sectionItemId = item.sectionItemId,
+                        propertyId = item.propertyId
+                    ).asPush()
+                )
+            },
             modifier = Modifier
                 .height(cardHeight)
                 .aspectRatio(
@@ -64,18 +68,15 @@ fun SubpropertyCard(
 
 @Preview(widthDp = 200, heightDp = 200)
 @Composable
-private fun SubpropertyCardPreview(modifier: Modifier = Modifier) = EluvioThemePreview {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        SubpropertyCard(
-            item = DynamicPageLayoutState.CarouselItem.SubpropertyLink(
-                subpropertyId = "subId",
-                imageUrl = "img",
-                imageAspectRatio = 1f,
-                subtitle = "subtitle",
-                title = "title",
-                headers = listOf("header1", "header2")
-            ),
-            cardHeight = 100.dp,
-        )
-    }
+private fun ItemPurchaseCardPreview() = EluvioThemePreview {
+    ItemPurchaseCard(
+        item = DynamicPageLayoutState.CarouselItem.ItemPurchase(
+            propertyId = "property_id",
+            sectionItemId = "section_id",
+            purchaseUrl = "https://www.google.com",
+            title = "Title that is really really really really really really really really long",
+            imageUrl = "https://www.google.com",
+            imageAspectRatio = AspectRatio.SQUARE
+        ), cardHeight = 150.dp
+    )
 }
