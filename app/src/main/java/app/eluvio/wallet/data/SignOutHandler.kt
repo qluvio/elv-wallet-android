@@ -22,10 +22,8 @@ class SignOutHandler @Inject constructor(
     fun signOut(completeMessage: String?): Completable {
         return Completable.fromAction {
             tokenStore.wipe()
-            // delete entire db?
             realm.writeBlocking {
                 Log.w("Deleting all realm data")
-                // TODO: find a way to keep non-auth data
                 deleteAll()
             }
         }

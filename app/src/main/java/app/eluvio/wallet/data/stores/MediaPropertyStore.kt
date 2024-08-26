@@ -71,7 +71,7 @@ class MediaPropertyStore @Inject constructor(
             .ignoreElement()
     }
 
-    private fun fetchMediaProperties(): Completable {
+    fun fetchMediaProperties(): Completable {
         // TODO: find a way to not leak data between Demo and Main
         //        if (!tokenStore.isLoggedIn) {
         // Since getProperties is a public API, this can be called right after SignOut.

@@ -28,8 +28,13 @@ fun EluvioTheme(content: @Composable () -> Unit) {
             extraLarge = RoundedCornerShape(5.dp),
         ),
         typography = EluvioTypography(),
-        content = content
-    )
+    ) {
+        CompositionLocalProvider(
+            LocalContentColor provides MaterialTheme.colorScheme.onSurface
+        ) {
+            content()
+        }
+    }
 }
 
 @Composable
@@ -42,7 +47,6 @@ fun EluvioThemePreview(content: @Composable BoxScope.() -> Unit) {
         ) {
             CompositionLocalProvider(
                 LocalNavigator provides {},
-                LocalContentColor provides MaterialTheme.colorScheme.onSurface,
                 LocalSurfaceScale provides LocalSurfaceScale.current,
             ) {
                 content()

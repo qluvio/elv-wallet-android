@@ -19,8 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.core.util.Consumer
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
-import androidx.tv.material3.LocalContentColor
-import androidx.tv.material3.MaterialTheme
 import app.eluvio.wallet.navigation.ComposeNavigator
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.screens.NavGraphs
@@ -65,8 +63,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     CompositionLocalProvider(
-                        LocalNavigator provides navigator,
-                        LocalContentColor provides MaterialTheme.colorScheme.onSurface
+                        LocalNavigator provides navigator
                     ) {
                         DestinationsNavHost(
                             navGraph = NavGraphs.root,
