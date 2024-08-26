@@ -115,9 +115,14 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
                     )
                 }
                 .retry()
+                .doOnSuccess { Log.d("Got a token $it") }
+                .flatMapCompletable {
+                    // Re-fetch properties because all the permissions will be different now that we have a token
+                    propertyStore.fetchMediaProperties()
+                }
                 .subscribeBy(
-                    onSuccess = {
-                        Log.d("Got a token $it")
+                    onComplete = {
+                        Log.d("Activation complete and properties re-fetched, finishing auth flow.")
                         navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
                         val nextDestination = AfterSignInDestination.direction.getAndSet(null)
                         if (nextDestination != null) {
