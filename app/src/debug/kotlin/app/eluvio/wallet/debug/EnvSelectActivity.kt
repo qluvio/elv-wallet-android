@@ -28,15 +28,16 @@ import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.navigation.LocalNavigator
-import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.theme.EluvioTheme
 import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.subscribeToState
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
 
@@ -105,7 +106,7 @@ private fun EnvSelector(state: EnvSelectViewModel.State, vm: EnvSelectViewModel)
 @HiltViewModel
 class EnvSelectViewModel @Inject constructor(
     private val environmentStore: EnvironmentStore,
-    private val signOutHandler: SignOutHandler
+    private val signOutHandler: SignOutHandler,
 ) : BaseViewModel<EnvSelectViewModel.State>(State()) {
     @Immutable
     data class State(
@@ -128,8 +129,13 @@ class EnvSelectViewModel @Inject constructor(
     }
 
     fun onEnvSelected(env: Environment) {
-        environmentStore.setSelectedEnvironment(env)
-        signOutHandler.signOut("Env changed, restarting app.")
+        Completable.fromAction {
+            environmentStore.setSelectedEnvironment(env)
+        }
+            .subscribeOn(Schedulers.io())
+            .andThen(
+                signOutHandler.signOut("Env changed, restarting app.")
+            )
             .subscribe()
             .addTo(disposables)
     }

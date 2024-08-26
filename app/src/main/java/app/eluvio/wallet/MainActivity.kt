@@ -1,7 +1,10 @@
 package app.eluvio.wallet
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -76,6 +79,15 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private val envSelectorHook by lazy { EnvSelectorHook(this) }
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        return if (BuildConfig.DEBUG && envSelectorHook.onKeyUp(keyCode, event)) {
+            true
+        } else {
+            super.onKeyUp(keyCode, event)
+        }
+    }
 }
 
 private fun Collection<NavBackStackEntry>.print(prefix: String = "navstack") {
@@ -90,4 +102,41 @@ private fun Collection<NavBackStackEntry>.print(prefix: String = "navstack") {
 
     val stack = map { it.routeWithArgs() }.toTypedArray().contentToString()
     Log.v("$prefix = $stack")
+}
+
+private class EnvSelectorHook(private val context: Context) {
+    private val magicSequence = listOf(
+        KeyEvent.KEYCODE_DPAD_UP,
+        KeyEvent.KEYCODE_DPAD_UP,
+        KeyEvent.KEYCODE_DPAD_DOWN,
+        KeyEvent.KEYCODE_DPAD_DOWN,
+        KeyEvent.KEYCODE_DPAD_LEFT,
+        KeyEvent.KEYCODE_DPAD_RIGHT,
+        KeyEvent.KEYCODE_DPAD_LEFT,
+        KeyEvent.KEYCODE_DPAD_RIGHT,
+    )
+
+    private var index = 0
+
+    fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_UP) {
+            if (keyCode == magicSequence[index]) {
+                index++
+                if (index == magicSequence.size) {
+                    index = 0
+                    // Sequence completed. Launching the debug activity
+                    context.startActivity(Intent().apply {
+                        component = ComponentName(
+                            "app.eluvio.wallet.debug",
+                            "app.eluvio.wallet.debug.EnvSelectActivity"
+                        )
+                    })
+                    return true
+                }
+            } else {
+                index = 0
+            }
+        }
+        return false
+    }
 }
