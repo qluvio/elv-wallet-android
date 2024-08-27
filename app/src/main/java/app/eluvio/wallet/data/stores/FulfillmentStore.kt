@@ -46,13 +46,17 @@ class FulfillmentStore @Inject constructor(
                     }
             }
             .map { (tenant, redeemStates) ->
+                // TODO: untested code. We changed realm entities to be unmanaged, so we can't just
+                //  pass [nft] to [findLatest] anymore. We need to find the latest nft "manually"
                 realm.writeBlocking {
-                    findLatest(nft)?.also {
-                        // Filter any offers that don't have valid redeem states
-                        it.redeemableOffers.removeAll { offer -> redeemStates.none { redeemState -> redeemState.offerId == offer.offerId } }
-                        it.redeemStates = redeemStates.toRealmListOrEmpty()
-                        it.nftTemplate?.tenant = tenant
-                    }
+                    query<NftEntity>("${NftEntity::id.name} == $0", nft.id)
+                        .first().find()
+                        ?.also {
+                            // Filter any offers that don't have valid redeem states
+                            it.redeemableOffers.removeAll { offer -> redeemStates.none { redeemState -> redeemState.offerId == offer.offerId } }
+                            it.redeemStates = redeemStates.toRealmListOrEmpty()
+                            it.nftTemplate?.tenant = tenant
+                        }
                 } ?: nft
             }
     }
@@ -119,12 +123,16 @@ class FulfillmentStore @Inject constructor(
         status: RedeemStateEntity.RedeemStatus
     ) {
         val nft = this
+        // TODO: untested code. We changed realm entities to be unmanaged, so we can't just
+        //  pass [nft] to [findLatest] anymore. We need to find the latest nft "manually"
         realm.writeBlocking {
-            findLatest(nft)?.also {
-                it.redeemStates
-                    .first { offer -> offer.offerId == offerId }
-                    .status = status
-            }
+            query<NftEntity>("${NftEntity::id.name} == $0", nft.id)
+                .first().find()
+                ?.also {
+                    it.redeemStates
+                        .first { offer -> offer.offerId == offerId }
+                        .status = status
+                }
         }
     }
 }

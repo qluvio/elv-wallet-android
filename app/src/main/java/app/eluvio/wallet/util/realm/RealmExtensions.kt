@@ -9,17 +9,20 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.delete
+import io.realm.kotlin.ext.copyFromRealm
 import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.rx3.rxCompletable
 import kotlinx.coroutines.rx3.rxFlowable
 
 // This is very simplified and doesn't handle incremental updates optimally
-fun <T : RealmObject> RealmQuery<T>.asFlowable(): Flowable<List<T>> {
+inline fun <reified T : RealmObject> RealmQuery<T>.asFlowable(): Flowable<List<T>> {
     return rxFlowable<List<T>> {
         asFlow().collect { trySend(it.list) }
     }
         .subscribeOn(Schedulers.io())
+        // Make all objects unmanaged.
+        .map { list -> list.map { entity -> entity.copyFromRealm() } }
 }
 
 inline fun <reified T : RealmObject> Single<T>.saveTo(

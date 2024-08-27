@@ -46,6 +46,12 @@ data class MediaItemV2Dto(
     // Search related stuff
     val attributes: Map<String, List<String>>?,
     val tags: List<String>?,
+    val permissions: List<MediaPermissionsDto>?,
+)
+
+@JsonClass(generateAdapter = true)
+data class MediaPermissionsDto(
+    val permission_item_id: String?,
 )
 
 @JsonClass(generateAdapter = true)

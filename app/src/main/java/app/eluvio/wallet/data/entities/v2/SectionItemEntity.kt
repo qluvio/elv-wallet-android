@@ -1,6 +1,8 @@
 package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -9,10 +11,11 @@ import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class SectionItemEntity : RealmObject {
+class SectionItemEntity : RealmObject, EntityWithPermissions {
     @PrimaryKey
     var id: String = ""
 
@@ -36,8 +39,14 @@ class SectionItemEntity : RealmObject {
     var description: String? = null
     var logoPath: String? = null
 
+    @Ignore
+    override var resolvedPermissions: PermissionsEntity? = null
+    override var rawPermissions: PermissionsEntity? = null
+    override val permissionChildren: List<EntityWithPermissions>
+        get() = listOfNotNull(media)
+
     override fun toString(): String {
-        return "SectionItemEntity(id='$id', mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, purchaseOptionsUrl=$purchaseOptionsUrl, thumbnailUrl=$thumbnailUrl, thumbnailAspectRatio=$thumbnailAspectRatio, title=$title, subtitle=$subtitle, headers=$headers, description=$description, logoPath=$logoPath)"
+        return "SectionItemEntity(id='$id', mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, purchaseOptionsUrl=$purchaseOptionsUrl, thumbnailUrl=$thumbnailUrl, thumbnailAspectRatio=$thumbnailAspectRatio, title=$title, subtitle=$subtitle, headers=$headers, description=$description, logoPath=$logoPath, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -58,6 +67,8 @@ class SectionItemEntity : RealmObject {
         if (headers != other.headers) return false
         if (description != other.description) return false
         if (logoPath != other.logoPath) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
+        if (rawPermissions != other.rawPermissions) return false
 
         return true
     }
@@ -75,6 +86,8 @@ class SectionItemEntity : RealmObject {
         result = 31 * result + headers.hashCode()
         result = 31 * result + (description?.hashCode() ?: 0)
         result = 31 * result + (logoPath?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
+        result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         return result
     }
 

@@ -1,5 +1,7 @@
 package app.eluvio.wallet.network.dto.v2
 
+import app.eluvio.wallet.network.dto.v2.permissions.DtoWithPermissions
+import app.eluvio.wallet.network.dto.v2.permissions.PermissionsDto
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -16,7 +18,8 @@ data class MediaPageSectionDto(
     val primaryFilter: String?,
     @field:Json(name = "secondary_filter")
     val secondaryFilter: String?,
-)
+    override val permissions: PermissionsDto?,
+) : DtoWithPermissions
 
 @JsonClass(generateAdapter = true)
 data class SectionItemDto(
@@ -38,7 +41,8 @@ data class SectionItemDto(
     // val subpropertyPageId: String?,
 
     val display: DisplaySettingsDto?,
-)
+    override val permissions: PermissionsDto?,
+) : DtoWithPermissions
 
 @JsonClass(generateAdapter = true)
 data class HeroItemDto(

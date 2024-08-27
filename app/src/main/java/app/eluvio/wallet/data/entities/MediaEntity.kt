@@ -2,6 +2,8 @@ package app.eluvio.wallet.data.entities
 
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,10 +16,11 @@ import io.realm.kotlin.types.RealmDictionary
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class MediaEntity : RealmObject {
+class MediaEntity : RealmObject, EntityWithPermissions {
     @PrimaryKey
     var id: String = ""
     var name: String = ""
@@ -25,6 +28,12 @@ class MediaEntity : RealmObject {
     var posterImagePath: String? = null
     var mediaType: String = ""
     var imageAspectRatio: Float? = null
+
+    @Ignore
+    override var resolvedPermissions: PermissionsEntity? = null
+    override var rawPermissions: PermissionsEntity? = null
+    override val permissionChildren: List<EntityWithPermissions>
+        get() = emptyList()
 
     // Relative path to file
     var mediaFile: String = ""
@@ -87,6 +96,8 @@ class MediaEntity : RealmObject {
         if (posterImagePath != other.posterImagePath) return false
         if (mediaType != other.mediaType) return false
         if (imageAspectRatio != other.imageAspectRatio) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
+        if (rawPermissions != other.rawPermissions) return false
         if (mediaFile != other.mediaFile) return false
         if (mediaLinks != other.mediaLinks) return false
         if (tvBackgroundImage != other.tvBackgroundImage) return false
@@ -105,13 +116,20 @@ class MediaEntity : RealmObject {
         return this?.substringAfter(host) == other?.substringAfter(host)
     }
 
+    private fun String?.hashCodeIgnoreHost(): Int {
+        val host = "contentfabric.io"
+        return this?.substringAfter(host)?.hashCode() ?: 0
+    }
+
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
-        result = 31 * result + image.hashCode()
+        result = 31 * result + image.hashCodeIgnoreHost()
         result = 31 * result + (posterImagePath?.hashCode() ?: 0)
         result = 31 * result + mediaType.hashCode()
         result = 31 * result + (imageAspectRatio?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
+        result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         result = 31 * result + mediaFile.hashCode()
         result = 31 * result + mediaLinks.hashCode()
         result = 31 * result + tvBackgroundImage.hashCode()
@@ -125,7 +143,7 @@ class MediaEntity : RealmObject {
     }
 
     override fun toString(): String {
-        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo, attributes=$attributes, tags=$tags)"
+        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo, attributes=$attributes, tags=$tags)"
     }
 
     companion object {

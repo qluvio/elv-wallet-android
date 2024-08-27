@@ -1,12 +1,13 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.util.realm.RealmEnum
 import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.ElementsIntoSet
 import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
@@ -15,7 +16,7 @@ import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class MediaPageSectionEntity : RealmObject {
+class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
 
     enum class DisplayFormat(override val value: String) : RealmEnum {
         UNKNOWN("unknown"),
@@ -56,6 +57,15 @@ class MediaPageSectionEntity : RealmObject {
     var primaryFilter: String? = null
     var secondaryFilter: String? = null
 
+    @Ignore
+    override var resolvedPermissions: PermissionsEntity? = null
+    override var rawPermissions: PermissionsEntity? = null
+    override val permissionChildren: List<EntityWithPermissions>
+        get() = items
+
+    override val isHidden: Boolean
+        get() = super.isHidden || items.all { it.isHidden }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -76,6 +86,8 @@ class MediaPageSectionEntity : RealmObject {
         if (displayFormatStr != other.displayFormatStr) return false
         if (primaryFilter != other.primaryFilter) return false
         if (secondaryFilter != other.secondaryFilter) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
+        if (rawPermissions != other.rawPermissions) return false
 
         return true
     }
@@ -95,11 +107,13 @@ class MediaPageSectionEntity : RealmObject {
         result = 31 * result + displayFormatStr.hashCode()
         result = 31 * result + (primaryFilter?.hashCode() ?: 0)
         result = 31 * result + (secondaryFilter?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
+        result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPageSectionEntity(id='$id', type='$type', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, logoPath=$logoPath, logoText=$logoText, backgroundImagePath=$backgroundImagePath, backgroundColor=$backgroundColor, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter)"
+        return "MediaPageSectionEntity(id='$id', type='$type', items=$items, title=$title, subtitle=$subtitle, displayLimit=$displayLimit, displayLimitType=$displayLimitType, logoPath=$logoPath, logoText=$logoText, backgroundImagePath=$backgroundImagePath, backgroundColor=$backgroundColor, displayFormatStr='$displayFormatStr', primaryFilter=$primaryFilter, secondaryFilter=$secondaryFilter, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
     }
 
     @Module

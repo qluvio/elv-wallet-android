@@ -4,6 +4,8 @@ import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.PropertyLoginInfoRealmEntity
+import app.eluvio.wallet.network.converters.v2.permissions.toEntity
+import app.eluvio.wallet.network.converters.v2.permissions.toPermissionStateEntities
 import app.eluvio.wallet.network.dto.v2.LoginInfoDto
 import app.eluvio.wallet.network.dto.v2.MediaPageDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
@@ -19,6 +21,9 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
         image = dto.image?.path?.takeIf { it.isNotEmpty() } ?: return null
         mainPage = dto.mainPage.toEntity(id)
         loginInfo = dto.login?.toEntity()
+
+        permissionStates = dto.toPermissionStateEntities()
+        rawPermissions = dto.permissions?.toEntity()
     }
 }
 
@@ -44,5 +49,6 @@ private fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
         title = layout.title
         description = layout.description
         descriptionRichText = layout.descriptionRichText
+        rawPermissions = dto.permissions?.toEntity()
     }
 }

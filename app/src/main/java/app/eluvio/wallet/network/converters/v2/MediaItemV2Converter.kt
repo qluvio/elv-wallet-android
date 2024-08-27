@@ -5,6 +5,7 @@ import app.eluvio.wallet.data.entities.GalleryItemEntity
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.network.converters.toPathMap
 import app.eluvio.wallet.network.dto.v2.GalleryItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
@@ -48,6 +49,11 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
             }
         }.toRealmListOrEmpty()
         tags = dto.tags.toRealmListOrEmpty()
+        rawPermissions = dto.permissions?.mapNotNull { it.permission_item_id }?.let {
+            PermissionsEntity().apply {
+                permissionItemIds = it.toRealmListOrEmpty()
+            }
+        }
     }
 }
 

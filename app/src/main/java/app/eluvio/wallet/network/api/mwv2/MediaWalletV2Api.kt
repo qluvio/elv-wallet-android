@@ -5,6 +5,7 @@ import app.eluvio.wallet.network.dto.PagedContent
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
+import app.eluvio.wallet.network.dto.v2.permissions.GetPermissionResponse
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -36,4 +37,7 @@ interface MediaWalletV2Api : AuthdApi {
         @Path("propertyId") propertyId: String,
         @Body request: List<String>
     ): Single<PagedContent<MediaItemV2Dto>>
+
+    @GET("mw/properties/{propertyId}/permissions")
+    fun getPermissionStates(@Path("propertyId") propertyId: String): Single<GetPermissionResponse>
 }

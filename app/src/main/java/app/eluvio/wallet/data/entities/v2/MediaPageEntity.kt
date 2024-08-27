@@ -1,5 +1,7 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -8,10 +10,11 @@ import dagger.multibindings.IntoSet
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class MediaPageEntity : RealmObject {
+class MediaPageEntity : RealmObject, EntityWithPermissions {
 
     /**
      * This is a composite ID we create with the containing Property's ID,
@@ -46,6 +49,13 @@ class MediaPageEntity : RealmObject {
      */
     var sectionIds = realmListOf<String>()
 
+    @Ignore
+    override var resolvedPermissions: PermissionsEntity? = null
+    override var rawPermissions: PermissionsEntity? = null
+    override val permissionChildren: List<EntityWithPermissions>
+        // Sections aren't directly connected to the object, so stop propagation here.
+        get() = emptyList()
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -60,6 +70,8 @@ class MediaPageEntity : RealmObject {
         if (description != other.description) return false
         if (descriptionRichText != other.descriptionRichText) return false
         if (sectionIds != other.sectionIds) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
+        if (rawPermissions != other.rawPermissions) return false
 
         return true
     }
@@ -73,11 +85,13 @@ class MediaPageEntity : RealmObject {
         result = 31 * result + (description?.hashCode() ?: 0)
         result = 31 * result + (descriptionRichText?.hashCode() ?: 0)
         result = 31 * result + sectionIds.hashCode()
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
+        result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPageEntity(id='$id', realId='$realId', backgroundImage=$backgroundImagePath, logo=$logo, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds)"
+        return "MediaPageEntity(id='$id', realId='$realId', backgroundImagePath=$backgroundImagePath, logo=$logo, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
     }
 
     @Module

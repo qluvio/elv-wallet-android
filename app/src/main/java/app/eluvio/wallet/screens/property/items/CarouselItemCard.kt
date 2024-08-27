@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -23,18 +24,36 @@ import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.theme.label_24
+import app.eluvio.wallet.util.compose.thenIf
+import app.eluvio.wallet.util.rememberToaster
 
 @Composable
 fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.current
+    val toaster = rememberToaster()
     when (carouselItem) {
         is CarouselItem.Media -> Column(modifier = modifier.width(IntrinsicSize.Min)) {
+            val entity = carouselItem.entity
             MediaItemCard(
-                carouselItem.entity,
+                entity,
                 cardHeight = cardHeight,
                 onMediaItemClick = { media ->
                     when {
+                        media.showAlternatePage -> {
+                            toaster.toast("TODO: showAlternatePage: ${entity.resolvedPermissions?.alternatePageId}")
+                        }
+
+                        media.showPurchaseOptions -> {
+                            toaster.toast("TODO: showPurchaseOptions")
+                        }
+
+                        media.resolvedPermissions?.authorized == false -> {
+                            // TODO: This shouldn't really happen, just for dev purposes
+                            toaster.toast("You are not authorized to view this content (behavior: ${entity.resolvedPermissions?.behavior})")
+                        }
+
                         media.mediaItemsIds.isNotEmpty() -> {
                             // This media item is a container for other media (e.g. a media list/collection)
                             navigator(
@@ -63,10 +82,13 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                carouselItem.entity.name,
+                entity.name,
                 style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.thenIf(entity.isDisabled) {
+                    alpha(MaterialTheme.colorScheme.disabledItemAlpha)
+                }
             )
         }
 
@@ -84,7 +106,10 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
             CustomCard(carouselItem, cardHeight, modifier)
         }
 
-        is CarouselItem.ItemPurchase -> ItemPurchaseCard(item = carouselItem, cardHeight = cardHeight)
+        is CarouselItem.ItemPurchase -> ItemPurchaseCard(
+            item = carouselItem,
+            cardHeight = cardHeight
+        )
     }
 }
 

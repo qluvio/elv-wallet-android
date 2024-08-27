@@ -100,6 +100,9 @@ private fun MediaPageSectionEntity.toHeroSections(): List<DynamicPageLayoutState
 fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselItem> {
     return mapNotNull { item ->
         when {
+            // Filter out hidden items
+            item.isHidden -> null
+
             item.subpropertyId != null -> {
                 CarouselItem.SubpropertyLink(
                     subpropertyId = item.subpropertyId!!,

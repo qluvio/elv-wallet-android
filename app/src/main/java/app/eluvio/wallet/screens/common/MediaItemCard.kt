@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +37,8 @@ import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.getStartDateTimeString
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
@@ -45,6 +49,7 @@ import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.button_24
+import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.logging.Log
 import io.realm.kotlin.ext.realmListOf
@@ -60,39 +65,70 @@ fun MediaItemCard(
     aspectRatio: Float = media.aspectRatio(),
     shape: Shape = MaterialTheme.shapes.medium,
 ) {
-    val liveVideoInfo = media.liveVideoInfo
-    ImageCard(
-        imageUrl = imageUrl,
-        contentDescription = media.nameOrLockedName(),
-        shape = shape,
-        focusedOverlay = {
-            if (liveVideoInfo != null) {
-                LiveVideoFocusedOverlay(liveVideoInfo)
-            } else {
-                DefaultFocusedOverlay(media)
-            }
-        },
-        unFocusedOverlay = {
-            if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
+    if (media.isDisabled) {
+        DisabledCard(imageUrl, media, shape, cardHeight, aspectRatio, modifier)
+    } else {
+        val liveVideoInfo = media.liveVideoInfo
+        ImageCard(
+            imageUrl = imageUrl,
+            contentDescription = media.nameOrLockedName(),
+            shape = shape,
+            focusedOverlay = {
                 if (liveVideoInfo != null) {
-                    LiveVideoUnFocusedOverlay(liveVideoInfo)
+                    LiveVideoFocusedOverlay(liveVideoInfo)
                 } else {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .align(Alignment.Center)
-                            .alpha(0.75f)
-                    )
+                    DefaultFocusedOverlay(media)
                 }
-            }
-        },
-        onClick = { onMediaItemClick(media) },
-        modifier = modifier
-            .height(cardHeight)
-            .aspectRatio(aspectRatio, matchHeightConstraintsFirst = true)
-    )
+            },
+            unFocusedOverlay = {
+                if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
+                    if (liveVideoInfo != null) {
+                        LiveVideoUnFocusedOverlay(liveVideoInfo)
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .align(Alignment.Center)
+                                .alpha(0.75f)
+                        )
+                    }
+                }
+            },
+            onClick = { onMediaItemClick(media) },
+            modifier = modifier
+                .height(cardHeight)
+                .aspectRatio(aspectRatio, matchHeightConstraintsFirst = true)
+        )
+    }
+}
+
+@Composable
+private fun DisabledCard(
+    imageUrl: String,
+    media: MediaEntity,
+    shape: Shape,
+    cardHeight: Dp,
+    aspectRatio: Float,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        Modifier
+            .alpha(MaterialTheme.colorScheme.disabledItemAlpha)
+            .clip(shape)
+    ) {
+        ShimmerImage(
+            imageUrl,
+            contentDescription = media.nameOrLockedName(),
+            modifier = modifier
+                .height(cardHeight)
+                .aspectRatio(aspectRatio, matchHeightConstraintsFirst = true)
+        )
+        media.liveVideoInfo?.let {
+            LiveVideoUnFocusedOverlay(it)
+        }
+    }
 }
 
 @Composable
@@ -301,4 +337,24 @@ fun EndedLiveVideoCardPreview() = EluvioThemePreview {
         }
     })
     Text("UNDEFINED DESIGN: TBD", modifier = Modifier.align(Alignment.Center))
+}
+
+@Preview(heightDp = 150, widthDp = 270, locale = "fr")
+@Composable
+fun DisabledCardPreview() = EluvioThemePreview {
+    MediaItemCard(media = MediaEntity().apply {
+        id = "id"
+        name = "NFT Media Item"
+        imageAspectRatio = AspectRatio.WIDE
+        resolvedPermissions = PermissionsEntity().apply {
+            authorized = false
+            behavior = PermissionBehavior.DISABLE.value
+        }
+        liveVideoInfo = LiveVideoInfoEntity().apply {
+            startTime = RealmInstant.MIN
+            title = "Tenacious D"
+            subtitle = "The Grand Arena"
+            headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+        }
+    })
 }

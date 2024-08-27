@@ -1,6 +1,8 @@
 package app.eluvio.wallet.network.dto.v2
 
 import app.eluvio.wallet.network.dto.AssetLinkDto
+import app.eluvio.wallet.network.dto.v2.permissions.DtoWithPermissions
+import app.eluvio.wallet.network.dto.v2.permissions.PermissionsDto
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -10,7 +12,8 @@ data class MediaPageDto(
     val id: String,
     val label: String,
     val layout: PageLayoutDto,
-)
+    override val permissions: PermissionsDto?,
+) : DtoWithPermissions
 
 @JsonClass(generateAdapter = true)
 data class PageLayoutDto(

@@ -3,6 +3,7 @@ package app.eluvio.wallet.network.converters.v2
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
+import app.eluvio.wallet.network.converters.v2.permissions.toEntity
 import app.eluvio.wallet.network.dto.v2.DisplaySettingsDto
 import app.eluvio.wallet.network.dto.v2.HeroItemDto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
@@ -45,6 +46,8 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
 
         primaryFilter = dto.primaryFilter
         secondaryFilter = dto.secondaryFilter
+
+        rawPermissions = dto.permissions?.toEntity()
     }
 }
 
@@ -55,6 +58,7 @@ private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
         id = dto.id
         mediaType = dto.mediaType
         media = dto.media?.toEntity(baseUrl)
+        rawPermissions = dto.permissions?.toEntity()
 
         subpropertyId = dto.subpropertyId
         val (imageLink, aspectRatio) =

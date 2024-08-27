@@ -1,17 +1,21 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionStatesEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
+import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class MediaPropertyEntity : RealmObject {
+class MediaPropertyEntity : RealmObject, EntityWithPermissions {
     @PrimaryKey
     var id: String = ""
     var name: String = ""
@@ -28,6 +32,14 @@ class MediaPropertyEntity : RealmObject {
     val loginProvider: LoginProviders
         get() = loginInfo?.loginProvider ?: LoginProviders.UNKNOWN
 
+    var permissionStates = realmDictionaryOf<PermissionStatesEntity?>()
+
+    @Ignore
+    override var resolvedPermissions: PermissionsEntity? = null
+    override var rawPermissions: PermissionsEntity? = null
+    override val permissionChildren: List<EntityWithPermissions>
+        get() = listOfNotNull(mainPage)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -40,6 +52,9 @@ class MediaPropertyEntity : RealmObject {
         if (image != other.image) return false
         if (mainPage != other.mainPage) return false
         if (loginInfo != other.loginInfo) return false
+        if (permissionStates != other.permissionStates) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
+        if (rawPermissions != other.rawPermissions) return false
 
         return true
     }
@@ -51,11 +66,14 @@ class MediaPropertyEntity : RealmObject {
         result = 31 * result + image.hashCode()
         result = 31 * result + (mainPage?.hashCode() ?: 0)
         result = 31 * result + (loginInfo?.hashCode() ?: 0)
+        result = 31 * result + permissionStates.hashCode()
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
+        result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage, loginInfo=$loginInfo)"
+        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage, loginInfo=$loginInfo, permissionStates=$permissionStates, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
     }
 
     // Index can't be saved as part of the PropertyEntity object because it will get overridden
