@@ -19,7 +19,8 @@ private fun PlayoutConfigDto.toEntity(baseUrl: String, fabricToken: String?): Vi
     }
     return VideoOptionsEntity(
         protocol = properties.protocol,
-        uri = "${baseUrl}/${uri}",
+        // baseUrl might or might not end with "/", so we remove it and add it back
+        uri = "${baseUrl.removeSuffix("/")}/${uri}",
         drm = properties.drm ?: VideoOptionsEntity.DRM_CLEAR,
         licenseUri = properties.license_servers?.firstOrNull(),
         tokenHeader = tokenHeader

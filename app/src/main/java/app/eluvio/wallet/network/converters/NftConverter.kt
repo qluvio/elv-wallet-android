@@ -100,6 +100,7 @@ fun MediaItemDto.toEntity(idPrefix: String): MediaEntity {
         mediaType = dto.media_type ?: ""
         imageAspectRatio = AspectRatio.parse(dto.image_aspect_ratio)
         mediaFile = dto.media_file?.path ?: ""
+        playableHash = dto.media_link?.hashContainer?.get("source")?.toString()
         mediaLinks = dto.media_link.toPathMap()
         tvBackgroundImage = dto.background_image_tv?.path ?: ""
         gallery = dto.gallery?.map { it.toEntity() }.toRealmListOrEmpty()

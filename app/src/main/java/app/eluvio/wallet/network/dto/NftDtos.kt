@@ -90,6 +90,16 @@ data class MediaItemDto(
 
 @JsonClass(generateAdapter = true)
 data class MediaLinkDto(
+    /**
+     * the "." field should contain a field "source" which holds the hash of the "playable" object.
+     * The assumption that this hash is "playable" means that we'll try to get playout_options for it.
+     */
+    @field:Json(name = ".")
+    val hashContainer: Map<String, Any>?,
+
+    /**
+     * This is the old way to get the path to a file, but keeping it as a fallback.
+     */
     val sources: Map<String, AssetLinkDto>?
 )
 

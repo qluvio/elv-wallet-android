@@ -31,6 +31,7 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
             ?: dto.thumbnailPortrait
             ?: dto.thumbnailLandscape
         image = imageLink?.path?.let { "$baseUrl$it" } ?: ""
+        playableHash = dto.mediaLink?.hashContainer?.get("source")?.toString()
         mediaLinks = dto.mediaLink?.toPathMap().toRealmDictionaryOrEmpty()
         gallery = dto.gallery?.mapNotNull { it.toEntity() }.toRealmListOrEmpty()
 

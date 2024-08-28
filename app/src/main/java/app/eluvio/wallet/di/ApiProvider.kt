@@ -45,12 +45,8 @@ class ApiProvider @Inject constructor(
     private inner class RetrofitCachedFactory(
         private val endpointSelector: (FabricConfiguration) -> String,
     ) {
-        // TODO: actually implement failover and don't just cache the first retrofit instance forever.
-        private var instance: Retrofit? = null
+        // TODO: actually implement failover and don't just create a new instance every time.
         fun get(): Single<Retrofit> {
-            instance?.let {
-                return Single.just(it)
-            }
             return configStore.observeFabricConfiguration()
                 .firstOrError()
                 .map { config ->

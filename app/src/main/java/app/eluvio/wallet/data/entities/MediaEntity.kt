@@ -38,7 +38,11 @@ class MediaEntity : RealmObject, EntityWithPermissions {
     // Relative path to file
     var mediaFile: String = ""
 
-    // Relative paths to offerings
+    // A hash to the playable file.
+    // This hash might be outdated, but the playout API will take care of that.
+    var playableHash: String? = null
+
+    // Relative paths to offerings. Only use if [playableHash] is null.
     var mediaLinks: RealmDictionary<String> = realmDictionaryOf()
 
     var tvBackgroundImage: String = ""
@@ -99,6 +103,7 @@ class MediaEntity : RealmObject, EntityWithPermissions {
         if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
         if (mediaFile != other.mediaFile) return false
+        if (playableHash != other.playableHash) return false
         if (mediaLinks != other.mediaLinks) return false
         if (tvBackgroundImage != other.tvBackgroundImage) return false
         if (gallery != other.gallery) return false
@@ -131,6 +136,7 @@ class MediaEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         result = 31 * result + mediaFile.hashCode()
+        result = 31 * result + playableHash.hashCode()
         result = 31 * result + mediaLinks.hashCode()
         result = 31 * result + tvBackgroundImage.hashCode()
         result = 31 * result + gallery.hashCode()
@@ -143,7 +149,7 @@ class MediaEntity : RealmObject, EntityWithPermissions {
     }
 
     override fun toString(): String {
-        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, mediaFile='$mediaFile', mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo, attributes=$attributes, tags=$tags)"
+        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, mediaFile='$mediaFile', playableHash=$playableHash, mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo, attributes=$attributes, tags=$tags)"
     }
 
     companion object {
