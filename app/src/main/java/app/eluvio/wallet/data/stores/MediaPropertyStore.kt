@@ -258,5 +258,3 @@ class MediaPropertyStore @Inject constructor(
         }
     }
 }
-
-

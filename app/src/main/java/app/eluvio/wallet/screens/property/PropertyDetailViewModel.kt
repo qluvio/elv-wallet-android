@@ -69,11 +69,17 @@ class PropertyDetailViewModel @Inject constructor(
                         )
                     }
                 },
-                onError = {
-                    // Note: might be a problem with deeplinks
-                    Log.e("Error loading property detail. Popping screen", it)
-                    fireEvent(Events.NetworkError)
-                    navigateTo(NavigationEvent.GoBack)
+                onError = { exception ->
+                    if (exception === CircularRedirectException) {
+                        Log.e("Circular redirect detected")
+                        fireEvent(Events.ToastMessage("Permission error. Unable to load page."))
+                        navigateTo(NavigationEvent.GoBack)
+                    } else {
+                        // Note: might be a problem with deeplinks
+                        Log.e("Error loading property detail. Popping screen", exception)
+                        fireEvent(Events.NetworkError)
+                        navigateTo(NavigationEvent.GoBack)
+                    }
                 }
             )
             .addTo(disposables)
@@ -102,13 +108,13 @@ class PropertyDetailViewModel @Inject constructor(
                 currentPage.id, in unauthorizedPageIds -> {
                     // We already checked this page id, or this is a self-reference, so we know
                     // we're not authorized to view it.
-                    Flowable.error(IllegalStateException("Circular redirect detected"))
+                    Flowable.error(CircularRedirectException)
                 }
 
                 null -> {
                     // No page to redirect to: we are authorized to render this page.
                     Flowable.just(currentPage)
-                        .doOnNext { Log.v("Authorized to view page ${currentPage.id}") }
+                        .doOnNext { Log.i("Authorized to view page ${currentPage.id}") }
                 }
 
                 else -> {
@@ -147,3 +153,5 @@ class PropertyDetailViewModel @Inject constructor(
             .flatMap { section -> section.toDynamicSections(propertyId, filters) }
     }
 }
+
+private val CircularRedirectException = IllegalStateException("Circular redirect detected")
