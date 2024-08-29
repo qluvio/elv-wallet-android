@@ -11,6 +11,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.kotlin.zipWith
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -24,23 +26,13 @@ class MetamaskActivationStore @Inject constructor(
 ) {
 
     fun observeMetamaskActivationData(): Flowable<MetamaskActivationData> {
-        return apiProvider.getApi(AuthServicesApi::class).flatMapPublisher { api ->
-            environmentStore.observeSelectedEnvironment()
-                .map { api to it }
-        }
-            .switchMap { (api, env) ->
-                observeMetamaskActivationData(api, env.walletUrl)
+        return apiProvider.getApi(AuthServicesApi::class)
+            .zipWith(environmentStore.observeSelectedEnvironment().firstOrError())
+            .flatMap { (api, env) ->
+                api.generateMetamaskCode(MetamaskCodeRequest.from(env))
             }
-    }
-
-    private fun observeMetamaskActivationData(
-        api: AuthServicesApi,
-        walletUrl: String
-    ): Flowable<MetamaskActivationData> {
-        return api.generateMetamaskCode(MetamaskCodeRequest(walletUrl))
-            .toFlowable()
             // Make observable never-ending so we can restart it even after getting successful result from auth0
-            .mergeWith(Flowable.never())
+            .mergeWith(Single.never())
             .timeout {
                 val delay = (it.expiration * 1000 - Calendar.getInstance().timeInMillis)
                     .coerceIn(1.minutes.inWholeMilliseconds..7.minutes.inWholeMilliseconds)

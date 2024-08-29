@@ -7,6 +7,7 @@ import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.showAlternatePage
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -60,12 +61,12 @@ class PropertyDetailViewModel @Inject constructor(
             Triple(page, sections, filters)
         }
             .subscribeBy(
-                onNext = { (mainPage, sections, filters) ->
+                onNext = { (page, sections, filters) ->
                     updateState {
                         copy(
-                            backgroundImagePath = mainPage.backgroundImagePath,
+                            backgroundImagePath = page.backgroundImagePath,
                             searchNavigationEvent = PropertySearchDestination(propertyId).asPush(),
-                            sections = sections(mainPage, sections, filters)
+                            sections = sections(page, sections, filters)
                         )
                     }
                 },
@@ -138,19 +139,25 @@ class PropertyDetailViewModel @Inject constructor(
     }
 
     private fun sections(
-        mainPage: MediaPageEntity,
+        page: MediaPageEntity,
         sections: Map<String, MediaPageSectionEntity>,
         filters: SearchFiltersEntity
     ): List<DynamicPageLayoutState.Section> {
+        val pagePermissionContext = PermissionContext(
+            propertyId = propertyId,
+            pageId = page.id
+        )
         // We can't just iterate over [sections] because the order of sections is important and it
         // is defined by the Page's sectionIds.
-        return mainPage.sectionIds
+        return page.sectionIds
             .mapNotNull { sections[it] }
             .filterNot { section ->
                 section.isHidden
                     .also { if (it) Log.v("Hiding unauthorized section $section") }
             }
-            .flatMap { section -> section.toDynamicSections(propertyId, filters) }
+            .flatMap { section ->
+                section.toDynamicSections(pagePermissionContext, filters)
+            }
     }
 }
 

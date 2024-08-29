@@ -23,6 +23,7 @@ import app.eluvio.wallet.screens.common.defaultMediaItemClickHandler
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.theme.label_24
@@ -51,6 +52,8 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
 
                         media.resolvedPermissions?.authorized == false -> {
                             // TODO: This shouldn't really happen, just for dev purposes
+                            // nvm i guess it could happen in the case of SHOW IF UNAUTHORIZED
+                            // in which case, we just carry on normally?
                             toaster.toast("You are not authorized to view this content (behavior: ${entity.resolvedPermissions?.behavior})")
                         }
 
@@ -118,10 +121,10 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
 private fun CarouselItemCardPreview() = EluvioThemePreview {
     CarouselItemCard(
         carouselItem = CarouselItem.Media(
+            permissionContext = PermissionContext(propertyId = "property"),
             entity = MediaEntity().apply {
                 name = "this is a very very very very long title"
             },
-            propertyId = "property"
         ), 120.dp
     )
 }

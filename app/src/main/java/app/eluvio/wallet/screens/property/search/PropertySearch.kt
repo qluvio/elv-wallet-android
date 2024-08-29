@@ -55,6 +55,7 @@ import app.eluvio.wallet.screens.common.SearchBox
 import app.eluvio.wallet.screens.common.SearchFilterChip
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.screens.property.sections
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.util.subscribeToState
@@ -269,9 +270,10 @@ private fun PropertySearchPreview() = EluvioThemePreview {
             propertyName = "FlixVerse",
             primaryFilters =
             DynamicPageLayoutState.Section.Carousel(
-                sectionId = "4",
+                permissionContext = PermissionContext(propertyId = "p", sectionId = "4"),
                 items = List(4) {
                     DynamicPageLayoutState.CarouselItem.CustomCard(
+                        permissionContext = PermissionContext(propertyId = "property1"),
                         title = "Primary Filter Value ${it + 1}",
                         imageUrl = null,
                         aspectRatio = 16f / 9f,

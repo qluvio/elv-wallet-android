@@ -18,16 +18,16 @@ enum class Environment(
     val walletUrl: String,
 ) {
     Main(
-        "main",
-        R.string.env_main_name,
-        "https://main.net955305.contentfabric.io/config",
-        "https://wallet.contentfabric.io?action=login&mode=login&response=code&source=code#/login"
+        networkName = "main",
+        prettyEnvName = R.string.env_main_name,
+        configUrl = "https://main.net955305.contentfabric.io/config",
+        walletUrl = "https://wallet.contentfabric.io"
     ),
     Demo(
-        "demov3",
-        R.string.env_demo_name,
-        "https://demov3.net955210.contentfabric.io/config",
-        "https://wallet.demov3.contentfabric.io?action=login&mode=login&response=code&source=code#/login"
+        networkName = "demov3",
+        prettyEnvName = R.string.env_demo_name,
+        configUrl = "https://demov3.net955210.contentfabric.io/config",
+        walletUrl = "https://wallet.demov3.contentfabric.io"
     )
 }
 

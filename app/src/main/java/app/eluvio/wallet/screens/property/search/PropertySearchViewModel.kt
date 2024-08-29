@@ -15,6 +15,7 @@ import app.eluvio.wallet.network.dto.v2.SearchRequest
 import app.eluvio.wallet.screens.destinations.PropertySearchDestination
 import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.screens.property.toDynamicSections
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
@@ -72,6 +73,7 @@ class PropertySearchViewModel @Inject constructor(
     }
 
     private val navArgs = savedStateHandle.navArgs<PropertySearchNavArgs>()
+    private val permissionContext = PermissionContext(propertyId = navArgs.propertyId)
 
     private val query = BehaviorProcessor.createDefault(QueryUpdate("", true))
     private val manualSearch = PublishProcessor.create<Unit>()
@@ -250,7 +252,7 @@ class PropertySearchViewModel @Inject constructor(
                     val forceGrid = primaryFilters == null
                     val sections = results.flatMap { section ->
                         section.toDynamicSections(
-                            navArgs.propertyId,
+                            permissionContext,
                             // Never show ViewAll button for search results
                             viewAllThreshold = Int.MAX_VALUE,
                             forceGridView = forceGrid
@@ -271,10 +273,12 @@ class PropertySearchViewModel @Inject constructor(
     }
 
     private fun SearchFiltersEntity.Attribute.toCustomCardsSection(imageBaseUrl: String?): DynamicPageLayoutState.Section {
+        val propertyContext = permissionContext
         return DynamicPageLayoutState.Section.Carousel(
-            sectionId = "PRIMARY_FILTERS",
+            permissionContext = propertyContext.copy(sectionId = "PRIMARY_FILTERS"),
             items = values.map { filterValue ->
                 DynamicPageLayoutState.CarouselItem.CustomCard(
+                    permissionContext = propertyContext.copy(),
                     imageUrl = filterValue.image?.let { imagePath -> "$imageBaseUrl${imagePath}" },
                     title = filterValue.value,
                     aspectRatio = AspectRatio.WIDE,

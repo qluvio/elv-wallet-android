@@ -39,6 +39,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.Surface
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
@@ -185,19 +186,20 @@ private fun DynamicPageLayoutPreview() = EluvioThemePreview {
                 DynamicPageLayoutState.Section.Banner("2", "https://foo.com/image.jpg"),
                 DynamicPageLayoutState.Section.Description("3", AnnotatedString("Description")),
                 DynamicPageLayoutState.Section.Carousel(
-                    sectionId = "4",
+                    permissionContext = PermissionContext(propertyId = "p", sectionId = "4"),
                     title = "Carousel",
                     subtitle = "Subtitle",
                     items = listOf(
                         DynamicPageLayoutState.CarouselItem.Media(
+                            permissionContext = PermissionContext(propertyId = "property1"),
                             entity = MediaEntity().apply {
                                 id = "1"
                                 name = "Media 1"
                                 mediaType = "image"
                             },
-                            propertyId = "property1"
                         ),
                         DynamicPageLayoutState.CarouselItem.RedeemableOffer(
+                            permissionContext = PermissionContext(propertyId = "property1"),
                             offerId = "1",
                             name = "Offer 1",
                             fulfillmentState = RedeemableOfferEntity.FulfillmentState.AVAILABLE,

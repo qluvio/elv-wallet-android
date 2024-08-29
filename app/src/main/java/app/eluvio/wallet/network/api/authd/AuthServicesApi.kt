@@ -56,12 +56,12 @@ data class SignResponse(
 
 @JsonClass(generateAdapter = true)
 data class MetamaskCodeRequest(
-    @field:Json(name = "dest") val walletUrl: String,
+    @field:Json(name = "dest") val destination: String,
     val op: String = "create",
 ) {
     companion object {
         fun from(environment: Environment) =
-            MetamaskCodeRequest(walletUrl = environment.walletUrl)
+            MetamaskCodeRequest(destination = "${environment.walletUrl}?action=login&mode=login&response=code&source=code#/login")
     }
 }
 

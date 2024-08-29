@@ -7,7 +7,9 @@ import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.NavigationEvent
+
 
 /**
  * Currently this is only used by PropertyPages, but we were planning to use it as the new
@@ -53,7 +55,7 @@ data class DynamicPageLayoutState(
 
         @Immutable
         data class Carousel(
-            override val sectionId: String,
+            val permissionContext: PermissionContext,
             val title: String? = null,
             val subtitle: String? = null,
             val viewAllNavigationEvent: NavigationEvent? = null,
@@ -66,15 +68,28 @@ data class DynamicPageLayoutState(
             val backgroundImagePath: String? = null,
             val logoPath: String? = null,
             val logoText: String? = null,
-        ) : Section
+        ) : Section {
+
+            override val sectionId: String =
+                requireNotNull(permissionContext.sectionId) { "PermissionContext.sectionId is null" }
+        }
     }
 
     sealed interface CarouselItem {
+        val permissionContext: PermissionContext
+
         @Immutable
-        data class Media(val entity: MediaEntity, val propertyId: String) : CarouselItem
+        data class Media(
+            override val permissionContext: PermissionContext,
+            val entity: MediaEntity,
+        ) : CarouselItem {
+            // TODO: remove once MediaGrid is converted to use PermissionContext
+            val propertyId: String = permissionContext.propertyId
+        }
 
         @Immutable
         data class SubpropertyLink(
+            override val permissionContext: PermissionContext,
             val subpropertyId: String,
             val imageUrl: String?,
             val imageAspectRatio: Float?,
@@ -85,6 +100,7 @@ data class DynamicPageLayoutState(
 
         @Immutable
         data class RedeemableOffer(
+            override val permissionContext: PermissionContext,
             val offerId: String,
             val name: String,
             val fulfillmentState: RedeemableOfferEntity.FulfillmentState,
@@ -96,6 +112,7 @@ data class DynamicPageLayoutState(
 
         @Immutable
         data class CustomCard(
+            override val permissionContext: PermissionContext,
             val imageUrl: String?,
             val title: String,
             val aspectRatio: Float = 1f,
@@ -104,9 +121,7 @@ data class DynamicPageLayoutState(
 
         @Immutable
         data class ItemPurchase(
-            val propertyId: String,
-            val sectionItemId: String,
-            val purchaseUrl: String,
+            override val permissionContext: PermissionContext,
             val imageUrl: String?,
             val imageAspectRatio: Float?,
             val title: String?,

@@ -21,13 +21,13 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
      * to make pages IDs unique across all properties.
      */
     @PrimaryKey
-    var id: String = ""
+    var uid: String = ""
 
     /**
      * The real ID of the page, as it comes from the API.
      * We need this for API calls that require pageId.
      */
-    var realId: String = ""
+    var id: String = ""
 
     /** Not a fully qualified URL, just a relative CF path */
     var backgroundImagePath: String? = null
@@ -66,8 +66,8 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
 
         other as MediaPageEntity
 
+        if (uid != other.uid) return false
         if (id != other.id) return false
-        if (realId != other.realId) return false
         if (backgroundImagePath != other.backgroundImagePath) return false
         if (logo != other.logo) return false
         if (title != other.title) return false
@@ -82,8 +82,8 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
     }
 
     override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + realId.hashCode()
+        var result = uid.hashCode()
+        result = 31 * result + id.hashCode()
         result = 31 * result + (backgroundImagePath?.hashCode() ?: 0)
         result = 31 * result + (logo?.hashCode() ?: 0)
         result = 31 * result + (title?.hashCode() ?: 0)
@@ -97,7 +97,7 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
     }
 
     override fun toString(): String {
-        return "MediaPageEntity(id='$id', realId='$realId', backgroundImagePath=$backgroundImagePath, logo=$logo, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, pagePermissions=$pagePermissions)"
+        return "MediaPageEntity(id='$uid', realId='$id', backgroundImagePath=$backgroundImagePath, logo=$logo, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, pagePermissions=$pagePermissions)"
     }
 
     @Module

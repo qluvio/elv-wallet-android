@@ -27,8 +27,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
     /** This section item links to another Property. */
     var subpropertyId: String? = null
 
-    /** Used when the item is either a direct link to, or locked behind a purchase */
-    var purchaseOptionsUrl: String? = null
+    var isPurchaseItem = false
 
     var thumbnailUrl: String? = null
     var thumbnailAspectRatio: Float? = null
@@ -46,7 +45,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         get() = listOfNotNull(media)
 
     override fun toString(): String {
-        return "SectionItemEntity(id='$id', mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, purchaseOptionsUrl=$purchaseOptionsUrl, thumbnailUrl=$thumbnailUrl, thumbnailAspectRatio=$thumbnailAspectRatio, title=$title, subtitle=$subtitle, headers=$headers, description=$description, logoPath=$logoPath, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
+        return "SectionItemEntity(id='$id', mediaType=$mediaType, media=$media, subpropertyId=$subpropertyId, isPurchaseItem=$isPurchaseItem, thumbnailUrl=$thumbnailUrl, thumbnailAspectRatio=$thumbnailAspectRatio, title=$title, subtitle=$subtitle, headers=$headers, description=$description, logoPath=$logoPath, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -59,7 +58,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         if (mediaType != other.mediaType) return false
         if (media != other.media) return false
         if (subpropertyId != other.subpropertyId) return false
-        if (purchaseOptionsUrl != other.purchaseOptionsUrl) return false
+        if (isPurchaseItem != other.isPurchaseItem) return false
         if (thumbnailUrl != other.thumbnailUrl) return false
         if (thumbnailAspectRatio != other.thumbnailAspectRatio) return false
         if (title != other.title) return false
@@ -78,7 +77,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (mediaType?.hashCode() ?: 0)
         result = 31 * result + (media?.hashCode() ?: 0)
         result = 31 * result + (subpropertyId?.hashCode() ?: 0)
-        result = 31 * result + (purchaseOptionsUrl?.hashCode() ?: 0)
+        result = 31 * result + (isPurchaseItem?.hashCode() ?: 0)
         result = 31 * result + (thumbnailUrl?.hashCode() ?: 0)
         result = 31 * result + (thumbnailAspectRatio?.hashCode() ?: 0)
         result = 31 * result + (title?.hashCode() ?: 0)

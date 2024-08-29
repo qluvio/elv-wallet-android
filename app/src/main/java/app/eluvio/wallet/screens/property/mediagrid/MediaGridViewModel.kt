@@ -8,6 +8,7 @@ import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.screens.property.toCarouselItems
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
@@ -49,6 +50,10 @@ class MediaGridViewModel @Inject constructor(
     }
 
     private fun loadMediaItems(mediaListId: String) {
+        // Assume that if the media list is accessible, all the media items are accessible, so
+        // we don't need to include section/sectionitem ids in the permission context.
+        val permissionContext = PermissionContext(propertyId = propertyId)
+
         contentStore.observeMediaItem(mediaListId, propertyId)
             .switchMap { mediaList -> // Technically could be a MediaCollection or MediaList
                 contentStore.observeMediaItems(propertyId, mediaList.mediaItemsIds)
@@ -59,8 +64,11 @@ class MediaGridViewModel @Inject constructor(
                     copy(
                         loading = false,
                         title = mediaList.name,
-                        items = mediaItems.map {
-                            DynamicPageLayoutState.CarouselItem.Media(it, propertyId)
+                        items = mediaItems.map { mediaEntity ->
+                            DynamicPageLayoutState.CarouselItem.Media(
+                                permissionContext = permissionContext,
+                                entity = mediaEntity
+                            )
                         }
                     )
                 }
@@ -69,13 +77,14 @@ class MediaGridViewModel @Inject constructor(
     }
 
     private fun loadSectionItems(sectionId: String) {
+        val permissionContext = PermissionContext(propertyId = propertyId, sectionId = sectionId)
         propertyStore.observeSection(sectionId)
             .subscribe { section ->
                 updateState {
                     copy(
                         loading = false,
                         title = section.title,
-                        items = section.items.toCarouselItems(propertyId)
+                        items = section.items.toCarouselItems(permissionContext)
                     )
                 }
             }

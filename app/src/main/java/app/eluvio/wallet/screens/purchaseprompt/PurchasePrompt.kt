@@ -33,6 +33,7 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.ShimmerImage
@@ -50,7 +51,7 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmInstant
 
 @MainGraph
-@Destination(navArgsDelegate = PurchasePromptNavArgs::class)
+@Destination(navArgsDelegate = PermissionContext::class)
 @Composable
 fun PurchasePrompt() {
     hiltViewModel<PurchasePromptViewModel>().subscribeToState { vm, state ->

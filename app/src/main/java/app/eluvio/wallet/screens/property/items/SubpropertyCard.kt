@@ -25,6 +25,7 @@ import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.label_24
 
@@ -68,6 +69,7 @@ private fun SubpropertyCardPreview(modifier: Modifier = Modifier) = EluvioThemeP
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         SubpropertyCard(
             item = DynamicPageLayoutState.CarouselItem.SubpropertyLink(
+                permissionContext = PermissionContext(propertyId = "property1"),
                 subpropertyId = "subId",
                 imageUrl = "img",
                 imageAspectRatio = 1f,

@@ -45,8 +45,8 @@ fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
     val layout = dto.layout
     return MediaPageEntity().apply {
         // Page ID's aren't unique across properties (but they should be), so as a workaround we use the property ID as a prefix
-        id = "$propertyId-${dto.id}"
-        realId = dto.id
+        uid = "$propertyId-${dto.id}"
+        id = dto.id
         sectionIds = layout.sections.toRealmList()
         backgroundImagePath = layout.backgroundImage?.path
         logo = layout.logo?.path

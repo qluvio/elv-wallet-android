@@ -69,8 +69,7 @@ private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
         thumbnailUrl = imageLink?.path?.let { "$baseUrl$it" } ?: ""
         thumbnailAspectRatio = aspectRatio
 
-        purchaseOptionsUrl =
-            "http://fakeurl.com/until/api/provides/this".takeIf { dto.type == "item_purchase" }
+        isPurchaseItem = dto.type == "item_purchase"
 
         setDisplayFields(dto.display)
     }

@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
@@ -20,7 +21,7 @@ private const val VIEW_ALL_THRESHOLD = 5
  * Usually this will be a single section, but in the case of a hero section, it may be multiple.
  */
 fun MediaPageSectionEntity.toDynamicSections(
-    propertyId: String,
+    parentPermissionContext: PermissionContext,
     filters: SearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
     forceGridView: Boolean = false,
@@ -30,7 +31,7 @@ fun MediaPageSectionEntity.toDynamicSections(
         MediaPageSectionEntity.TYPE_MANUAL,
         MediaPageSectionEntity.TYPE_SEARCH -> listOf(
             this.toCarouselSection(
-                propertyId,
+                parentPermissionContext,
                 filters,
                 viewAllThreshold,
                 forceGridView
@@ -43,19 +44,20 @@ fun MediaPageSectionEntity.toDynamicSections(
 }
 
 private fun MediaPageSectionEntity.toCarouselSection(
-    propertyId: String,
+    parentPermissionContext: PermissionContext,
     filters: SearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
     forceGridView: Boolean,
 ): DynamicPageLayoutState.Section.Carousel {
-    val items = items.toCarouselItems(propertyId)
+    val permissionContext = parentPermissionContext.copy(sectionId = id)
+    val items = items.toCarouselItems(permissionContext)
     val displayLimit = displayLimit?.takeIf { it > 0 } ?: items.size
     val showViewAll = items.size > displayLimit || items.size > viewAllThreshold
     val filterAttribute = primaryFilter?.let { primaryFilter ->
         filters?.attributes?.firstOrNull { it.id == primaryFilter }
     }
     return DynamicPageLayoutState.Section.Carousel(
-        sectionId = id,
+        permissionContext,
         title = title,
         subtitle = subtitle,
         items = items.take(displayLimit),
@@ -66,7 +68,7 @@ private fun MediaPageSectionEntity.toCarouselSection(
         showAsGrid = forceGridView || displayFormat == MediaPageSectionEntity.DisplayFormat.GRID,
         filterAttribute = filterAttribute,
         viewAllNavigationEvent = MediaGridDestination(
-            propertyId = propertyId,
+            propertyId = parentPermissionContext.propertyId,
             sectionId = id
         )
             .takeIf { showViewAll }
@@ -97,14 +99,18 @@ private fun MediaPageSectionEntity.toHeroSections(): List<DynamicPageLayoutState
     }
 }
 
-fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselItem> {
+fun List<SectionItemEntity>.toCarouselItems(
+    parentPermissionContext: PermissionContext
+): List<CarouselItem> {
     return mapNotNull { item ->
+        val permissionContext = parentPermissionContext.copy(sectionItemId = item.id)
         when {
             // Filter out hidden items
             item.isHidden -> null
 
             item.subpropertyId != null -> {
                 CarouselItem.SubpropertyLink(
+                    permissionContext = permissionContext,
                     subpropertyId = item.subpropertyId!!,
                     imageUrl = item.thumbnailUrl,
                     imageAspectRatio = item.thumbnailAspectRatio,
@@ -114,13 +120,14 @@ fun List<SectionItemEntity>.toCarouselItems(propertyId: String): List<CarouselIt
                 )
             }
 
-            item.media != null -> CarouselItem.Media(item.media!!, propertyId)
+            item.media != null -> CarouselItem.Media(
+                permissionContext = permissionContext,
+                entity = item.media!!,
+            )
 
-            item.purchaseOptionsUrl != null -> {
+            item.isPurchaseItem -> {
                 CarouselItem.ItemPurchase(
-                    propertyId = propertyId,
-                    sectionItemId = item.id,
-                    purchaseUrl = item.purchaseOptionsUrl!!,
+                    permissionContext = permissionContext,
                     title = item.title,
                     imageUrl = item.thumbnailUrl,
                     imageAspectRatio = item.thumbnailAspectRatio,

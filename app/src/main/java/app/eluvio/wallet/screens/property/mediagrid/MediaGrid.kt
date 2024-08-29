@@ -25,6 +25,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
 import app.eluvio.wallet.screens.common.Overscan
@@ -124,14 +125,15 @@ private fun MediaGridPreview() = EluvioThemePreview {
             title = "Grid Title!",
             items = listOf(
                 CarouselItem.Media(
+                    permissionContext = PermissionContext(propertyId = "property1"),
                     entity = MediaEntity().apply {
                         id = "1"
                         name = "Media 1"
                         mediaType = "image"
                     },
-                    propertyId = "property1"
                 ),
                 CarouselItem.RedeemableOffer(
+                    permissionContext = PermissionContext(propertyId = "property1"),
                     offerId = "1",
                     name = "Offer 1",
                     fulfillmentState = RedeemableOfferEntity.FulfillmentState.AVAILABLE,

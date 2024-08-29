@@ -22,6 +22,7 @@ import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
 import app.eluvio.wallet.screens.destinations.PurchasePromptDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.label_24
 
@@ -42,8 +43,7 @@ fun ItemPurchaseCard(
             onClick = {
                 navigator(
                     PurchasePromptDestination(
-                        sectionItemId = item.sectionItemId,
-                        propertyId = item.propertyId
+                        item.permissionContext
                     ).asPush()
                 )
             },
@@ -71,9 +71,10 @@ fun ItemPurchaseCard(
 private fun ItemPurchaseCardPreview() = EluvioThemePreview {
     ItemPurchaseCard(
         item = DynamicPageLayoutState.CarouselItem.ItemPurchase(
-            propertyId = "property_id",
-            sectionItemId = "section_id",
-            purchaseUrl = "https://www.google.com",
+            permissionContext = PermissionContext(
+                propertyId = "property1",
+                sectionItemId = "section_id"
+            ),
             title = "Title that is really really really really really really really really long",
             imageUrl = "https://www.google.com",
             imageAspectRatio = AspectRatio.SQUARE

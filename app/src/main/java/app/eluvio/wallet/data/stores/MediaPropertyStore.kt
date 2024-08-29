@@ -123,7 +123,7 @@ class MediaPropertyStore @Inject constructor(
     fun observePage(property: MediaPropertyEntity, pageId: String): Flowable<MediaPageEntity> {
         return observeRealmAndFetch(
             realmQuery = realm.query<MediaPageEntity>(
-                "${MediaPageEntity::realId.name} == $0",
+                "${MediaPageEntity::id.name} == $0",
                 pageId
             )
                 .asFlowable(),
