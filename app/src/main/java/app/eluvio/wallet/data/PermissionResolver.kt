@@ -38,14 +38,14 @@ object PermissionResolver {
             if (parentPermissions == null) {
                 // top level, resolve with [entity] as parent.
                 entity.rawPermissions?.let {
-                    resolve(
+                    merge(
                         parent = it,
                         child = null,
                         permissionStates = permissionStates
                     )
                 }
             } else {
-                resolve(
+                merge(
                     parent = parentPermissions,
                     child = entity.rawPermissions,
                     permissionStates = permissionStates
@@ -59,21 +59,31 @@ object PermissionResolver {
     ) {
         if (entity is MediaPropertyEntity) {
             entity.propertyPermissions?.let {
-                entity.propertyPermissions = resolve(null, it, permissionStates)
+                entity.propertyPermissions = merge(
+                    parent = it,
+                    child = null,
+                    permissionStates = permissionStates
+                )
             }
         } else if (entity is MediaPageEntity) {
             entity.pagePermissions?.let {
-                entity.pagePermissions = resolve(null, it, permissionStates)
+                entity.pagePermissions = merge(
+                    parent = it,
+                    child = null,
+                    permissionStates = permissionStates
+                )
             }
         }
     }
 
     /**
-     * Returns a new [PermissionsEntity] with resolved permissions.
+     * Returns a new [PermissionsEntity] with merged permissions.
+     * Note that [parent] and [child] are not treated equally, and parent permissions take over
+     * once we hit an unauthorized state.
      */
-    private fun resolve(
-        child: PermissionsEntity?,
+    private fun merge(
         parent: PermissionsEntity,
+        child: PermissionsEntity?,
         permissionStates: Map<String, PermissionStatesEntity?>
     ): PermissionsEntity {
         val result = PermissionsEntity()
