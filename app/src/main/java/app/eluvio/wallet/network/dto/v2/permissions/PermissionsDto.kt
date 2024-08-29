@@ -22,6 +22,11 @@ data class PermissionsDto(
     val page_permissions: List<String>?,
     val page_permissions_behavior: String?,
     val page_permissions_alternate_page_id: String?,
+
+    // Only applies to Properties
+    val property_permissions: List<String>?,
+    val property_permissions_behavior: String?,
+    val property_permissions_alternate_page_id: String?,
 )
 
 @JsonClass(generateAdapter = true)

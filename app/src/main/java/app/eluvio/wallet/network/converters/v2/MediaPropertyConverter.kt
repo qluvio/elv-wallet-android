@@ -4,8 +4,10 @@ import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.PropertyLoginInfoRealmEntity
-import app.eluvio.wallet.network.converters.v2.permissions.toEntity
+import app.eluvio.wallet.network.converters.v2.permissions.toContentPermissionsEntity
+import app.eluvio.wallet.network.converters.v2.permissions.toPagePermissionsEntity
 import app.eluvio.wallet.network.converters.v2.permissions.toPermissionStateEntities
+import app.eluvio.wallet.network.converters.v2.permissions.toPropertyPermissionsEntity
 import app.eluvio.wallet.network.dto.v2.LoginInfoDto
 import app.eluvio.wallet.network.dto.v2.MediaPageDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
@@ -23,7 +25,8 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
         loginInfo = dto.login?.toEntity()
 
         permissionStates = dto.toPermissionStateEntities()
-        rawPermissions = dto.permissions?.toEntity()
+        rawPermissions = dto.permissions?.toContentPermissionsEntity()
+        propertyPermissions = dto.permissions?.toPropertyPermissionsEntity()
     }
 }
 
@@ -37,7 +40,7 @@ private fun LoginInfoDto.toEntity(): PropertyLoginInfoRealmEntity {
     }
 }
 
-private fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
+fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
     val dto = this
     val layout = dto.layout
     return MediaPageEntity().apply {
@@ -50,6 +53,7 @@ private fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
         title = layout.title
         description = layout.description
         descriptionRichText = layout.descriptionRichText
-        rawPermissions = dto.permissions?.toEntity()
+        rawPermissions = dto.permissions?.toContentPermissionsEntity()
+        pagePermissions = dto.permissions?.toPagePermissionsEntity()
     }
 }

@@ -1,14 +1,12 @@
 package app.eluvio.wallet.data.stores
 
+import app.eluvio.wallet.data.PermissionResolver
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.OwnedPropertiesEntity
 import app.eluvio.wallet.data.entities.v2.OwnedPropertiesRealmEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
-import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionStatesEntity
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.mwv2.MediaWalletV2Api
 import app.eluvio.wallet.network.converters.v2.permissions.toPermissionStateEntities
@@ -40,7 +38,13 @@ class MediaPropertyStore @Inject constructor(
                     .distinctUntilChanged()
                     .map { list -> list.associateBy { it.propertyId } }
             ) { properties, orderMap ->
-                properties.forEach { resolvePermissions(it, null, it.permissionStates) }
+                properties.forEach {
+                    PermissionResolver.resolvePermissions(
+                        it,
+                        null,
+                        it.permissionStates
+                    )
+                }
                 properties.sortedBy { orderMap[it.id]?.index ?: Int.MAX_VALUE }
             }
 
@@ -116,6 +120,31 @@ class MediaPropertyStore @Inject constructor(
             }
     }
 
+    fun observePage(property: MediaPropertyEntity, pageId: String): Flowable<MediaPageEntity> {
+        return observeRealmAndFetch(
+            realmQuery = realm.query<MediaPageEntity>(
+                "${MediaPageEntity::realId.name} == $0",
+                pageId
+            )
+                .asFlowable(),
+            fetchOperation = { _, isFirstState ->
+                apiProvider.getApi(MediaWalletV2Api::class)
+                    .flatMap { api -> api.getPage(property.id, pageId) }
+                    .map { it.toEntity(property.id) }
+                    .saveTo(realm)
+                    .ignoreElement()
+                    .takeIf { isFirstState }
+            }
+        )
+            .mapNotNull { it.firstOrNull() }
+            .doOnNext { page ->
+                PermissionResolver.resolvePermissions(
+                    page,
+                    property.resolvedPermissions,
+                    property.permissionStates
+                )
+            }
+    }
     fun observeMediaProperty(
         propertyId: String,
         forceRefresh: Boolean = true
@@ -134,7 +163,11 @@ class MediaPropertyStore @Inject constructor(
         )
             .mapNotNull { it.firstOrNull() }
             .doOnNext { property ->
-                resolvePermissions(property, null, property.permissionStates)
+                PermissionResolver.resolvePermissions(
+                    property,
+                    null,
+                    property.permissionStates
+                )
             }
     }
 
@@ -160,7 +193,7 @@ class MediaPropertyStore @Inject constructor(
         )
             .doOnNext { sections ->
                 sections.forEach { section ->
-                    resolvePermissions(
+                    PermissionResolver.resolvePermissions(
                         section,
                         page.resolvedPermissions,
                         property.permissionStates
@@ -224,68 +257,6 @@ class MediaPropertyStore @Inject constructor(
                 .ignoreElement()
         }
     }
-
-    /**
-     * Recursively resolves permissions
-     */
-    private fun resolvePermissions(
-        entity: EntityWithPermissions,
-        parentPermissions: PermissionsEntity?,
-        permissionStates: Map<String, PermissionStatesEntity?>
-    ) {
-        if (parentPermissions == null) {
-            // top level, resolve with [entity] as parent.
-            entity.resolvedPermissions =
-                entity.rawPermissions?.let { resolve(it, null, permissionStates) }
-        } else {
-            entity.resolvedPermissions =
-                resolve(parentPermissions, entity.rawPermissions, permissionStates)
-        }
-        entity.permissionChildren.forEach { child ->
-            resolvePermissions(child, entity.resolvedPermissions, permissionStates)
-        }
-    }
-
-    private fun resolve(
-        parent: PermissionsEntity,
-        child: PermissionsEntity?,
-        permissionStates: Map<String, PermissionStatesEntity?>
-    ): PermissionsEntity {
-        if (child == null) {
-            return PermissionsEntity().apply {
-                authorized = parent.authorized ?: with(parent.permissionItemIds) {
-                    isEmpty() || any { permissionStates[it]?.authorized == true }
-                }
-                behavior = parent.behavior
-                alternatePageId = parent.alternatePageId
-                permissionItemIds = parent.permissionItemIds
-            }
-        } else {
-            return PermissionsEntity().apply {
-                if (parent.authorized == false) {
-                    // Parent isn't authorized, so no need to check child
-                    // and we can ignore child's permission_item_ids
-                    authorized = false
-                    permissionItemIds = parent.permissionItemIds
-                    behavior = parent.behavior ?: child.behavior
-                    alternatePageId = parent.alternatePageId
-                } else {
-                    authorized = with(child.permissionItemIds) {
-                        isEmpty() || any { permissionStates[it]?.authorized == true }
-                    }
-                    permissionItemIds = child.permissionItemIds
-                    behavior = child.behavior ?: parent.behavior
-                    alternatePageId = child.alternatePageId ?: parent.alternatePageId
-                }
-
-
-                // TODO: decide if page stuff needs to be propagated
-//            page_permissions = child.page_permissions.toRealmListOrEmpty()
-//            page_permissions_behavior =
-//                child.page_permissions_behavior ?: page_permissions_behavior
-//            page_permissions_alternate_page_id = child.page_permissions_alternate_page_id
-//                ?: page_permissions_alternate_page_id
-            }
-        }
-    }
 }
+
+

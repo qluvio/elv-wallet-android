@@ -1,8 +1,8 @@
 package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionStatesEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,6 +40,11 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
     override val permissionChildren: List<EntityWithPermissions>
         get() = listOfNotNull(mainPage)
 
+    // Unique permissions that don't depend on parent hierarchy and can be resolved directly.
+    // When user is not authorized to view the property, we redirect to another page, which is
+    // technically still in the same property, but we show it anyway.
+    var propertyPermissions: PermissionsEntity? = null
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -55,6 +60,7 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         if (permissionStates != other.permissionStates) return false
         if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
+        if (propertyPermissions != other.propertyPermissions) return false
 
         return true
     }
@@ -69,11 +75,12 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + permissionStates.hashCode()
         result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
+        result = 31 * result + (propertyPermissions?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage, loginInfo=$loginInfo, permissionStates=$permissionStates, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
+        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', mainPage=$mainPage, loginInfo=$loginInfo, permissionStates=$permissionStates, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, propertyPermissions=$propertyPermissions)"
     }
 
     // Index can't be saved as part of the PropertyEntity object because it will get overridden

@@ -3,6 +3,7 @@ package app.eluvio.wallet.network.api.mwv2
 import app.eluvio.wallet.network.api.authd.AuthdApi
 import app.eluvio.wallet.network.dto.PagedContent
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
+import app.eluvio.wallet.network.dto.v2.MediaPageDto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
 import app.eluvio.wallet.network.dto.v2.permissions.GetPermissionResponse
@@ -19,6 +20,12 @@ interface MediaWalletV2Api : AuthdApi {
      */
     @GET("mw/properties")
     fun getProperties(@Query("include_public") includePublic: Boolean = true): Single<PagedContent<MediaPropertyDto>>
+
+    @GET("mw/properties/{propertyId}/pages/{pageId}")
+    fun getPage(
+        @Path("propertyId") propertyId: String,
+        @Path("pageId") pageId: String
+    ): Single<MediaPageDto>
 
     /**
      * Request a list of sections by their IDs.

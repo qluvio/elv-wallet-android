@@ -56,6 +56,10 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
         // Sections aren't directly connected to the object, so stop propagation here.
         get() = emptyList()
 
+    // Unique permissions that don't depend on parent hierarchy and can be resolved directly.
+    // These permissions say whether or not the user is allowed to view this page
+    var pagePermissions: PermissionsEntity? = null
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -72,6 +76,7 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
         if (sectionIds != other.sectionIds) return false
         if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
+        if (pagePermissions != other.pagePermissions) return false
 
         return true
     }
@@ -87,11 +92,12 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + sectionIds.hashCode()
         result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
+        result = 31 * result + (pagePermissions?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPageEntity(id='$id', realId='$realId', backgroundImagePath=$backgroundImagePath, logo=$logo, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
+        return "MediaPageEntity(id='$id', realId='$realId', backgroundImagePath=$backgroundImagePath, logo=$logo, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, pagePermissions=$pagePermissions)"
     }
 
     @Module
