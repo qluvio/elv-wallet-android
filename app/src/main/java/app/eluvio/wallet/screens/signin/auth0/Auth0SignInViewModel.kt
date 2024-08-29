@@ -1,6 +1,7 @@
 package app.eluvio.wallet.screens.signin.auth0
 
 import androidx.lifecycle.SavedStateHandle
+import app.eluvio.wallet.data.AuthenticationService
 import app.eluvio.wallet.data.stores.DeviceActivationStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.di.ApiProvider
@@ -19,6 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class Auth0SignInViewModel @Inject constructor(
     private val deviceActivationStore: DeviceActivationStore,
+    private val authenticationService: AuthenticationService,
     propertyStore: MediaPropertyStore,
     apiProvider: ApiProvider,
     savedStateHandle: SavedStateHandle
@@ -38,5 +40,7 @@ class Auth0SignInViewModel @Inject constructor(
     override fun DeviceActivationData.getCode(): String = userCode
 
     override fun DeviceActivationData.checkToken(): Maybe<*> =
-        deviceActivationStore.checkToken(deviceCode).mapNotNull { it.body() }
+        deviceActivationStore.checkToken(deviceCode)
+            .mapNotNull { it.body() }
+            .flatMapSingle { authenticationService.getFabricToken() }
 }

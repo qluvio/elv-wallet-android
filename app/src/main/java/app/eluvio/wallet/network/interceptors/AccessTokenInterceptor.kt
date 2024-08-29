@@ -59,7 +59,7 @@ class AccessTokenInterceptor @Inject constructor(
             HttpURLConnection.HTTP_UNAUTHORIZED,
             HttpURLConnection.HTTP_FORBIDDEN -> {
                 // If there's no new response from refreshAndRetry, then we should return the original response.
-                return refreshAndRetry(chain) ?: run {
+                return refreshAndRetry(chain, response) ?: run {
                     signOutHandler
                         .signOut("Token expired. Please sign in again.")
                         .blockingAwait()
@@ -74,8 +74,9 @@ class AccessTokenInterceptor @Inject constructor(
     /**
      * Potentially refreshes the token and retries the request.
      * Returns a new response in case of successful refresh+retry, or null no refreshToken is available or refresh fails.
+     * In the case of a canceled call, the original response is returned.
      */
-    private fun refreshAndRetry(chain: Interceptor.Chain): Response? {
+    private fun refreshAndRetry(chain: Interceptor.Chain, originalResponse: Response): Response? {
         val request = chain.request()
         log("Detected bad token from ${request.url}")
         val refreshToken = tokenStore.refreshToken.get()
@@ -95,7 +96,7 @@ class AccessTokenInterceptor @Inject constructor(
 
             if (refreshToken != tokenStore.refreshToken.get()) {
                 // refresh token has changed since we started this request. Someone else must have refreshed it.
-                log("refresh token changed. retrying original request.")
+                log("refresh token changed. retrying original request to ${request.url}")
                 return chain.proceed(request.withHeaders())
             }
         }
@@ -124,15 +125,21 @@ class AccessTokenInterceptor @Inject constructor(
                 val newFabricToken =
                     authenticationService.get().getFabricToken().blockingGet()
                 log("Successfully refreshed token. Retrying original request (new token=$newFabricToken)")
-                refreshInProgress.onNext(false)
                 // retry original request with new tokens
                 chain.proceed(request.withHeaders())
             }
-            .onFailure {
-                log("Failed to refresh token. Signing out.", it)
-                refreshInProgress.onNext(false)
+            .recoverCatching {
+                if (chain.call().isCanceled()) {
+                    log("Call was canceled after successful refresh. Passing original response.")
+                    originalResponse
+                } else {
+                    log("Failed to refresh token. Signing out.", it)
+                    throw it
+                }
             }
             .getOrNull()
+            // Finally, regardless of success/failure, unblock other calls waiting for refresh to finish.
+            .also { refreshInProgress.onNext(false) }
     }
 
     /**
@@ -174,4 +181,4 @@ class AccessTokenInterceptor @Inject constructor(
 
 // The process of refreshing a token is flaky and complicated.
 // Logs are helpful for debugging, but they're too verbose to be enabled by default.
-private const val ENABLE_EXCESSIVE_LOGGING = false
+private const val ENABLE_EXCESSIVE_LOGGING = true
