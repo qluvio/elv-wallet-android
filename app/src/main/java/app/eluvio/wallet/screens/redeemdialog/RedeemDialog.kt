@@ -28,14 +28,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
-import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.RedeemStateEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.ShimmerImage
-import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.label_24
@@ -43,7 +41,7 @@ import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.redeemAvailableText
 import app.eluvio.wallet.theme.redeemExpiredText
 import app.eluvio.wallet.theme.title_62
-import app.eluvio.wallet.util.rememberToaster
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -51,21 +49,12 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Destination(navArgsDelegate = RedeemDialogNavArgs::class)
 @Composable
 fun RedeemDialog() {
-    val toaster = rememberToaster()
-    hiltViewModel<RedeemDialogViewModel>().subscribeToState(
-        onEvent = {
-            when (it) {
-                is Events.NetworkError -> toaster.toast(it.defaultMessage)
-                else -> {}
-            }
-        },
-        onState = { vm, state ->
-            if (state.title.isNotEmpty()) {
-                // ignore empty state
-                RedeemDialog(state, onRedeemClicked = { vm.redeemOrShowOffer() })
-            }
+    hiltViewModel<RedeemDialogViewModel>().subscribeToState { vm, state ->
+        if (state.title.isNotEmpty()) {
+            // ignore empty state
+            RedeemDialog(state, onRedeemClicked = { vm.redeemOrShowOffer() })
         }
-    )
+    }
 }
 
 @Composable

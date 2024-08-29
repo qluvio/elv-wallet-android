@@ -37,7 +37,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 )
 @Composable
 fun ExternalMediaQrDialog() {
-    hiltViewModel<ExternalMediaQrDialogViewModel>().subscribeToState({ }) { vm, state ->
+    hiltViewModel<ExternalMediaQrDialogViewModel>().subscribeToState { _, state ->
         ExternalMediaQrDialog(state)
     }
 }

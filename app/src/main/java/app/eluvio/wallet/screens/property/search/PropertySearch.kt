@@ -82,10 +82,11 @@ fun PropertySearch() {
             )
         },
         onEvent = {
-            when (it) {
-                is ResetQueryEvent -> {
-                    query = ""
-                }
+            if (it is ResetQueryEvent) {
+                query = ""
+                true
+            } else {
+                false
             }
         }
     )

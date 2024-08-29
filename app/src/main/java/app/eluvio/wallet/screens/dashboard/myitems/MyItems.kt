@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -61,18 +60,9 @@ import kotlin.math.roundToInt
 
 @Composable
 fun MyItems() {
-    val toaster = rememberToaster()
-    hiltViewModel<MyItemsViewModel>().subscribeToState(
-        onEvent = {
-            when (it) {
-                is Events.NetworkError -> toaster.toast(it.defaultMessage)
-                else -> {}
-            }
-        },
-        onState = { vm, state ->
-            MyItems(state, vm::onPropertySelected, vm::onQueryChanged)
-        }
-    )
+    hiltViewModel<MyItemsViewModel>().subscribeToState { vm, state ->
+        MyItems(state, vm::onPropertySelected, vm::onQueryChanged)
+    }
 }
 
 @Composable

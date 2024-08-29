@@ -15,16 +15,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Destination(navArgsDelegate = PropertyDetailNavArgs::class)
 @Composable
 fun PropertyDetail() {
-    val toaster = rememberToaster()
-    hiltViewModel<PropertyDetailViewModel>().subscribeToState(
-        onEvent = {
-            when (it) {
-                is Events.NetworkError -> toaster.toast(it.defaultMessage)
-                else -> {}
-            }
-        },
-        onState = { vm, state ->
-            DynamicPageLayout(state)
-        }
-    )
+    hiltViewModel<PropertyDetailViewModel>().subscribeToState { _, state ->
+        DynamicPageLayout(state)
+    }
 }

@@ -1,9 +1,9 @@
 package app.eluvio.wallet.app
 
 interface Events {
-    object NetworkError : Events {
-        const val defaultMessage: String = "Network error. Please try again."
-    }
+    open class ToastMessage(val message: String) : Events
 
-    object NftNotFound : Events
+    object NetworkError : ToastMessage("Network error. Please try again.")
+
+    object NftNotFound : ToastMessage("You don't own this NFT")
 }

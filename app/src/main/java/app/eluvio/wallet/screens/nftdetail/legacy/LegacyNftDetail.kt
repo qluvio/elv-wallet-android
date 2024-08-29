@@ -46,7 +46,6 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
-import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.MediaCollectionEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.MediaSectionEntity
@@ -80,16 +79,9 @@ import io.realm.kotlin.ext.realmListOf
 @Composable
 fun LegacyNftDetail() {
     val toaster = rememberToaster()
-    hiltViewModel<LegacyNftDetailViewModel>().subscribeToState(
-        onEvent = { event ->
-            if (event is Events.NftNotFound) {
-                toaster.toast("You don't own this NFT")
-            }
-        },
-        onState = { _, state ->
-            LegacyNftDetail(state)
-        }
-    )
+    hiltViewModel<LegacyNftDetailViewModel>().subscribeToState { _, state ->
+        LegacyNftDetail(state)
+    }
 }
 
 @Composable

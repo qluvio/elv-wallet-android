@@ -12,14 +12,17 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.util.logging.Log
 
-// TODO: this name mention nothing about navigation/events/lifecycle being handled.. :/
+/**
+ * @param [onEvent] return true if event was handled, false otherwise.
+ */
 @Composable
 inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
-    crossinline onEvent: (Events) -> Unit = {},
+    crossinline onEvent: (Events) -> Boolean = { false },
     onState: @Composable (VM, State) -> Unit
 ) {
     val vm = this
     val navigator = LocalNavigator.current
+    val toaster = rememberToaster()
     // Handle navigation events
     DisposableEffect(Unit) {
         val navigationEvents = vm.navigationEvents.subscribe {
@@ -27,8 +30,12 @@ inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
             navigator(it)
         }
         val events = vm.events.subscribe {
-            Log.d("${vm.javaClass.simpleName} event fired: $it")
-            onEvent(it)
+            if (onEvent(it)) {
+                Log.d("${vm.javaClass.simpleName} handled event: $it")
+            } else {
+                Log.d("${vm.javaClass.simpleName} default event handling: $it")
+                defaultEventHandler(it, toaster)
+            }
         }
         onDispose {
             navigationEvents.dispose()
@@ -42,6 +49,12 @@ inline fun <reified VM : BaseViewModel<State>, State : Any> VM.subscribeToState(
 
     // Important to register AFTER we subscribed to state/nav/events, otherwise we might miss events emitted by VM
     vm.observeLifecycle(LocalLifecycleOwner.current.lifecycle)
+}
+
+fun defaultEventHandler(event: Events, toaster: Toaster) {
+    when (event) {
+        is Events.ToastMessage -> toaster.toast(event.message)
+    }
 }
 
 @Composable

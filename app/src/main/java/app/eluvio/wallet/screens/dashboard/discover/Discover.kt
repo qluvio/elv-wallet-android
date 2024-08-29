@@ -54,7 +54,6 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -69,24 +68,15 @@ import app.eluvio.wallet.util.compose.RealisticDevices
 import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.isKeyUpOf
 import app.eluvio.wallet.util.logging.Log
-import app.eluvio.wallet.util.rememberToaster
 import app.eluvio.wallet.util.subscribeToState
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
 fun Discover(onBackgroundImageSet: (String?) -> Unit) {
-    val toaster = rememberToaster()
-    hiltViewModel<DiscoverViewModel>().subscribeToState(
-        onState = { vm, state ->
-            Discover(state, onBackgroundImageSet, vm::onPropertyClicked, vm::retry)
-        },
-        onEvent = { event ->
-            when (event) {
-                is Events.NetworkError -> toaster.toast(event.defaultMessage)
-            }
-        }
-    )
+    hiltViewModel<DiscoverViewModel>().subscribeToState { vm, state ->
+        Discover(state, onBackgroundImageSet, vm::onPropertyClicked, vm::retry)
+    }
 }
 
 @Composable
