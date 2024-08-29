@@ -30,8 +30,9 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
 private fun LoginInfoDto.toEntity(): PropertyLoginInfoRealmEntity {
     val dto = this
     return PropertyLoginInfoRealmEntity().apply {
-        backgroundImagePath = dto.styling?.backgroundImageDesktop?.path
-        logoPath = dto.styling?.logo?.path
+        backgroundImagePath =
+            dto.styling?.backgroundImageTv?.path ?: dto.styling?.backgroundImageDesktop?.path
+        logoPath = dto.styling?.logoTv?.path ?: dto.styling?.logo?.path
         loginProvider = LoginProviders.from(dto.settings?.provider)
     }
 }

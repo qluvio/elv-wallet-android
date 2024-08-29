@@ -41,7 +41,13 @@ data class LoginSettingsDto(val provider: String?)
 
 @JsonClass(generateAdapter = true)
 data class LoginStylingDto(
+
+    @field:Json(name = "background_image_tv")
+    val backgroundImageTv: AssetLinkDto?,
     @field:Json(name = "background_image_desktop")
     val backgroundImageDesktop: AssetLinkDto?,
+
+    @field:Json(name = "logo_tv")
+    val logoTv: AssetLinkDto?,
     val logo: AssetLinkDto?
 )
