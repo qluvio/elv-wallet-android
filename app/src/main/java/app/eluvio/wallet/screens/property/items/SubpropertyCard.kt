@@ -19,13 +19,13 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.AspectRatio
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.label_24
 
@@ -43,7 +43,7 @@ fun SubpropertyCard(
             focusedOverlay = {
                 MetadataTexts(headers = item.headers, title = item.title, subtitle = item.subtitle)
             },
-            onClick = { navigator(PropertyDetailDestination(item.subpropertyId).asPush()) },
+            onClick = { navigator(PropertyDetailDestination(propertyId = item.subpropertyId).asPush()) },
             modifier = Modifier
                 .height(cardHeight)
                 .aspectRatio(

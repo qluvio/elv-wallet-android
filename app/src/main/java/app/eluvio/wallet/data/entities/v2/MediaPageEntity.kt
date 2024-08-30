@@ -15,6 +15,11 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
 class MediaPageEntity : RealmObject, EntityWithPermissions {
+    companion object {
+        fun uid(propertyId: String, pageId: String): String {
+            return "$propertyId-$pageId"
+        }
+    }
 
     /**
      * This is a composite ID we create with the containing Property's ID,

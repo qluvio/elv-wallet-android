@@ -76,7 +76,9 @@ private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
 }
 
 private fun HeroItemDto.toEntity(): SectionItemEntity {
+    val dto = this
     return SectionItemEntity().apply {
+        id = dto.id
         setDisplayFields(display)
     }
 }

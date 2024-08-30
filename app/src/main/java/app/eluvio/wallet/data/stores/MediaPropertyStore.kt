@@ -9,7 +9,6 @@ import app.eluvio.wallet.data.entities.v2.OwnedPropertiesRealmEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.mwv2.MediaWalletV2Api
-import app.eluvio.wallet.network.converters.v2.permissions.toPermissionStateEntities
 import app.eluvio.wallet.network.converters.v2.toEntity
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.asFlowable
@@ -126,8 +125,8 @@ class MediaPropertyStore @Inject constructor(
     fun observePage(property: MediaPropertyEntity, pageId: String): Flowable<MediaPageEntity> {
         return observeRealmAndFetch(
             realmQuery = realm.query<MediaPageEntity>(
-                "${MediaPageEntity::id.name} == $0",
-                pageId
+                "${MediaPageEntity::uid.name} == $0",
+                MediaPageEntity.uid(propertyId = property.id, pageId = pageId)
             )
                 .asFlowable(),
             fetchOperation = { _, isFirstState ->
@@ -148,6 +147,7 @@ class MediaPropertyStore @Inject constructor(
                 )
             }
     }
+
     fun observeMediaProperty(
         propertyId: String,
         forceRefresh: Boolean = true

@@ -46,5 +46,6 @@ data class SectionItemDto(
 
 @JsonClass(generateAdapter = true)
 data class HeroItemDto(
+    val id: String,
     val display: DisplaySettingsDto?,
 )
