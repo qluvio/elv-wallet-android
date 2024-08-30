@@ -16,14 +16,15 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.defaultMediaItemClickHandler
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
+import app.eluvio.wallet.screens.destinations.PurchasePromptDestination
 import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.theme.label_24
@@ -47,7 +48,10 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
                         }
 
                         media.showPurchaseOptions -> {
-                            toaster.toast("TODO: showPurchaseOptions")
+                            navigator(
+                                PurchasePromptDestination(carouselItem.permissionContext)
+                                    .asPush()
+                            )
                         }
 
                         media.resolvedPermissions?.authorized == false -> {
