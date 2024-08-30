@@ -47,6 +47,8 @@ data class MediaItemV2Dto(
     val attributes: Map<String, List<String>>?,
     val tags: List<String>?,
     val permissions: List<MediaPermissionsDto>?,
+    // Media that is set to public=false, but also doesn't define any Permissions - is inaccessible.
+    val public: Boolean?,
 )
 
 @JsonClass(generateAdapter = true)

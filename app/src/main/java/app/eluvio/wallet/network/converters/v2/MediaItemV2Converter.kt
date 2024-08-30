@@ -50,9 +50,15 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
             }
         }.toRealmListOrEmpty()
         tags = dto.tags.toRealmListOrEmpty()
-        rawPermissions = dto.permissions?.mapNotNull { it.permission_item_id }?.let {
-            PermissionsEntity().apply {
-                permissionItemIds = it.toRealmListOrEmpty()
+        rawPermissions = PermissionsEntity().apply {
+            permissionItemIds = dto.permissions
+                ?.mapNotNull { it.permission_item_id }
+                .toRealmListOrEmpty()
+            if (dto.public == false) {
+                // Add a dummy permission item that will always resolve to unauthorized.
+                // This won't affect Media Items that also have permissions defined, since it's enough
+                // to own one of the permissions to gain access.
+                permissionItemIds += "private"
             }
         }
     }
