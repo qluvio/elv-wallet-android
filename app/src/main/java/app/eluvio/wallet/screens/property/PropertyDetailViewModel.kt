@@ -32,7 +32,8 @@ class PropertyDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<DynamicPageLayoutState>(DynamicPageLayoutState()) {
 
-    private val propertyId = PropertyDetailDestination.argsFrom(savedStateHandle).propertyId
+    private val navArgs = PropertyDetailDestination.argsFrom(savedStateHandle)
+    private val propertyId = navArgs.propertyId
 
     private val unauthorizedPageIds = mutableSetOf<String>()
 
@@ -45,9 +46,22 @@ class PropertyDetailViewModel @Inject constructor(
 
         val pageLayout = propertyStore.observeMediaProperty(propertyId)
             .switchMap { property ->
+                if (navArgs.pageId != null) {
+                    // Observing a specific page will skip the property permissions check.
+                    // As long as properties don't link to specific pages in other properties,
+                    // this should be fine.
+                    propertyStore.observePage(property, navArgs.pageId)
+                        .map { page -> property to page }
+                } else {
+                    // The default case. Not passing mainPage here to make sure we check the
+                    // Property permissions before we check the page permissions,
+                    Flowable.just(property to null)
+                }
+            }
+            .switchMap { (property, page) ->
                 unauthorizedPageIds.clear()
-                getFirstAuthorizedPage(property, null)
-                    .map { page -> property to page }
+                getFirstAuthorizedPage(property, page)
+                    .map { authorizedPage -> property to authorizedPage }
             }
             .switchMap { (property, page) ->
                 propertyStore.observeSections(property, page)

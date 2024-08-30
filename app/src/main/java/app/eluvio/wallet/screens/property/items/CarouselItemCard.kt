@@ -22,6 +22,7 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.defaultMediaItemClickHandler
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
+import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.PurchasePromptDestination
 import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
@@ -29,12 +30,10 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.compose.thenIf
-import app.eluvio.wallet.util.rememberToaster
 
 @Composable
 fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.current
-    val toaster = rememberToaster()
     when (carouselItem) {
         is CarouselItem.Media -> Column(modifier = modifier.width(IntrinsicSize.Min)) {
             val entity = carouselItem.entity
@@ -44,7 +43,12 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
                 onMediaItemClick = { media ->
                     when {
                         media.showAlternatePage -> {
-                            toaster.toast("TODO: showAlternatePage: ${entity.resolvedPermissions?.alternatePageId}")
+                            navigator(
+                                PropertyDetailDestination(
+                                    propertyId = carouselItem.permissionContext.propertyId,
+                                    pageId = media.resolvedPermissions?.alternatePageId!!
+                                ).asPush()
+                            )
                         }
 
                         media.showPurchaseOptions -> {
