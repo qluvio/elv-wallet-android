@@ -54,13 +54,6 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
                             )
                         }
 
-                        media.resolvedPermissions?.authorized == false -> {
-                            // TODO: This shouldn't really happen, just for dev purposes
-                            // nvm i guess it could happen in the case of SHOW IF UNAUTHORIZED
-                            // in which case, we just carry on normally?
-                            toaster.toast("You are not authorized to view this content (behavior: ${entity.resolvedPermissions?.behavior})")
-                        }
-
                         media.mediaItemsIds.isNotEmpty() -> {
                             // This media item is a container for other media (e.g. a media list/collection)
                             navigator(

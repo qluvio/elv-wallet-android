@@ -7,6 +7,7 @@ enum class PermissionBehavior(override val value: String) : RealmEnum {
     DISABLE("disable"),
     SHOW_PURCHASE("show_purchase"),
     SHOW_ALTERNATE_PAGE("show_alternate_page"),
+    ONLY_SHOW_IF_UNAUTHORIZED("show_if_unauthorized")
     ;
 
     companion object {

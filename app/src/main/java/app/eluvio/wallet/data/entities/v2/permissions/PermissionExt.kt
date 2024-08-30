@@ -1,7 +1,8 @@
 package app.eluvio.wallet.data.entities.v2.permissions
 
 val PermissionsEntity.isHidden: Boolean
-    get() = authorized == false && behaviorEnum == PermissionBehavior.HIDE
+    get() = (authorized == false && behaviorEnum == PermissionBehavior.HIDE) ||
+            (authorized == true && behaviorEnum == PermissionBehavior.ONLY_SHOW_IF_UNAUTHORIZED)
 
 val PermissionsEntity.isDisabled: Boolean
     get() = authorized == false && behaviorEnum == PermissionBehavior.DISABLE
