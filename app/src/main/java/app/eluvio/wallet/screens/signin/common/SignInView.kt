@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -58,20 +59,15 @@ fun SignInView(state: LoginState, onRequestNewToken: () -> Unit, showMetamaskLin
             .padding(vertical = 37.dp)
     ) {
 
+        Spacer(modifier = Modifier.weight(1f))
         Text(
             "Sign In",
             style = MaterialTheme.typography.title_62,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        AsyncImage(
-            model = state.logoUrl,
-            contentDescription = "Logo",
-            modifier = Modifier.height(72.dp)
-        )
-        Spacer(modifier = Modifier.height(30.dp))
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.size(250.dp)
         ) {
             if (state.loading) {
                 EluvioLoadingSpinner()
@@ -109,6 +105,7 @@ fun SignInView(state: LoginState, onRequestNewToken: () -> Unit, showMetamaskLin
                 )
             }
         }
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
