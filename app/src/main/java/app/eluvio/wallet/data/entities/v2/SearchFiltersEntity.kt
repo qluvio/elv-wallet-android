@@ -5,7 +5,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
-import io.realm.kotlin.ext.parent
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmList
@@ -37,9 +36,6 @@ class SearchFiltersEntity : RealmObject {
                 values = src.values
             }
         }
-
-        // Backlink to parent searchFilters
-        fun searchFilters(): SearchFiltersEntity = parent<SearchFiltersEntity>()
 
         override fun toString(): String {
             return "Attribute(id='$id', title='$title', values=$values)"
@@ -75,9 +71,6 @@ class SearchFiltersEntity : RealmObject {
         var value: String = ""
         var nextFilterAttribute: String? = null
         var image: String? = null
-
-        // Backlink to parent attribute
-        fun attribute(): Attribute = parent<Attribute>()
 
         override fun toString(): String {
             return "AttributeValue(value='$value', nextFilterAttribute=$nextFilterAttribute, image=$image)"

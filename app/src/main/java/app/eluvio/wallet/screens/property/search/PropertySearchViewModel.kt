@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events.ToastMessage
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
@@ -17,7 +18,6 @@ import app.eluvio.wallet.screens.destinations.PropertySearchDestination
 import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.toDynamicSections
-import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.Optional
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +35,6 @@ class PropertySearchViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
     private val searchStore: PropertySearchStore,
     private val apiProvider: ApiProvider,
-    private val toaster: Toaster,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<PropertySearchViewModel.State>(State(), savedStateHandle) {
 
@@ -81,6 +80,11 @@ class PropertySearchViewModel @Inject constructor(
     private val selectedPrimaryFilter =
         BehaviorProcessor.createDefault(Optional.empty<State.SelectedFilters>())
 
+    /**
+     * Once filters are fetched, hold onto them so we can look up attributes/values by ID.
+     */
+    private var searchFilters: SearchFiltersEntity? = null
+
     override fun onResume() {
         super.onResume()
 
@@ -115,6 +119,7 @@ class PropertySearchViewModel @Inject constructor(
             )
             .subscribeBy(
                 onSuccess = { filters ->
+                    searchFilters = filters
                     updateState {
                         copy(
                             // Technically we might not have finished loading the Property at this point,
@@ -128,7 +133,7 @@ class PropertySearchViewModel @Inject constructor(
                     observeSearchTriggers(filters)
                 },
                 onError = {
-                    toaster.toast("We hit a problem. Please try again later.")
+                    fireEvent(ToastMessage("We hit a problem. Please try again later."))
                     navigateTo(NavigationEvent.GoBack)
                 }
             )
@@ -165,9 +170,9 @@ class PropertySearchViewModel @Inject constructor(
 
     fun onPrimaryFilterSelected(primaryFilterValue: SearchFiltersEntity.AttributeValue?) {
         val selectedFilter = primaryFilterValue?.let {
-            val primaryFilterAttribute = primaryFilterValue.attribute()
-            val nextFilter = primaryFilterAttribute.searchFilters().attributes
-                .find { it.id == primaryFilterValue.nextFilterAttribute }
+            val primaryFilterAttribute = searchFilters?.primaryFilter ?: return@let null
+            val nextFilter = searchFilters?.attributes
+                ?.firstOrNull { it.id == primaryFilterValue.nextFilterAttribute }
             State.SelectedFilters(
                 primaryFilterAttribute = primaryFilterAttribute,
                 primaryFilterValue = primaryFilterValue.value,
