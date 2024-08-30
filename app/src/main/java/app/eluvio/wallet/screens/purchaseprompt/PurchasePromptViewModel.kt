@@ -57,9 +57,9 @@ class PurchasePromptViewModel @Inject constructor(
         apiProvider.getFabricEndpoint().flatMapPublisher { baseUrl ->
             propertyStore.observeMediaProperty(permissionContext.propertyId)
                 .mapNotNull { property ->
-                    property.mainPage?.backgroundImagePath
-                        ?.takeIf { it.isNotEmpty() }
-                        ?.let { "${baseUrl}${it}" }
+                    val path = property.loginInfo?.backgroundImagePath?.ifEmpty { null }
+                        ?: property.mainPage?.backgroundImagePath?.ifEmpty { null }
+                    path?.let { "${baseUrl}${it}" }
                 }
         }
             .subscribeBy(
