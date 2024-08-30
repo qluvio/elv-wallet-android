@@ -80,7 +80,7 @@ class MediaPropertyStore @Inject constructor(
             .ignoreElement()
     }
 
-    fun fetchMediaProperties(): Completable {
+    fun fetchMediaProperties(clearOldProperties: Boolean = false): Completable {
         // TODO: find a way to not leak data between Demo and Main
         //        if (!tokenStore.isLoggedIn) {
         // Since getProperties is a public API, this can be called right after SignOut.
@@ -114,8 +114,8 @@ class MediaPropertyStore @Inject constructor(
                     }
 
                 Completable.mergeArray(
-                    realm.saveAsync(properties),
-                    realm.saveAsync(order)
+                    realm.saveAsync(properties, clearTable = clearOldProperties),
+                    realm.saveAsync(order, clearTable = clearOldProperties)
                 )
             }
     }

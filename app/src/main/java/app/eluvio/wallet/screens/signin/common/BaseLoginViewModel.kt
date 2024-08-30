@@ -3,7 +3,9 @@ package app.eluvio.wallet.screens.signin.common
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.AfterSignInDestination
+import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.stores.MediaPropertyStore
+import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
@@ -29,6 +31,8 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
     // Just for convenience, we always provide this, even if we don't use it (propertyId=null)
     private val propertyStore: MediaPropertyStore,
     private val apiProvider: ApiProvider,
+    private val tokenStore: TokenStore,
+    private val loginProvider: LoginProviders,
     savedStateHandle: SavedStateHandle? = null
 ) : BaseViewModel<LoginState>(LoginState(), savedStateHandle) {
 
@@ -42,7 +46,6 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
     abstract fun ActivationData.getPollingInterval(): Duration
     abstract fun ActivationData.getQrUrl(): String
     abstract fun ActivationData.getCode(): String
-
 
     private var activationDataDisposable: Disposable? = null
     private var activationCompleteDisposable: Disposable? = null
@@ -118,11 +121,12 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
                 .doOnSuccess { Log.d("Got a token $it") }
                 .flatMapCompletable {
                     // Re-fetch properties because all the permissions will be different now that we have a token
-                    propertyStore.fetchMediaProperties()
+                    propertyStore.fetchMediaProperties(clearOldProperties = true)
                 }
                 .subscribeBy(
                     onComplete = {
                         Log.d("Activation complete and properties re-fetched, finishing auth flow.")
+                        tokenStore.update(tokenStore.loginProvider to loginProvider.name)
                         navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
                         val nextDestination = AfterSignInDestination.direction.getAndSet(null)
                         if (nextDestination != null) {

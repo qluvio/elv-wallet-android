@@ -1,6 +1,7 @@
 package app.eluvio.wallet.data.stores
 
 import android.content.Context
+import androidx.datastore.dataStore
 import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder
 import app.eluvio.wallet.util.base58
 import app.eluvio.wallet.util.datastore.ReadWriteStringPref
@@ -29,6 +30,9 @@ class TokenStore @Inject constructor(
 
     val isLoggedIn: Boolean get() = fabricToken.get() != null
     val loggedInObservable = fabricToken.observe().map { it.isPresent }
+
+    // TODO: Make sure this survives obfuscation + version updates
+    val loginProvider = dataStore.readWriteStringPref("login_provider")
 
     /**
      * Update multiple preferences at once.

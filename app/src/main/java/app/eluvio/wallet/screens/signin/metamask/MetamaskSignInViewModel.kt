@@ -1,8 +1,10 @@
 package app.eluvio.wallet.screens.signin.metamask
 
 import androidx.lifecycle.SavedStateHandle
+import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.MetamaskActivationStore
+import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.MetamaskActivationData
 import app.eluvio.wallet.screens.signin.common.BaseLoginViewModel
@@ -18,11 +20,14 @@ class MetamaskSignInViewModel @Inject constructor(
     private val metamaskActivationStore: MetamaskActivationStore,
     propertyStore: MediaPropertyStore,
     apiProvider: ApiProvider,
+    tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseLoginViewModel<MetamaskActivationData>(
     propertyId = null, // We don't want the property bg for Metamask, so we pass null
     propertyStore,
     apiProvider,
+    tokenStore,
+    LoginProviders.AUTH0,
     savedStateHandle
 ) {
     override fun fetchActivationData(): Flowable<MetamaskActivationData> =

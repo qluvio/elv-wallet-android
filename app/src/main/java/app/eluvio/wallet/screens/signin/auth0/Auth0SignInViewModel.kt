@@ -2,8 +2,10 @@ package app.eluvio.wallet.screens.signin.auth0
 
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.data.AuthenticationService
+import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.stores.DeviceActivationStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
+import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.DeviceActivationData
 import app.eluvio.wallet.screens.navArgs
@@ -23,11 +25,14 @@ class Auth0SignInViewModel @Inject constructor(
     private val authenticationService: AuthenticationService,
     propertyStore: MediaPropertyStore,
     apiProvider: ApiProvider,
+    tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseLoginViewModel<DeviceActivationData>(
     savedStateHandle.navArgs<Auth0SignInNavArgs>().propertyId,
     propertyStore,
     apiProvider,
+    tokenStore,
+    LoginProviders.AUTH0,
     savedStateHandle
 ) {
     override fun fetchActivationData(): Flowable<DeviceActivationData> =

@@ -86,11 +86,14 @@ class DiscoverViewModel @Inject constructor(
     }
 
     fun onPropertyClicked(property: MediaPropertyEntity) {
-        // TODO: add auth provider handling
         val destination = PropertyDetailDestination(property.id)
-        if (tokenStore.isLoggedIn) {
+        if (tokenStore.isLoggedIn && tokenStore.loginProvider.get() == property.loginProvider.name) {
             navigateTo(destination.asPush())
         } else {
+            // In case we are logged in but the login provider is different, clear old tokens before
+            // going to auth again.
+            tokenStore.wipe()
+
             Log.d("User not signed in, navigating to authFlow and saving propertyId: ${property.id}")
             AfterSignInDestination.direction.set(destination)
             navigateTo(SignInRouterDestination(property.loginProvider, property.id).asPush())
