@@ -84,6 +84,14 @@ private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
         when {
             state.media != null -> MediaPurchaseCard(state.media, state.qrImage)
             state.itemPurchase != null -> ItemPurchaseCard(state.itemPurchase, state.qrImage)
+            state.qrImage != null -> {
+                Image(
+                    bitmap = state.qrImage.asImageBitmap(), contentDescription = "QR Code",
+                    modifier = Modifier
+                        .height(250.dp)
+                        .aspectRatio(1f)
+                )
+            }
         }
     }
 }
@@ -206,6 +214,16 @@ private fun ItemPurchasePromptPreview() = EluvioThemePreview {
                 subtitle = "Subtitle",
                 image = "http://example.com/image.png"
             ),
+            qrImage = generateQrCodeBlocking("http://eluv.io")
+        )
+    )
+}
+
+@Composable
+@Preview(device = RealisticDevices.TV_720p)
+private fun PagePurchasePromptPreview() = EluvioThemePreview {
+    PurchasePrompt(
+        PurchasePromptViewModel.State(
             qrImage = generateQrCodeBlocking("http://eluv.io")
         )
     )

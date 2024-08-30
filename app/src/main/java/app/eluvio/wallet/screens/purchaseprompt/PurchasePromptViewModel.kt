@@ -42,7 +42,6 @@ class PurchasePromptViewModel @Inject constructor(
 
     override fun onResume() {
         super.onResume()
-        requireNotNull(permissionContext.sectionItemId) { "Section Item ID is required" }
 
         environmentStore.observeSelectedEnvironment()
             .firstOrError()
@@ -69,18 +68,20 @@ class PurchasePromptViewModel @Inject constructor(
             )
             .addTo(disposables)
 
-        propertyStore.getSectionItem(permissionContext.sectionItemId)
-            .subscribeBy(
-                onSuccess = { sectionItem ->
-                    val itemPurchase = State.ItemPurchase(
-                        title = sectionItem.title ?: "",
-                        subtitle = sectionItem.subtitle,
-                        image = sectionItem.thumbnailUrl
-                    )
-                    updateState { copy(media = sectionItem.media, itemPurchase = itemPurchase) }
-                },
-                onError = { Log.e("Error loading purchase item", it) }
-            )
-            .addTo(disposables)
+        permissionContext.sectionItemId?.let {
+            propertyStore.getSectionItem(it)
+                .subscribeBy(
+                    onSuccess = { sectionItem ->
+                        val itemPurchase = State.ItemPurchase(
+                            title = sectionItem.title ?: "",
+                            subtitle = sectionItem.subtitle,
+                            image = sectionItem.thumbnailUrl
+                        )
+                        updateState { copy(media = sectionItem.media, itemPurchase = itemPurchase) }
+                    },
+                    onError = { Log.e("Error loading purchase item", it) }
+                )
+                .addTo(disposables)
+        }
     }
 }

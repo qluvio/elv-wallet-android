@@ -10,13 +10,16 @@ import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.showAlternatePage
+import app.eluvio.wallet.data.entities.v2.permissions.showPurchaseOptions
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.PropertySearchDestination
+import app.eluvio.wallet.screens.destinations.PurchasePromptDestination
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
@@ -85,21 +88,35 @@ class PropertyDetailViewModel @Inject constructor(
                     }
                 },
                 onError = { exception ->
-                    if (exception === CircularRedirectException) {
-                        Log.e("Circular redirect detected")
-                        fireEvent(Events.ToastMessage("Permission error. Unable to load page."))
-                        navigateTo(NavigationEvent.GoBack)
-                    } else {
-                        // Note: might be a problem with deeplinks
-                        Log.e("Error loading property detail. Popping screen", exception)
-                        fireEvent(Events.NetworkError)
-                        navigateTo(NavigationEvent.GoBack)
+                    when (exception) {
+                        is ShowPurchaseOptionsRedirectException -> {
+                            Log.e("Show purchase options detected. Navigating.")
+                            navigateTo(PurchasePromptDestination(exception.permissionContext).asReplace())
+                        }
+
+                        CircularRedirectException -> {
+                            Log.e("Circular redirect detected")
+                            fireEvent(Events.ToastMessage("Permission error. Unable to load page."))
+                            navigateTo(NavigationEvent.GoBack)
+                        }
+
+                        else -> {
+                            // Note: might be a problem with deeplinks
+                            Log.e("Error loading property detail. Popping screen", exception)
+                            fireEvent(Events.NetworkError)
+                            navigateTo(NavigationEvent.GoBack)
+                        }
                     }
                 }
             )
             .addTo(disposables)
     }
 
+    /**
+     * Finds the first page we are authorized to view.
+     * @throws ShowPurchaseOptionsRedirectException when reaching a property/page that requires
+     *  displaying purchase options, since there's no valid [MediaPageEntity] in that case.
+     */
     private fun getFirstAuthorizedPage(
         property: MediaPropertyEntity,
         currentPage: MediaPageEntity?
@@ -113,11 +130,19 @@ class PropertyDetailViewModel @Inject constructor(
 
         return if (currentPage == null) {
             // Check property permissions
-            property.propertyPermissions
-                ?.getRedirectPageId()
-                ?.let { redirect(it) }
-            // We're authorized to view the property, check the main page.
-                ?: getFirstAuthorizedPage(property, property.mainPage)
+            val propertyRedirectPage = property.propertyPermissions?.getRedirectPageId()
+            if (propertyRedirectPage != null) {
+                redirect(propertyRedirectPage)
+            } else if (property.propertyPermissions?.showPurchaseOptions == true) {
+                Flowable.error(ShowPurchaseOptionsRedirectException(PermissionContext(property.id)))
+            } else {
+                // We're authorized to view the property, check the main page.
+                getFirstAuthorizedPage(property, property.mainPage)
+            }
+        } else if (currentPage.pagePermissions?.showPurchaseOptions == true) {
+            Flowable.error(
+                ShowPurchaseOptionsRedirectException(PermissionContext(property.id, currentPage.id))
+            )
         } else {
             when (val redirectPageId = currentPage.pagePermissions?.getRedirectPageId()) {
                 currentPage.id, in unauthorizedPageIds -> {
@@ -135,11 +160,7 @@ class PropertyDetailViewModel @Inject constructor(
                 else -> {
                     Log.w("Reached unauthorized page ${currentPage.id}, redirecting to $redirectPageId")
                     unauthorizedPageIds += currentPage.id
-                    propertyStore.observePage(property, redirectPageId)
-                        .switchMap { nextPage ->
-                            // Recursively check the next page
-                            getFirstAuthorizedPage(property, nextPage)
-                        }
+                    redirect(redirectPageId)
                 }
             }
         }
@@ -176,3 +197,6 @@ class PropertyDetailViewModel @Inject constructor(
 }
 
 private val CircularRedirectException = IllegalStateException("Circular redirect detected")
+
+private class ShowPurchaseOptionsRedirectException(val permissionContext: PermissionContext) :
+    RuntimeException("Show purchase options detected")
