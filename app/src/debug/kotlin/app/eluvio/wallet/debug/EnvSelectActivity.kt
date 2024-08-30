@@ -27,17 +27,17 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.SignOutHandler
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
+import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.navigation.LocalNavigator
+import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.theme.EluvioTheme
 import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.util.subscribeToState
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
 
@@ -70,7 +70,11 @@ private fun EnvSelector(state: EnvSelectViewModel.State, vm: EnvSelectViewModel)
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        Text("Select Environment:", Modifier.padding(bottom = 10.dp))
+        if (state.loading) {
+            EluvioLoadingSpinner(Modifier.padding(bottom = 20.dp))
+        } else {
+            Text("Select Environment:", Modifier.padding(bottom = 10.dp))
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             state.availableEnvironments.forEach { env ->
                 val selected = state.selectedEnv == env
@@ -106,10 +110,12 @@ private fun EnvSelector(state: EnvSelectViewModel.State, vm: EnvSelectViewModel)
 @HiltViewModel
 class EnvSelectViewModel @Inject constructor(
     private val environmentStore: EnvironmentStore,
+    private val fabricConfigStore: FabricConfigStore,
     private val signOutHandler: SignOutHandler,
 ) : BaseViewModel<EnvSelectViewModel.State>(State()) {
     @Immutable
     data class State(
+        val loading: Boolean = false,
         val availableEnvironments: List<Environment> = if (BuildConfig.DEBUG) {
             Environment.entries
         } else {
@@ -129,14 +135,10 @@ class EnvSelectViewModel @Inject constructor(
     }
 
     fun onEnvSelected(env: Environment) {
-        Completable.fromAction {
-            environmentStore.setSelectedEnvironment(env)
-        }
-            .subscribeOn(Schedulers.io())
-            .andThen(
-                signOutHandler.signOut("Env changed, restarting app.")
-            )
-            .subscribe()
+        fabricConfigStore.setEnvAndAwaitNewConfig(env)
+            .doOnSubscribe { updateState { copy(loading = true) } }
+            .andThen(signOutHandler.signOut("Env changed, restarting app."))
+            .subscribeBy(onComplete = { updateState { copy(loading = false) } })
             .addTo(disposables)
     }
 }

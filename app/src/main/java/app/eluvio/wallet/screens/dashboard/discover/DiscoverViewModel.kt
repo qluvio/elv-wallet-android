@@ -15,6 +15,7 @@ import app.eluvio.wallet.screens.destinations.SignInRouterDestination
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.kotlin.Flowables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.processors.BehaviorProcessor
@@ -45,13 +46,18 @@ class DiscoverViewModel @Inject constructor(
             .subscribeBy { updateState { copy(baseUrl = it) } }
             .addTo(disposables)
 
-        retryTrigger
+        Flowables.combineLatest(
+            // restart chain on manual refresh
+            retryTrigger,
+            // restart chain when login state / environment changes
+            tokenStore.loggedInObservable.distinctUntilChanged(),
+        )
             .doOnNext {
+                Log.i("Restart triggered, resetting state.")
                 updateState {
-                    copy(showRetryButton = false, loading = properties.isEmpty())
+                    copy(loading = true, properties = emptyList(), showRetryButton = false)
                 }
             }
-            .switchMap { tokenStore.loggedInObservable.distinctUntilChanged() }
             .switchMap {
                 // Restart property observing when log-in state changes
                 propertyStore.observeMediaProperties(true)

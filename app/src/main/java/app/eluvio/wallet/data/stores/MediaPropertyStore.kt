@@ -47,6 +47,9 @@ class MediaPropertyStore @Inject constructor(
                 }
                 properties.sortedBy { orderMap[it.id]?.index ?: Int.MAX_VALUE }
             }
+                // Because we are observing 2 tables, it's important to not emit the same list twice
+                // or we might cancel an ongoing fetch request
+                .distinctUntilChanged()
 
         return observeRealmAndFetch(
             realmQuery = orderedProperties,
