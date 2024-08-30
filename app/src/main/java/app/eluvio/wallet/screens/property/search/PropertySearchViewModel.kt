@@ -7,6 +7,7 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.di.ApiProvider
@@ -15,7 +16,6 @@ import app.eluvio.wallet.network.dto.v2.SearchRequest
 import app.eluvio.wallet.screens.destinations.PropertySearchDestination
 import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.screens.property.toDynamicSections
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
@@ -245,7 +245,15 @@ class PropertySearchViewModel @Inject constructor(
                 }
             }
             .distinctUntilChanged()
-            .switchMapSingle { request -> fetchResults(request) }
+            .switchMapMaybe { request ->
+                fetchResults(request)
+                    .doOnError { error ->
+                        Log.d("Error during search", error)
+                        updateState { copy(searchResults = messageResult("Encountered an error. Please try again later.")) }
+                    }
+                    // Consume errors, so that the stream doesn't die.
+                    .onErrorComplete()
+            }
             .subscribeBy { results ->
                 updateState {
                     // If filters aren't defined for this tenant, always show results as a grid
@@ -259,17 +267,21 @@ class PropertySearchViewModel @Inject constructor(
                         )
                     }.ifEmpty {
                         // Show a message when no results are found
-                        listOf(
-                            DynamicPageLayoutState.Section.Title(
-                                "no_results",
-                                AnnotatedString("No results found")
-                            )
-                        )
+                        messageResult("No results found")
                     }
                     copy(searchResults = sections)
                 }
             }
             .addTo(disposables)
+    }
+
+    private fun messageResult(message: String): List<DynamicPageLayoutState.Section.Title> {
+        return listOf(
+            DynamicPageLayoutState.Section.Title(
+                "message_result",
+                AnnotatedString(message)
+            )
+        )
     }
 
     private fun SearchFiltersEntity.Attribute.toCustomCardsSection(imageBaseUrl: String?): DynamicPageLayoutState.Section {
