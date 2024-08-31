@@ -41,15 +41,16 @@ abstract class BaseViewModel<State : Any>(
         }
         .distinctUntilChanged()
         .scan { previousState, newState ->
-            val msg = takeIf { BuildConfig.DEBUG }
-                ?.let { diffStates(previousState, newState) }
-                ?.let { diff ->
-                    // Timber will truncate long enough diffs (>4000 chars)
-                    "Diff:\n${diff}"
-                }
-                ?: "$newState"
-            val className = newState.javaClass.name.substringAfterLast('.')
-            Log.d("Next $className emitted: $msg")
+            val printStateUpdates = BuildConfig.DEBUG
+            if (printStateUpdates) {
+                diffStates(previousState, newState)
+                    ?.let { diff ->
+                        // Timber will truncate long enough diffs (>4000 chars)
+                        val msg = "Diff:\n${diff}"
+                        val className = newState.javaClass.name.substringAfterLast('.')
+                        Log.d("Next $className emitted: $msg")
+                    }
+            }
             newState
         }
         .asSharedState()
