@@ -24,11 +24,22 @@ import kotlin.random.Random
  * it's not as important.
  */
 class EntityEqualityTest {
-    @Test
-    fun `verify entities have a proper equals implementation`() {
-        /** Classes whose instances are never equal to each other. See [neverEqual] */
-        val neverEqual = mutableSetOf<Class<*>>()
 
+    @Test
+    fun `verify entities have SOME equals() implementation`() {
+        /** Classes whose instances are never equal to each other. See [neverEqual] */
+        val neverEqual = allEntityClasses.filter { it.neverEqual }
+
+        assert(neverEqual.isEmpty()) {
+            """
+                >>>Instance never equal (usually missing equals() impl altogether)<<<
+                ${neverEqual.joinToString("") { "\t${it.name}\n" }}
+            """.trimIndent()
+        }
+    }
+
+    @Test
+    fun `verify entities aren't missing any fields in equals() implementation`() {
         /**
          * Fields that aren't considered in equals() and also not explicitly ignored.
          * See [missedFields], [comparableFields]
@@ -38,9 +49,8 @@ class EntityEqualityTest {
         allEntityClasses
             .forEach { entityClass ->
                 try {
-                    if (entityClass.neverEqual) {
-                        neverEqual += entityClass
-                    } else {
+                    // For the sake of cleaner output, ignore classes that are never equal
+                    if (!entityClass.neverEqual) {
                         entityClass.missedFields
                             .takeIf { it.isNotEmpty() }
                             ?.let { missedFields[entityClass] = it }
@@ -51,18 +61,8 @@ class EntityEqualityTest {
                 }
             }
 
-        /** Aggregate errors (if any) to a single string */
-        val errors = buildString {
-            if (neverEqual.isNotEmpty()) {
-                appendLine()
-                appendLine(">>>Instance never equal (usually missing equals() impl altogether)<<<")
-                appendLine(
-                    neverEqual.joinToString("") { "\t${it.name}\n" }
-                )
-            }
-
-            if (missedFields.isNotEmpty()) {
-                appendLine()
+        assert(missedFields.isEmpty()) {
+            buildString {
                 appendLine(">>>Incomplete equals implementation<<<")
                 missedFields.forEach { (kls, fields) ->
                     appendLine(kls)
@@ -72,8 +72,32 @@ class EntityEqualityTest {
                 }
             }
         }
+    }
 
-        assert(errors.isEmpty()) { errors }
+    @Test
+    fun `verify @Ignore fields are not included in equals() implementation`() {
+        /**
+         * [@Ignore] Fields that are considered in equals(), but shouldn't.
+         */
+        val badFields = mutableMapOf<Class<*>, List<Field>>()
+
+        allEntityClasses.forEach { entityClass ->
+            entityClass.badIgnoredFields
+                .takeIf { it.isNotEmpty() }
+                ?.let { badFields[entityClass] = it }
+        }
+
+        assert(badFields.isEmpty()) {
+            buildString {
+                appendLine(">>> @Ignore fields that are included in equals implementation<<<")
+                badFields.forEach { (kls, fields) ->
+                    appendLine(kls)
+                    appendLine(
+                        fields.joinToString("") { "\t${it.type.simpleName} ${it.name}\n" }
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -104,14 +128,25 @@ class EntityEqualityTest {
      * Returns every [Field], which doesn't break equality checks after mutating.
      */
     private val <T : RealmObject> Class<T>.missedFields: List<Field>
-        get() = this.comparableFields.filter { field ->
-            val blankInstance = new()
-            val mutatedInstance = new().apply {
-                field.makeNotDefault(this)
-            }
+        get() = comparableFields.filterNot { field -> isFieldInEquals(field) }
 
-            blankInstance == mutatedInstance
+    /**
+     * Returns every @Ignore [Field], which breaks equality checks after mutating.
+     */
+    private val <T : RealmObject> Class<T>.badIgnoredFields: List<Field>
+        get() = ignoredFields.filter { field -> isFieldInEquals(field) }
+
+    /**
+     * Checks if mutating [field] breaks equality checks between 2 instances.
+     */
+    private fun Class<*>.isFieldInEquals(field: Field): Boolean {
+        val blankInstance = new()
+        val mutatedInstance = new().apply {
+            field.makeNotDefault(this)
         }
+
+        return blankInstance != mutatedInstance
+    }
 
     private fun Field.makeNotDefault(instance: Any) {
         this.isAccessible = true
@@ -180,4 +215,12 @@ class EntityEqualityTest {
                             it.isAnnotationPresent(Ignore::class.java)
                 }
         }
+
+    /**
+     * Only @Ignore fields.
+     * Including static/final fields is too much of a hassle, but also even if they are included,
+     * they won't break equality checks.
+     */
+    private val Class<*>.ignoredFields: List<Field>
+        get() = declaredFields.filter { it.isAnnotationPresent(Ignore::class.java) }
 }
