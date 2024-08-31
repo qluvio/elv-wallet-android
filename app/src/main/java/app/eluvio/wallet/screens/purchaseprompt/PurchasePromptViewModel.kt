@@ -137,6 +137,11 @@ class PurchasePromptViewModel @Inject constructor(
      */
     private fun pollForPermissionGranted() {
         val permissionHolder = sectionItem
+            ?.filter {
+                // Currently, we don't really need to poll for permissions for ItemPurchase.
+                // The user will just stay here forever until they manually navigate away.
+                !it.isPurchaseItem
+            }
             ?.map { sectionItem ->
                 sectionItem.media
                     ?.takeIf { media -> media.id == permissionContext.mediaItemId }
