@@ -34,7 +34,7 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
 
     var permissionStates = realmDictionaryOf<PermissionStatesEntity?>()
 
-    @Ignore
+    @field:Ignore
     override var resolvedPermissions: PermissionsEntity? = null
     override var rawPermissions: PermissionsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
@@ -58,7 +58,6 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         if (mainPage != other.mainPage) return false
         if (loginInfo != other.loginInfo) return false
         if (permissionStates != other.permissionStates) return false
-        if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
         if (propertyPermissions != other.propertyPermissions) return false
 
@@ -73,7 +72,6 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (mainPage?.hashCode() ?: 0)
         result = 31 * result + (loginInfo?.hashCode() ?: 0)
         result = 31 * result + permissionStates.hashCode()
-        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         result = 31 * result + (propertyPermissions?.hashCode() ?: 0)
         return result

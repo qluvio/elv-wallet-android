@@ -38,7 +38,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
     var description: String? = null
     var logoPath: String? = null
 
-    @Ignore
+    @field:Ignore
     override var resolvedPermissions: PermissionsEntity? = null
     override var rawPermissions: PermissionsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
@@ -66,7 +66,6 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         if (headers != other.headers) return false
         if (description != other.description) return false
         if (logoPath != other.logoPath) return false
-        if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
 
         return true
@@ -77,7 +76,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (mediaType?.hashCode() ?: 0)
         result = 31 * result + (media?.hashCode() ?: 0)
         result = 31 * result + (subpropertyId?.hashCode() ?: 0)
-        result = 31 * result + (isPurchaseItem?.hashCode() ?: 0)
+        result = 31 * result + (isPurchaseItem.hashCode() ?: 0)
         result = 31 * result + (thumbnailUrl?.hashCode() ?: 0)
         result = 31 * result + (thumbnailAspectRatio?.hashCode() ?: 0)
         result = 31 * result + (title?.hashCode() ?: 0)
@@ -85,7 +84,6 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + headers.hashCode()
         result = 31 * result + (description?.hashCode() ?: 0)
         result = 31 * result + (logoPath?.hashCode() ?: 0)
-        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         return result
     }

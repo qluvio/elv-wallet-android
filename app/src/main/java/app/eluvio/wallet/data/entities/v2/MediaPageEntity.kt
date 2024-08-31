@@ -54,7 +54,7 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
      */
     var sectionIds = realmListOf<String>()
 
-    @Ignore
+    @field:Ignore
     override var resolvedPermissions: PermissionsEntity? = null
     override var rawPermissions: PermissionsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
@@ -79,7 +79,6 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
         if (description != other.description) return false
         if (descriptionRichText != other.descriptionRichText) return false
         if (sectionIds != other.sectionIds) return false
-        if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
         if (pagePermissions != other.pagePermissions) return false
 
@@ -95,7 +94,6 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (description?.hashCode() ?: 0)
         result = 31 * result + (descriptionRichText?.hashCode() ?: 0)
         result = 31 * result + sectionIds.hashCode()
-        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         result = 31 * result + (pagePermissions?.hashCode() ?: 0)
         return result

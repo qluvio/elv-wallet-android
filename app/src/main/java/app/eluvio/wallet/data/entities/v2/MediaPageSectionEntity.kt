@@ -57,7 +57,7 @@ class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
     var primaryFilter: String? = null
     var secondaryFilter: String? = null
 
-    @Ignore
+    @field:Ignore
     override var resolvedPermissions: PermissionsEntity? = null
     override var rawPermissions: PermissionsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
@@ -86,7 +86,6 @@ class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
         if (displayFormatStr != other.displayFormatStr) return false
         if (primaryFilter != other.primaryFilter) return false
         if (secondaryFilter != other.secondaryFilter) return false
-        if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
 
         return true
@@ -107,7 +106,6 @@ class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + displayFormatStr.hashCode()
         result = 31 * result + (primaryFilter?.hashCode() ?: 0)
         result = 31 * result + (secondaryFilter?.hashCode() ?: 0)
-        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         return result
     }

@@ -194,6 +194,7 @@ class ContentStore @Inject constructor(
     /**
      * Observes local cache only, unless [propertyId] is provided,
      * in which case it will fetch from the server if needed.
+     * Note: Permissions are NOT resolved when fetched from here. Use [MediaPropertyStore] for that.
      */
     fun observeMediaItem(mediaId: String, propertyId: String? = null): Flowable<MediaEntity> {
         return if (propertyId == null) {

@@ -95,15 +95,18 @@ class EntityEqualityTest {
      * instance creation (for example random UUID, or Date()).
      */
     private val <T : RealmObject> Class<T>.neverEqual: Boolean
-        get() = newInstance() != newInstance()
+        get() = new() != new()
+
+    /** Convenience method to create a new instance of a class, without using the deprecated [Class.newInstance] */
+    private fun <T : Any> Class<T>.new() = getDeclaredConstructor().newInstance()
 
     /**
      * Returns every [Field], which doesn't break equality checks after mutating.
      */
     private val <T : RealmObject> Class<T>.missedFields: List<Field>
         get() = this.comparableFields.filter { field ->
-            val blankInstance = newInstance()
-            val mutatedInstance = newInstance().apply {
+            val blankInstance = new()
+            val mutatedInstance = new().apply {
                 field.makeNotDefault(this)
             }
 
@@ -145,7 +148,7 @@ class EntityEqualityTest {
             "android.graphics.drawable.Drawable" -> null
             else -> {
                 // non-primitive - attempt to construct random instance recursively
-                runCatching { newInstance() }
+                runCatching { new() }
                     .recoverCatching {
                         // no empty constructor - try to use a constructor with parameters
                         val ctor = constructors.first()

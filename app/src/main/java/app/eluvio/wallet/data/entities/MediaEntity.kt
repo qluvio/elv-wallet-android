@@ -29,7 +29,7 @@ class MediaEntity : RealmObject, EntityWithPermissions {
     var mediaType: String = ""
     var imageAspectRatio: Float? = null
 
-    @Ignore
+    @field:Ignore
     override var resolvedPermissions: PermissionsEntity? = null
     override var rawPermissions: PermissionsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
@@ -100,7 +100,6 @@ class MediaEntity : RealmObject, EntityWithPermissions {
         if (posterImagePath != other.posterImagePath) return false
         if (mediaType != other.mediaType) return false
         if (imageAspectRatio != other.imageAspectRatio) return false
-        if (resolvedPermissions != other.resolvedPermissions) return false
         if (rawPermissions != other.rawPermissions) return false
         if (mediaFile != other.mediaFile) return false
         if (playableHash != other.playableHash) return false
@@ -133,7 +132,6 @@ class MediaEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (posterImagePath?.hashCode() ?: 0)
         result = 31 * result + mediaType.hashCode()
         result = 31 * result + (imageAspectRatio?.hashCode() ?: 0)
-        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         result = 31 * result + mediaFile.hashCode()
         result = 31 * result + playableHash.hashCode()

@@ -25,7 +25,7 @@ class PermissionsEntity : EmbeddedRealmObject {
     var alternatePageId: String? = null
 
     // Only applies to resolve permissions
-    @Ignore
+    @field:Ignore
     var authorized: Boolean? = null
 
     override fun toString(): String {
@@ -41,7 +41,6 @@ class PermissionsEntity : EmbeddedRealmObject {
         if (permissionItemIds != other.permissionItemIds) return false
         if (behavior != other.behavior) return false
         if (alternatePageId != other.alternatePageId) return false
-        if (authorized != other.authorized) return false
 
         return true
     }
@@ -50,7 +49,6 @@ class PermissionsEntity : EmbeddedRealmObject {
         var result = permissionItemIds.hashCode()
         result = 31 * result + (behavior?.hashCode() ?: 0)
         result = 31 * result + (alternatePageId?.hashCode() ?: 0)
-        result = 31 * result + (authorized?.hashCode() ?: 0)
         return result
     }
 
