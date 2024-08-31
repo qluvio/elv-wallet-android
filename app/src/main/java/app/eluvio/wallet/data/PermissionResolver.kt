@@ -5,6 +5,7 @@ import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionStatesEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.util.logging.Log
 
 object PermissionResolver {
     /**
@@ -16,7 +17,10 @@ object PermissionResolver {
         permissionStates: Map<String, PermissionStatesEntity?>
     ) {
         // Special cases
-        resolveSpecialPermissions(entity, permissionStates)
+        if (resolveSpecialPermissions(entity, permissionStates)) {
+            Log.w("Short-circuiting content permission resolution for $entity")
+            return
+        }
 
         resolveContentPermissions(entity, parentPermissions, permissionStates)
 
@@ -53,10 +57,13 @@ object PermissionResolver {
             }
     }
 
+    /**
+     * @return true if we can short-circuit the content permission resolution process.
+     */
     private fun resolveSpecialPermissions(
         entity: EntityWithPermissions,
         permissionStates: Map<String, PermissionStatesEntity?>
-    ) {
+    ): Boolean {
         if (entity is MediaPropertyEntity) {
             entity.propertyPermissions?.let {
                 entity.propertyPermissions = merge(
@@ -65,6 +72,8 @@ object PermissionResolver {
                     permissionStates = permissionStates
                 )
             }
+            // An in-accessible property could still render a Page, so we can't short-circuit here.
+            return false
         } else if (entity is MediaPageEntity) {
             entity.pagePermissions?.let {
                 entity.pagePermissions = merge(
@@ -73,7 +82,11 @@ object PermissionResolver {
                     permissionStates = permissionStates
                 )
             }
+            // In the case of an unauthorized page, we can save ourselves from checking any content
+            // permissions, because none of that content will be visible to the user
+            return entity.pagePermissions?.authorized == false
         }
+        return false
     }
 
     /**
