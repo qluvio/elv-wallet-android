@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.toPurchaseUrl
@@ -13,10 +14,13 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.asSharedState
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,9 +44,47 @@ class PurchasePromptViewModel @Inject constructor(
 
     private val permissionContext = savedStateHandle.navArgs<PermissionContext>()
 
+    private val property = propertyStore
+        .observeMediaProperty(permissionContext.propertyId, forceRefresh = false)
+        .asSharedState()
+
+    // Only available when pageId is provided. Otherwise, it's null.
+    private val pageAndProperty = permissionContext.pageId
+        ?.let { pageId ->
+            property.switchMap { property ->
+                propertyStore.observePage(property, pageId, forceRefresh = false)
+                    .map { page -> property to page }
+            }
+        }
+        ?.asSharedState()
+
+    private val sectionItem by lazy {
+        val sectionId = permissionContext.sectionId ?: return@lazy null
+        val sectionItemId = permissionContext.sectionItemId ?: return@lazy null
+        pageAndProperty?.switchMap { (property, page) ->
+            propertyStore.observeSections(property, page, forceRefresh = false)
+        }
+            ?.mapNotNull { sections ->
+                sections.firstOrNull { it.id == sectionId }
+                    ?.items
+                    ?.firstOrNull { it.id == sectionItemId }
+            }
+            ?.asSharedState()
+    }
+
     override fun onResume() {
         super.onResume()
 
+        updateQrCode()
+
+        updateBackgroundImage()
+
+        updateCardItem()
+
+        pollForPermissionGranted()
+    }
+
+    private fun updateQrCode() {
         environmentStore.observeSelectedEnvironment()
             .firstOrError()
             .flatMap { env ->
@@ -53,35 +95,72 @@ class PurchasePromptViewModel @Inject constructor(
                 onError = { Log.e("Error generating QR code", it) }
             )
             .addTo(disposables)
+    }
 
-        apiProvider.getFabricEndpoint().flatMapPublisher { baseUrl ->
-            propertyStore.observeMediaProperty(permissionContext.propertyId)
-                .mapNotNull { property ->
+    private fun updateBackgroundImage(): Completable {
+        // If no "page" is defined, default to the property's main page.
+        val pageAndProperty =
+            pageAndProperty ?: property.map { property -> property to property.mainPage!! }
+
+        return pageAndProperty.flatMapMaybe { (property, page) ->
+            apiProvider.getFabricEndpoint()
+                .mapNotNull { baseUrl ->
                     val path = property.loginInfo?.backgroundImagePath?.ifEmpty { null }
-                        ?: property.mainPage?.backgroundImagePath?.ifEmpty { null }
+                        ?: page.backgroundImagePath?.ifEmpty { null }
                     path?.let { "${baseUrl}${it}" }
                 }
         }
-            .subscribeBy(
-                onNext = { updateState { copy(bgImageUrl = it) } },
-                onError = { Log.e("Error loading background image", it) }
+            .doOnNext { updateState { copy(bgImageUrl = it) } }
+            .doOnError { Log.e("Error loading background image", it) }
+            .ignoreElements()
+    }
+
+    private fun updateCardItem() {
+        sectionItem?.firstOrError()
+            ?.subscribeBy(
+                onSuccess = { sectionItem ->
+                    val itemPurchase = State.ItemPurchase(
+                        title = sectionItem.title ?: "",
+                        subtitle = sectionItem.subtitle,
+                        image = sectionItem.thumbnailUrl
+                    )
+                    updateState { copy(media = sectionItem.media, itemPurchase = itemPurchase) }
+                },
+                onError = { Log.e("Error loading purchase item", it) }
             )
+            ?.addTo(disposables)
+    }
+
+    /**
+     * Keep checking permissions to see if the user is now allowed to view the content,
+     * then navigate to it.
+     */
+    private fun pollForPermissionGranted() {
+        val permissionHolder = sectionItem
+            ?.map { sectionItem ->
+                sectionItem.media
+                    ?.takeIf { media -> media.id == permissionContext.mediaItemId }
+                    ?: sectionItem
+            }
+            ?: pageAndProperty?.map { (_, page) -> page }
+            ?: property
+
+        permissionHolder
+            .mapNotNull { it.resolvedPermissions?.authorized }
+            .distinctUntilChanged()
+            .subscribeBy { authorized ->
+                if (authorized) {
+                    fireEvent(Events.ToastMessage("Permission granted! TODO: impl navigation.."))
+                }
+            }
             .addTo(disposables)
 
-        permissionContext.sectionItemId?.let {
-            propertyStore.getSectionItem(it)
-                .subscribeBy(
-                    onSuccess = { sectionItem ->
-                        val itemPurchase = State.ItemPurchase(
-                            title = sectionItem.title ?: "",
-                            subtitle = sectionItem.subtitle,
-                            image = sectionItem.thumbnailUrl
-                        )
-                        updateState { copy(media = sectionItem.media, itemPurchase = itemPurchase) }
-                    },
-                    onError = { Log.e("Error loading purchase item", it) }
-                )
-                .addTo(disposables)
-        }
+        propertyStore.fetchPermissionStates(permissionContext.propertyId)
+            .doOnSubscribe { Log.i("Starting to fetch permission states.") }
+            .doOnComplete { Log.i("Permission states fetched.") }
+            .delay(5, TimeUnit.SECONDS)
+            .repeat()
+            .subscribe()
+            .addTo(disposables)
     }
 }

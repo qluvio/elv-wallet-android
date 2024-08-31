@@ -17,7 +17,8 @@ data class PermissionContext(
     val propertyId: String,
     val pageId: String? = null,
     val sectionId: String? = null,
-    val sectionItemId: String? = null
+    val sectionItemId: String? = null,
+    val mediaItemId: String? = null,
 ) : Parcelable
 
 /**

@@ -121,7 +121,7 @@ fun List<SectionItemEntity>.toCarouselItems(
             }
 
             item.media != null -> CarouselItem.Media(
-                permissionContext = permissionContext,
+                permissionContext = permissionContext.copy(mediaItemId = item.media!!.id),
                 entity = item.media!!,
             )
 
