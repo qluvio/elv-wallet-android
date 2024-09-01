@@ -38,29 +38,29 @@ import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.getStartDateTimeString
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
-import app.eluvio.wallet.screens.destinations.ExternalMediaQrDialogDestination
-import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
-import app.eluvio.wallet.screens.destinations.LockedMediaDialogDestination
-import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
+import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.button_24
 import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.util.compose.requestInitialFocus
-import app.eluvio.wallet.util.logging.Log
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmInstant
+
+typealias MediaClickHandler = (MediaEntity, PermissionContext?) -> Unit
 
 @Composable
 fun MediaItemCard(
     media: MediaEntity,
     modifier: Modifier = Modifier,
     imageUrl: String = media.imageOrLockedImage(),
-    onMediaItemClick: (MediaEntity) -> Unit = defaultMediaItemClickHandler(LocalNavigator.current),
+    permissionContext: PermissionContext? = null,
+    onMediaItemClick: MediaClickHandler = defaultMediaItemClickHandler(LocalNavigator.current),
     cardHeight: Dp = 150.dp,
     aspectRatio: Float = media.aspectRatio(),
     shape: Shape = MaterialTheme.shapes.medium,
@@ -96,7 +96,7 @@ fun MediaItemCard(
                     }
                 }
             },
-            onClick = { onMediaItemClick(media) },
+            onClick = { onMediaItemClick(media, permissionContext) },
             modifier = modifier
                 .height(cardHeight)
                 .aspectRatio(aspectRatio, matchHeightConstraintsFirst = true)
@@ -215,38 +215,10 @@ private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
 /**
  * Navigates to the appropriate destination based on the media type.
  */
-fun defaultMediaItemClickHandler(navigator: Navigator): (media: MediaEntity) -> Unit =
-    { media ->
-        if (media.requireLockedState().locked) {
-            navigator(
-                LockedMediaDialogDestination(
-                    media.nameOrLockedName(),
-                    media.imageOrLockedImage(),
-                    media.requireLockedState().subtitle,
-                    media.aspectRatio(),
-                ).asPush()
-            )
-        } else {
-            when (media.mediaType) {
-                MediaEntity.MEDIA_TYPE_LIVE_VIDEO,
-                MediaEntity.MEDIA_TYPE_VIDEO -> {
-                    navigator(VideoPlayerActivityDestination(media.id).asPush())
-                }
-
-                MediaEntity.MEDIA_TYPE_IMAGE,
-                MediaEntity.MEDIA_TYPE_GALLERY -> {
-                    navigator(ImageGalleryDestination(media.id).asPush())
-                }
-
-                else -> {
-                    if (media.mediaFile.isNotEmpty() || media.mediaLinks.isNotEmpty()) {
-                        navigator(ExternalMediaQrDialogDestination(media.id).asPush())
-                    } else {
-                        Log.w("Tried to open unsupported media with no links: $media")
-                    }
-                }
-            }
-        }
+private fun defaultMediaItemClickHandler(navigator: Navigator): MediaClickHandler =
+    { media, permissionContext ->
+        media.onClickDirection(permissionContext)
+            ?.let { navigator(it.asPush()) }
     }
 
 @Preview(heightDp = 150, widthDp = 300)

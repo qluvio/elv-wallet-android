@@ -42,9 +42,7 @@ fun ItemPurchaseCard(
             },
             onClick = {
                 navigator(
-                    PurchasePromptDestination(
-                        item.permissionContext
-                    ).asPush()
+                    PurchasePromptDestination(item.permissionContext).asPush()
                 )
             },
             modifier = Modifier

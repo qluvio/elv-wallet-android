@@ -157,7 +157,7 @@ private fun MediaPurchaseCard(media: MediaEntity, qrImage: Bitmap?) {
             MediaItemCard(
                 media,
                 cardHeight = cardHeight,
-                onMediaItemClick = { /*No-Op*/ },
+                onMediaItemClick = { _, _ -> /*No-Op*/ },
                 modifier = Modifier
                     // Card is just for show. Disable interaction.
                     .focusProperties { canFocus = false }

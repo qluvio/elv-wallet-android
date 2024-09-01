@@ -4,15 +4,18 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
-import app.eluvio.wallet.data.entities.v2.permissions.toPurchaseUrl
+import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.di.ApiProvider
+import app.eluvio.wallet.navigation.asReplace
+import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.screens.common.generateQrCode
+import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.navArgs
+import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.asSharedState
 import app.eluvio.wallet.util.rx.mapNotNull
@@ -20,6 +23,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -85,13 +90,22 @@ class PurchasePromptViewModel @Inject constructor(
     }
 
     private fun updateQrCode() {
+        val permissionItemIds = sectionItem?.map {
+            // Will be empty for non-media section items. For now that's fine.
+            it.media?.resolvedPermissions?.permissionItemIds.orEmpty()
+        }
+            ?: pageAndProperty?.map { (_, page) -> page.pagePermissions?.permissionItemIds.orEmpty() }
+            ?: property.map { it.propertyPermissions?.permissionItemIds.orEmpty() }
+
         environmentStore.observeSelectedEnvironment()
-            .firstOrError()
-            .flatMap { env ->
-                generateQrCode(permissionContext.toPurchaseUrl(env))
+            .firstOrError(/*Assume env won't change while in this screen*/)
+            .flatMapPublisher { env ->
+                permissionItemIds.flatMapSingle { permissionItems ->
+                    generateQrCode(buildPurchaseUrl(permissionContext, env, permissionItems))
+                }
             }
             .subscribeBy(
-                onSuccess = { updateState { copy(qrImage = it) } },
+                onNext = { updateState { copy(qrImage = it) } },
                 onError = { Log.e("Error generating QR code", it) }
             )
             .addTo(disposables)
@@ -136,27 +150,30 @@ class PurchasePromptViewModel @Inject constructor(
      * then navigate to it.
      */
     private fun pollForPermissionGranted() {
-        val permissionHolder = sectionItem
-            ?.filter {
-                // Currently, we don't really need to poll for permissions for ItemPurchase.
-                // The user will just stay here forever until they manually navigate away.
-                !it.isPurchaseItem
-            }
-            ?.map { sectionItem ->
+        // Depending on the context, emit a nav event for the next screen when the user gains
+        // access to the relevant resource.
+        val navEvent = sectionItem
+            ?.mapNotNull { sectionItem ->
+                // The only section items that can lead us here are ItemPurchase and Media.
+                // We currently don't handle ItemPurchase auto-forward, so we can just handle Media.
+                // However, this is brittle code, as anything we direct here in the future will
+                // probably just hang forever
                 sectionItem.media
-                    ?.takeIf { media -> media.id == permissionContext.mediaItemId }
-                    ?: sectionItem
+                    ?.takeIf { media -> media.resolvedPermissions?.authorized == true }
+                    ?.onClickDirection(permissionContext)?.asReplace()
             }
-            ?: pageAndProperty?.map { (_, page) -> page }
-            ?: property
-
-        permissionHolder
-            .mapNotNull { it.resolvedPermissions?.authorized }
-            .distinctUntilChanged()
-            .subscribeBy { authorized ->
-                if (authorized) {
-                    fireEvent(Events.ToastMessage("Permission granted! TODO: impl navigation.."))
+            ?: pageAndProperty
+                ?.filter { (_, page) -> page.pagePermissions?.authorized == true }
+                ?.map { (property, page) ->
+                    PropertyDetailDestination(property.id, page.id).asReplace()
                 }
+            ?: property
+                .filter { it.propertyPermissions?.authorized == true }
+                .map { PropertyDetailDestination(it.id).asReplace() }
+
+        navEvent.firstOrError()
+            .subscribeBy { navigationEvent ->
+                navigateTo(navigationEvent)
             }
             .addTo(disposables)
 
@@ -168,4 +185,37 @@ class PurchasePromptViewModel @Inject constructor(
             .subscribe()
             .addTo(disposables)
     }
+}
+
+/**
+ * Creates a Wallet URL for either purchasing a specific item, or being offered multiple items that
+ * will unlock access for this [PermissionContext].
+ */
+private fun buildPurchaseUrl(
+    permissionContext: PermissionContext,
+    environment: Environment,
+    permissionItemIds: List<String> = emptyList()
+): String {
+    val context = JSONObject()
+        // Only supported type is "purchase" for now.
+        .put("type", "purchase")
+        // Start from the most broad id and keep overriding with more specific ids.
+        // Any field that is [null] will not override the previous value.
+        .putOpt("id", permissionContext.propertyId)
+        .putOpt("id", permissionContext.pageId)
+        .putOpt("id", permissionContext.sectionId)
+        .putOpt("id", permissionContext.sectionItemId)
+        .putOpt("id", permissionContext.mediaItemId)
+        // Everything else we have explicitly specified.
+        .putOpt("sectionSlugOrId", permissionContext.sectionId)
+        .putOpt("sectionItemId", permissionContext.sectionItemId)
+        .putOpt(
+            "permissionItemIds",
+            permissionItemIds
+                .takeIf { it.isNotEmpty() }
+                ?.let { JSONArray(it) }
+        )
+
+    val encodedContext = Base58.encode(context.toString().toByteArray())
+    return "${environment.walletUrl}/${permissionContext.propertyId}/${permissionContext.pageId.orEmpty()}?p=$encodedContext"
 }
