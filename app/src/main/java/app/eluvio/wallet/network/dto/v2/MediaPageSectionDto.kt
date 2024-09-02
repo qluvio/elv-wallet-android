@@ -1,5 +1,6 @@
 package app.eluvio.wallet.network.dto.v2
 
+import app.eluvio.wallet.network.dto.AssetLinkDto
 import app.eluvio.wallet.network.dto.v2.permissions.DtoWithPermissions
 import app.eluvio.wallet.network.dto.v2.permissions.PermissionsDto
 import com.squareup.moshi.Json
@@ -34,14 +35,28 @@ data class SectionItemDto(
     @field:Json(name = "use_media_settings")
     val useMediaSettings: Boolean?,
 
+    // Subproperty link data
     @field:Json(name = "subproperty_id")
     val subpropertyId: String?,
-    // Page is also provided, but we just navigate to Main for now
-    // @field:Json(name="subproperty_page_id")
-    // val subpropertyPageId: String?,
+    @field:Json(name = "subproperty_page_id")
+    val subpropertyPageId: String?,
+
+    // Property link data
+    @field:Json(name = "property_id")
+    val propertyId: String?,
+    @field:Json(name = "property_page_id")
+    val propertyPageId: String?,
+
+    // Page link data
+    @field:Json(name = "page_id")
+    val pageId: String?,
 
     val display: DisplaySettingsDto?,
     override val permissions: PermissionsDto?,
+
+    // SectionsItems inside a Banner section will have this field defined
+    @field:Json(name = "banner_image")
+    val bannerImage: AssetLinkDto?,
 ) : DtoWithPermissions
 
 @JsonClass(generateAdapter = true)

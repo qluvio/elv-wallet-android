@@ -49,6 +49,7 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.Overscan
@@ -173,14 +174,50 @@ fun CarouselSection(
                             .height(CARD_HEIGHT)
                             .wrapContentHeight(Alignment.CenterVertically)
                     )
-                } else if (item.showAsGrid) {
-                    ItemGrid(filteredItems, startPadding, modifier = exitFocusModifier)
                 } else {
-                    ItemRow(filteredItems, startPadding, modifier = exitFocusModifier)
+                    SectionItems(
+                        item.displayFormat,
+                        filteredItems,
+                        startPadding,
+                        modifier = exitFocusModifier
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun SectionItems(
+    displayFormat: DisplayFormat,
+    filteredItems: List<CarouselItem>,
+    startPadding: Dp,
+    modifier: Modifier = Modifier
+) {
+    when (displayFormat) {
+        DisplayFormat.GRID -> ItemGrid(
+            filteredItems,
+            startPadding,
+            modifier = modifier
+        )
+
+        // A "banner" style section still supports all the customization options of a carousel,
+        // but only displays one item per row.
+        DisplayFormat.BANNER -> ItemGrid(
+            filteredItems,
+            startPadding,
+            maxItemsInEachRow = 1,
+            modifier = modifier
+        )
+
+        // Default to carousel if the display format is unknown
+        DisplayFormat.UNKNOWN,
+        DisplayFormat.CAROUSEL -> ItemRow(
+            filteredItems,
+            startPadding,
+            modifier = modifier
+        )
     }
 }
 
@@ -288,13 +325,19 @@ private fun ViewAllButton(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ItemGrid(items: List<CarouselItem>, startPadding: Dp, modifier: Modifier = Modifier) {
+private fun ItemGrid(
+    items: List<CarouselItem>,
+    startPadding: Dp,
+    modifier: Modifier = Modifier,
+    maxItemsInEachRow: Int = Int.MAX_VALUE
+) {
     val firstChildFocusRequester = remember { FocusRequester() }
     var firstChildPositioned by remember { mutableStateOf(false) }
     // TODO: make lazy
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
+        maxItemsInEachRow = maxItemsInEachRow,
         modifier = modifier
             .fillMaxWidth()
             .focusCapturingGroup {

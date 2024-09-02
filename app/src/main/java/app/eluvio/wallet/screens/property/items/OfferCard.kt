@@ -17,11 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
-import app.eluvio.wallet.navigation.LocalNavigator
-import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.WrapContentText
-import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.label_24
@@ -29,8 +26,11 @@ import app.eluvio.wallet.theme.onRedeemTagSurface
 import app.eluvio.wallet.theme.redeemTagSurface
 
 @Composable
-fun OfferCard(item: DynamicPageLayoutState.CarouselItem.RedeemableOffer, cardHeight: Dp) {
-    val navigator = LocalNavigator.current
+fun OfferCard(
+    item: DynamicPageLayoutState.CarouselItem.RedeemableOffer,
+    cardHeight: Dp,
+    onClick: () -> Unit
+) {
     // It's possible to layer this Text on top of the card (with explicit zIndex modifiers, see:
     // https://issuetracker.google.com/issues/291642442), but then it won't scale right when
     // the card is focused.
@@ -90,15 +90,7 @@ fun OfferCard(item: DynamicPageLayoutState.CarouselItem.RedeemableOffer, cardHei
     ImageCard(
         imageUrl = item.imageUrl,
         contentDescription = item.name,
-        onClick = {
-            navigator(
-                RedeemDialogDestination(
-                    item.contractAddress,
-                    item.tokenId,
-                    item.offerId
-                ).asPush()
-            )
-        },
+        onClick = onClick,
         modifier = Modifier.size(cardHeight),
         focusedOverlay = {
             offerTitle()

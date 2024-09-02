@@ -39,6 +39,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.Surface
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
@@ -189,6 +190,7 @@ private fun DynamicPageLayoutPreview() = EluvioThemePreview {
                     permissionContext = PermissionContext(propertyId = "p", sectionId = "4"),
                     title = "Carousel",
                     subtitle = "Subtitle",
+                    displayFormat = DisplayFormat.CAROUSEL,
                     items = listOf(
                         DynamicPageLayoutState.CarouselItem.Media(
                             permissionContext = PermissionContext(propertyId = "property1"),

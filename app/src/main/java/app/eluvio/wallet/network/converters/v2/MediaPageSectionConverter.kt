@@ -1,6 +1,7 @@
 package app.eluvio.wallet.network.converters.v2
 
 import app.eluvio.wallet.data.AspectRatio
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
 import app.eluvio.wallet.network.converters.v2.permissions.toContentPermissionsEntity
@@ -10,7 +11,12 @@ import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.SectionItemDto
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 
-private val supportedSectionItemTypes = setOf("media", "subproperty_link", "item_purchase")
+private const val TYPE_PROPERTY_LINK = "property_link"
+private const val TYPE_SUBPROPERTY_LINK = "subproperty_link"
+private const val TYPE_PAGE_LINK = "page_link"
+
+private val supportedSectionItemTypes =
+    setOf("media", "item_purchase", TYPE_PROPERTY_LINK, TYPE_SUBPROPERTY_LINK, TYPE_PAGE_LINK)
 
 fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
     val dto = this
@@ -33,10 +39,8 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
         }
         displayLimitType = dto.display?.displayLimitType
         displayFormat = dto.display?.displayFormat?.let { format ->
-            MediaPageSectionEntity.DisplayFormat.entries
-                .firstOrNull { enum -> enum.value == format }
-        }
-            ?: MediaPageSectionEntity.DisplayFormat.UNKNOWN
+            DisplayFormat.from(format)
+        } ?: DisplayFormat.UNKNOWN
 
         logoPath = dto.display?.logo?.path
         logoText = dto.display?.logoText
@@ -60,7 +64,7 @@ private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
         media = dto.media?.toEntity(baseUrl)
         rawPermissions = dto.permissions?.toContentPermissionsEntity()
 
-        subpropertyId = dto.subpropertyId
+        linkData = dto.getLinkDataEntity()
         val (imageLink, aspectRatio) =
             dto.display?.thumbnailSquare?.let { it to AspectRatio.SQUARE }
                 ?: dto.display?.thumbnailPortrait?.let { it to AspectRatio.POSTER }
@@ -68,6 +72,8 @@ private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
                 ?: (null to null)
         thumbnailUrl = imageLink?.path?.let { "$baseUrl$it" } ?: ""
         thumbnailAspectRatio = aspectRatio
+
+        bannerImageUrl = dto.bannerImage?.path?.let { "$baseUrl$it" }
 
         isPurchaseItem = dto.type == "item_purchase"
 
@@ -84,7 +90,38 @@ private fun HeroItemDto.toEntity(): SectionItemEntity {
 }
 
 /**
- * Mutates the [MediaPageSectionEntity.SectionItemEntity] to set the display fields from the [DisplaySettingsDto].
+ * Returns a [SectionItemEntity.LinkData] object if this SectionItem represents a link.
+ * Because the server doesn't clear irrelevant fields, we can't just find the first non-null link
+ * field. We have to only look at the fields for the corresponding type.
+ */
+private fun SectionItemDto.getLinkDataEntity(): SectionItemEntity.LinkData? {
+    return when (type) {
+        TYPE_PROPERTY_LINK -> {
+            SectionItemEntity.LinkData().apply {
+                linkPropertyId = propertyId
+                linkPageId = propertyPageId
+            }
+        }
+
+        TYPE_SUBPROPERTY_LINK -> {
+            SectionItemEntity.LinkData().apply {
+                linkPropertyId = subpropertyId
+                linkPageId = subpropertyPageId
+            }
+        }
+
+        TYPE_PAGE_LINK -> {
+            SectionItemEntity.LinkData().apply {
+                linkPageId = pageId
+            }
+        }
+
+        else -> null
+    }
+}
+
+/**
+ * Mutates the [SectionItemEntity] to set the display fields from the [DisplaySettingsDto].
  */
 private fun SectionItemEntity.setDisplayFields(dto: DisplaySettingsDto?) {
     title = dto?.title

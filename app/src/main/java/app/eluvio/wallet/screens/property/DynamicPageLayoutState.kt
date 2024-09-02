@@ -6,9 +6,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 
 
 /**
@@ -50,6 +52,8 @@ data class DynamicPageLayoutState(
         @Immutable
         data class Description(override val sectionId: String, val text: AnnotatedString) : Section
 
+        // Note: This has nothing to do with BannerWrapper and we should probably just remove this
+        // section type.
         @Immutable
         data class Banner(override val sectionId: String, val imagePath: String) : Section
 
@@ -60,16 +64,13 @@ data class DynamicPageLayoutState(
             val subtitle: String? = null,
             val viewAllNavigationEvent: NavigationEvent? = null,
             val items: List<CarouselItem>,
-            // Whether to show this as a row or a grid
-            val showAsGrid: Boolean = false,
+            val displayFormat: DisplayFormat,
             val filterAttribute: SearchFiltersEntity.Attribute? = null,
-
             val backgroundColor: Color? = null,
             val backgroundImagePath: String? = null,
             val logoPath: String? = null,
             val logoText: String? = null,
         ) : Section {
-
             override val sectionId: String =
                 requireNotNull(permissionContext.sectionId) { "PermissionContext.sectionId is null" }
         }
@@ -88,9 +89,12 @@ data class DynamicPageLayoutState(
         }
 
         @Immutable
-        data class SubpropertyLink(
+        data class PageLink(
             override val permissionContext: PermissionContext,
-            val subpropertyId: String,
+            // Property ID to link to
+            val propertyId: String,
+            // Page ID to link to
+            val pageId: String?,
             val imageUrl: String?,
             val imageAspectRatio: Float?,
             val title: String?,
@@ -126,5 +130,28 @@ data class DynamicPageLayoutState(
             val imageAspectRatio: Float?,
             val title: String?,
         ) : CarouselItem
+
+        /**
+         * Any type of item can appear inside a section with display_type="banner".
+         * In that case it will (should) have a "banner_image" defined and we'll display that
+         * instead of the item's "normal" UI. However the onClick behavior still works the same, so
+         * instead of this being a standalone SectionItem type, it wraps the "real" item, which
+         * we'll use for the onClick behavior.
+         */
+        @Immutable
+        data class BannerWrapper(
+            val delegate: CarouselItem,
+            val bannerImageUrl: String
+        ) : CarouselItem by delegate
+    }
+}
+
+/**
+ * Convenience method to "convert" any CarouselItem to look like a banner.
+ */
+fun CarouselItem.asBanner(bannerImageUrl: String): CarouselItem {
+    return when (this) {
+        is CarouselItem.BannerWrapper -> copy(bannerImageUrl = bannerImageUrl)
+        else -> CarouselItem.BannerWrapper(this, bannerImageUrl)
     }
 }

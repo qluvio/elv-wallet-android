@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.ClickableSurfaceDefaults
 import app.eluvio.wallet.R
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
@@ -271,6 +272,7 @@ private fun PropertySearchPreview() = EluvioThemePreview {
             primaryFilters =
             DynamicPageLayoutState.Section.Carousel(
                 permissionContext = PermissionContext(propertyId = "p", sectionId = "4"),
+                displayFormat = DisplayFormat.GRID,
                 items = List(4) {
                     DynamicPageLayoutState.CarouselItem.CustomCard(
                         permissionContext = PermissionContext(propertyId = "property1"),

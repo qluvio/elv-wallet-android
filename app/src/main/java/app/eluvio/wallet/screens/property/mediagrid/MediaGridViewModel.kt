@@ -3,12 +3,13 @@ package app.eluvio.wallet.screens.property.mediagrid
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.screens.property.toCarouselItems
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
@@ -84,7 +85,7 @@ class MediaGridViewModel @Inject constructor(
                     copy(
                         loading = false,
                         title = section.title,
-                        items = section.items.toCarouselItems(permissionContext)
+                        items = section.items.toCarouselItems(permissionContext, DisplayFormat.GRID)
                     )
                 }
             }

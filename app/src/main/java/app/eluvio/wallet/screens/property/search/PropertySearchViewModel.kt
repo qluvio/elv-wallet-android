@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events.ToastMessage
 import app.eluvio.wallet.data.AspectRatio
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
@@ -262,13 +263,19 @@ class PropertySearchViewModel @Inject constructor(
             .subscribeBy { results ->
                 updateState {
                     // If filters aren't defined for this tenant, always show results as a grid
-                    val forceGrid = primaryFilters == null
+                    val fakeDisplayFormat = if (primaryFilters == null) {
+                        DisplayFormat.GRID
+                    } else {
+                        DisplayFormat.CAROUSEL
+                    }
                     val sections = results.flatMap { section ->
+                        // This is a hack, server should set a proper display format
+                        section.displayFormat = fakeDisplayFormat
+
                         section.toDynamicSections(
                             permissionContext,
                             // Never show ViewAll button for search results
                             viewAllThreshold = Int.MAX_VALUE,
-                            forceGridView = forceGrid
                         )
                     }.ifEmpty {
                         // Show a message when no results are found
@@ -302,7 +309,7 @@ class PropertySearchViewModel @Inject constructor(
                     onClick = { onPrimaryFilterSelected(filterValue) }
                 )
             },
-            showAsGrid = true
+            displayFormat = DisplayFormat.GRID,
         )
     }
 }

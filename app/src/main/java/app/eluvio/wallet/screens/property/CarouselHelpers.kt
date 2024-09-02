@@ -2,6 +2,7 @@ package app.eluvio.wallet.screens.property
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
@@ -10,6 +11,7 @@ import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.util.compose.fromHex
+import app.eluvio.wallet.util.logging.Log
 
 /**
  * The maximum number of items to display in a carousel before showing a "View All" button.
@@ -24,7 +26,6 @@ fun MediaPageSectionEntity.toDynamicSections(
     parentPermissionContext: PermissionContext,
     filters: SearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
-    forceGridView: Boolean = false,
 ): List<DynamicPageLayoutState.Section> {
     return when (type) {
         MediaPageSectionEntity.TYPE_AUTOMATIC,
@@ -34,7 +35,6 @@ fun MediaPageSectionEntity.toDynamicSections(
                 parentPermissionContext,
                 filters,
                 viewAllThreshold,
-                forceGridView
             )
         )
 
@@ -47,10 +47,9 @@ private fun MediaPageSectionEntity.toCarouselSection(
     parentPermissionContext: PermissionContext,
     filters: SearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
-    forceGridView: Boolean,
 ): DynamicPageLayoutState.Section.Carousel {
     val permissionContext = parentPermissionContext.copy(sectionId = id)
-    val items = items.toCarouselItems(permissionContext)
+    val items = items.toCarouselItems(permissionContext, displayFormat)
     val displayLimit = displayLimit?.takeIf { it > 0 } ?: items.size
     val showViewAll = items.size > displayLimit || items.size > viewAllThreshold
     val filterAttribute = primaryFilter?.let { primaryFilter ->
@@ -65,7 +64,7 @@ private fun MediaPageSectionEntity.toCarouselSection(
         backgroundImagePath = backgroundImagePath,
         logoPath = logoPath,
         logoText = logoText,
-        showAsGrid = forceGridView || displayFormat == MediaPageSectionEntity.DisplayFormat.GRID,
+        displayFormat = displayFormat,
         filterAttribute = filterAttribute,
         viewAllNavigationEvent = MediaGridDestination(
             propertyId = parentPermissionContext.propertyId,
@@ -100,18 +99,28 @@ private fun MediaPageSectionEntity.toHeroSections(): List<DynamicPageLayoutState
 }
 
 fun List<SectionItemEntity>.toCarouselItems(
-    parentPermissionContext: PermissionContext
+    parentPermissionContext: PermissionContext,
+    sectionDisplayFormat: DisplayFormat
 ): List<CarouselItem> {
     return mapNotNull { item ->
+        val bannerImage = item.bannerImageUrl
+        val isBannerSection = sectionDisplayFormat == DisplayFormat.BANNER
+        if (isBannerSection && bannerImage == null) {
+            Log.w("Section item inside a Banner section, doesn't have a banner image configured")
+            return@mapNotNull null
+        }
         val permissionContext = parentPermissionContext.copy(sectionItemId = item.id)
-        when {
+        val result = when {
             // Filter out hidden items
             item.isHidden -> null
 
-            item.subpropertyId != null -> {
-                CarouselItem.SubpropertyLink(
+            item.linkData != null -> {
+                CarouselItem.PageLink(
                     permissionContext = permissionContext,
-                    subpropertyId = item.subpropertyId!!,
+                    // If linkData doesn't have a propertyId,
+                    // assume this is a link to page within the current property.
+                    propertyId = item.linkData?.linkPropertyId ?: permissionContext.propertyId,
+                    pageId = item.linkData?.linkPageId,
                     imageUrl = item.thumbnailUrl,
                     imageAspectRatio = item.thumbnailAspectRatio,
                     title = item.title,
@@ -135,6 +144,13 @@ fun List<SectionItemEntity>.toCarouselItems(
             }
 
             else -> null
+        }
+
+        // Wrap in a banner if necessary, otherwise return as-is
+        if (result != null && isBannerSection && bannerImage != null) {
+            result.asBanner(bannerImage)
+        } else {
+            result
         }
     }
 }

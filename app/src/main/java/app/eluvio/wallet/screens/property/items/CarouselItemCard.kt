@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
@@ -17,6 +18,9 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.navigation.LocalNavigator
+import app.eluvio.wallet.navigation.asPush
+import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -26,6 +30,14 @@ import app.eluvio.wallet.util.compose.thenIf
 
 @Composable
 fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.current
+    val onClick: () -> Unit = remember {
+        {
+            carouselItem.onClickDirection()?.let {
+                navigator(it.asPush())
+            }
+        }
+    }
     when (carouselItem) {
         is CarouselItem.Media -> Column(modifier = modifier.width(IntrinsicSize.Min)) {
             val entity = carouselItem.entity
@@ -48,12 +60,14 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
 
         is CarouselItem.RedeemableOffer -> OfferCard(
             carouselItem,
-            cardHeight
+            cardHeight,
+            onClick
         )
 
-        is CarouselItem.SubpropertyLink -> SubpropertyCard(
+        is CarouselItem.PageLink -> PageLinkCard(
             carouselItem,
-            cardHeight
+            cardHeight,
+            onClick
         )
 
         is CarouselItem.CustomCard -> {
@@ -62,7 +76,14 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
 
         is CarouselItem.ItemPurchase -> ItemPurchaseCard(
             item = carouselItem,
-            cardHeight = cardHeight
+            cardHeight = cardHeight,
+            onClick
+        )
+
+        is CarouselItem.BannerWrapper -> BannerItem(
+            carouselItem,
+            onClick = onClick,
+            modifier
         )
     }
 }

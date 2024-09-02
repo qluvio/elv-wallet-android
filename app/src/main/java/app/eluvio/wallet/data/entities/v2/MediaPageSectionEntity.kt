@@ -2,7 +2,6 @@ package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
-import app.eluvio.wallet.util.realm.RealmEnum
 import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
 import dagger.Provides
@@ -17,12 +16,6 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
 class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
-
-    enum class DisplayFormat(override val value: String) : RealmEnum {
-        UNKNOWN("unknown"),
-        CAROUSEL("carousel"),
-        GRID("grid");
-    }
 
     companion object {
         const val TYPE_MANUAL = "manual"

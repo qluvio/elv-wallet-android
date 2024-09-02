@@ -20,30 +20,27 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
-import app.eluvio.wallet.navigation.LocalNavigator
-import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
-import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.label_24
 
 @Composable
-fun SubpropertyCard(
-    item: DynamicPageLayoutState.CarouselItem.SubpropertyLink,
+fun PageLinkCard(
+    item: DynamicPageLayoutState.CarouselItem.PageLink,
     cardHeight: Dp,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier.width(IntrinsicSize.Min)) {
-        val navigator = LocalNavigator.current
         ImageCard(
             imageUrl = item.imageUrl,
             contentDescription = item.title,
             focusedOverlay = {
                 MetadataTexts(headers = item.headers, title = item.title, subtitle = item.subtitle)
             },
-            onClick = { navigator(PropertyDetailDestination(propertyId = item.subpropertyId).asPush()) },
+            onClick = onClick,
             modifier = Modifier
                 .height(cardHeight)
                 .aspectRatio(
@@ -67,10 +64,11 @@ fun SubpropertyCard(
 @Composable
 private fun SubpropertyCardPreview(modifier: Modifier = Modifier) = EluvioThemePreview {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        SubpropertyCard(
-            item = DynamicPageLayoutState.CarouselItem.SubpropertyLink(
+        PageLinkCard(
+            item = DynamicPageLayoutState.CarouselItem.PageLink(
                 permissionContext = PermissionContext(propertyId = "property1"),
-                subpropertyId = "subId",
+                propertyId = "subId",
+                pageId = null,
                 imageUrl = "img",
                 imageAspectRatio = 1f,
                 subtitle = "subtitle",
@@ -78,6 +76,7 @@ private fun SubpropertyCardPreview(modifier: Modifier = Modifier) = EluvioThemeP
                 headers = listOf("header1", "header2")
             ),
             cardHeight = 100.dp,
+            onClick = {},
         )
     }
 }
