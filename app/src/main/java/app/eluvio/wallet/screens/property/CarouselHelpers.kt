@@ -82,13 +82,13 @@ private fun MediaPageSectionEntity.toHeroSections(): List<DynamicPageLayoutState
             item.logoPath?.let {
                 DynamicPageLayoutState.Section.Banner("${sectionIdPrefix}-banner", it)
             },
-            item.title?.let {
+            item.title?.ifEmpty { null }?.let {
                 DynamicPageLayoutState.Section.Title(
                     sectionId = "$sectionIdPrefix-title",
                     text = AnnotatedString(it)
                 )
             },
-            item.description?.let {
+            item.description?.ifEmpty { null }?.let {
                 DynamicPageLayoutState.Section.Description(
                     sectionId = "$sectionIdPrefix-description",
                     text = AnnotatedString(it)
