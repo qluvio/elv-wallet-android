@@ -8,6 +8,7 @@ import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.data.stores.TokenStore
+import app.eluvio.wallet.util.base58
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.kotlin.Flowables
@@ -37,15 +38,16 @@ class ProfileViewModel @Inject constructor(
 
     override fun onResume() {
         super.onResume()
-
         Flowables.combineLatest(
             environmentStore.observeSelectedEnvironment(),
-            fabricConfigStore.observeFabricConfiguration()
-        ).subscribeBy { (env, config) ->
+            fabricConfigStore.observeFabricConfiguration(),
+            tokenStore.walletAddress.observe(),
+        ).subscribeBy { (env, config, walletAddress) ->
+            val address = walletAddress.orDefault(null) ?: ""
             updateState {
                 copy(
-                    address = tokenStore.walletAddress.get() ?: "",
-                    userId = tokenStore.userId ?: "",
+                    address = address,
+                    userId = "iusr${address.base58}",
                     network = env,
                     fabricNode = config.fabricEndpoint,
                     authNode = config.authdEndpoint,

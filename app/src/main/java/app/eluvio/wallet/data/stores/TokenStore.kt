@@ -1,9 +1,8 @@
 package app.eluvio.wallet.data.stores
 
 import android.content.Context
-import androidx.datastore.dataStore
 import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder
-import app.eluvio.wallet.util.base58
+import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.util.datastore.ReadWriteStringPref
 import app.eluvio.wallet.util.datastore.edit
 import app.eluvio.wallet.util.datastore.readWriteStringPref
@@ -26,13 +25,14 @@ class TokenStore @Inject constructor(
     val fabricToken = dataStore.readWriteStringPref("fabric_token")
 
     val walletAddress = dataStore.readWriteStringPref("wallet_address")
-    val userId: String? get() = walletAddress.get()?.let { "iusr${it.base58}" }
 
     val isLoggedIn: Boolean get() = fabricToken.get() != null
     val loggedInObservable = fabricToken.observe().map { it.isPresent }
 
-    // TODO: Make sure this survives obfuscation + version updates
-    val loginProvider = dataStore.readWriteStringPref("login_provider")
+    private val loginProviderStr = dataStore.readWriteStringPref("login_provider")
+    var loginProvider: LoginProviders
+        get() = LoginProviders.from(loginProviderStr.get())
+        set(value) = loginProviderStr.set(value.value)
 
     /**
      * Update multiple preferences at once.

@@ -96,7 +96,7 @@ fun SignInView(state: LoginState, onRequestNewToken: () -> Unit, showMetamaskLin
                 val navigator = LocalNavigator.current
                 TvButton(
                     text = stringResource(R.string.metamask_sign_on_button),
-                    onClick = { navigator(MetamaskSignInDestination.asPush()) },
+                    onClick = { navigator(MetamaskSignInDestination().asPush()) },
                     colors = ClickableSurfaceDefaults.colors(
                         containerColor = Color.Transparent,
                         contentColor = Color(0xFF7B7B7B)

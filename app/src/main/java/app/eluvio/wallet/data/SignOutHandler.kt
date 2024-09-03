@@ -19,7 +19,10 @@ class SignOutHandler @Inject constructor(
     @ApplicationContext private val context: Context,
     private val toaster: Toaster,
 ) {
-    fun signOut(completeMessage: String?): Completable {
+    fun signOut(
+        completeMessage: String? = null,
+        restartAppOnComplete: Boolean = true
+    ): Completable {
         return Completable.fromAction {
             tokenStore.wipe()
             realm.writeBlocking {
@@ -32,7 +35,9 @@ class SignOutHandler @Inject constructor(
                 if (completeMessage != null) {
                     toaster.toast(completeMessage, Toast.LENGTH_LONG)
                 }
-                restartApp()
+                if (restartAppOnComplete) {
+                    restartApp()
+                }
             }
     }
 

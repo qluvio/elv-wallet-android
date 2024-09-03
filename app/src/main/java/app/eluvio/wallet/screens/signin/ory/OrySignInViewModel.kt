@@ -8,7 +8,6 @@ import app.eluvio.wallet.data.stores.MetamaskActivationStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.MetamaskActivationData
-import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.signin.common.BaseLoginViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
@@ -25,7 +24,6 @@ class OrySignInViewModel @Inject constructor(
     tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseLoginViewModel<MetamaskActivationData>(
-    savedStateHandle.navArgs<OrySignInNavArgs>().propertyId,
     propertyStore,
     apiProvider,
     tokenStore,

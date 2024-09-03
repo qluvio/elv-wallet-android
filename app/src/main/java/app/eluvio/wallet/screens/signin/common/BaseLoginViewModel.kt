@@ -10,6 +10,8 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.generateQrCode
+import app.eluvio.wallet.screens.navArgs
+import app.eluvio.wallet.screens.signin.SignInNavArgs
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.interval
 import app.eluvio.wallet.util.rx.mapNotNull
@@ -26,15 +28,17 @@ import kotlin.time.Duration
  * and only delegates the provider-specific logic to the subclasses.
  */
 abstract class BaseLoginViewModel<ActivationData : Any>(
-    // The bg image / logo will be fetched from the property, if available
-    protected val propertyId: String?,
     // Just for convenience, we always provide this, even if we don't use it (propertyId=null)
     private val propertyStore: MediaPropertyStore,
     private val apiProvider: ApiProvider,
     private val tokenStore: TokenStore,
     private val loginProvider: LoginProviders,
-    savedStateHandle: SavedStateHandle? = null
+    savedStateHandle: SavedStateHandle
 ) : BaseViewModel<LoginState>(LoginState(), savedStateHandle) {
+
+    private val navArgs = savedStateHandle.navArgs<SignInNavArgs>()
+    // The bg image / logo will be fetched from the property, if available
+    protected val propertyId: String? = navArgs.propertyId
 
     abstract fun fetchActivationData(): Flowable<ActivationData>
 
@@ -126,7 +130,7 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
                 .subscribeBy(
                     onComplete = {
                         Log.d("Activation complete and properties re-fetched, finishing auth flow.")
-                        tokenStore.update(tokenStore.loginProvider to loginProvider.name)
+                        tokenStore.loginProvider = loginProvider
                         navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
                         val nextDestination = AfterSignInDestination.direction.getAndSet(null)
                         if (nextDestination != null) {

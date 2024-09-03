@@ -23,7 +23,6 @@ class MetamaskSignInViewModel @Inject constructor(
     tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseLoginViewModel<MetamaskActivationData>(
-    propertyId = null, // We don't want the property bg for Metamask, so we pass null
     propertyStore,
     apiProvider,
     tokenStore,

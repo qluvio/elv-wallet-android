@@ -25,6 +25,7 @@ import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
 import app.eluvio.wallet.screens.common.Overscan
 import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.offsetAndFakeSize
+import app.eluvio.wallet.screens.signin.SignInNavArgs
 import app.eluvio.wallet.screens.signin.common.LoginState
 import app.eluvio.wallet.screens.signin.common.QrData
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -34,7 +35,7 @@ import app.eluvio.wallet.util.subscribeToState
 import com.ramcosta.composedestinations.annotation.Destination
 
 @AuthFlowGraph
-@Destination
+@Destination(navArgsDelegate = SignInNavArgs::class)
 @Composable
 fun MetamaskSignIn() {
     hiltViewModel<MetamaskSignInViewModel>().subscribeToState { vm, state ->

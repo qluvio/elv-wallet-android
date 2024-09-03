@@ -8,7 +8,6 @@ import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.DeviceActivationData
-import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.signin.common.BaseLoginViewModel
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +27,6 @@ class Auth0SignInViewModel @Inject constructor(
     tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseLoginViewModel<DeviceActivationData>(
-    savedStateHandle.navArgs<Auth0SignInNavArgs>().propertyId,
     propertyStore,
     apiProvider,
     tokenStore,
