@@ -262,16 +262,7 @@ class PropertySearchViewModel @Inject constructor(
             }
             .subscribeBy { results ->
                 updateState {
-                    // If filters aren't defined for this tenant, always show results as a grid
-                    val fakeDisplayFormat = if (primaryFilters == null) {
-                        DisplayFormat.GRID
-                    } else {
-                        DisplayFormat.CAROUSEL
-                    }
                     val sections = results.flatMap { section ->
-                        // This is a hack, server should set a proper display format
-                        section.displayFormat = fakeDisplayFormat
-
                         section.toDynamicSections(
                             permissionContext,
                             // Never show ViewAll button for search results
