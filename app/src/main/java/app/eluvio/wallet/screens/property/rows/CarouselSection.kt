@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -41,6 +43,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -94,7 +97,6 @@ fun CarouselSection(
             )
         }
         Row {
-            // TODO: Re-enable once we figure out focus issues with offset rows
             val showLogo = item.logoPath != null
             if (showLogo) {
                 Logo(item, imagesBaseUrl)
@@ -227,11 +229,33 @@ private fun Logo(
     imagesBaseUrl: String?,
 ) {
     item.logoPath ?: return
+
+    val focusManager = LocalFocusManager.current
+    // There's a bug where the entire row is skipped over when the logo is present because the first
+    // focusable child is offset to the right. To work around this, we add a dummy surface to make
+    // sure the row is considered in focus resolution.
+    Surface(
+        onClick = {/* no click action, just here to capture focus */ },
+        modifier = Modifier
+            // Doesn't have to be accurate, but Surface should start below the top of card row
+            .padding(top = CARD_HEIGHT)
+            // Doubles as the padding for the Logo/text. (size of 0.dp is never focusable)
+            .size(width = Overscan.horizontalPadding, height = 1.dp)
+            // Invisible, but still focusable
+            .alpha(0f)
+            .onFocusChanged {
+                if (it.hasFocus) {
+                    // Immediately throw focus to the card row
+                    focusManager.moveFocus(FocusDirection.Right)
+                }
+            },
+        content = {}
+    )
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .padding(start = Overscan.horizontalPadding)
             .then(
                 if (item.logoText != null) {
                     Modifier.padding(top = 40.dp)
