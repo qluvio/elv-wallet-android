@@ -21,13 +21,14 @@ class UpcomingVideoViewModel @Inject constructor(
     private val navArgs: UpcomingVideoNavArgs,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<UpcomingVideoViewModel.State>(
-    State(mediaItemId = navArgs.mediaItemId),
+    State(mediaItemId = navArgs.mediaItemId, propertyId = navArgs.propertyId),
     savedStateHandle
 ) {
     data class State(
         val imagesBaseUrl: String? = null,
         private val backgroundImagePath: String? = null,
         val mediaItemId: String = "",
+        val propertyId: String = "",
         val title: String = "",
         val icons: List<String> = emptyList(),
         val headers: List<String> = emptyList(),

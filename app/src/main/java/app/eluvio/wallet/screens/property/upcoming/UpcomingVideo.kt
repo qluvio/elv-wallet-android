@@ -110,7 +110,12 @@ private fun UpcomingVideoContent(state: UpcomingVideoViewModel.State) {
         val navigator = LocalNavigator.current
         Countdown(state, onComplete = {
             // Countdown done. Navigate to the video player.
-            navigator(VideoPlayerActivityDestination(state.mediaItemId).asReplace())
+            navigator(
+                VideoPlayerActivityDestination(
+                    propertyId = state.propertyId,
+                    mediaItemId = state.mediaItemId
+                ).asReplace()
+            )
         })
     }
 }

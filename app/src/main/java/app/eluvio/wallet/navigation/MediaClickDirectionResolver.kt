@@ -69,6 +69,14 @@ private fun clickWithPermissionContext(
             )
         }
 
+        media.mediaType in listOf(
+            MediaEntity.MEDIA_TYPE_LIVE_VIDEO,
+            MediaEntity.MEDIA_TYPE_VIDEO,
+        ) -> VideoPlayerActivityDestination(
+            mediaItemId = media.id,
+            propertyId = permissionContext.propertyId
+        )
+
         else -> clickWithoutContext(media)
     }
 }

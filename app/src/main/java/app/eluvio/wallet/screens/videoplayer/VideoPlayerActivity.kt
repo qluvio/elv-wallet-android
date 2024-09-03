@@ -126,7 +126,7 @@ class VideoPlayerActivity : FragmentActivity(), Player.Listener {
             .defaultIfEmpty("done with fake stuff, time to load video")
             .flatMap {
                 // this is all we really need if it wasn't for all the fake stuff
-                videoOptionsFetcher.fetchVideoOptions(mediaItemId)
+                videoOptionsFetcher.fetchVideoOptions(mediaItemId, navArgs.propertyId)
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(

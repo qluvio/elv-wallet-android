@@ -16,17 +16,42 @@ class VideoOptionsFetcher @Inject constructor(
     private val contentStore: ContentStore,
     private val tokenStore: TokenStore,
 ) {
-    fun fetchVideoOptions(mediaItemId: String): Single<VideoOptionsEntity> {
-        return contentStore.observeMediaItem(mediaItemId)
-            .firstOrError()
-            .flatMap { mediaItem ->
-                val hash = mediaItem.playableHash
-                if (hash != null) {
-                    fetchVideoOptionsFromHash(hash)
-                } else {
-                    val path = mediaItem.mediaLinks.values.firstOrNull()
-                        ?: throw RuntimeException("No media link found for $mediaItemId")
-                    fetchVideoOptionsFromPath(path)
+    fun fetchVideoOptions(mediaItemId: String, propertyId: String?): Single<VideoOptionsEntity> {
+        return if (propertyId != null) {
+            fetchVideoOptionsFromProperty(propertyId, mediaItemId)
+        } else {
+            contentStore.observeMediaItem(mediaItemId)
+                .firstOrError()
+                .flatMap { mediaItem ->
+                    val hash = mediaItem.playableHash
+                    if (hash != null) {
+                        fetchVideoOptionsFromHash(hash)
+                    } else {
+                        val path = mediaItem.mediaLinks.values.firstOrNull()
+                            ?: throw RuntimeException("No media link found for $mediaItemId")
+                        fetchVideoOptionsFromPath(path)
+                    }
+                }
+        }
+    }
+
+    /**
+     * This is the preferred way to fetch video options. It's the only way the backend sets
+     * start/end fields correctly for clip playback
+     */
+    private fun fetchVideoOptionsFromProperty(
+        propertyId: String,
+        mediaItemId: String
+    ): Single<VideoOptionsEntity> {
+        return apiProvider.getApi(VideoPlayoutApi::class)
+            .zipWith(apiProvider.getFabricEndpoint())
+            .flatMap { (api, baseUrl) ->
+                api.getVideoOptions(
+                    propertyId = propertyId,
+                    mediaItemId = mediaItemId
+                ).map { response ->
+                    response.toEntity(baseUrl, tokenStore.fabricToken.get())
+                        ?: throw RuntimeException("No supported video formats found in $response")
                 }
             }
     }
