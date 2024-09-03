@@ -52,14 +52,20 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         tags = dto.tags.toRealmListOrEmpty()
         rawPermissions = PermissionsEntity().apply {
             permissionItemIds = dto.permissions
+                ?.takeIf {
+                    // Server can still send a non-empty dto.permissions list even if the item is
+                    // public. In that case we should ignore the list completely.
+                    dto.public != true
+                }
                 ?.mapNotNull { it.permission_item_id }
+                ?.plus(
+                    // Add a dummy permission item that will always resolve to unauthorized. This
+                    // won't affect Media Items that also have permissions defined, since it's
+                    // enough to own one of the permissions to gain access. But we need it to make
+                    // sure "private" media items are not accessible.
+                    element = ""
+                )
                 .toRealmListOrEmpty()
-            if (dto.public == false) {
-                // Add a dummy permission item that will always resolve to unauthorized.
-                // This won't affect Media Items that also have permissions defined, since it's enough
-                // to own one of the permissions to gain access.
-                permissionItemIds += ""
-            }
         }
     }
 }
