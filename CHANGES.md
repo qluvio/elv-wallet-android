@@ -1,5 +1,8 @@
 # Eluvio Media Wallet for AndroidTV Releases
 
+## Version 2.0
+* Overhauled Wallet app. Uses the new Media Property API.
+
 ## Version 1.0.4
 * Updated Compose-TV libraries. This solves a bug when scrolling up quickly in MyItems - the tab row would get selected before list was done scrolling.
 
