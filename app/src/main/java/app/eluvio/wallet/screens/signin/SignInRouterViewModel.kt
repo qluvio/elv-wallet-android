@@ -39,10 +39,7 @@ class SignInRouterViewModel @Inject constructor(
         preAuthAction
             .subscribeBy {
                 when (navArgs.provider) {
-                    // Default to Auth0
-                    LoginProviders.UNKNOWN,
                     LoginProviders.AUTH0 -> Auth0SignInDestination(navArgs)
-
                     LoginProviders.ORY -> OrySignInDestination(navArgs)
                 }.let { navigateTo(it.asReplace()) }
             }

@@ -8,7 +8,7 @@ import com.ramcosta.composedestinations.spec.Direction
  * to navigate between them.
  */
 data class SignInNavArgs(
-    val provider: LoginProviders = LoginProviders.UNKNOWN,
+    val provider: LoginProviders = LoginProviders.AUTH0,
     val propertyId: String? = null,
     // Will clear data before navigating to the appropriate auth flow
     val signOutBeforeAuthFlow: Boolean = false,

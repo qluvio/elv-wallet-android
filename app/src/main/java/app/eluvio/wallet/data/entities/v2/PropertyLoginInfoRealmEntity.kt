@@ -18,7 +18,7 @@ class PropertyLoginInfoRealmEntity : EmbeddedRealmObject {
 
     @Ignore
     var loginProvider: LoginProviders by realmEnum(::_loginProvider)
-    private var _loginProvider: String = LoginProviders.UNKNOWN.value
+    private var _loginProvider: String = LoginProviders.AUTH0.value
 
     override fun toString(): String {
         return "PropertyLoginInfoRealmEntity(backgroundImagePath=$backgroundImagePath, logoPath=$logoPath, _loginProvider='$_loginProvider')"
