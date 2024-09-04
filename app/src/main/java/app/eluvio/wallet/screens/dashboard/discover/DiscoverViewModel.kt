@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
-import app.eluvio.wallet.data.AfterSignInDestination
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
@@ -92,19 +91,19 @@ class DiscoverViewModel @Inject constructor(
     }
 
     fun onPropertyClicked(property: MediaPropertyEntity) {
-        val destination = PropertyDetailDestination(property.id)
+        val direction = PropertyDetailDestination(property.id)
         if (tokenStore.isLoggedIn && tokenStore.loginProvider == property.loginProvider) {
-            navigateTo(destination.asPush())
+            navigateTo(direction.asPush())
         } else {
             Log.d("User not signed in, navigating to authFlow and saving propertyId: ${property.id}")
-            AfterSignInDestination.direction.set(destination)
             navigateTo(
                 SignInRouterDestination(
                     property.loginProvider,
                     property.id,
                     // In case we are logged in but the login provider is different, clear old
                     // tokens and data before going to auth again.
-                    signOutBeforeAuthFlow = tokenStore.isLoggedIn
+                    signOutBeforeAuthFlow = tokenStore.isLoggedIn,
+                    onSignedInDirection = direction
                 ).asPush()
             )
         }

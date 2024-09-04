@@ -2,12 +2,12 @@ package app.eluvio.wallet.screens.signin.common
 
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
-import app.eluvio.wallet.data.AfterSignInDestination
 import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
+import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.NavGraphs
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.screens.navArgs
@@ -37,6 +37,7 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
 ) : BaseViewModel<LoginState>(LoginState(), savedStateHandle) {
 
     private val navArgs = savedStateHandle.navArgs<SignInNavArgs>()
+
     // The bg image / logo will be fetched from the property, if available
     protected val propertyId: String? = navArgs.propertyId
 
@@ -132,10 +133,7 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
                         Log.d("Activation complete and properties re-fetched, finishing auth flow.")
                         tokenStore.loginProvider = loginProvider
                         navigateTo(NavigationEvent.PopTo(NavGraphs.authFlowGraph, true))
-                        val nextDestination = AfterSignInDestination.direction.getAndSet(null)
-                        if (nextDestination != null) {
-                            navigateTo(NavigationEvent.Push(nextDestination))
-                        }
+                        navArgs.onSignedInDirection?.let { navigateTo(it.asPush()) }
                     }
                 )
                 .addTo(disposables)
