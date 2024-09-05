@@ -24,12 +24,18 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
     return MediaPageSectionEntity().apply {
         id = dto.id
         type = dto.type
-        items = (
-                dto.content
-                    ?.takeIf { it.isNotEmpty() }
-                    ?.mapNotNull { it.toEntity(baseUrl) }
-                    ?: dto.heroItems?.map { it.toEntity() }
-                ).toRealmListOrEmpty()
+        if (type == MediaPageSectionEntity.TYPE_HERO) {
+            items = dto.heroItems?.map { it.toEntity() }.toRealmListOrEmpty()
+            backgroundImagePath =
+                dto.heroItems
+                    ?.firstNotNullOfOrNull { it.display?.heroBackgroundImage?.path }
+                    ?.ifEmpty { null }
+        } else {
+            items = dto.content?.mapNotNull { it.toEntity(baseUrl) }.toRealmListOrEmpty()
+            backgroundImagePath = dto.display?.inlineBackgroundImage?.path?.ifEmpty { null }
+            backgroundColor = dto.display?.inlineBackgroundColor?.ifEmpty { null }
+        }
+
         title = dto.display?.title
         subtitle = dto.display?.subtitle
         displayLimit = dto.display?.displayLimit?.takeIf {
@@ -44,9 +50,6 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
 
         logoPath = dto.display?.logo?.path
         logoText = dto.display?.logoText
-
-        backgroundImagePath = dto.display?.backgroundImage?.path
-        backgroundColor = dto.display?.backgroundColor?.takeIf { it.isNotEmpty() }
 
         primaryFilter = dto.primaryFilter
         secondaryFilter = dto.secondaryFilter

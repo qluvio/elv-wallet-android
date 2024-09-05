@@ -72,8 +72,11 @@ class MainActivity : ComponentActivity() {
                             navGraph = NavGraphs.root,
                             navController = navController,
                         )
-                        // Print nav backstack for debugging
-                        navController.currentBackStack.collectAsState().value.print()
+                        if (BuildConfig.DEBUG) {
+                            // Print nav backstack for debugging
+                            // noinspection RestrictedApi
+                            navController.currentBackStack.collectAsState().value.print()
+                        }
                     }
                 }
             }

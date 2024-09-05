@@ -28,7 +28,10 @@ data class DisplaySettingsDto(
     @field:Json(name = "logo_text")
     val logoText: String?,
     @field:Json(name = "inline_background_color")
-    val backgroundColor: String?,
+    val inlineBackgroundColor: String?,
     @field:Json(name = "inline_background_image")
-    val backgroundImage: AssetLinkDto?,
+    val inlineBackgroundImage: AssetLinkDto?,
+
+    @field:Json(name = "background_image")
+    val heroBackgroundImage: AssetLinkDto?,
 )

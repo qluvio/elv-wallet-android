@@ -40,19 +40,7 @@ abstract class BaseViewModel<State : Any>(
             Log.d("${this.javaClass.simpleName} has started streaming state")
         }
         .distinctUntilChanged()
-        .scan { previousState, newState ->
-            val printStateUpdates = BuildConfig.DEBUG
-            if (printStateUpdates) {
-                diffStates(previousState, newState)
-                    ?.let { diff ->
-                        // Timber will truncate long enough diffs (>4000 chars)
-                        val msg = "Diff:\n${diff}"
-                        val className = newState.javaClass.name.substringAfterLast('.')
-                        Log.d("Next $className emitted: $msg")
-                    }
-            }
-            newState
-        }
+        .printDebugStateDiffs()
         .asSharedState()
 
     /** Synchronize all state updates to happen on a single thread. */
@@ -106,6 +94,23 @@ abstract class BaseViewModel<State : Any>(
                 }
             }
         }
+    }
+}
+
+private fun <T : Any> Observable<T>.printDebugStateDiffs(): Observable<T> {
+    return if (BuildConfig.DEBUG) {
+        this.scan { previousState, newState ->
+            diffStates(previousState, newState)
+                ?.let { diff ->
+                    // Timber will truncate long enough diffs (>4000 chars)
+                    val msg = "Diff:\n${diff}"
+                    val className = newState.javaClass.name.substringAfterLast('.')
+                    Log.d("Next $className emitted: $msg")
+                }
+            newState
+        }
+    } else {
+        this
     }
 }
 

@@ -79,9 +79,14 @@ class PropertyDetailViewModel @Inject constructor(
         }
             .subscribeBy(
                 onNext = { (page, sections, filters) ->
+                    // Find the first hero section and use its background as the page background.
+                    val bgImage = sections.values
+                        .firstOrNull { it.type == MediaPageSectionEntity.TYPE_HERO }
+                        ?.backgroundImagePath
+                        ?: page.backgroundImagePath
                     updateState {
                         copy(
-                            backgroundImagePath = page.backgroundImagePath,
+                            backgroundImagePath = bgImage,
                             searchNavigationEvent = PropertySearchDestination(propertyId).asPush(),
                             sections = sections(page, sections, filters)
                         )
