@@ -168,15 +168,20 @@ class MediaPropertyStore @Inject constructor(
             }
     }
 
+    /**
+     * Observes sections for a given page.
+     * By default, it will observe all sections on the page, but you can specify a subset.
+     */
     fun observeSections(
         property: MediaPropertyEntity,
         page: MediaPageEntity,
+        sectionIds: List<String> = page.sectionIds,
         forceRefresh: Boolean = true
     ): Flowable<List<MediaPageSectionEntity>> {
         return observeRealmAndFetch(
             realmQuery = realm.query<MediaPageSectionEntity>(
                 "${MediaPageSectionEntity::id.name} IN $0",
-                page.sectionIds
+                sectionIds
             ).asFlowable(),
             fetchOperation = { sections, isFirst ->
                 val existingSections = if (forceRefresh && isFirst) {
@@ -185,7 +190,7 @@ class MediaPropertyStore @Inject constructor(
                     sections.map { it.id }.toSet()
                 }
                 Log.w("Existing sections (will NOT be fetched): $existingSections")
-                fetchMissingSections(property.id, page, existingSections)
+                fetchMissingSections(property.id, missingSections = sectionIds - existingSections)
             }
         )
             .doOnNext { sections ->
@@ -199,16 +204,6 @@ class MediaPropertyStore @Inject constructor(
             }
     }
 
-    @Deprecated("Does not resolve permissions correctly")
-    fun observeSection(sectionId: String): Flowable<MediaPageSectionEntity> {
-        return realm.query<MediaPageSectionEntity>(
-            "${MediaPageSectionEntity::id.name} == $0",
-            sectionId
-        )
-            .asFlowable()
-            .mapNotNull { it.firstOrNull() }
-    }
-
     private fun fetchMediaProperty(propertyId: String): Completable {
         return apiProvider.getApi(MediaWalletV2Api::class)
             .flatMap { api -> api.getProperty(propertyId) }
@@ -220,10 +215,8 @@ class MediaPropertyStore @Inject constructor(
 
     private fun fetchMissingSections(
         propertyId: String,
-        page: MediaPageEntity,
-        existingSections: Set<String>
+        missingSections: List<String>
     ): Completable {
-        val missingSections = page.sectionIds.subtract(existingSections)
         return if (missingSections.isEmpty()) {
             Completable.complete()
                 .doOnSubscribe {

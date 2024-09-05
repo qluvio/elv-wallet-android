@@ -51,8 +51,8 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
         }.toRealmListOrEmpty()
         tags = dto.tags.toRealmListOrEmpty()
         rawPermissions = PermissionSettingsEntity().apply {
-            permissionItemIds = dto.permissions
-                ?.takeIf {
+            permissionItemIds = dto.permissions.orEmpty()
+                .takeIf {
                     // Server can still send a non-empty dto.permissions list even if the item is
                     // public. In that case we should ignore the list completely.
                     dto.public != true

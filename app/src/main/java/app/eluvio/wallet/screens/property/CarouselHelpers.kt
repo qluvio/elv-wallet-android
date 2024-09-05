@@ -66,10 +66,7 @@ private fun MediaPageSectionEntity.toCarouselSection(
         logoText = logoText,
         displayFormat = displayFormat,
         filterAttribute = filterAttribute,
-        viewAllNavigationEvent = MediaGridDestination(
-            propertyId = parentPermissionContext.propertyId,
-            sectionId = id
-        )
+        viewAllNavigationEvent = MediaGridDestination(permissionContext)
             .takeIf { showViewAll }
             ?.asPush()
     )

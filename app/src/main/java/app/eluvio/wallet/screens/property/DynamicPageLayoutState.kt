@@ -83,10 +83,7 @@ data class DynamicPageLayoutState(
         data class Media(
             override val permissionContext: PermissionContext,
             val entity: MediaEntity,
-        ) : CarouselItem {
-            // TODO: remove once MediaGrid is converted to use PermissionContext
-            val propertyId: String = permissionContext.propertyId
-        }
+        ) : CarouselItem
 
         @Immutable
         data class PageLink(

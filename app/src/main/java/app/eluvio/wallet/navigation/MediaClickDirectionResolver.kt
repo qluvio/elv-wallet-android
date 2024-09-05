@@ -55,10 +55,7 @@ private fun clickWithPermissionContext(
 
         media.mediaItemsIds.isNotEmpty() -> {
             // This media item is a container for other media (e.g. a media list/collection)
-            MediaGridDestination(
-                propertyId = permissionContext.propertyId,
-                mediaContainerId = media.id
-            )
+            MediaGridDestination(permissionContext)
         }
 
         media.liveVideoInfo?.started == false -> {

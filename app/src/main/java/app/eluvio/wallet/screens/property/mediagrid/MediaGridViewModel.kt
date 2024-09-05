@@ -3,17 +3,21 @@ package app.eluvio.wallet.screens.property.mediagrid
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
+import app.eluvio.wallet.data.PermissionResolver
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
+import app.eluvio.wallet.data.stores.ResolvedContext
+import app.eluvio.wallet.data.stores.resolveContext
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.toCarouselItems
-import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
@@ -22,7 +26,6 @@ import javax.inject.Inject
 class MediaGridViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
     private val contentStore: ContentStore,
-    private val toaster: Toaster,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<MediaGridViewModel.State>(State(), savedStateHandle) {
 
@@ -33,62 +36,84 @@ class MediaGridViewModel @Inject constructor(
         val items: List<DynamicPageLayoutState.CarouselItem> = emptyList()
     )
 
-    private val navArgs = MediaGridDestination.argsFrom(savedStateHandle)
-    private val propertyId = navArgs.propertyId
+    private val permissionContext = MediaGridDestination.argsFrom(savedStateHandle)
 
     override fun onResume() {
         super.onResume()
 
-        when {
-            navArgs.sectionId != null -> loadSectionItems(navArgs.sectionId)
-            navArgs.mediaContainerId != null -> loadMediaItems(navArgs.mediaContainerId)
-            else -> {
-                Log.e("MediaGrid launched with no Section or MediaList ID.")
-                toaster.toast("Error loading items.")
-                navigateTo(NavigationEvent.GoBack)
+        propertyStore
+            .resolveContext(permissionContext)
+            .switchMap { context ->
+                if (permissionContext.mediaItemId != null) {
+                    observeMediaItems(context)
+                } else if (permissionContext.sectionId != null) {
+                    getSectionItem(context.section)
+                } else {
+                    Flowable.error(IllegalStateException("Media grid launched without mediaItemId or sectionId."))
+                }
             }
+            .subscribeBy(
+                onNext = { stateUpdate ->
+                    updateState {
+                        copy(
+                            loading = false,
+                            title = stateUpdate.title,
+                            items = stateUpdate.items
+                        )
+                    }
+                },
+                onError = {
+                    // Required fields are missing
+                    Log.e("Error loading items", it)
+                    fireEvent(Events.ToastMessage("Error loading items."))
+                    navigateTo(NavigationEvent.GoBack)
+                }
+            )
+            .addTo(disposables)
+    }
+
+    private fun getSectionItem(section: MediaPageSectionEntity?): Flowable<State> {
+        if (section == null) {
+            return Flowable.error(RuntimeException("Section not found"))
         }
+        val items = section.items.toCarouselItems(permissionContext, DisplayFormat.GRID)
+        return Flowable.just(State(title = section.title, items = items))
     }
 
-    private fun loadMediaItems(mediaListId: String) {
-        // Assume that if the media list is accessible, all the media items are accessible, so
-        // we don't need to include section/sectionitem ids in the permission context.
-        val permissionContext = PermissionContext(propertyId = propertyId)
+    private fun observeMediaItems(context: ResolvedContext): Flowable<State> {
+        val mediaContainer = context.mediaItem
+        if (mediaContainer == null) {
+            return Flowable.error(RuntimeException("Media container not found"))
+        } else if (mediaContainer.mediaItemsIds.isEmpty()) {
+            return Flowable.error(RuntimeException("Media container is empty"))
+        }
 
-        contentStore.observeMediaItem(mediaListId, propertyId)
-            .switchMap { mediaList -> // Technically could be a MediaCollection or MediaList
-                contentStore.observeMediaItems(propertyId, mediaList.mediaItemsIds)
-                    .map { mediaItems -> mediaList to mediaItems }
-            }
-            .subscribeBy { (mediaList, mediaItems) ->
-                updateState {
-                    copy(
-                        loading = false,
-                        title = mediaList.name,
-                        items = mediaItems.map { mediaEntity ->
-                            DynamicPageLayoutState.CarouselItem.Media(
-                                permissionContext = permissionContext,
-                                entity = mediaEntity
-                            )
-                        }
+        return contentStore.observeMediaItems(
+            permissionContext.propertyId,
+            mediaContainer.mediaItemsIds,
+            forceRefresh = false
+        )
+            .doOnNext { mediaItems ->
+                // Resolve permissions
+                mediaItems.forEach { child ->
+                    PermissionResolver.resolvePermissions(
+                        child,
+                        mediaContainer.resolvedPermissions,
+                        context.property.permissionStates
                     )
                 }
             }
-            .addTo(disposables)
-    }
-
-    private fun loadSectionItems(sectionId: String) {
-        val permissionContext = PermissionContext(propertyId = propertyId, sectionId = sectionId)
-        propertyStore.observeSection(sectionId)
-            .subscribe { section ->
-                updateState {
-                    copy(
-                        loading = false,
-                        title = section.title,
-                        items = section.items.toCarouselItems(permissionContext, DisplayFormat.GRID)
-                    )
-                }
+            .map { mediaItems ->
+                mediaItems
+                    .filterNot { it.isHidden }
+                    .map { mediaEntity ->
+                        DynamicPageLayoutState.CarouselItem.Media(
+                            // TODO: potential bug? we are losing info about the containing list/collection
+                            permissionContext = permissionContext.copy(mediaItemId = mediaEntity.id),
+                            entity = mediaEntity
+                        )
+                    }
             }
-            .addTo(disposables)
+            .map { State(title = mediaContainer.name, items = it) }
     }
 }
