@@ -3,8 +3,10 @@ package app.eluvio.wallet.data
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettings
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionStatesEntity
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import app.eluvio.wallet.util.logging.Log
 
 object PermissionResolver {
@@ -13,7 +15,7 @@ object PermissionResolver {
      */
     fun resolvePermissions(
         entity: EntityWithPermissions,
-        parentPermissions: PermissionsEntity?,
+        parentPermissions: PermissionSettings?,
         permissionStates: Map<String, PermissionStatesEntity?>
     ) {
         // Special cases
@@ -35,7 +37,7 @@ object PermissionResolver {
      */
     private fun resolveContentPermissions(
         entity: EntityWithPermissions,
-        parentPermissions: PermissionsEntity?,
+        parentPermissions: PermissionSettings?,
         permissionStates: Map<String, PermissionStatesEntity?>
     ) {
         entity.resolvedPermissions =
@@ -46,14 +48,14 @@ object PermissionResolver {
                         parent = it,
                         child = null,
                         permissionStates = permissionStates
-                    )
+                    ).asVolatile()
                 }
             } else {
                 merge(
                     parent = parentPermissions,
                     child = entity.rawPermissions,
                     permissionStates = permissionStates
-                )
+                ).asVolatile()
             }
     }
 
@@ -70,7 +72,7 @@ object PermissionResolver {
                     parent = it,
                     child = null,
                     permissionStates = permissionStates
-                )
+                ).asEntity()
             }
             // An in-accessible property could still render a Page, so we can't short-circuit here.
             return false
@@ -80,7 +82,7 @@ object PermissionResolver {
                     parent = it,
                     child = null,
                     permissionStates = permissionStates
-                )
+                ).asEntity()
             }
             // In the case of an unauthorized page, we can save ourselves from checking any content
             // permissions, because none of that content will be visible to the user
@@ -90,45 +92,96 @@ object PermissionResolver {
     }
 
     /**
-     * Returns a new [PermissionsEntity] with merged permissions.
+     * Returns a new [CompositePermissions] with merged permissions.
      * Note that [parent] and [child] are not treated equally, and parent permissions take over
      * once we hit an unauthorized state.
      */
     private fun merge(
-        parent: PermissionsEntity,
-        child: PermissionsEntity?,
-        permissionStates: Map<String, PermissionStatesEntity?>
-    ): PermissionsEntity {
-        val result = PermissionsEntity()
-        val primary: PermissionsEntity
-        val fallback: PermissionsEntity
-        if (child == null) {
-            // Child has nothing defined, [authorized] will be the same as the parent's,
-            // unless it still needs to be calculated.
-            result.authorized = parent.authorized ?: with(parent.permissionItemIds) {
-                isEmpty() || any { permissionStates[it]?.authorized == true }
+        parent: PermissionSettings,
+        child: PermissionSettingsEntity?,
+        permissionStates: Map<String, PermissionStatesEntity?>,
+    ): CompositePermissions {
+        return when {
+            child == null -> {
+                // Child has nothing defined, [authorized] will be the same as the parent's,
+                // unless it still needs to be calculated.
+                CompositePermissions(
+                    authorized = parent.authorized ?: parent.calcAuthorized(permissionStates),
+                    primary = parent,
+                    fallback = parent
+                )
             }
-            primary = parent
-            fallback = parent
-        } else if (parent.authorized == false) {
-            // Parent is not authorized, everything down the line is not authorized
-            // and will inherit behavior, unless it's not already set.
-            result.authorized = false
-            primary = parent
-            fallback = child
-        } else {
-            result.authorized = with(child.permissionItemIds) {
-                isEmpty() || any { permissionStates[it]?.authorized == true }
+
+            parent.authorized == false -> {
+                // Parent is not authorized, everything down the line is not authorized
+                // and will inherit behavior, unless it's not already set.
+                CompositePermissions(
+                    authorized = false,
+                    primary = parent,
+                    fallback = child
+                )
             }
-            // Parent is authorized, child will have to check its own permissions.
-            primary = child
-            fallback = parent
+
+            else -> {
+                // Parent is authorized, child will have to check its own permissions.
+                // Child fields take precedence over parent fields.
+                CompositePermissions(
+                    authorized = child.calcAuthorized(permissionStates),
+                    primary = child,
+                    fallback = parent
+                )
+            }
         }
-        // Copy content permissions / behavior
-        result.behavior = primary.behavior ?: fallback.behavior
-        result.alternatePageId = primary.alternatePageId ?: fallback.alternatePageId
-        result.permissionItemIds =
-            primary.permissionItemIds.takeIf { it.isNotEmpty() } ?: fallback.permissionItemIds
-        return result
+    }
+}
+
+/**
+ * Returns true if any of the [PermissionSettings.permissionItemIds] are authorized.
+ * If [PermissionSettings.permissionItemIds] is empty, also returns true, since it means there is
+ * no item requirement for access.
+ */
+private fun PermissionSettings.calcAuthorized(permissionStates: Map<String, PermissionStatesEntity?>): Boolean {
+    return permissionItemIds.isEmpty() || permissionItemIds.any { permissionStates[it]?.authorized == true }
+}
+
+/**
+ * Tries to delegate to [primary] first, and falls back to [fallback] if [primary] is not defined.
+ * While it's only used once and doesn't save us much code, the real use of this class is to make
+ * sure we get a complication error any time [PermissionSettings] is updated, so we don't forget to
+ * include the new field in the permission resolution logic.
+ */
+private class CompositePermissions(
+    override val authorized: Boolean,
+    private val primary: PermissionSettings,
+    private val fallback: PermissionSettings
+) : PermissionSettings {
+    override val permissionItemIds: List<String>
+        get() = primary.permissionItemIds.takeIf { it.isNotEmpty() } ?: fallback.permissionItemIds
+    override val behavior: String?
+        get() = primary.behavior ?: fallback.behavior
+    override val alternatePageId: String?
+        get() = primary.alternatePageId ?: fallback.alternatePageId
+    override val secondaryMarketPurchaseOption: String?
+        get() = primary.secondaryMarketPurchaseOption ?: fallback.secondaryMarketPurchaseOption
+
+    fun asEntity(): PermissionSettingsEntity {
+        val settings = this
+        return PermissionSettingsEntity().apply {
+            authorized = settings.authorized
+            permissionItemIds = settings.permissionItemIds
+            behavior = settings.behavior
+            alternatePageId = settings.alternatePageId
+            secondaryMarketPurchaseOption = settings.secondaryMarketPurchaseOption
+        }
+    }
+
+    fun asVolatile(): VolatilePermissionSettings {
+        return VolatilePermissionSettings(
+            authorized = authorized,
+            permissionItemIds = permissionItemIds,
+            behavior = behavior,
+            alternatePageId = alternatePageId,
+            secondaryMarketPurchaseOption = secondaryMarketPurchaseOption
+        )
     }
 }

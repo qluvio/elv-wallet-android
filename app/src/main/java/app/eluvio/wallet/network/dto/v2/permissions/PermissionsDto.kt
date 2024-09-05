@@ -17,16 +17,19 @@ data class PermissionsDto(
     // Content permissions, trickles down to children.
     val behavior: String?,
     val alternate_page_id: String?,
+    val secondary_market_purchase_option: String?,
 
     // Only applies to Pages
     val page_permissions: List<String>?,
     val page_permissions_behavior: String?,
     val page_permissions_alternate_page_id: String?,
+    val page_permissions_secondary_market_purchase_option: String?,
 
     // Only applies to Properties
     val property_permissions: List<String>?,
     val property_permissions_behavior: String?,
     val property_permissions_alternate_page_id: String?,
+    val property_permissions_secondary_market_purchase_option: String?,
 )
 
 @JsonClass(generateAdapter = true)

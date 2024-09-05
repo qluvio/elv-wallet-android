@@ -39,7 +39,7 @@ import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.getStartDateTimeString
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
@@ -318,10 +318,13 @@ fun DisabledCardPreview() = EluvioThemePreview {
         id = "id"
         name = "NFT Media Item"
         imageAspectRatio = AspectRatio.WIDE
-        resolvedPermissions = PermissionsEntity().apply {
-            authorized = false
-            behavior = PermissionBehavior.DISABLE.value
-        }
+        resolvedPermissions = VolatilePermissionSettings(
+            authorized = false,
+            behavior = PermissionBehavior.DISABLE.value,
+            permissionItemIds = emptyList(),
+            alternatePageId = null,
+            secondaryMarketPurchaseOption = null
+        )
         liveVideoInfo = LiveVideoInfoEntity().apply {
             startTime = RealmInstant.MIN
             title = "Tenacious D"

@@ -1,7 +1,8 @@
 package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
 import dagger.Provides
@@ -51,8 +52,8 @@ class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
     var secondaryFilter: String? = null
 
     @field:Ignore
-    override var resolvedPermissions: PermissionsEntity? = null
-    override var rawPermissions: PermissionsEntity? = null
+    override var resolvedPermissions: VolatilePermissionSettings? = null
+    override var rawPermissions: PermissionSettingsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
         get() = items
 

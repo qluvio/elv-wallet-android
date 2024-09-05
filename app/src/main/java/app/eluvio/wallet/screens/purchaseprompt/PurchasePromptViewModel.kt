@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettings
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -17,6 +18,7 @@ import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.Optional
 import app.eluvio.wallet.util.rx.asSharedState
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -90,18 +92,20 @@ class PurchasePromptViewModel @Inject constructor(
     }
 
     private fun updateQrCode() {
-        val permissionItemIds = sectionItem?.map {
+        val permissionSettings = sectionItem?.map {
             // Will be empty for non-media section items. For now that's fine.
-            it.media?.resolvedPermissions?.permissionItemIds.orEmpty()
+            Optional.of(it.media?.resolvedPermissions)
         }
-            ?: pageAndProperty?.map { (_, page) -> page.pagePermissions?.permissionItemIds.orEmpty() }
-            ?: property.map { it.propertyPermissions?.permissionItemIds.orEmpty() }
+            ?: pageAndProperty?.map { (_, page) -> Optional.of(page.pagePermissions) }
+            ?: property.map { Optional.of(it.propertyPermissions) }
 
         environmentStore.observeSelectedEnvironment()
             .firstOrError(/*Assume env won't change while in this screen*/)
             .flatMapPublisher { env ->
-                permissionItemIds.flatMapSingle { permissionItems ->
-                    generateQrCode(buildPurchaseUrl(permissionContext, env, permissionItems))
+                permissionSettings.flatMapSingle { permissionSettings ->
+                    generateQrCode(
+                        buildPurchaseUrl(permissionContext, env, permissionSettings.orDefault(null))
+                    )
                 }
             }
             .subscribeBy(
@@ -194,7 +198,7 @@ class PurchasePromptViewModel @Inject constructor(
 private fun buildPurchaseUrl(
     permissionContext: PermissionContext,
     environment: Environment,
-    permissionItemIds: List<String> = emptyList()
+    permissionSettings: PermissionSettings?,
 ): String {
     val context = JSONObject()
         // Only supported type is "purchase" for now.
@@ -211,10 +215,11 @@ private fun buildPurchaseUrl(
         .putOpt("sectionItemId", permissionContext.sectionItemId)
         .putOpt(
             "permissionItemIds",
-            permissionItemIds
-                .takeIf { it.isNotEmpty() }
+            permissionSettings?.permissionItemIds
+                ?.takeIf { it.isNotEmpty() }
                 ?.let { JSONArray(it) }
         )
+        .putOpt("secondaryPurchaseOption", permissionSettings?.secondaryMarketPurchaseOption)
 
     val encodedContext = Base58.encode(context.toString().toByteArray())
     return "${environment.walletUrl}/${permissionContext.propertyId}/${permissionContext.pageId.orEmpty()}?p=$encodedContext"

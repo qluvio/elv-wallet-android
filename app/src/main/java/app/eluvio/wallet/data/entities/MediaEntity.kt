@@ -3,7 +3,8 @@ package app.eluvio.wallet.data.entities
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,8 +31,8 @@ class MediaEntity : RealmObject, EntityWithPermissions {
     var imageAspectRatio: Float? = null
 
     @field:Ignore
-    override var resolvedPermissions: PermissionsEntity? = null
-    override var rawPermissions: PermissionsEntity? = null
+    override var resolvedPermissions: VolatilePermissionSettings? = null
+    override var rawPermissions: PermissionSettingsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
         get() = emptyList()
 

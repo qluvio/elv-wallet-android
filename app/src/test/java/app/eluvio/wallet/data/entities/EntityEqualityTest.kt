@@ -167,6 +167,7 @@ class EntityEqualityTest {
             "java.lang.Float", "float" -> 1f
             "java.lang.Boolean", "boolean" -> lastValue.toString().toBoolean().not()
             "java.util.Date" -> Date(Random.nextLong())
+            "java.util.List" -> listOf(1)
             "io.realm.kotlin.types.RealmList" -> {
                 // generic types are erased at runtime, so we can make a list of any type we want
                 realmListOf<Any>(1).toList().toRealmList()

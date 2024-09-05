@@ -2,7 +2,8 @@ package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,8 +44,8 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
     var logoPath: String? = null
 
     @field:Ignore
-    override var resolvedPermissions: PermissionsEntity? = null
-    override var rawPermissions: PermissionsEntity? = null
+    override var resolvedPermissions: VolatilePermissionSettings? = null
+    override var rawPermissions: PermissionSettingsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
         get() = listOfNotNull(media)
 

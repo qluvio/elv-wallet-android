@@ -1,7 +1,8 @@
 package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -55,15 +56,15 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
     var sectionIds = realmListOf<String>()
 
     @field:Ignore
-    override var resolvedPermissions: PermissionsEntity? = null
-    override var rawPermissions: PermissionsEntity? = null
+    override var resolvedPermissions: VolatilePermissionSettings? = null
+    override var rawPermissions: PermissionSettingsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
         // Sections aren't directly connected to the object, so stop propagation here.
         get() = emptyList()
 
     // Unique permissions that don't depend on parent hierarchy and can be resolved directly.
     // These permissions say whether or not the user is allowed to view this page
-    var pagePermissions: PermissionsEntity? = null
+    var pagePermissions: PermissionSettingsEntity? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

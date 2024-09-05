@@ -8,7 +8,7 @@ import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.showAlternatePage
 import app.eluvio.wallet.data.entities.v2.permissions.showPurchaseOptions
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -169,7 +169,7 @@ class PropertyDetailViewModel @Inject constructor(
     /**
      * If we are authorized to view this page/property, or redirect behavior isn't configured, returns null.
      */
-    private fun PermissionsEntity.getRedirectPageId(): String? {
+    private fun PermissionSettingsEntity.getRedirectPageId(): String? {
         return alternatePageId?.takeIf { showAlternatePage }
     }
 

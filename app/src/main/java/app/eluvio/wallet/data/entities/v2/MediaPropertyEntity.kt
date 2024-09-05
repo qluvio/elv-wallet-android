@@ -2,7 +2,8 @@ package app.eluvio.wallet.data.entities.v2
 
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionStatesEntity
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
+import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,15 +36,15 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
     var permissionStates = realmDictionaryOf<PermissionStatesEntity?>()
 
     @field:Ignore
-    override var resolvedPermissions: PermissionsEntity? = null
-    override var rawPermissions: PermissionsEntity? = null
+    override var resolvedPermissions: VolatilePermissionSettings? = null
+    override var rawPermissions: PermissionSettingsEntity? = null
     override val permissionChildren: List<EntityWithPermissions>
         get() = listOfNotNull(mainPage)
 
     // Unique permissions that don't depend on parent hierarchy and can be resolved directly.
     // When user is not authorized to view the property, we redirect to another page, which is
     // technically still in the same property, but we show it anyway.
-    var propertyPermissions: PermissionsEntity? = null
+    var propertyPermissions: PermissionSettingsEntity? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
