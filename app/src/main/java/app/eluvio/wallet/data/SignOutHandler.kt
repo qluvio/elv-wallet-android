@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import app.eluvio.wallet.MainActivity
+import app.eluvio.wallet.data.stores.PlaybackStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class SignOutHandler @Inject constructor(
     private val tokenStore: TokenStore,
     private val realm: Realm,
+    private val playbackStore: PlaybackStore,
     @ApplicationContext private val context: Context,
     private val toaster: Toaster,
 ) {
@@ -24,6 +26,7 @@ class SignOutHandler @Inject constructor(
         restartAppOnComplete: Boolean = true
     ): Completable {
         return Completable.fromAction {
+            playbackStore.wipe()
             tokenStore.wipe()
             realm.writeBlocking {
                 Log.w("Deleting all realm data")

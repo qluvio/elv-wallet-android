@@ -32,4 +32,8 @@ class PlaybackStore @Inject constructor(
     fun setPlaybackPosition(mediaId: String, position: Long) {
         prefs.edit().putLong(mediaId, position).apply()
     }
+
+    fun wipe() {
+        prefs.edit().clear().apply()
+    }
 }
