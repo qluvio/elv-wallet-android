@@ -21,6 +21,7 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
         headerLogo = dto.tvHeaderLogo?.path ?: dto.headerLogo?.path ?: ""
         // We can't handle properties without images
         image = dto.image?.path?.takeIf { it.isNotEmpty() } ?: return null
+        bgImagePath = dto.discoverPageBgImage?.path?.ifEmpty { null }
         mainPage = dto.mainPage.toEntity(id)
         loginInfo = dto.login?.toEntity()
 

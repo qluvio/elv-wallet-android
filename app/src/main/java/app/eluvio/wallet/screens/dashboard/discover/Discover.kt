@@ -93,9 +93,8 @@ private fun Discover(
         DiscoverGrid(
             state,
             onPropertyFocused = { property ->
-                val bgImage = property.mainPage?.backgroundImagePath?.let {
-                    "${state.baseUrl}${it}"
-                }
+                val path = property.bgImagePath ?: property.mainPage?.backgroundImagePath
+                val bgImage = path?.let { "${state.baseUrl}${it}" }
                 onBackgroundImageSet(bgImage)
             },
             onPropertyClicked = onPropertyClicked,

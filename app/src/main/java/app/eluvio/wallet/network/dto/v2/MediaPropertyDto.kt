@@ -17,6 +17,8 @@ data class MediaPropertyDto(
     val tvHeaderLogo: AssetLinkDto?,
     val id: String,
     val image: AssetLinkDto?,
+    @field:Json(name = "image_tv")
+    val discoverPageBgImage: AssetLinkDto?,
     val name: String,
     @field:Json(name = "main_page")
     val mainPage: MediaPageDto,
