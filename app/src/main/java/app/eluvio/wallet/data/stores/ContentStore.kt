@@ -39,12 +39,8 @@ class ContentStore @Inject constructor(
 ) {
 
     fun search(propertyId: String?, displayName: String?): Flowable<List<NftEntity>> {
-        val queryMap = buildMap {
-            if (propertyId != null) put("property_id", propertyId)
-            if (displayName != null) put("filter", "meta/display_name:co:$displayName")
-        }
         return apiProvider.getApi(GatewayApi::class)
-            .flatMap { api -> api.search(queryMap) }
+            .flatMap { api -> api.search(searchTerm = displayName, propertyId = propertyId) }
             .map { response -> response.contents.orEmpty().toNfts() }
             .saveTo(realm)
             .toFlowable()

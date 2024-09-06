@@ -7,7 +7,6 @@ import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.QueryMap
 
 interface GatewayApi : AuthdApi {
     @GET("apigw/nfts")
@@ -19,7 +18,8 @@ interface GatewayApi : AuthdApi {
 
     @GET("apigw/nfts")
     fun search(
-        @QueryMap queryMap: Map<String, String>,
+        @Query("name_like") searchTerm: String? = null,
+        @Query("property_id") propertyId: String? = null,
         @Query("limit") limit: Int = 100
     ): Single<PagedContent<NftDto>>
 
