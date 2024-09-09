@@ -3,7 +3,7 @@ package app.eluvio.wallet.data.stores
 import android.content.Context
 import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder
 import app.eluvio.wallet.data.entities.v2.LoginProviders
-import app.eluvio.wallet.util.datastore.ReadWriteStringPref
+import app.eluvio.wallet.util.datastore.StoreOperation
 import app.eluvio.wallet.util.datastore.edit
 import app.eluvio.wallet.util.datastore.readWriteStringPref
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -38,13 +38,9 @@ class TokenStore @Inject constructor(
      * Update multiple preferences at once.
      * This is more performant than updating them one by one.
      */
-    fun update(vararg pairs: Pair<ReadWriteStringPref, String?>) = dataStore.edit {
-        pairs.forEach { (key, value) ->
-            if (value != null) {
-                set(key.key, value)
-            } else {
-                remove(key.key)
-            }
+    fun update(vararg operations: StoreOperation) = dataStore.edit {
+        operations.forEach { operation ->
+            operation()
         }
     }
 

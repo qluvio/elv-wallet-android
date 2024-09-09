@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder
 import app.eluvio.wallet.R
+import app.eluvio.wallet.util.datastore.readWriteBoolPref
 import app.eluvio.wallet.util.datastore.readWriteStringPref
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -38,6 +39,7 @@ class EnvironmentStore @Inject constructor(
 
     private val dataStore = RxPreferenceDataStoreBuilder(context, "selected_env_store").build()
     private val selectedEnvName = dataStore.readWriteStringPref("selected_env")
+    val stagingFlag = dataStore.readWriteBoolPref("staging_flag")
 
     fun setSelectedEnvironment(environment: Environment) {
         selectedEnvName.set(environment.networkName)
@@ -45,6 +47,7 @@ class EnvironmentStore @Inject constructor(
 
     fun observeSelectedEnvironment(): Flowable<Environment> {
         return selectedEnvName.observe()
+            .distinctUntilChanged()
             .mapNotNull { optionalEnv ->
                 val envName = optionalEnv.orDefault(null)
                 val environment = Environment.entries
