@@ -12,7 +12,7 @@ fun NftTemplateDto.toEntity(primaryKey: String): NftTemplateEntity {
     val dto = this
     return NftTemplateEntity().apply {
         id = primaryKey
-        contractAddress = dto.address
+        contractAddress = dto.address ?: ""
         imageUrl = dto.image
         displayName = dto.display_name ?: ""
         editionName = dto.edition_name ?: ""

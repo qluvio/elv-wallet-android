@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.dashboard.myitems
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.v2.OwnedPropertiesEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -89,7 +90,11 @@ class MyItemsViewModel @Inject constructor(
                         copy(allMedia = allMedia)
                     }
                 },
-                onError = { Log.e("Error getting wallet data", it) }
+                onError = {
+                    fireEvent(Events.NetworkError)
+                    updateState { copy(allMedia = allMedia.copy(loading = false)) }
+                    Log.e("Error getting wallet data", it)
+                }
             )
             .addTo(disposables)
 

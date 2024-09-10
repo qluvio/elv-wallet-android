@@ -15,6 +15,7 @@ import app.eluvio.wallet.network.dto.MediaLinkDto
 import app.eluvio.wallet.network.dto.MediaSectionDto
 import app.eluvio.wallet.network.dto.NftDto
 import app.eluvio.wallet.network.dto.RedeemableOfferDto
+import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.realm.toRealmDictionaryOrEmpty
 import app.eluvio.wallet.util.realm.toRealmInstant
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
@@ -24,7 +25,8 @@ import io.realm.kotlin.types.RealmDictionary
 fun List<NftDto>.toNfts(): List<NftEntity> {
     return mapNotNull { dto ->
         if (dto.nft_template.error != null) {
-            throw IllegalStateException("Fabric error. Probably Bad/expired Token.")
+            Log.e("Fabric error. Probably Bad/expired Token.")
+            return@mapNotNull null
         }
         // What makes this token truly unique is the combination of contract address and token id.
         // This is needed because the internal entities (sections, collections, media) have their own ID, but it's not actually unique.

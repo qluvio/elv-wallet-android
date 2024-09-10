@@ -31,7 +31,7 @@ data class NftMetadataDto(
 
 @JsonClass(generateAdapter = true)
 data class NftTemplateDto(
-    val address: String,
+    val address: String?,
     val description: String?,
     val description_rich_text: String?,
     val display_name: String?,
