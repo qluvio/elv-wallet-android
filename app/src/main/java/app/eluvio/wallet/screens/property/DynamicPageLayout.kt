@@ -40,6 +40,7 @@ import androidx.tv.material3.Surface
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
@@ -61,10 +62,9 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
         DelayedFullscreenLoader()
         return
     }
-    if (state.backgroundImagePath != null) {
-        val url = state.urlForPath(state.backgroundImagePath)
+    if (state.backgroundImageUrl != null) {
         AsyncImage(
-            model = url,
+            model = state.backgroundImageUrl,
             contentScale = ContentScale.FillWidth,
             contentDescription = "Background",
             modifier = Modifier.fillMaxSize()
@@ -84,7 +84,7 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
         contentPadding = PaddingValues(top = 50.dp, bottom = 32.dp),
         modifier = Modifier.focusRequester(listFocusRequester)
     ) {
-        sections(state.sections, state.imagesBaseUrl)
+        sections(state.sections)
     }
 }
 
@@ -93,19 +93,16 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
  */
 fun LazyListScope.sections(
     sections: List<DynamicPageLayoutState.Section>,
-    imagesBaseUrl: String?
 ) {
     sections.forEach { section ->
         item(contentType = section::class) {
             when (section) {
                 is DynamicPageLayoutState.Section.Banner -> BannerSection(
                     item = section,
-                    imagesBaseUrl
                 )
 
                 is DynamicPageLayoutState.Section.Carousel -> CarouselSection(
                     item = section,
-                    imagesBaseUrl
                 )
 
                 is DynamicPageLayoutState.Section.Description -> DescriptionSection(item = section)
@@ -188,9 +185,11 @@ private fun DynamicPageLayoutPreview() = EluvioThemePreview {
                 DynamicPageLayoutState.Section.Description("3", AnnotatedString("Description")),
                 DynamicPageLayoutState.Section.Carousel(
                     permissionContext = PermissionContext(propertyId = "p", sectionId = "4"),
-                    title = "Carousel",
-                    subtitle = "Subtitle",
-                    displayFormat = DisplayFormat.CAROUSEL,
+                    displaySettings = SimpleDisplaySettings(
+                        title = "Carousel",
+                        subtitle = "Subtitle",
+                        displayFormat = DisplayFormat.CAROUSEL,
+                    ),
                     items = listOf(
                         DynamicPageLayoutState.CarouselItem.Media(
                             permissionContext = PermissionContext(propertyId = "property1"),

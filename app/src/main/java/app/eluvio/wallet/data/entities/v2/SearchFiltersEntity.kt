@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.entities.FabricUrlEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -70,10 +71,10 @@ class SearchFiltersEntity : RealmObject {
 
         var value: String = ""
         var nextFilterAttribute: String? = null
-        var image: String? = null
+        var imageUrl: FabricUrlEntity? = null
 
         override fun toString(): String {
-            return "AttributeValue(value='$value', nextFilterAttribute=$nextFilterAttribute, image=$image)"
+            return "AttributeValue(value='$value', nextFilterAttribute=$nextFilterAttribute, image=$imageUrl)"
         }
 
         override fun equals(other: Any?): Boolean {
@@ -84,7 +85,7 @@ class SearchFiltersEntity : RealmObject {
 
             if (value != other.value) return false
             if (nextFilterAttribute != other.nextFilterAttribute) return false
-            if (image != other.image) return false
+            if (imageUrl != other.imageUrl) return false
 
             return true
         }
@@ -92,7 +93,7 @@ class SearchFiltersEntity : RealmObject {
         override fun hashCode(): Int {
             var result = value.hashCode()
             result = 31 * result + (nextFilterAttribute?.hashCode() ?: 0)
-            result = 31 * result + (image?.hashCode() ?: 0)
+            result = 31 * result + (imageUrl?.hashCode() ?: 0)
             return result
         }
 

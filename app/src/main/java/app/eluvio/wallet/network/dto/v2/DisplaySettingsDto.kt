@@ -1,37 +1,29 @@
 package app.eluvio.wallet.network.dto.v2
 
 import app.eluvio.wallet.network.dto.AssetLinkDto
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+
+@Suppress("PropertyName")
 @JsonClass(generateAdapter = true)
 data class DisplaySettingsDto(
     val title: String?,
     val subtitle: String?,
     val headers: List<String>?,
     val description: String?,
-    @field:Json(name = "thumbnail_image_landscape")
-    val thumbnailLandscape: AssetLinkDto?,
-    @field:Json(name = "thumbnail_image_portrait")
-    val thumbnailPortrait: AssetLinkDto?,
-    @field:Json(name = "thumbnail_image_square")
-    val thumbnailSquare: AssetLinkDto?,
+    val aspect_ratio: String?,
+    val thumbnail_image_landscape: AssetLinkDto?,
+    val thumbnail_image_portrait: AssetLinkDto?,
+    val thumbnail_image_square: AssetLinkDto?,
 
-    @field:Json(name = "display_limit")
-    val displayLimit: Int?,
-    @field:Json(name = "display_limit_type")
-    val displayLimitType: String?,
-    @field:Json(name = "display_format")
-    val displayFormat: String?,
+    val display_limit: Int?,
+    val display_limit_type: String?,
+    val display_format: String?,
 
     val logo: AssetLinkDto?,
-    @field:Json(name = "logo_text")
-    val logoText: String?,
-    @field:Json(name = "inline_background_color")
-    val inlineBackgroundColor: String?,
-    @field:Json(name = "inline_background_image")
-    val inlineBackgroundImage: AssetLinkDto?,
+    val logo_text: String?,
+    val inline_background_color: String?,
+    val inline_background_image: AssetLinkDto?,
 
-    @field:Json(name = "background_image")
-    val heroBackgroundImage: AssetLinkDto?,
+    val background_image: AssetLinkDto?,
 )

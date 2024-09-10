@@ -1,6 +1,6 @@
 package app.eluvio.wallet.data.stores
 
-import app.eluvio.wallet.app.ConfigRefresher
+import app.eluvio.wallet.app.FabricConfigRefresher
 import app.eluvio.wallet.network.api.FabricConfigApi
 import app.eluvio.wallet.network.dto.FabricConfiguration
 import app.eluvio.wallet.util.logging.Log
@@ -23,7 +23,7 @@ class FabricConfigStore @Inject constructor(
 
     /**
      * Effectively an in-memory cache of the config, that will self-refresh as long as someone is
-     * subscribed (that someone is the [ConfigRefresher], which runs as long as the app does.
+     * subscribed (that someone is the [FabricConfigRefresher], which runs as long as the app does.
      * Also keeps track of which environment the current config is for.
      */
     private val config: Flowable<Pair<Environment, FabricConfiguration>> =

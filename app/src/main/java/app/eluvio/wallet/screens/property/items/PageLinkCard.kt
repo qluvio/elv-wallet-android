@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.AspectRatio
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
@@ -33,22 +35,26 @@ fun PageLinkCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val display = item.displaySettings
+    val title = display?.title
+    val (imageUrl, imageAspectRatio) = display?.thumbnailUrlAndRatio ?: (null to null)
+    val headers = display?.headers.orEmpty()
     Column(modifier.width(IntrinsicSize.Min)) {
         ImageCard(
-            imageUrl = item.imageUrl,
-            contentDescription = item.title,
+            imageUrl = imageUrl,
+            contentDescription = title,
             focusedOverlay = {
-                MetadataTexts(headers = item.headers, title = item.title, subtitle = item.subtitle)
+                MetadataTexts(item.displaySettings)
             },
             onClick = onClick,
             modifier = Modifier
                 .height(cardHeight)
                 .aspectRatio(
-                    item.imageAspectRatio ?: AspectRatio.WIDE,
+                    imageAspectRatio ?: AspectRatio.WIDE,
                     matchHeightConstraintsFirst = true
                 )
         )
-        item.title?.let { title ->
+        if (title != null) {
             Spacer(Modifier.height(10.dp))
             Text(
                 title,
@@ -69,11 +75,12 @@ private fun SubpropertyCardPreview(modifier: Modifier = Modifier) = EluvioThemeP
                 permissionContext = PermissionContext(propertyId = "property1"),
                 propertyId = "subId",
                 pageId = null,
-                imageUrl = "img",
-                imageAspectRatio = 1f,
-                subtitle = "subtitle",
-                title = "title",
-                headers = listOf("header1", "header2")
+                displaySettings = SimpleDisplaySettings(
+                    forcedAspectRatio = AspectRatio.SQUARE,
+                    subtitle = "subtitle",
+                    title = "title",
+                    headers = listOf("header1", "header2")
+                ),
             ),
             cardHeight = 100.dp,
             onClick = {},

@@ -1,6 +1,8 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.entities.FabricUrlEntity
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
@@ -9,7 +11,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
-import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
@@ -31,17 +32,11 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
 
     var isPurchaseItem = false
 
-    var thumbnailUrl: String? = null
-    var thumbnailAspectRatio: Float? = null
-
     // This field is defined only if the SectionItem is inside a Banner section.
-    var bannerImageUrl: String? = null
+    var bannerImageUrl: FabricUrlEntity? = null
 
-    var title: String? = null
-    var subtitle: String? = null
-    var headers = realmListOf<String>()
-    var description: String? = null
-    var logoPath: String? = null
+    var useMediaDisplaySettings: Boolean = true
+    var displaySettings: DisplaySettingsEntity? = null
 
     @field:Ignore
     override var resolvedPermissions: VolatilePermissionSettings? = null
@@ -50,7 +45,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         get() = listOfNotNull(media)
 
     override fun toString(): String {
-        return "SectionItemEntity(id='$id', mediaType=$mediaType, media=$media, linkData=$linkData, isPurchaseItem=$isPurchaseItem, thumbnailUrl=$thumbnailUrl, thumbnailAspectRatio=$thumbnailAspectRatio, bannerImageUrl=$bannerImageUrl, title=$title, subtitle=$subtitle, headers=$headers, description=$description, logoPath=$logoPath, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
+        return "SectionItemEntity(id='$id', mediaType=$mediaType, media=$media, linkData=$linkData, isPurchaseItem=$isPurchaseItem, bannerImageUrl=$bannerImageUrl, useMediaDisplaySettings=$useMediaDisplaySettings, displaySettings=$displaySettings, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -64,14 +59,9 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         if (media != other.media) return false
         if (linkData != other.linkData) return false
         if (isPurchaseItem != other.isPurchaseItem) return false
-        if (thumbnailUrl != other.thumbnailUrl) return false
-        if (thumbnailAspectRatio != other.thumbnailAspectRatio) return false
         if (bannerImageUrl != other.bannerImageUrl) return false
-        if (title != other.title) return false
-        if (subtitle != other.subtitle) return false
-        if (headers != other.headers) return false
-        if (description != other.description) return false
-        if (logoPath != other.logoPath) return false
+        if (useMediaDisplaySettings != other.useMediaDisplaySettings) return false
+        if (displaySettings != other.displaySettings) return false
         if (rawPermissions != other.rawPermissions) return false
 
         return true
@@ -83,14 +73,9 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (media?.hashCode() ?: 0)
         result = 31 * result + (linkData?.hashCode() ?: 0)
         result = 31 * result + isPurchaseItem.hashCode()
-        result = 31 * result + (thumbnailUrl?.hashCode() ?: 0)
-        result = 31 * result + (thumbnailAspectRatio?.hashCode() ?: 0)
         result = 31 * result + (bannerImageUrl?.hashCode() ?: 0)
-        result = 31 * result + (title?.hashCode() ?: 0)
-        result = 31 * result + (subtitle?.hashCode() ?: 0)
-        result = 31 * result + headers.hashCode()
-        result = 31 * result + (description?.hashCode() ?: 0)
-        result = 31 * result + (logoPath?.hashCode() ?: 0)
+        result = 31 * result + useMediaDisplaySettings.hashCode()
+        result = 31 * result + (displaySettings?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         return result
     }
@@ -99,6 +84,28 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         /** This section item links to a property/page. */
         var linkPropertyId: String? = null
         var linkPageId: String? = null
+
+        override fun toString(): String {
+            return "LinkData(linkPropertyId=$linkPropertyId, linkPageId=$linkPageId)"
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as LinkData
+
+            if (linkPropertyId != other.linkPropertyId) return false
+            if (linkPageId != other.linkPageId) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = linkPropertyId?.hashCode() ?: 0
+            result = 31 * result + (linkPageId?.hashCode() ?: 0)
+            return result
+        }
     }
 
     @Module

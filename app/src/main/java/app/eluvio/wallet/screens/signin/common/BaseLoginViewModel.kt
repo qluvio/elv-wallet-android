@@ -5,7 +5,6 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
-import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.NavGraphs
@@ -14,7 +13,6 @@ import app.eluvio.wallet.screens.navArgs
 import app.eluvio.wallet.screens.signin.SignInNavArgs
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.interval
-import app.eluvio.wallet.util.rx.mapNotNull
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.Disposable
@@ -30,7 +28,6 @@ import kotlin.time.Duration
 abstract class BaseLoginViewModel<ActivationData : Any>(
     // Just for convenience, we always provide this, even if we don't use it (propertyId=null)
     private val propertyStore: MediaPropertyStore,
-    private val apiProvider: ApiProvider,
     private val tokenStore: TokenStore,
     private val loginProvider: LoginProviders,
     savedStateHandle: SavedStateHandle
@@ -60,18 +57,12 @@ abstract class BaseLoginViewModel<ActivationData : Any>(
         observeActivationData()
 
         propertyId?.let { propertyId ->
-            apiProvider.getFabricEndpoint()
-                .flatMapPublisher { baseUrl ->
-                    propertyStore.observeMediaProperty(propertyId, forceRefresh = false)
-                        .mapNotNull { property ->
-                            baseUrl to property.loginInfo
-                        }
-                }
-                .subscribeBy { (baseUrl, loginInfo) ->
+            propertyStore.observeMediaProperty(propertyId, forceRefresh = false)
+                .subscribeBy { property ->
                     updateState {
                         copy(
-                            bgImageUrl = loginInfo?.backgroundImagePath?.let { "$baseUrl$it" },
-                            logoUrl = loginInfo?.logoPath?.let { "$baseUrl$it" }
+                            bgImageUrl = property.loginInfo?.backgroundImageUrl,
+                            logoUrl = property.loginInfo?.logoUrl
                         )
                     }
                 }

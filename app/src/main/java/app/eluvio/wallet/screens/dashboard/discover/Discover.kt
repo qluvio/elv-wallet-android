@@ -93,9 +93,7 @@ private fun Discover(
         DiscoverGrid(
             state,
             onPropertyFocused = { property ->
-                val path = property.bgImagePath ?: property.mainPage?.backgroundImagePath
-                val bgImage = path?.let { "${state.baseUrl}${it}" }
-                onBackgroundImageSet(bgImage)
+                onBackgroundImageSet(property.bgImageWithFallback?.url)
             },
             onPropertyClicked = onPropertyClicked,
             onRetryClicked = onRetryClicked
@@ -202,7 +200,6 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
                 PropertyCard(
                     index = index,
                     property = property,
-                    baseUrl = state.baseUrl,
                     scrollState = scrollState,
                     lastClickedProperty = lastClickedProperty,
                     currentFocusedProperty = currentFocusedProperty,
@@ -231,7 +228,6 @@ private fun BoxWithConstraintsScope.DiscoverGrid(
 private fun PropertyCard(
     index: Int,
     property: MediaPropertyEntity,
-    baseUrl: String,
     scrollState: TvLazyGridState,
     lastClickedProperty: MutableState<String?>,
     currentFocusedProperty: MutableState<String?>,
@@ -268,11 +264,10 @@ private fun PropertyCard(
                 }
             }
     ) {
-        val url = "${baseUrl}${property.image}"
-        var showImage by remember(url) { mutableStateOf(true) }
+        var showImage by remember(property.image) { mutableStateOf(true) }
         if (showImage) {
             ShimmerImage(
-                model = url,
+                model = property.image,
                 contentDescription = property.name,
                 onError = { showImage = false },
             )

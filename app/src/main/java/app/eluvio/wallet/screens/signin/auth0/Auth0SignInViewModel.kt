@@ -6,7 +6,6 @@ import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.stores.DeviceActivationStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
-import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.DeviceActivationData
 import app.eluvio.wallet.screens.signin.common.BaseLoginViewModel
 import app.eluvio.wallet.util.rx.mapNotNull
@@ -23,12 +22,10 @@ class Auth0SignInViewModel @Inject constructor(
     private val deviceActivationStore: DeviceActivationStore,
     private val authenticationService: AuthenticationService,
     propertyStore: MediaPropertyStore,
-    apiProvider: ApiProvider,
     tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseLoginViewModel<DeviceActivationData>(
     propertyStore,
-    apiProvider,
     tokenStore,
     LoginProviders.AUTH0,
     savedStateHandle

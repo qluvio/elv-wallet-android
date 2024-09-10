@@ -49,6 +49,7 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.EluvioLoadingSpinner
@@ -131,7 +132,7 @@ private fun PropertySearch(
             )
         } else {
             LazyColumn(contentPadding = PaddingValues(vertical = 20.dp)) {
-                sections(state.allSections, state.baseUrl)
+                sections(state.allSections)
             }
         }
     }
@@ -243,7 +244,7 @@ private fun Header(
     }
     Row(Modifier.padding(Overscan.defaultPadding(excludeBottom = true))) {
         AsyncImage(
-            model = "${state.baseUrl}${state.headerLogo}",
+            model = state.headerLogo,
             contentDescription = "Logo",
             placeholder = placeholder,
             modifier = Modifier.height(48.dp)
@@ -272,7 +273,9 @@ private fun PropertySearchPreview() = EluvioThemePreview {
             primaryFilters =
             DynamicPageLayoutState.Section.Carousel(
                 permissionContext = PermissionContext(propertyId = "p", sectionId = "4"),
-                displayFormat = DisplayFormat.GRID,
+                displaySettings = SimpleDisplaySettings(
+                    displayFormat = DisplayFormat.GRID,
+                ),
                 items = List(4) {
                     DynamicPageLayoutState.CarouselItem.CustomCard(
                         permissionContext = PermissionContext(propertyId = "property1"),

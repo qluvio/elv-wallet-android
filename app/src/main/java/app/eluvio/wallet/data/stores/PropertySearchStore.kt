@@ -32,7 +32,10 @@ class PropertySearchStore @Inject constructor(
                 if (isFirstState) {
                     apiProvider.getApi(SearchApi::class)
                         .flatMap { it.getSearchFilters(propertyId) }
-                        .map { it.toEntity(propertyId) }
+                        .zipWith(apiProvider.getFabricEndpoint())
+                        .map { (searchFilters, baseUrl) ->
+                            searchFilters.toEntity(propertyId, baseUrl)
+                        }
                         .saveTo(realm)
                         .ignoreElement()
                 } else null

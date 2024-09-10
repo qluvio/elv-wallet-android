@@ -43,12 +43,14 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
             val entity = carouselItem.entity
             MediaItemCard(
                 entity,
+                displayOverrides = carouselItem.displayOverrides,
                 cardHeight = cardHeight,
                 permissionContext = carouselItem.permissionContext
             )
             Spacer(Modifier.height(10.dp))
+            val title = carouselItem.displayOverrides?.title ?: entity.title
             Text(
-                entity.name,
+                title,
                 style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

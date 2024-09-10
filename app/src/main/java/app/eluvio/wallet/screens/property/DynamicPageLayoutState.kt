@@ -1,13 +1,13 @@
 package app.eluvio.wallet.screens.property
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.media3.exoplayer.source.MediaSource
+import app.eluvio.wallet.data.FabricUrl
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.RedeemableOfferEntity
-import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
@@ -19,10 +19,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
  */
 @Immutable
 data class DynamicPageLayoutState(
-    /** Some images are provided as paths, use this as */
-    val imagesBaseUrl: String? = null,
-
-    val backgroundImagePath: String? = null,
+    val backgroundImageUrl: String? = null,
     val sections: List<Section> = emptyList(),
 
     val searchNavigationEvent: NavigationEvent? = null,
@@ -31,15 +28,7 @@ data class DynamicPageLayoutState(
     val backLinkUrl: String? = null,
     val backButtonLogo: String? = null,
 ) {
-    fun isEmpty() = sections.isEmpty() && backgroundImagePath == null
-
-    /**
-     * Returns the full URL for a given path, using [imagesBaseUrl] if available.
-     * If [imagesBaseUrl] is not available, returns the path as-is.
-     */
-    fun urlForPath(path: String): String {
-        return imagesBaseUrl?.let { "$it$path" } ?: path
-    }
+    fun isEmpty() = sections.isEmpty() && backgroundImageUrl == null
 
     sealed interface Section {
         val sectionId: String
@@ -55,21 +44,15 @@ data class DynamicPageLayoutState(
         // Note: This has nothing to do with BannerWrapper and we should probably just remove this
         // section type.
         @Immutable
-        data class Banner(override val sectionId: String, val imagePath: String) : Section
+        data class Banner(override val sectionId: String, val imageUrl: String) : Section
 
         @Immutable
         data class Carousel(
             val permissionContext: PermissionContext,
-            val title: String? = null,
-            val subtitle: String? = null,
+            val displaySettings: DisplaySettings? = null,
             val viewAllNavigationEvent: NavigationEvent? = null,
             val items: List<CarouselItem>,
-            val displayFormat: DisplayFormat,
             val filterAttribute: SearchFiltersEntity.Attribute? = null,
-            val backgroundColor: Color? = null,
-            val backgroundImagePath: String? = null,
-            val logoPath: String? = null,
-            val logoText: String? = null,
         ) : Section {
             override val sectionId: String =
                 requireNotNull(permissionContext.sectionId) { "PermissionContext.sectionId is null" }
@@ -83,6 +66,7 @@ data class DynamicPageLayoutState(
         data class Media(
             override val permissionContext: PermissionContext,
             val entity: MediaEntity,
+            val displayOverrides: DisplaySettings? = null,
         ) : CarouselItem
 
         @Immutable
@@ -92,11 +76,7 @@ data class DynamicPageLayoutState(
             val propertyId: String,
             // Page ID to link to
             val pageId: String?,
-            val imageUrl: String?,
-            val imageAspectRatio: Float?,
-            val title: String?,
-            val subtitle: String?,
-            val headers: List<String>
+            val displaySettings: DisplaySettings?,
         ) : CarouselItem
 
         @Immutable
@@ -114,7 +94,7 @@ data class DynamicPageLayoutState(
         @Immutable
         data class CustomCard(
             override val permissionContext: PermissionContext,
-            val imageUrl: String?,
+            val imageUrl: FabricUrl?,
             val title: String,
             val aspectRatio: Float = 1f,
             val onClick: (() -> Unit)
@@ -123,9 +103,7 @@ data class DynamicPageLayoutState(
         @Immutable
         data class ItemPurchase(
             override val permissionContext: PermissionContext,
-            val imageUrl: String?,
-            val imageAspectRatio: Float?,
-            val title: String?,
+            val displaySettings: DisplaySettings?,
         ) : CarouselItem
 
         /**

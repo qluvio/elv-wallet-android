@@ -12,7 +12,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
 import app.eluvio.wallet.theme.label_24
+
+@Composable
+fun BoxScope.MetadataTexts(displaySettings: DisplaySettings?) = displaySettings?.run {
+    MetadataTexts(headers, title, subtitle)
+}
 
 @Composable
 fun BoxScope.MetadataTexts(

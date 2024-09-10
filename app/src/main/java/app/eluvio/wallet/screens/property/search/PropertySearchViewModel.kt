@@ -6,13 +6,14 @@ import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events.ToastMessage
 import app.eluvio.wallet.data.AspectRatio
+import app.eluvio.wallet.data.FabricUrl
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
-import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.network.dto.v2.SearchRequest
 import app.eluvio.wallet.screens.destinations.PropertySearchDestination
@@ -35,7 +36,6 @@ import javax.inject.Inject
 class PropertySearchViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
     private val searchStore: PropertySearchStore,
-    private val apiProvider: ApiProvider,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<PropertySearchViewModel.State>(State(), savedStateHandle) {
 
@@ -43,8 +43,7 @@ class PropertySearchViewModel @Inject constructor(
     data class State(
         val loading: Boolean = true,
         val loadingResults: Boolean = false,
-        val baseUrl: String? = null,
-        val headerLogo: String? = null,
+        val headerLogo: FabricUrl? = null,
         val propertyName: String? = null,
 
         val primaryFilters: DynamicPageLayoutState.Section? = null,
@@ -95,17 +94,11 @@ class PropertySearchViewModel @Inject constructor(
             }
             .addTo(disposables)
 
-        apiProvider.getFabricEndpoint()
-            .subscribeBy {
-                updateState { copy(baseUrl = it) }
-            }
-            .addTo(disposables)
-
         propertyStore.observeMediaProperty(navArgs.propertyId)
             .subscribeBy {
                 updateState {
                     copy(
-                        headerLogo = it.headerLogo,
+                        headerLogo = it.headerLogoUrl,
                         propertyName = it.name
                     )
                 }
@@ -126,7 +119,7 @@ class PropertySearchViewModel @Inject constructor(
                             // Technically we might not have finished loading the Property at this point,
                             // but we still know the filters, so we can show them.
                             loading = false,
-                            primaryFilters = filters.primaryFilter?.toCustomCardsSection(baseUrl)
+                            primaryFilters = filters.primaryFilter?.toCustomCardsSection()
                         )
                     }
 
@@ -231,7 +224,7 @@ class PropertySearchViewModel @Inject constructor(
                     copy(primaryFilters = searchFilters.primaryFilter
                         // only show primary filters while non are selected
                         ?.takeIf { !primaryFilterSelected }
-                        ?.toCustomCardsSection(baseUrl))
+                        ?.toCustomCardsSection())
                 }
             }
             .map { SearchTriggers.FilterChanged(it.orDefault(null)) }
@@ -287,20 +280,20 @@ class PropertySearchViewModel @Inject constructor(
         )
     }
 
-    private fun SearchFiltersEntity.Attribute.toCustomCardsSection(imageBaseUrl: String?): DynamicPageLayoutState.Section {
+    private fun SearchFiltersEntity.Attribute.toCustomCardsSection(): DynamicPageLayoutState.Section {
         val propertyContext = permissionContext
         return DynamicPageLayoutState.Section.Carousel(
             permissionContext = propertyContext.copy(sectionId = "PRIMARY_FILTERS"),
             items = values.map { filterValue ->
                 DynamicPageLayoutState.CarouselItem.CustomCard(
                     permissionContext = propertyContext.copy(),
-                    imageUrl = filterValue.image?.let { imagePath -> "$imageBaseUrl${imagePath}" },
+                    imageUrl = filterValue.imageUrl,
                     title = filterValue.value,
                     aspectRatio = AspectRatio.WIDE,
                     onClick = { onPrimaryFilterSelected(filterValue) }
                 )
             },
-            displayFormat = DisplayFormat.GRID,
+            displaySettings = SimpleDisplaySettings(displayFormat = DisplayFormat.GRID),
         )
     }
 }

@@ -7,7 +7,6 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
-import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.SignInRouterDestination
@@ -23,7 +22,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
-    private val apiProvider: ApiProvider,
     private val tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<DiscoverViewModel.State>(State(), savedStateHandle) {
@@ -32,7 +30,6 @@ class DiscoverViewModel @Inject constructor(
     data class State(
         val loading: Boolean = true,
         val properties: List<MediaPropertyEntity> = emptyList(),
-        val baseUrl: String = "",
         val showRetryButton: Boolean = false,
     )
 
@@ -40,10 +37,6 @@ class DiscoverViewModel @Inject constructor(
 
     override fun onResume() {
         super.onResume()
-
-        apiProvider.getFabricEndpoint()
-            .subscribeBy { updateState { copy(baseUrl = it) } }
-            .addTo(disposables)
 
         Flowables.combineLatest(
             // restart chain on manual refresh

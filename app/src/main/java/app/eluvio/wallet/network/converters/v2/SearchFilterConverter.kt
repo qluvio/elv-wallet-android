@@ -8,7 +8,7 @@ import app.eluvio.wallet.network.dto.v2.SearchFiltersDto
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 import io.realm.kotlin.ext.toRealmList
 
-fun SearchFiltersDto.toEntity(propId: String): SearchFiltersEntity {
+fun SearchFiltersDto.toEntity(propId: String, baseUrl: String): SearchFiltersEntity {
     val dto = this
     return SearchFiltersEntity().apply {
         propertyId = propId
@@ -22,13 +22,14 @@ fun SearchFiltersDto.toEntity(propId: String): SearchFiltersEntity {
         secondaryFilter = attributeMap[dto.secondaryFilter]
         primaryFilter = attributeMap[dto.primaryFilter]
             ?.copy()
-            ?.applyFilterOptions(dto.filterOptions, secondaryFilter)
+            ?.applyFilterOptions(dto.filterOptions, secondaryFilter, baseUrl)
     }
 }
 
 private fun Attribute.applyFilterOptions(
     filterOptions: List<FilterOptionsDto>?,
-    globalSecondaryFilter: Attribute?
+    globalSecondaryFilter: Attribute?,
+    baseUrl: String
 ) = apply {
     if (filterOptions.isNullOrEmpty()) {
         // Update nextFilter to global secondary filter
@@ -41,7 +42,7 @@ private fun Attribute.applyFilterOptions(
                 value = option.primaryFilterValue.takeIf { it.isNotEmpty() }
                     ?: SearchFiltersEntity.AttributeValue.ALL
                 nextFilterAttribute = option.secondaryFilterAttribute?.takeIf { it.isNotEmpty() }
-                image = option.image?.path
+                imageUrl = option.image?.toUrl(baseUrl)
             }
         }.toRealmListOrEmpty()
     }

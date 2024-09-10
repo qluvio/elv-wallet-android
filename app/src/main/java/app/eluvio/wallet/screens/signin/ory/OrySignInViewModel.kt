@@ -6,7 +6,6 @@ import app.eluvio.wallet.data.entities.v2.LoginProviders
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.MetamaskActivationStore
 import app.eluvio.wallet.data.stores.TokenStore
-import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.MetamaskActivationData
 import app.eluvio.wallet.screens.signin.common.BaseLoginViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,12 +19,10 @@ import kotlin.time.Duration.Companion.seconds
 class OrySignInViewModel @Inject constructor(
     private val metamaskActivationStore: MetamaskActivationStore,
     propertyStore: MediaPropertyStore,
-    apiProvider: ApiProvider,
     tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle
 ) : BaseLoginViewModel<MetamaskActivationData>(
     propertyStore,
-    apiProvider,
     tokenStore,
     LoginProviders.ORY,
     savedStateHandle

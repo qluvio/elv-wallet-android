@@ -10,7 +10,7 @@ enum class DisplayFormat(override val value: String) : RealmEnum {
     ;
 
     companion object {
-        fun from(value: String): DisplayFormat {
+        fun from(value: String?): DisplayFormat {
             return entries.firstOrNull { it.value == value } ?: UNKNOWN
         }
     }

@@ -26,18 +26,14 @@ class UpcomingVideoViewModel @Inject constructor(
 ) {
     data class State(
         val imagesBaseUrl: String? = null,
-        private val backgroundImagePath: String? = null,
+        val backgroundImageUrl: String? = null,
         val mediaItemId: String = "",
         val propertyId: String = "",
         val title: String = "",
         val icons: List<String> = emptyList(),
         val headers: List<String> = emptyList(),
         val startTimeMillis: Long? = null,
-    ) {
-        val backgroundImageUrl: String?
-            get() = "${imagesBaseUrl}$backgroundImagePath"
-                .takeIf { imagesBaseUrl != null && backgroundImagePath != null }
-    }
+    )
 
     override fun onResume() {
         super.onResume()
@@ -48,7 +44,7 @@ class UpcomingVideoViewModel @Inject constructor(
 
         propertyStore.observeMediaProperty(navArgs.propertyId)
             .subscribeBy {
-                updateState { copy(backgroundImagePath = it.mainPage?.backgroundImagePath) }
+                updateState { copy(backgroundImageUrl = it.mainPage?.backgroundImageUrl?.url) }
             }
             .addTo(disposables)
 
@@ -59,7 +55,7 @@ class UpcomingVideoViewModel @Inject constructor(
                         copy(
                             title = mediaItem.name,
                             icons = mediaItem.liveVideoInfo?.icons?.toList().orEmpty(),
-                            headers = mediaItem.liveVideoInfo?.headers?.toList().orEmpty(),
+                            headers = mediaItem.headers,
                             startTimeMillis = mediaItem.liveVideoInfo?.startTime?.millis
                         )
                     }

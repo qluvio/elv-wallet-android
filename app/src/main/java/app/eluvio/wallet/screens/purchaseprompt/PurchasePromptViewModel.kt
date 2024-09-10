@@ -4,13 +4,15 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
+import app.eluvio.wallet.data.FabricUrl
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettings
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
-import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.screens.common.generateQrCode
@@ -33,7 +35,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PurchasePromptViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
-    private val apiProvider: ApiProvider,
     private val environmentStore: EnvironmentStore,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<PurchasePromptViewModel.State>(State(), savedStateHandle) {
@@ -43,10 +44,10 @@ class PurchasePromptViewModel @Inject constructor(
         val media: MediaEntity? = null,
         val itemPurchase: ItemPurchase? = null,
         val qrImage: Bitmap? = null,
-        val bgImageUrl: String? = null
+        val bgImageUrl: FabricUrl? = null
     ) {
         @Immutable
-        data class ItemPurchase(val title: String, val subtitle: String?, val image: String?)
+        data class ItemPurchase(val displaySettings: DisplaySettings?)
     }
 
     private val permissionContext = savedStateHandle.navArgs<PermissionContext>()
@@ -120,14 +121,11 @@ class PurchasePromptViewModel @Inject constructor(
         val pageAndProperty =
             pageAndProperty ?: property.map { property -> property to property.mainPage!! }
 
-        return pageAndProperty.flatMapMaybe { (property, page) ->
-            apiProvider.getFabricEndpoint()
-                .mapNotNull { baseUrl ->
-                    val path = property.loginInfo?.backgroundImagePath?.ifEmpty { null }
-                        ?: page.backgroundImagePath?.ifEmpty { null }
-                    path?.let { "${baseUrl}${it}" }
-                }
-        }
+        return pageAndProperty
+            .mapNotNull { (property, page) ->
+                property.loginInfo?.backgroundImageUrl
+                    ?: page.backgroundImageUrl
+            }
             .doOnNext { updateState { copy(bgImageUrl = it) } }
             .doOnError { Log.e("Error loading background image", it) }
             .ignoreElements()
@@ -137,11 +135,7 @@ class PurchasePromptViewModel @Inject constructor(
         sectionItem?.firstOrError()
             ?.subscribeBy(
                 onSuccess = { sectionItem ->
-                    val itemPurchase = State.ItemPurchase(
-                        title = sectionItem.title ?: "",
-                        subtitle = sectionItem.subtitle,
-                        image = sectionItem.thumbnailUrl
-                    )
+                    val itemPurchase = State.ItemPurchase(sectionItem.displaySettings)
                     updateState { copy(media = sectionItem.media, itemPurchase = itemPurchase) }
                 },
                 onError = { Log.e("Error loading purchase item", it) }

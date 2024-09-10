@@ -32,6 +32,36 @@ class RedeemStateEntity : EmbeddedRealmObject {
         REDEEM_FAILED("REDEEM_FAILED")
     }
 
+    override fun toString(): String {
+        return "RedeemStateEntity(offerId='$offerId', active=$active, redeemer=$redeemer, redeemed=$redeemed, transaction=$transaction, statusStr='$statusStr')"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RedeemStateEntity
+
+        if (offerId != other.offerId) return false
+        if (active != other.active) return false
+        if (redeemer != other.redeemer) return false
+        if (redeemed != other.redeemed) return false
+        if (transaction != other.transaction) return false
+        if (statusStr != other.statusStr) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = offerId.hashCode()
+        result = 31 * result + active.hashCode()
+        result = 31 * result + (redeemer?.hashCode() ?: 0)
+        result = 31 * result + (redeemed?.hashCode() ?: 0)
+        result = 31 * result + (transaction?.hashCode() ?: 0)
+        result = 31 * result + statusStr.hashCode()
+        return result
+    }
+
     @Module
     @InstallIn(SingletonComponent::class)
     object EntityModule {

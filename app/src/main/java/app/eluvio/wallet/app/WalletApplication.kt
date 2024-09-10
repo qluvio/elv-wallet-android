@@ -1,18 +1,15 @@
 package app.eluvio.wallet.app
 
 import android.app.Application
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import app.eluvio.wallet.BuildConfig
-import app.eluvio.wallet.data.stores.FabricConfigStore
 import app.eluvio.wallet.di.TokenAwareHttpClient
-import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.coil.ContentFabricSizingInterceptor
+import app.eluvio.wallet.util.coil.FabricUrlMapper
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.SvgDecoder
 import dagger.hilt.android.HiltAndroidApp
-import io.reactivex.rxjava3.disposables.Disposable
 import okhttp3.OkHttpClient
 import timber.log.Timber
 import javax.inject.Inject
@@ -20,7 +17,7 @@ import javax.inject.Inject
 @HiltAndroidApp
 class WalletApplication : Application(), ImageLoaderFactory {
     @Inject
-    lateinit var configRefresher: ConfigRefresher
+    lateinit var fabricConfigRefresher: FabricConfigRefresher
 
     @Inject
     @TokenAwareHttpClient
@@ -31,7 +28,7 @@ class WalletApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
-        ProcessLifecycleOwner.get().lifecycle.addObserver(configRefresher)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(fabricConfigRefresher)
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -47,26 +44,8 @@ class WalletApplication : Application(), ImageLoaderFactory {
             .components {
                 add(SvgDecoder.Factory())
                 add(ContentFabricSizingInterceptor())
+                add(FabricUrlMapper())
             }
             .build()
-    }
-}
-
-class ConfigRefresher @Inject constructor(
-    private val fabricConfigStore: FabricConfigStore
-) : DefaultLifecycleObserver {
-    private var disposable: Disposable? = null
-    override fun onStart(owner: LifecycleOwner) {
-        Log.d("============APP START=========")
-        disposable = fabricConfigStore.observeFabricConfiguration()
-            .ignoreElements()
-            .retry()
-            .subscribe()
-    }
-
-    override fun onStop(owner: LifecycleOwner) {
-        Log.d("============APP STOP=========")
-        disposable?.dispose()
-        disposable = null
     }
 }

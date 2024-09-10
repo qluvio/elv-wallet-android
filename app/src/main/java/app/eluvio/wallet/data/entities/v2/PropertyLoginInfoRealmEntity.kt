@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.entities.FabricUrlEntity
 import app.eluvio.wallet.util.realm.realmEnum
 import dagger.Module
 import dagger.Provides
@@ -13,15 +14,15 @@ import kotlin.reflect.KClass
 
 class PropertyLoginInfoRealmEntity : EmbeddedRealmObject {
 
-    var backgroundImagePath: String? = null
-    var logoPath: String? = null
+    var backgroundImageUrl: FabricUrlEntity? = null
+    var logoUrl: FabricUrlEntity? = null
 
     @Ignore
     var loginProvider: LoginProviders by realmEnum(::_loginProvider)
     private var _loginProvider: String = LoginProviders.AUTH0.value
 
     override fun toString(): String {
-        return "PropertyLoginInfoRealmEntity(backgroundImagePath=$backgroundImagePath, logoPath=$logoPath, _loginProvider='$_loginProvider')"
+        return "PropertyLoginInfoRealmEntity(backgroundImageUrl=$backgroundImageUrl, logoUrl=$logoUrl, _loginProvider='$_loginProvider')"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -30,16 +31,16 @@ class PropertyLoginInfoRealmEntity : EmbeddedRealmObject {
 
         other as PropertyLoginInfoRealmEntity
 
-        if (backgroundImagePath != other.backgroundImagePath) return false
-        if (logoPath != other.logoPath) return false
+        if (backgroundImageUrl != other.backgroundImageUrl) return false
+        if (logoUrl != other.logoUrl) return false
         if (_loginProvider != other._loginProvider) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = backgroundImagePath?.hashCode() ?: 0
-        result = 31 * result + (logoPath?.hashCode() ?: 0)
+        var result = backgroundImageUrl?.hashCode() ?: 0
+        result = 31 * result + (logoUrl?.hashCode() ?: 0)
         result = 31 * result + _loginProvider.hashCode()
         return result
     }

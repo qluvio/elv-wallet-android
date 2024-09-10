@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,7 +24,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,6 +35,8 @@ import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.getStartDateTimeString
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
@@ -45,7 +45,6 @@ import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.button_24
 import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.util.compose.requestInitialFocus
@@ -58,13 +57,16 @@ typealias MediaClickHandler = (MediaEntity, PermissionContext?) -> Unit
 fun MediaItemCard(
     media: MediaEntity,
     modifier: Modifier = Modifier,
-    imageUrl: String = media.imageOrLockedImage(),
+    displayOverrides: DisplaySettings? = null,
     permissionContext: PermissionContext? = null,
     onMediaItemClick: MediaClickHandler = defaultMediaItemClickHandler(LocalNavigator.current),
     cardHeight: Dp = 150.dp,
-    aspectRatio: Float = media.aspectRatio(),
     shape: Shape = MaterialTheme.shapes.medium,
 ) {
+    val (imageUrl, aspectRatio) = displayOverrides?.thumbnailUrlAndRatio
+    // This will be cleaned up when MediaItem uses DisplaySettings properly
+        ?: (media.imageOrLockedImage() to (displayOverrides?.forcedAspectRatio
+            ?: media.aspectRatio()))
     if (media.isDisabled) {
         DisabledCard(imageUrl, media, shape, cardHeight, aspectRatio, modifier)
     } else {
@@ -74,11 +76,11 @@ fun MediaItemCard(
             contentDescription = media.nameOrLockedName(),
             shape = shape,
             focusedOverlay = {
-                if (liveVideoInfo != null) {
-                    LiveVideoFocusedOverlay(liveVideoInfo)
-                } else {
-                    DefaultFocusedOverlay(media)
-                }
+                MetadataTexts(
+                    headers = displayOverrides?.headers ?: media.headers,
+                    title = displayOverrides?.title ?: media.title,
+                    subtitle = displayOverrides?.subtitle ?: media.subtitle
+                )
             },
             unFocusedOverlay = {
                 if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
@@ -132,34 +134,6 @@ private fun DisabledCard(
 }
 
 @Composable
-private fun BoxScope.DefaultFocusedOverlay(media: MediaEntity) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.align(Alignment.BottomCenter)
-    ) {
-        if (media.requireLockedState().locked) {
-            Icon(
-                imageVector = Icons.Default.Lock,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .size(24.dp)
-            )
-        }
-        WrapContentText(
-            text = media.nameOrLockedName(),
-            style = MaterialTheme.typography.body_32,
-            // TODO: get this from theme
-            color = Color.White,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 20.dp)
-        )
-    }
-}
-
-@Composable
 private fun BoxScope.LiveVideoUnFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
     when {
         liveVideo.ended -> {
@@ -201,15 +175,6 @@ private fun BoxScope.LiveVideoUnFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
             )
         }
     }
-}
-
-@Composable
-private fun BoxScope.LiveVideoFocusedOverlay(liveVideo: LiveVideoInfoEntity) {
-    MetadataTexts(
-        headers = liveVideo.headers,
-        title = liveVideo.title,
-        subtitle = liveVideo.subtitle
-    )
 }
 
 /**
@@ -258,13 +223,12 @@ fun LiveVideoCardPreview() = EluvioThemePreview {
     val media = MediaEntity().apply {
         id = "id"
         name = "NFT Media Item"
+        subtitle = "The Grand Arena"
+        headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
         imageAspectRatio = AspectRatio.WIDE
         liveVideoInfo = LiveVideoInfoEntity().apply {
             startTime = RealmInstant.MIN
-            title = "Tenacious D"
-            subtitle = "The Grand Arena"
-            headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
         }
     }
     Column(modifier = Modifier.padding(10.dp)) {
@@ -280,13 +244,12 @@ fun UpcomingLiveVideoCardPreview() = EluvioThemePreview {
     val media = MediaEntity().apply {
         id = "id"
         name = "NFT Media Item"
+        subtitle = "The Grand Arena"
+        headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
         imageAspectRatio = AspectRatio.WIDE
         liveVideoInfo = LiveVideoInfoEntity().apply {
             startTime = RealmInstant.MAX
-            title = "Tenacious D"
-            subtitle = "The Grand Arena"
-            headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
         }
     }
     Column(modifier = Modifier.padding(10.dp)) {
@@ -317,6 +280,8 @@ fun DisabledCardPreview() = EluvioThemePreview {
     MediaItemCard(media = MediaEntity().apply {
         id = "id"
         name = "NFT Media Item"
+        subtitle = "The Grand Arena"
+        headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
         imageAspectRatio = AspectRatio.WIDE
         resolvedPermissions = VolatilePermissionSettings(
             authorized = false,
@@ -327,9 +292,6 @@ fun DisabledCardPreview() = EluvioThemePreview {
         )
         liveVideoInfo = LiveVideoInfoEntity().apply {
             startTime = RealmInstant.MIN
-            title = "Tenacious D"
-            subtitle = "The Grand Arena"
-            headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
         }
     })
 }

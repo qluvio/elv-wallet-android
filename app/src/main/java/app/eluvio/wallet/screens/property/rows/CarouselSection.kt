@@ -53,6 +53,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.Overscan
@@ -66,6 +67,7 @@ import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.util.compose.focusCapturingGroup
 import app.eluvio.wallet.util.compose.focusCapturingLazyList
 import app.eluvio.wallet.util.compose.focusTrap
+import app.eluvio.wallet.util.compose.fromHex
 import app.eluvio.wallet.util.compose.thenIf
 import app.eluvio.wallet.util.compose.thenIfNotNull
 import coil.compose.AsyncImage
@@ -76,20 +78,20 @@ private val CARD_HEIGHT = 120.dp
 @Composable
 fun CarouselSection(
     item: DynamicPageLayoutState.Section.Carousel,
-    imagesBaseUrl: String?,
     modifier: Modifier = Modifier
 ) {
-    if (item.items.isEmpty()) {
+    val display = item.displaySettings
+    if (display == null || item.items.isEmpty()) {
         return
     }
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .thenIfNotNull(item.backgroundColor) { Modifier.background(it) }
+            .thenIfNotNull(display.inlineBackgroundColor) { background(Color.fromHex(it)) }
     ) {
-        if (item.backgroundImagePath != null) {
+        if (display.inlineBackgroundImageUrl != null) {
             AsyncImage(
-                model = "$imagesBaseUrl${item.backgroundImagePath}",
+                model = display.inlineBackgroundImageUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopStart,
@@ -97,9 +99,9 @@ fun CarouselSection(
             )
         }
         Row {
-            val showLogo = item.logoPath != null
+            val showLogo = display.logoUrl != null
             if (showLogo) {
-                Logo(item, imagesBaseUrl)
+                Logo(display)
             }
             Column(
                 Modifier
@@ -114,15 +116,14 @@ fun CarouselSection(
                 var selectedFilter by remember { mutableStateOf<AttributeAndValue?>(null) }
                 val filterRowFocusRequester = remember { FocusRequester() }
 
-                val title = item.title?.takeIf { it.isNotEmpty() }
-                val subtitle = item.subtitle?.takeIf { it.isNotEmpty() }
+                val title = display.title?.ifEmpty { null }
+                val subtitle = display.subtitle?.ifEmpty { null }
                 val hasTitleRow = title != null || subtitle != null
                 if (hasTitleRow) {
                     TitleRow(
                         title,
                         subtitle,
                         item.viewAllNavigationEvent,
-                        imagesBaseUrl,
                         startPadding
                     )
                 }
@@ -178,7 +179,7 @@ fun CarouselSection(
                     )
                 } else {
                     SectionItems(
-                        item.displayFormat,
+                        display.displayFormat,
                         filteredItems,
                         startPadding,
                         modifier = exitFocusModifier
@@ -224,11 +225,8 @@ private fun SectionItems(
 }
 
 @Composable
-private fun Logo(
-    item: DynamicPageLayoutState.Section.Carousel,
-    imagesBaseUrl: String?,
-) {
-    item.logoPath ?: return
+private fun Logo(displaySettings: DisplaySettings) {
+    displaySettings.logoUrl ?: return
 
     val focusManager = LocalFocusManager.current
     // There's a bug where the entire row is skipped over when the logo is present because the first
@@ -244,7 +242,7 @@ private fun Logo(
             // Invisible, but still focusable
             .alpha(0f)
             .onFocusChanged {
-                if (it.hasFocus) {
+                if (it.isFocused) {
                     // Immediately throw focus to the card row
                     focusManager.moveFocus(FocusDirection.Right)
                 }
@@ -257,7 +255,7 @@ private fun Logo(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .then(
-                if (item.logoText != null) {
+                if (displaySettings.logoText != null) {
                     Modifier.padding(top = 40.dp)
                 } else {
                     Modifier
@@ -268,12 +266,12 @@ private fun Logo(
             .width(95.dp)
     ) {
         AsyncImage(
-            model = "$imagesBaseUrl${item.logoPath}",
+            model = displaySettings.logoUrl,
             contentDescription = "Logo"
         )
-        if (item.logoText != null) {
+        displaySettings.logoText?.let { text ->
             Text(
-                item.logoText,
+                text,
                 style = MaterialTheme.typography.label_24,
                 modifier = Modifier.padding(vertical = 20.dp)
             )
@@ -286,7 +284,6 @@ private fun ColumnScope.TitleRow(
     title: String?,
     subtitle: String?,
     viewAllNavigationEvent: NavigationEvent?,
-    imagesBaseUrl: String?,
     startPadding: Dp
 ) {
     Row(

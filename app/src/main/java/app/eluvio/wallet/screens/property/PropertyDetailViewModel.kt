@@ -13,7 +13,6 @@ import app.eluvio.wallet.data.entities.v2.permissions.showAlternatePage
 import app.eluvio.wallet.data.entities.v2.permissions.showPurchaseOptions
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
-import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.navigation.asReplace
@@ -31,7 +30,6 @@ import javax.inject.Inject
 class PropertyDetailViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
     private val propertySearchStore: PropertySearchStore,
-    private val apiProvider: ApiProvider,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<DynamicPageLayoutState>(DynamicPageLayoutState()) {
 
@@ -42,10 +40,6 @@ class PropertyDetailViewModel @Inject constructor(
 
     override fun onResume() {
         super.onResume()
-
-        apiProvider.getFabricEndpoint()
-            .subscribeBy { updateState { copy(imagesBaseUrl = it) } }
-            .addTo(disposables)
 
         val pageLayout = propertyStore.observeMediaProperty(propertyId)
             .switchMap { property ->
@@ -82,11 +76,11 @@ class PropertyDetailViewModel @Inject constructor(
                     // Find the first hero section and use its background as the page background.
                     val bgImage = sections.values
                         .firstOrNull { it.type == MediaPageSectionEntity.TYPE_HERO }
-                        ?.backgroundImagePath
-                        ?: page.backgroundImagePath
+                        ?.displaySettings?.heroBackgroundImageUrl
+                        ?: page.backgroundImageUrl
                     updateState {
                         copy(
-                            backgroundImagePath = bgImage,
+                            backgroundImageUrl = bgImage?.url,
                             searchNavigationEvent = PropertySearchDestination(propertyId).asPush(),
                             sections = sections(page, sections, filters)
                         )

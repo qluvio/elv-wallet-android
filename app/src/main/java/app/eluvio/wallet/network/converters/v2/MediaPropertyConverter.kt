@@ -13,17 +13,17 @@ import app.eluvio.wallet.network.dto.v2.MediaPageDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
 import io.realm.kotlin.ext.toRealmList
 
-fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
+fun MediaPropertyDto.toEntity(baseUrl: String): MediaPropertyEntity? {
     val dto = this
     return MediaPropertyEntity().apply {
         id = dto.id
         name = dto.name
-        headerLogo = dto.tvHeaderLogo?.path ?: dto.headerLogo?.path ?: ""
+        headerLogoUrl = (dto.tvHeaderLogo ?: dto.headerLogo)?.toUrl(baseUrl)
         // We can't handle properties without images
-        image = dto.image?.path?.takeIf { it.isNotEmpty() } ?: return null
-        bgImagePath = dto.discoverPageBgImage?.path?.ifEmpty { null }
-        mainPage = dto.mainPage.toEntity(id)
-        loginInfo = dto.login?.toEntity()
+        image = dto.image?.toUrl(baseUrl) ?: return null
+        bgImageUrl = dto.discoverPageBgImage?.toUrl(baseUrl)
+        mainPage = dto.mainPage.toEntity(id, baseUrl)
+        loginInfo = dto.login?.toEntity(baseUrl)
 
         permissionStates = dto.toPermissionStateEntities()
         rawPermissions = dto.permissions?.toContentPermissionsEntity()
@@ -31,17 +31,17 @@ fun MediaPropertyDto.toEntity(): MediaPropertyEntity? {
     }
 }
 
-private fun LoginInfoDto.toEntity(): PropertyLoginInfoRealmEntity {
+private fun LoginInfoDto.toEntity(baseUrl: String): PropertyLoginInfoRealmEntity {
     val dto = this
     return PropertyLoginInfoRealmEntity().apply {
-        backgroundImagePath =
-            dto.styling?.backgroundImageTv?.path ?: dto.styling?.backgroundImageDesktop?.path
-        logoPath = dto.styling?.logoTv?.path ?: dto.styling?.logo?.path
+        backgroundImageUrl =
+            (dto.styling?.backgroundImageTv ?: dto.styling?.backgroundImageDesktop)?.toUrl(baseUrl)
+        logoUrl = (dto.styling?.logoTv ?: dto.styling?.logo)?.toUrl(baseUrl)
         loginProvider = LoginProviders.from(dto.settings?.provider)
     }
 }
 
-fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
+fun MediaPageDto.toEntity(propertyId: String, baseUrl: String): MediaPageEntity {
     val dto = this
     val layout = dto.layout
     return MediaPageEntity().apply {
@@ -49,8 +49,8 @@ fun MediaPageDto.toEntity(propertyId: String): MediaPageEntity {
         uid = MediaPageEntity.uid(propertyId, dto.id)
         id = dto.id
         sectionIds = layout.sections.toRealmList()
-        backgroundImagePath = layout.backgroundImage?.path
-        logo = layout.logo?.path
+        backgroundImageUrl = layout.backgroundImage?.toUrl(baseUrl)
+        logoUrl = layout.logo?.toUrl(baseUrl)
         title = layout.title
         description = layout.description
         descriptionRichText = layout.descriptionRichText

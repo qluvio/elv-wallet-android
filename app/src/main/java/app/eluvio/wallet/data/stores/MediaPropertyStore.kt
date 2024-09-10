@@ -92,9 +92,10 @@ class MediaPropertyStore @Inject constructor(
                 // Maybe some day.
                 3
             )
-            .flatMapCompletable { response ->
-                val properties =
-                    response.contents.orEmpty().mapNotNull { propertyDto -> propertyDto.toEntity() }
+            .zipWith(apiProvider.getFabricEndpoint())
+            .flatMapCompletable { (response, baseUrl) ->
+                val properties = response.contents.orEmpty()
+                    .mapNotNull { propertyDto -> propertyDto.toEntity(baseUrl) }
                 val order = properties
                     .mapIndexed { index, property ->
                         MediaPropertyEntity.PropertyOrderEntity().apply {
@@ -126,7 +127,8 @@ class MediaPropertyStore @Inject constructor(
             fetchOperation = { _, isFirstState ->
                 apiProvider.getApi(MediaWalletV2Api::class)
                     .flatMap { api -> api.getPage(property.id, pageId) }
-                    .map { it.toEntity(property.id) }
+                    .zipWith(apiProvider.getFabricEndpoint())
+                    .map { (page, baseUrl) -> page.toEntity(property.id, baseUrl) }
                     .saveTo(realm)
                     .ignoreElement()
                     .takeIf { isFirstState && forceRefresh }
@@ -208,7 +210,8 @@ class MediaPropertyStore @Inject constructor(
         return apiProvider.getApi(MediaWalletV2Api::class)
             .flatMap { api -> api.getProperty(propertyId) }
             .doOnError { Log.e("Error fetching property: $it") }
-            .mapNotNull { response -> response.toEntity() }
+            .zipWith(apiProvider.getFabricEndpoint())
+            .mapNotNull { (response, baseUrl) -> response.toEntity(baseUrl) }
             .saveTo(realm)
             .ignoreElement()
     }

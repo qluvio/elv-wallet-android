@@ -1,7 +1,10 @@
 package app.eluvio.wallet.data.entities
 
 import app.eluvio.wallet.data.AspectRatio
+import app.eluvio.wallet.data.FabricUrl
+import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
@@ -21,10 +24,18 @@ import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlin.reflect.KClass
 
-class MediaEntity : RealmObject, EntityWithPermissions {
+/**
+ * This entity can represent a v1 or v2 media object. This was probably a mistake and we should
+ * have made separate classes, but it's too late now :)
+ * Most v2 properties *have* [DisplaySettings], but for historical reasons,
+ * [MediaEntity] *is* a [DisplaySettings]
+ */
+class MediaEntity : RealmObject, EntityWithPermissions, DisplaySettings {
     @PrimaryKey
     var id: String = ""
     var name: String = ""
+
+    // Full path. Can't be converted to [FabricUrl] because it's coming as a full path from the v1 API.
     var image: String = ""
     var posterImagePath: String? = null
     var mediaType: String = ""
@@ -61,6 +72,39 @@ class MediaEntity : RealmObject, EntityWithPermissions {
     // Search API
     var attributes: RealmList<SearchFiltersEntity.Attribute> = realmListOf()
     var tags: RealmList<String> = realmListOf()
+
+    // DisplaySettings stuff just lives here for now
+    override val title: String get() = name
+    override var subtitle: String? = null
+    override var headers: RealmList<String> = realmListOf()
+
+    // DisplaySettings stuff we haven't yet implemented on MediaEntity
+    override val description: String
+        get() = TODO("Not yet implemented")
+    override val forcedAspectRatio: Float
+        get() = TODO("Not yet implemented")
+    override val thumbnailLandscapeUrl: FabricUrl
+        get() = TODO("Not yet implemented")
+    override val thumbnailPortraitUrl: FabricUrl
+        get() = TODO("Not yet implemented")
+    override val thumbnailSquareUrl: FabricUrl
+        get() = TODO("Not yet implemented")
+    override val displayLimit: Int
+        get() = TODO("Not yet implemented")
+    override val displayLimitType: String
+        get() = TODO("Not yet implemented")
+    override val displayFormat: DisplayFormat
+        get() = TODO("Not yet implemented")
+    override val logoUrl: FabricUrl
+        get() = TODO("Not yet implemented")
+    override val logoText: String
+        get() = TODO("Not yet implemented")
+    override val inlineBackgroundColor: String
+        get() = TODO("Not yet implemented")
+    override val inlineBackgroundImageUrl: FabricUrl
+        get() = TODO("Not yet implemented")
+    override val heroBackgroundImageUrl: FabricUrl
+        get() = TODO("Not yet implemented")
 
     fun imageOrLockedImage(): String = with(requireLockedState()) {
         lockedImage?.takeIf { locked } ?: image
@@ -112,6 +156,8 @@ class MediaEntity : RealmObject, EntityWithPermissions {
         if (liveVideoInfo != other.liveVideoInfo) return false
         if (attributes != other.attributes) return false
         if (tags != other.tags) return false
+        if (subtitle != other.subtitle) return false
+        if (headers != other.headers) return false
 
         return true
     }
@@ -172,6 +218,36 @@ class MediaEntity : RealmObject, EntityWithPermissions {
 
         var imageAspectRatio: Float? = null
         var subtitle: String? = null
+
+        override fun toString(): String {
+            return "LockedStateEntity(locked=$locked, hideWhenLocked=$hideWhenLocked, lockedImage=$lockedImage, lockedName=$lockedName, imageAspectRatio=$imageAspectRatio, subtitle=$subtitle)"
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as LockedStateEntity
+
+            if (locked != other.locked) return false
+            if (hideWhenLocked != other.hideWhenLocked) return false
+            if (lockedImage != other.lockedImage) return false
+            if (lockedName != other.lockedName) return false
+            if (imageAspectRatio != other.imageAspectRatio) return false
+            if (subtitle != other.subtitle) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = locked.hashCode()
+            result = 31 * result + hideWhenLocked.hashCode()
+            result = 31 * result + (lockedImage?.hashCode() ?: 0)
+            result = 31 * result + (lockedName?.hashCode() ?: 0)
+            result = 31 * result + (imageAspectRatio?.hashCode() ?: 0)
+            result = 31 * result + (subtitle?.hashCode() ?: 0)
+            return result
+        }
     }
 
     @Module

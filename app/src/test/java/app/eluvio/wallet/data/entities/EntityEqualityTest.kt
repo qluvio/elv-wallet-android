@@ -4,8 +4,10 @@ package app.eluvio.wallet.data.entities
 import io.realm.kotlin.ext.realmDictionaryOf
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import org.junit.Test
 import org.reflections.Reflections
@@ -47,14 +49,13 @@ class EntityEqualityTest {
         val missedFields = mutableMapOf<Class<*>, List<Field>>()
 
         allEntityClasses
+            // For the sake of cleaner output, ignore classes that are never equal
+            .filterNot { it.neverEqual }
             .forEach { entityClass ->
                 try {
-                    // For the sake of cleaner output, ignore classes that are never equal
-                    if (!entityClass.neverEqual) {
-                        entityClass.missedFields
-                            .takeIf { it.isNotEmpty() }
-                            ?.let { missedFields[entityClass] = it }
-                    }
+                    entityClass.missedFields
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { missedFields[entityClass] = it }
                 } catch (e: Exception) {
                     System.err.println("Unexpected error while processing $entityClass")
                     throw e
@@ -103,13 +104,15 @@ class EntityEqualityTest {
     /**
      * Returns all entities we want to consider.
      */
-    private val allEntityClasses: List<Class<out RealmObject>>
+    private val allEntityClasses: List<Class<out TypedRealmObject>>
         get() = Reflections(
             ConfigurationBuilder()
                 .forPackage("app.eluvio.wallet")
                 .addUrls(ClasspathHelper.forJavaClassPath())
-        )
-            .getSubTypesOf(RealmObject::class.java)
+        ).let {
+            it.getSubTypesOf(RealmObject::class.java) +
+                    it.getSubTypesOf(EmbeddedRealmObject::class.java)
+        }
             .sortedBy { it.name }
 
     /**
@@ -118,7 +121,7 @@ class EntityEqualityTest {
      * But this can also happen because we are comparing fields that get a different value upon
      * instance creation (for example random UUID, or Date()).
      */
-    private val <T : RealmObject> Class<T>.neverEqual: Boolean
+    private val <T : TypedRealmObject> Class<T>.neverEqual: Boolean
         get() = new() != new()
 
     /** Convenience method to create a new instance of a class, without using the deprecated [Class.newInstance] */
@@ -127,13 +130,13 @@ class EntityEqualityTest {
     /**
      * Returns every [Field], which doesn't break equality checks after mutating.
      */
-    private val <T : RealmObject> Class<T>.missedFields: List<Field>
+    private val <T : TypedRealmObject> Class<T>.missedFields: List<Field>
         get() = comparableFields.filterNot { field -> isFieldInEquals(field) }
 
     /**
      * Returns every @Ignore [Field], which breaks equality checks after mutating.
      */
-    private val <T : RealmObject> Class<T>.badIgnoredFields: List<Field>
+    private val <T : TypedRealmObject> Class<T>.badIgnoredFields: List<Field>
         get() = ignoredFields.filter { field -> isFieldInEquals(field) }
 
     /**
@@ -204,9 +207,11 @@ class EntityEqualityTest {
      */
     private val Class<*>.comparableFields: List<Field>
         get() {
-            val excludedFields = listOf(
+            val excludedFields = listOfNotNull(
                 // Realm Kotlin SDK adds this field to all classes, just ignore it
-                "io_realm_kotlin_objectReference"
+                "io_realm_kotlin_objectReference",
+                // FabricUrlEntity is a special case, we ignore "baseUrl" when comparing.
+                "baseUrl".takeIf { this == FabricUrlEntity::class.java }
             )
             return declaredFields
                 .filterNot {

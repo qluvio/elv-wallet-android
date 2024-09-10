@@ -36,7 +36,7 @@ class PermissionSettingsEntity : PermissionSettings, EmbeddedRealmObject {
     override var authorized: Boolean? = null
 
     override fun toString(): String {
-        return "PermissionsEntity(permissionItemIds=$_permissionItemIds, behavior=$behavior, alternatePageId=$alternatePageId, authorized=$authorized)"
+        return "PermissionSettingsEntity(_permissionItemIds=$_permissionItemIds, behavior=$behavior, alternatePageId=$alternatePageId, secondaryMarketPurchaseOption=$secondaryMarketPurchaseOption, authorized=$authorized)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -48,6 +48,7 @@ class PermissionSettingsEntity : PermissionSettings, EmbeddedRealmObject {
         if (_permissionItemIds != other._permissionItemIds) return false
         if (behavior != other.behavior) return false
         if (alternatePageId != other.alternatePageId) return false
+        if (secondaryMarketPurchaseOption != other.secondaryMarketPurchaseOption) return false
 
         return true
     }
@@ -56,6 +57,7 @@ class PermissionSettingsEntity : PermissionSettings, EmbeddedRealmObject {
         var result = _permissionItemIds.hashCode()
         result = 31 * result + (behavior?.hashCode() ?: 0)
         result = 31 * result + (alternatePageId?.hashCode() ?: 0)
+        result = 31 * result + (secondaryMarketPurchaseOption?.hashCode() ?: 0)
         return result
     }
 

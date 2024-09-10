@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.entities.FabricUrlEntity
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
@@ -35,11 +36,10 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
      */
     var id: String = ""
 
-    /** Not a fully qualified URL, just a relative CF path */
-    var backgroundImagePath: String? = null
+    var backgroundImageUrl: FabricUrlEntity? = null
 
     /** AKA Header logo or banner */
-    var logo: String? = null
+    var logoUrl: FabricUrlEntity? = null
     var title: String? = null
     var description: String? = ""
 
@@ -74,8 +74,8 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
 
         if (uid != other.uid) return false
         if (id != other.id) return false
-        if (backgroundImagePath != other.backgroundImagePath) return false
-        if (logo != other.logo) return false
+        if (backgroundImageUrl != other.backgroundImageUrl) return false
+        if (logoUrl != other.logoUrl) return false
         if (title != other.title) return false
         if (description != other.description) return false
         if (descriptionRichText != other.descriptionRichText) return false
@@ -89,8 +89,8 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
     override fun hashCode(): Int {
         var result = uid.hashCode()
         result = 31 * result + id.hashCode()
-        result = 31 * result + (backgroundImagePath?.hashCode() ?: 0)
-        result = 31 * result + (logo?.hashCode() ?: 0)
+        result = 31 * result + (backgroundImageUrl?.hashCode() ?: 0)
+        result = 31 * result + (logoUrl?.hashCode() ?: 0)
         result = 31 * result + (title?.hashCode() ?: 0)
         result = 31 * result + (description?.hashCode() ?: 0)
         result = 31 * result + (descriptionRichText?.hashCode() ?: 0)
@@ -101,7 +101,7 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
     }
 
     override fun toString(): String {
-        return "MediaPageEntity(id='$uid', realId='$id', backgroundImagePath=$backgroundImagePath, logo=$logo, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, pagePermissions=$pagePermissions)"
+        return "MediaPageEntity(id='$uid', realId='$id', backgroundImage=$backgroundImageUrl, logoUrl=$logoUrl, title=$title, description=$description, descriptionRichText=$descriptionRichText, sectionIds=$sectionIds, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, pagePermissions=$pagePermissions)"
     }
 
     @Module

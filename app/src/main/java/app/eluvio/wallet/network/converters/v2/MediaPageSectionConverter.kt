@@ -1,11 +1,9 @@
 package app.eluvio.wallet.network.converters.v2
 
-import app.eluvio.wallet.data.AspectRatio
-import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
 import app.eluvio.wallet.network.converters.v2.permissions.toContentPermissionsEntity
-import app.eluvio.wallet.network.dto.v2.DisplaySettingsDto
 import app.eluvio.wallet.network.dto.v2.HeroItemDto
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
 import app.eluvio.wallet.network.dto.v2.SectionItemDto
@@ -24,32 +22,16 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
     return MediaPageSectionEntity().apply {
         id = dto.id
         type = dto.type
+        displaySettings = dto.display?.toEntity(baseUrl) ?: DisplaySettingsEntity()
         if (type == MediaPageSectionEntity.TYPE_HERO) {
-            items = dto.heroItems?.map { it.toEntity() }.toRealmListOrEmpty()
-            backgroundImagePath =
-                dto.heroItems
-                    ?.firstNotNullOfOrNull { it.display?.heroBackgroundImage?.path }
-                    ?.ifEmpty { null }
+            items = dto.heroItems?.map { it.toEntity(baseUrl) }.toRealmListOrEmpty()
+            // Find first bg image from children and apply to self
+            items
+                .firstNotNullOfOrNull { it.displaySettings?.heroBackgroundImageUrl }
+                ?.let { displaySettings?.heroBackgroundImageUrl = it }
         } else {
             items = dto.content?.mapNotNull { it.toEntity(baseUrl) }.toRealmListOrEmpty()
-            backgroundImagePath = dto.display?.inlineBackgroundImage?.path?.ifEmpty { null }
-            backgroundColor = dto.display?.inlineBackgroundColor?.ifEmpty { null }
         }
-
-        title = dto.display?.title
-        subtitle = dto.display?.subtitle
-        displayLimit = dto.display?.displayLimit?.takeIf {
-            // Display limit of 0 means no limit. Which is the same handling we do for null, so just
-            // turn zeros to null.
-            it > 0
-        }
-        displayLimitType = dto.display?.displayLimitType
-        displayFormat = dto.display?.displayFormat?.let { format ->
-            DisplayFormat.from(format)
-        } ?: DisplayFormat.UNKNOWN
-
-        logoPath = dto.display?.logo?.path
-        logoText = dto.display?.logoText
 
         primaryFilter = dto.primaryFilter
         secondaryFilter = dto.secondaryFilter
@@ -65,30 +47,24 @@ private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
         id = dto.id
         mediaType = dto.mediaType
         media = dto.media?.toEntity(baseUrl)
+        useMediaDisplaySettings = dto.useMediaSettings == true
         rawPermissions = dto.permissions?.toContentPermissionsEntity()
 
         linkData = dto.getLinkDataEntity()
-        val (imageLink, aspectRatio) =
-            dto.display?.thumbnailSquare?.let { it to AspectRatio.SQUARE }
-                ?: dto.display?.thumbnailPortrait?.let { it to AspectRatio.POSTER }
-                ?: dto.display?.thumbnailLandscape?.let { it to AspectRatio.WIDE }
-                ?: (null to null)
-        thumbnailUrl = imageLink?.path?.let { "$baseUrl$it" } ?: ""
-        thumbnailAspectRatio = aspectRatio
 
-        bannerImageUrl = dto.bannerImage?.path?.let { "$baseUrl$it" }
+        bannerImageUrl = dto.bannerImage?.toUrl(baseUrl)
 
         isPurchaseItem = dto.type == "item_purchase"
 
-        setDisplayFields(dto.display)
+        displaySettings = dto.display?.toEntity(baseUrl)
     }
 }
 
-private fun HeroItemDto.toEntity(): SectionItemEntity {
+private fun HeroItemDto.toEntity(baseUrl: String): SectionItemEntity {
     val dto = this
     return SectionItemEntity().apply {
         id = dto.id
-        setDisplayFields(display)
+        displaySettings = dto.display?.toEntity(baseUrl)
     }
 }
 
@@ -121,15 +97,4 @@ private fun SectionItemDto.getLinkDataEntity(): SectionItemEntity.LinkData? {
 
         else -> null
     }
-}
-
-/**
- * Mutates the [SectionItemEntity] to set the display fields from the [DisplaySettingsDto].
- */
-private fun SectionItemEntity.setDisplayFields(dto: DisplaySettingsDto?) {
-    title = dto?.title
-    subtitle = dto?.subtitle
-    headers = dto?.headers.toRealmListOrEmpty()
-    description = dto?.description
-    logoPath = dto?.logo?.path
 }

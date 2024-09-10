@@ -25,7 +25,7 @@ import app.eluvio.wallet.theme.title_62
 @Composable
 fun CustomCard(item: CarouselItem.CustomCard, cardHeight: Dp, modifier: Modifier) {
     ImageCard(
-        imageUrl = item.imageUrl,
+        imageUrl = item.imageUrl?.url,
         contentDescription = item.title,
         onClick = item.onClick,
         modifier = modifier

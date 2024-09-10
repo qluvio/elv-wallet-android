@@ -33,6 +33,8 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.MediaItemCard
@@ -101,6 +103,7 @@ private fun ItemPurchaseCard(
     itemPurchase: PurchasePromptViewModel.State.ItemPurchase,
     qrImage: Bitmap?,
 ) {
+    val display = itemPurchase.displaySettings ?: return
     Row(
         horizontalArrangement = Arrangement.spacedBy(24.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -118,7 +121,7 @@ private fun ItemPurchaseCard(
         ) {
             Spacer(Modifier.height(32.dp))
             ShimmerImage(
-                model = itemPurchase.image, //TODO: add baseurl
+                model = display.thumbnailUrlAndRatio?.first,
                 contentDescription = "NFT image",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -127,14 +130,14 @@ private fun ItemPurchaseCard(
             )
             Spacer(Modifier.height(18.dp))
             Text(
-                text = itemPurchase.title,
+                text = display.title ?: "",
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.carousel_36
             )
             Spacer(modifier = Modifier.height(4.dp))
-            itemPurchase.subtitle?.let {
+            display.subtitle?.let {
                 Text(text = it.uppercase(), style = MaterialTheme.typography.label_24)
             }
         }
@@ -194,7 +197,6 @@ private fun MediaEntityPurchasePromptPreview() = EluvioThemePreview {
                 imageAspectRatio = AspectRatio.WIDE
                 liveVideoInfo = LiveVideoInfoEntity().apply {
                     startTime = RealmInstant.MIN
-                    title = "Tenacious D"
                     subtitle = "The Grand Arena"
                     headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
                 }
@@ -210,9 +212,10 @@ private fun ItemPurchasePromptPreview() = EluvioThemePreview {
     PurchasePrompt(
         PurchasePromptViewModel.State(
             itemPurchase = PurchasePromptViewModel.State.ItemPurchase(
-                title = "Item Purchase",
-                subtitle = "Subtitle",
-                image = "http://example.com/image.png"
+                SimpleDisplaySettings(
+                    title = "Item Purchase",
+                    subtitle = "Subtitle",
+                )
             ),
             qrImage = generateQrCodeBlocking("http://eluv.io")
         )

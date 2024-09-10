@@ -24,13 +24,15 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
     return MediaEntity().apply {
         id = dto.id
         name = dto.title ?: ""
+        subtitle = dto.subtitle
+        headers = dto.headers.toRealmListOrEmpty()
         mediaFile = imageFile?.path ?: ""
         imageAspectRatio = aspectRatio
         mediaType = dto.mediaType ?: dto.type
         val imageLink = dto.thumbnailSquare
             ?: dto.thumbnailPortrait
             ?: dto.thumbnailLandscape
-        image = imageLink?.path?.let { "$baseUrl$it" } ?: ""
+        image = imageLink?.toUrl(baseUrl)?.url ?: ""
         playableHash = dto.mediaLink?.hashContainer?.get("source")?.toString()
         mediaLinks = dto.mediaLink?.toPathMap().toRealmDictionaryOrEmpty()
         gallery = dto.gallery?.mapNotNull { it.toEntity() }.toRealmListOrEmpty()
@@ -75,9 +77,6 @@ private fun parseLiveVideoInfo(dto: MediaItemV2Dto): LiveVideoInfoEntity? {
         return null
     }
     return LiveVideoInfoEntity().apply {
-        title = dto.title
-        subtitle = dto.subtitle
-        headers = dto.headers.toRealmListOrEmpty()
         icons = dto.icons?.mapNotNull { it.icon?.path }.toRealmListOrEmpty()
         startTime = dto.startTime?.toRealmInstant()
         endTime = dto.endTime?.toRealmInstant()

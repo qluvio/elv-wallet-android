@@ -13,11 +13,10 @@ import coil.compose.AsyncImage
 @Composable
 fun BannerSection(
     item: DynamicPageLayoutState.Section.Banner,
-    baseUrl: String?,
     modifier: Modifier = Modifier
 ) {
     AsyncImage(
-        model = baseUrl?.let { "$it${item.imagePath}" },
+        model = item.imageUrl,
         contentDescription = "Logo",
         modifier
             .padding(

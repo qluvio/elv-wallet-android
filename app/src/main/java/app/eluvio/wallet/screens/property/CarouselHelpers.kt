@@ -1,16 +1,16 @@
 package app.eluvio.wallet.screens.property
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
-import app.eluvio.wallet.util.compose.fromHex
 import app.eluvio.wallet.util.logging.Log
 
 /**
@@ -49,22 +49,16 @@ private fun MediaPageSectionEntity.toCarouselSection(
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
 ): DynamicPageLayoutState.Section.Carousel {
     val permissionContext = parentPermissionContext.copy(sectionId = id)
-    val items = items.toCarouselItems(permissionContext, displayFormat)
-    val displayLimit = displayLimit?.takeIf { it > 0 } ?: items.size
+    val items = items.toCarouselItems(permissionContext, displaySettings)
+    val displayLimit = displaySettings?.displayLimit?.takeIf { it > 0 } ?: items.size
     val showViewAll = items.size > displayLimit || items.size > viewAllThreshold
     val filterAttribute = primaryFilter?.let { primaryFilter ->
         filters?.attributes?.firstOrNull { it.id == primaryFilter }
     }
     return DynamicPageLayoutState.Section.Carousel(
         permissionContext,
-        title = title,
-        subtitle = subtitle,
+        displaySettings = displaySettings,
         items = items.take(displayLimit),
-        backgroundColor = backgroundColor?.let { Color.fromHex(it) },
-        backgroundImagePath = backgroundImagePath,
-        logoPath = logoPath,
-        logoText = logoText,
-        displayFormat = displayFormat,
         filterAttribute = filterAttribute,
         viewAllNavigationEvent = MediaGridDestination(permissionContext)
             .takeIf { showViewAll }
@@ -76,16 +70,16 @@ private fun MediaPageSectionEntity.toHeroSections(): List<DynamicPageLayoutState
     return items.flatMap { item ->
         val sectionIdPrefix = "${this.id}-${item.id}"
         listOfNotNull(
-            item.logoPath?.let {
+            item.displaySettings?.logoUrl?.url?.let {
                 DynamicPageLayoutState.Section.Banner("${sectionIdPrefix}-banner", it)
             },
-            item.title?.ifEmpty { null }?.let {
+            item.displaySettings?.title?.ifEmpty { null }?.let {
                 DynamicPageLayoutState.Section.Title(
                     sectionId = "$sectionIdPrefix-title",
                     text = AnnotatedString(it)
                 )
             },
-            item.description?.ifEmpty { null }?.let {
+            item.displaySettings?.description?.ifEmpty { null }?.let {
                 DynamicPageLayoutState.Section.Description(
                     sectionId = "$sectionIdPrefix-description",
                     text = AnnotatedString(it)
@@ -97,11 +91,11 @@ private fun MediaPageSectionEntity.toHeroSections(): List<DynamicPageLayoutState
 
 fun List<SectionItemEntity>.toCarouselItems(
     parentPermissionContext: PermissionContext,
-    sectionDisplayFormat: DisplayFormat
+    sectionDisplaySettings: DisplaySettings?,
 ): List<CarouselItem> {
     return mapNotNull { item ->
-        val bannerImage = item.bannerImageUrl
-        val isBannerSection = sectionDisplayFormat == DisplayFormat.BANNER
+        val bannerImage = item.bannerImageUrl?.url
+        val isBannerSection = sectionDisplaySettings?.displayFormat == DisplayFormat.BANNER
         if (isBannerSection && bannerImage == null) {
             Log.w("Section item inside a Banner section, doesn't have a banner image configured")
             return@mapNotNull null
@@ -118,25 +112,27 @@ fun List<SectionItemEntity>.toCarouselItems(
                     // assume this is a link to page within the current property.
                     propertyId = item.linkData?.linkPropertyId ?: permissionContext.propertyId,
                     pageId = item.linkData?.linkPageId,
-                    imageUrl = item.thumbnailUrl,
-                    imageAspectRatio = item.thumbnailAspectRatio,
-                    title = item.title,
-                    subtitle = item.subtitle,
-                    headers = item.headers
+                    displaySettings = item.displaySettings,
                 )
             }
 
-            item.media != null -> CarouselItem.Media(
-                permissionContext = permissionContext.copy(mediaItemId = item.media!!.id),
-                entity = item.media!!,
-            )
+            item.media != null -> {
+                val aspectRatioOverride = sectionDisplaySettings?.forcedAspectRatio
+                val displayOverrides = item.displaySettings
+                    ?.takeIf { !item.useMediaDisplaySettings }
+                    ?.let { SimpleDisplaySettings.from(it, aspectRatioOverride) }
+                    ?: SimpleDisplaySettings(forcedAspectRatio = aspectRatioOverride)
+                CarouselItem.Media(
+                    permissionContext = permissionContext.copy(mediaItemId = item.media!!.id),
+                    entity = item.media!!,
+                    displayOverrides = displayOverrides
+                )
+            }
 
             item.isPurchaseItem -> {
                 CarouselItem.ItemPurchase(
                     permissionContext = permissionContext,
-                    title = item.title,
-                    imageUrl = item.thumbnailUrl,
-                    imageAspectRatio = item.thumbnailAspectRatio,
+                    displaySettings = item.displaySettings,
                 )
             }
 

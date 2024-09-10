@@ -1,5 +1,7 @@
 package app.eluvio.wallet.data.entities.v2
 
+import app.eluvio.wallet.data.FabricUrl
+import app.eluvio.wallet.data.entities.FabricUrlEntity
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionStatesEntity
@@ -20,15 +22,15 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
     @PrimaryKey
     var id: String = ""
     var name: String = ""
-    var headerLogo: String = ""
+    var headerLogoUrl: FabricUrlEntity? = null
 
     // Poster image used on Discover page
-    var image: String = ""
+    var image: FabricUrlEntity? = null
 
     // Background image used on Discover page when the Property is selected
-    var bgImagePath: String? = null
-    val bgImageWithFallback: String?
-        get() = bgImagePath ?: mainPage?.backgroundImagePath
+    var bgImageUrl: FabricUrlEntity? = null
+    val bgImageWithFallback: FabricUrl?
+        get() = bgImageUrl ?: mainPage?.backgroundImageUrl
 
     // Property can also include a list of pages besides the main page.
     // But the TV apps have no use for it currently.
@@ -61,9 +63,9 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
 
         if (id != other.id) return false
         if (name != other.name) return false
-        if (headerLogo != other.headerLogo) return false
+        if (headerLogoUrl != other.headerLogoUrl) return false
         if (image != other.image) return false
-        if (bgImagePath != other.bgImagePath) return false
+        if (bgImageUrl != other.bgImageUrl) return false
         if (mainPage != other.mainPage) return false
         if (loginInfo != other.loginInfo) return false
         if (permissionStates != other.permissionStates) return false
@@ -76,9 +78,9 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
-        result = 31 * result + headerLogo.hashCode()
+        result = 31 * result + headerLogoUrl.hashCode()
         result = 31 * result + image.hashCode()
-        result = 31 * result + (bgImagePath?.hashCode() ?: 0)
+        result = 31 * result + (bgImageUrl?.hashCode() ?: 0)
         result = 31 * result + (mainPage?.hashCode() ?: 0)
         result = 31 * result + (loginInfo?.hashCode() ?: 0)
         result = 31 * result + permissionStates.hashCode()
@@ -88,7 +90,7 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
     }
 
     override fun toString(): String {
-        return "MediaPropertyEntity(id='$id', name='$name', headerLogo='$headerLogo', image='$image', bgImagePath=$bgImagePath, mainPage=$mainPage, loginInfo=$loginInfo, permissionStates=$permissionStates, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, propertyPermissions=$propertyPermissions)"
+        return "MediaPropertyEntity(id='$id', name='$name', headerLogoUrl='$headerLogoUrl', image='$image', bgImageUrl=$bgImageUrl, mainPage=$mainPage, loginInfo=$loginInfo, permissionStates=$permissionStates, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, propertyPermissions=$propertyPermissions)"
     }
 
     // Index can't be saved as part of the PropertyEntity object because it will get overridden

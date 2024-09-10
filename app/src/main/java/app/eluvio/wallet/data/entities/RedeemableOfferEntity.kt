@@ -66,7 +66,7 @@ class RedeemableOfferEntity : EmbeddedRealmObject {
     }
 
     override fun toString(): String {
-        return "RedeemableOfferEntity(name='$name', offerId='$offerId', imagePath='$imagePath', posterImagePath='$posterImagePath', availableAt=$availableAt, expiresAt=$expiresAt)"
+        return "RedeemableOfferEntity(name='$name', description='$description', offerId='$offerId', imagePath=$imagePath, posterImagePath=$posterImagePath, availableAt=$availableAt, expiresAt=$expiresAt, animation=$animation, redeemAnimation=$redeemAnimation, hide=$hide, hideIfExpired=$hideIfExpired, hideIfUnreleased=$hideIfUnreleased)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -76,22 +76,34 @@ class RedeemableOfferEntity : EmbeddedRealmObject {
         other as RedeemableOfferEntity
 
         if (name != other.name) return false
+        if (description != other.description) return false
         if (offerId != other.offerId) return false
         if (imagePath != other.imagePath) return false
         if (posterImagePath != other.posterImagePath) return false
         if (availableAt != other.availableAt) return false
         if (expiresAt != other.expiresAt) return false
+        if (animation != other.animation) return false
+        if (redeemAnimation != other.redeemAnimation) return false
+        if (hide != other.hide) return false
+        if (hideIfExpired != other.hideIfExpired) return false
+        if (hideIfUnreleased != other.hideIfUnreleased) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = name.hashCode()
+        result = 31 * result + description.hashCode()
         result = 31 * result + offerId.hashCode()
-        result = 31 * result + imagePath.hashCode()
-        result = 31 * result + posterImagePath.hashCode()
+        result = 31 * result + (imagePath?.hashCode() ?: 0)
+        result = 31 * result + (posterImagePath?.hashCode() ?: 0)
         result = 31 * result + (availableAt?.hashCode() ?: 0)
         result = 31 * result + (expiresAt?.hashCode() ?: 0)
+        result = 31 * result + animation.hashCode()
+        result = 31 * result + redeemAnimation.hashCode()
+        result = 31 * result + hide.hashCode()
+        result = 31 * result + hideIfExpired.hashCode()
+        result = 31 * result + hideIfUnreleased.hashCode()
         return result
     }
 

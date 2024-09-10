@@ -18,11 +18,6 @@ import java.util.Locale
 import kotlin.reflect.KClass
 
 class LiveVideoInfoEntity : EmbeddedRealmObject {
-    /** Copy of wrapping [MediaEntity]'s title, also stored here for convenience */
-    var title: String? = null
-    var subtitle: String? = null
-    var headers: RealmList<String> = realmListOf()
-
     // icon image paths.
     var icons: RealmList<String> = realmListOf()
 
@@ -45,7 +40,7 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
     }
 
     override fun toString(): String {
-        return "LiveVideoInfoEntity(title=$title, subtitle=$subtitle, headers=$headers, icons=$icons, startTime=$startTime, endTime=$endTime)"
+        return "LiveVideoInfoEntity(icons=$icons, startTime=$startTime, endTime=$endTime)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -54,9 +49,6 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
 
         other as LiveVideoInfoEntity
 
-        if (title != other.title) return false
-        if (subtitle != other.subtitle) return false
-        if (headers != other.headers) return false
         if (icons != other.icons) return false
         if (startTime != other.startTime) return false
         if (endTime != other.endTime) return false
@@ -65,10 +57,7 @@ class LiveVideoInfoEntity : EmbeddedRealmObject {
     }
 
     override fun hashCode(): Int {
-        var result = title?.hashCode() ?: 0
-        result = 31 * result + (subtitle?.hashCode() ?: 0)
-        result = 31 * result + headers.hashCode()
-        result = 31 * result + icons.hashCode()
+        var result = icons.hashCode()
         result = 31 * result + (startTime?.hashCode() ?: 0)
         result = 31 * result + (endTime?.hashCode() ?: 0)
         return result

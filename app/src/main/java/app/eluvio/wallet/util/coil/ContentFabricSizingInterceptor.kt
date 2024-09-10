@@ -1,4 +1,4 @@
-package app.eluvio.wallet.app
+package app.eluvio.wallet.util.coil
 
 import coil.intercept.Interceptor
 import coil.request.ImageResult

@@ -7,6 +7,7 @@ import app.eluvio.wallet.app.Events
 import app.eluvio.wallet.data.PermissionResolver
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.ResolvedContext
@@ -76,8 +77,11 @@ class MediaGridViewModel @Inject constructor(
         if (section == null) {
             return Flowable.error(RuntimeException("Section not found"))
         }
-        val items = section.items.toCarouselItems(permissionContext, DisplayFormat.GRID)
-        return Flowable.just(State(title = section.title, items = items))
+        val items = section.items.toCarouselItems(
+            permissionContext,
+            SimpleDisplaySettings(displayFormat = DisplayFormat.GRID)
+        )
+        return Flowable.just(State(title = section.displaySettings?.title, items = items))
     }
 
     private fun observeMediaItems(context: ResolvedContext): Flowable<State> {

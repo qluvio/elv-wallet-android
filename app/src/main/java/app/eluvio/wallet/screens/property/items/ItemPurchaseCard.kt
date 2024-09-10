@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.AspectRatio
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
@@ -30,22 +32,24 @@ fun ItemPurchaseCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val title = item.displaySettings?.title
+    val (imageUrl, imageAspectRatio) = item.displaySettings?.thumbnailUrlAndRatio ?: (null to null)
     Column(modifier = modifier.width(IntrinsicSize.Min)) {
         ImageCard(
-            imageUrl = item.imageUrl,
-            contentDescription = item.title,
+            imageUrl = imageUrl,
+            contentDescription = title,
             focusedOverlay = {
-                MetadataTexts(title = item.title, subtitle = null, headers = emptyList())
+                MetadataTexts(item.displaySettings)
             },
             onClick = onClick,
             modifier = Modifier
                 .height(cardHeight)
                 .aspectRatio(
-                    item.imageAspectRatio ?: AspectRatio.WIDE,
+                    imageAspectRatio ?: AspectRatio.WIDE,
                     matchHeightConstraintsFirst = true
                 )
         )
-        item.title?.let { title ->
+        if (title != null) {
             Spacer(Modifier.height(10.dp))
             Text(
                 title,
@@ -66,9 +70,10 @@ private fun ItemPurchaseCardPreview() = EluvioThemePreview {
                 propertyId = "property1",
                 sectionItemId = "section_id"
             ),
-            title = "Title that is really really really really really really really really long",
-            imageUrl = "https://www.google.com",
-            imageAspectRatio = AspectRatio.SQUARE
+            displaySettings = SimpleDisplaySettings(
+                title = "Title that is really really really really really really really really long",
+                forcedAspectRatio = AspectRatio.SQUARE
+            ),
         ),
         cardHeight = 150.dp,
         onClick = {}
