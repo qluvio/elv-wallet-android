@@ -7,12 +7,12 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.FabricUrl
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
-import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettings
+import app.eluvio.wallet.data.permissions.PermissionContext
+import app.eluvio.wallet.data.permissions.PermissionContextResolver
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
-import app.eluvio.wallet.data.permissions.PermissionContextResolver
 import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.screens.common.generateQrCode
@@ -24,7 +24,6 @@ import app.eluvio.wallet.util.rx.Optional
 import app.eluvio.wallet.util.rx.asSharedState
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.json.JSONArray
@@ -95,16 +94,18 @@ class PurchasePromptViewModel @Inject constructor(
             .addTo(disposables)
     }
 
-    private fun updateBackgroundImage(): Completable {
-        return resolvedContext.mapNotNull { context ->
+    private fun updateBackgroundImage() {
+        resolvedContext.mapNotNull { context ->
             // If no "page" is defined, default to the property's main page.
             val page = context.page ?: context.property.mainPage
             context.property.loginInfo?.backgroundImageUrl
                 ?: page?.backgroundImageUrl
         }
-            .doOnNext { updateState { copy(bgImageUrl = it) } }
-            .doOnError { Log.e("Error loading background image", it) }
-            .ignoreElements()
+            .subscribeBy(
+                onNext = { updateState { copy(bgImageUrl = it) } },
+                onError = { Log.e("Error loading background image", it) },
+            )
+            .addTo(disposables)
     }
 
     private fun updateCardItem() {
