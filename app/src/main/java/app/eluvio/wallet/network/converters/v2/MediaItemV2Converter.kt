@@ -17,9 +17,9 @@ import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 
 fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity? {
     val dto = this
-    if (dto.mediaLink?.hashContainer?.get("resolution_error") != null) {
-        return null
-    }
+//    if (dto.mediaLink?.hashContainer?.get("resolution_error") != null) {
+//        return null
+//    }
 
     val display = (dto as DisplaySettingsDto).toEntity(baseUrl)
 
