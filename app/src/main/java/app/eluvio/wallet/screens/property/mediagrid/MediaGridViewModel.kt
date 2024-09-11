@@ -4,14 +4,13 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
-import app.eluvio.wallet.data.PermissionResolver
+import app.eluvio.wallet.data.permissions.PermissionResolver
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.stores.ContentStore
-import app.eluvio.wallet.data.stores.MediaPropertyStore
-import app.eluvio.wallet.data.stores.ResolvedContext
-import app.eluvio.wallet.data.stores.resolveContext
+import app.eluvio.wallet.data.permissions.PermissionContextResolver
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
@@ -25,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MediaGridViewModel @Inject constructor(
-    private val propertyStore: MediaPropertyStore,
+    private val permissionContextResolver: PermissionContextResolver,
     private val contentStore: ContentStore,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<MediaGridViewModel.State>(State(), savedStateHandle) {
@@ -42,13 +41,17 @@ class MediaGridViewModel @Inject constructor(
     override fun onResume() {
         super.onResume()
 
-        propertyStore
-            .resolveContext(permissionContext)
-            .switchMap { context ->
+        // When coming from Search, permissionContext.(sectionId/sectionItemId) will be set to some
+        // arbitrary value from the API, that doesn't actually mean anything and won't be found in
+        // the database. This should be fine, as pageId should be null in that case, which will
+        // make [permissionContextResolver] skip the section resolution.
+        permissionContextResolver
+            .resolve(permissionContext)
+            .switchMap { resolved ->
                 if (permissionContext.mediaItemId != null) {
-                    observeMediaItems(context)
+                    observeMediaItems(resolved)
                 } else if (permissionContext.sectionId != null) {
-                    getSectionItem(context.section)
+                    getSectionItem(resolved.section)
                 } else {
                     Flowable.error(IllegalStateException("Media grid launched without mediaItemId or sectionId."))
                 }
@@ -84,8 +87,8 @@ class MediaGridViewModel @Inject constructor(
         return Flowable.just(State(title = section.displaySettings?.title, items = items))
     }
 
-    private fun observeMediaItems(context: ResolvedContext): Flowable<State> {
-        val mediaContainer = context.mediaItem
+    private fun observeMediaItems(resolved: PermissionContext.Resolved): Flowable<State> {
+        val mediaContainer = resolved.mediaItem
         if (mediaContainer == null) {
             return Flowable.error(RuntimeException("Media container not found"))
         } else if (mediaContainer.mediaItemsIds.isEmpty()) {
@@ -99,13 +102,11 @@ class MediaGridViewModel @Inject constructor(
         )
             .doOnNext { mediaItems ->
                 // Resolve permissions
-                mediaItems.forEach { child ->
-                    PermissionResolver.resolvePermissions(
-                        child,
-                        mediaContainer.resolvedPermissions,
-                        context.property.permissionStates
-                    )
-                }
+                PermissionResolver.resolvePermissions(
+                    mediaItems,
+                    mediaContainer.resolvedPermissions,
+                    resolved.property.permissionStates
+                )
             }
             .map { mediaItems ->
                 mediaItems

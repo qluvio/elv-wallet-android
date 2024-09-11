@@ -1,11 +1,11 @@
 package app.eluvio.wallet.data.stores
 
-import app.eluvio.wallet.data.PermissionResolver
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.OwnedPropertiesEntity
 import app.eluvio.wallet.data.entities.v2.OwnedPropertiesRealmEntity
+import app.eluvio.wallet.data.permissions.PermissionResolver
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.mwv2.MediaWalletV2Api
 import app.eluvio.wallet.network.converters.v2.permissions.toPermissionStateEntities

@@ -11,7 +11,7 @@ import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.navigation.NavigationEvent
@@ -22,6 +22,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState
 import app.eluvio.wallet.screens.property.toDynamicSections
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.Optional
+import app.eluvio.wallet.util.rx.asSharedState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -34,7 +35,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PropertySearchViewModel @Inject constructor(
-    private val propertyStore: MediaPropertyStore,
+    propertyStore: MediaPropertyStore,
     private val searchStore: PropertySearchStore,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<PropertySearchViewModel.State>(State(), savedStateHandle) {
@@ -73,6 +74,7 @@ class PropertySearchViewModel @Inject constructor(
 
     private val navArgs = savedStateHandle.navArgs<PropertySearchNavArgs>()
     private val permissionContext = PermissionContext(propertyId = navArgs.propertyId)
+    private val property = propertyStore.observeMediaProperty(navArgs.propertyId).asSharedState()
 
     private val query = BehaviorProcessor.createDefault(QueryUpdate("", true))
     private val manualSearch = PublishProcessor.create<Unit>()
@@ -94,7 +96,7 @@ class PropertySearchViewModel @Inject constructor(
             }
             .addTo(disposables)
 
-        propertyStore.observeMediaProperty(navArgs.propertyId)
+        property
             .subscribeBy {
                 updateState {
                     copy(
@@ -193,7 +195,10 @@ class PropertySearchViewModel @Inject constructor(
     }
 
     private fun fetchResults(request: SearchRequest): Single<List<MediaPageSectionEntity>> {
-        return searchStore.search(navArgs.propertyId, request)
+        return property.firstOrError()
+            .flatMap { property ->
+                searchStore.search(property, request)
+            }
             .doOnSubscribe {
                 updateState { copy(loadingResults = true) }
                 Log.d("Starting to search for $request")

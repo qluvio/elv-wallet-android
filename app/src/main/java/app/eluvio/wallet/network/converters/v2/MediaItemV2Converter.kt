@@ -5,34 +5,37 @@ import app.eluvio.wallet.data.entities.GalleryItemEntity
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.network.converters.toPathMap
+import app.eluvio.wallet.network.dto.v2.DisplaySettingsDto
 import app.eluvio.wallet.network.dto.v2.GalleryItemV2Dto
 import app.eluvio.wallet.network.dto.v2.MediaItemV2Dto
 import app.eluvio.wallet.util.realm.toRealmDictionaryOrEmpty
 import app.eluvio.wallet.util.realm.toRealmInstant
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
 
-fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity {
+fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity? {
     val dto = this
+    if (dto.mediaLink?.hashContainer?.get("resolution_error") != null) {
+        return null
+    }
+
+    val display = (dto as DisplaySettingsDto).toEntity(baseUrl)
 
     val (imageFile, aspectRatio) = dto.mediaFile?.let { it to null }
-        ?: dto.thumbnailSquare?.let { it to AspectRatio.SQUARE }
-        ?: dto.thumbnailPortrait?.let { it to AspectRatio.POSTER }
-        ?: dto.thumbnailLandscape?.let { it to AspectRatio.WIDE }
+        ?: dto.thumbnail_image_square?.let { it to AspectRatio.SQUARE }
+        ?: dto.thumbnail_image_portrait?.let { it to AspectRatio.POSTER }
+        ?: dto.thumbnail_image_landscape?.let { it to AspectRatio.WIDE }
         ?: (null to null)
     return MediaEntity().apply {
         id = dto.id
         name = dto.title ?: ""
-        subtitle = dto.subtitle
-        headers = dto.headers.toRealmListOrEmpty()
+        displaySettings = display
         mediaFile = imageFile?.path ?: ""
         imageAspectRatio = aspectRatio
         mediaType = dto.mediaType ?: dto.type
-        val imageLink = dto.thumbnailSquare
-            ?: dto.thumbnailPortrait
-            ?: dto.thumbnailLandscape
-        image = imageLink?.toUrl(baseUrl)?.url ?: ""
+        image = display.thumbnailUrlAndRatio?.first ?: ""
         playableHash = dto.mediaLink?.hashContainer?.get("source")?.toString()
         mediaLinks = dto.mediaLink?.toPathMap().toRealmDictionaryOrEmpty()
         gallery = dto.gallery?.mapNotNull { it.toEntity() }.toRealmListOrEmpty()

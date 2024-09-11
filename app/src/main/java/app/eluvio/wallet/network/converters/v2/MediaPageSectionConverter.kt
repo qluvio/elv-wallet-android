@@ -47,6 +47,10 @@ private fun SectionItemDto.toEntity(baseUrl: String): SectionItemEntity? {
         id = dto.id
         mediaType = dto.mediaType
         media = dto.media?.toEntity(baseUrl)
+        if (dto.type == "media" && media == null) {
+            // This section is supposed to be a media item, but the media is missing. Ignore.
+            return null
+        }
         useMediaDisplaySettings = dto.useMediaSettings == true
         rawPermissions = dto.permissions?.toContentPermissionsEntity()
 

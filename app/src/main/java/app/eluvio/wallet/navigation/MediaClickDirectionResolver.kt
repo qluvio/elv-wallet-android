@@ -2,8 +2,8 @@ package app.eluvio.wallet.navigation
 
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.behaviorEnum
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.screens.destinations.ExternalMediaQrDialogDestination
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import app.eluvio.wallet.screens.destinations.LockedMediaDialogDestination

@@ -36,9 +36,11 @@ import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.getStartDateTimeString
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
 import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
+import app.eluvio.wallet.data.entities.v2.display.withOverrides
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
@@ -63,10 +65,8 @@ fun MediaItemCard(
     cardHeight: Dp = 150.dp,
     shape: Shape = MaterialTheme.shapes.medium,
 ) {
-    val (imageUrl, aspectRatio) = displayOverrides?.thumbnailUrlAndRatio
-    // This will be cleaned up when MediaItem uses DisplaySettings properly
-        ?: (media.imageOrLockedImage() to (displayOverrides?.forcedAspectRatio
-            ?: media.aspectRatio()))
+    val displaySettings = media.requireDisplaySettings().withOverrides(displayOverrides)
+    val (imageUrl, aspectRatio) = displaySettings.thumbnailUrlAndRatio ?: return
     if (media.isDisabled) {
         DisabledCard(imageUrl, media, shape, cardHeight, aspectRatio, modifier)
     } else {
@@ -76,11 +76,7 @@ fun MediaItemCard(
             contentDescription = media.nameOrLockedName(),
             shape = shape,
             focusedOverlay = {
-                MetadataTexts(
-                    headers = displayOverrides?.headers ?: media.headers,
-                    title = displayOverrides?.title ?: media.title,
-                    subtitle = displayOverrides?.subtitle ?: media.subtitle
-                )
+                MetadataTexts(displaySettings)
             },
             unFocusedOverlay = {
                 if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
@@ -223,8 +219,11 @@ fun LiveVideoCardPreview() = EluvioThemePreview {
     val media = MediaEntity().apply {
         id = "id"
         name = "NFT Media Item"
-        subtitle = "The Grand Arena"
-        headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+        displaySettings = DisplaySettingsEntity().apply {
+            title = name
+            subtitle = "The Grand Arena"
+            headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+        }
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
         imageAspectRatio = AspectRatio.WIDE
         liveVideoInfo = LiveVideoInfoEntity().apply {
@@ -244,8 +243,11 @@ fun UpcomingLiveVideoCardPreview() = EluvioThemePreview {
     val media = MediaEntity().apply {
         id = "id"
         name = "NFT Media Item"
-        subtitle = "The Grand Arena"
-        headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+        displaySettings = DisplaySettingsEntity().apply {
+            title = name
+            subtitle = "The Grand Arena"
+            headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+        }
         mediaType = MediaEntity.MEDIA_TYPE_VIDEO
         imageAspectRatio = AspectRatio.WIDE
         liveVideoInfo = LiveVideoInfoEntity().apply {
@@ -280,8 +282,11 @@ fun DisabledCardPreview() = EluvioThemePreview {
     MediaItemCard(media = MediaEntity().apply {
         id = "id"
         name = "NFT Media Item"
-        subtitle = "The Grand Arena"
-        headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+        displaySettings = DisplaySettingsEntity().apply {
+            title = name
+            subtitle = "The Grand Arena"
+            headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+        }
         imageAspectRatio = AspectRatio.WIDE
         resolvedPermissions = VolatilePermissionSettings(
             authorized = false,

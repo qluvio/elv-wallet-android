@@ -33,9 +33,10 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.ShimmerImage
@@ -193,12 +194,15 @@ private fun MediaEntityPurchasePromptPreview() = EluvioThemePreview {
             media = MediaEntity().apply {
                 id = "id"
                 name = "NFT Media Item"
+                displaySettings = DisplaySettingsEntity().apply {
+                    title = name
+                    subtitle = "The Grand Arena"
+                    headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+                }
                 mediaType = MediaEntity.MEDIA_TYPE_VIDEO
                 imageAspectRatio = AspectRatio.WIDE
                 liveVideoInfo = LiveVideoInfoEntity().apply {
                     startTime = RealmInstant.MIN
-                    subtitle = "The Grand Arena"
-                    headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
                 }
             },
             qrImage = generateQrCodeBlocking("http://eluv.io")

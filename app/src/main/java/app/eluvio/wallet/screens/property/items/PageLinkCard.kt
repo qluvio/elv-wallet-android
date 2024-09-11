@@ -21,7 +21,7 @@ import androidx.tv.material3.Text
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MetadataTexts
 import app.eluvio.wallet.screens.property.DynamicPageLayoutState
@@ -38,7 +38,6 @@ fun PageLinkCard(
     val display = item.displaySettings
     val title = display?.title
     val (imageUrl, imageAspectRatio) = display?.thumbnailUrlAndRatio ?: (null to null)
-    val headers = display?.headers.orEmpty()
     Column(modifier.width(IntrinsicSize.Min)) {
         ImageCard(
             imageUrl = imageUrl,

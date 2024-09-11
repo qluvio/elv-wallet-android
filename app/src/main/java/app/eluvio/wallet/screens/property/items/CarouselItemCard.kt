@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.data.entities.MediaEntity
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.navigation.onClickDirection
@@ -48,7 +48,7 @@ fun CarouselItemCard(carouselItem: CarouselItem, cardHeight: Dp, modifier: Modif
                 permissionContext = carouselItem.permissionContext
             )
             Spacer(Modifier.height(10.dp))
-            val title = carouselItem.displayOverrides?.title ?: entity.title
+            val title = carouselItem.displayOverrides?.title ?: entity.name
             Text(
                 title,
                 style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),

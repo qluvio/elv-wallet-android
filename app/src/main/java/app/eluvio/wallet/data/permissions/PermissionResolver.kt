@@ -1,4 +1,4 @@
-package app.eluvio.wallet.data
+package app.eluvio.wallet.data.permissions
 
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
@@ -29,6 +29,20 @@ object PermissionResolver {
         // Iterate children and update their permissions too
         entity.permissionChildren.forEach { child ->
             resolvePermissions(child, entity.resolvedPermissions, permissionStates)
+        }
+    }
+
+    /**
+     * Convenience method to resolve permissions for a list of entities.
+     * @see resolvePermissions
+     */
+    fun resolvePermissions(
+        entities: List<EntityWithPermissions>,
+        parentPermissions: PermissionSettings?,
+        permissionStates: Map<String, PermissionStatesEntity?>
+    ) {
+        entities.forEach { entity ->
+            resolvePermissions(entity, parentPermissions, permissionStates)
         }
     }
 
@@ -98,7 +112,7 @@ object PermissionResolver {
      */
     private fun merge(
         parent: PermissionSettings,
-        child: PermissionSettingsEntity?,
+        child: PermissionSettings?,
         permissionStates: Map<String, PermissionStatesEntity?>,
     ): CompositePermissions {
         return when {

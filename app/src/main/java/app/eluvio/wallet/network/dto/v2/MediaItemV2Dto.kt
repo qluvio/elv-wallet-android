@@ -18,13 +18,6 @@ data class MediaItemV2Dto(
     val type: String,
     @field:Json(name = "poster_image")
     val posterImage: AssetLinkDto?,
-    @field:Json(name = "thumbnail_image_landscape")
-    val thumbnailLandscape: AssetLinkDto?,
-    @field:Json(name = "thumbnail_image_portrait")
-    val thumbnailPortrait: AssetLinkDto?,
-    @field:Json(name = "thumbnail_image_square")
-    val thumbnailSquare: AssetLinkDto?,
-    val title: String?,
     // Media of type "list" will have a list of media item ids
     val media: List<String>?,
     // Media of type "collection" will have a list of media list ids
@@ -39,8 +32,6 @@ data class MediaItemV2Dto(
     val startTime: Date?,
     @field:Json(name = "end_time")
     val endTime: Date?,
-    val subtitle: String?,
-    val headers: List<String>?,
     val icons: List<MediaIconDto>?,
 
     // Search related stuff
@@ -49,7 +40,24 @@ data class MediaItemV2Dto(
     val permissions: List<MediaPermissionsDto>?,
     // Media that is set to public=false, but also doesn't define any Permissions - is inaccessible.
     val public: Boolean?,
-)
+
+    override val title: String?,
+    override val subtitle: String?,
+    override val headers: List<String>?,
+    override val description: String?,
+    override val aspect_ratio: String?,
+    override val thumbnail_image_landscape: AssetLinkDto?,
+    override val thumbnail_image_portrait: AssetLinkDto?,
+    override val thumbnail_image_square: AssetLinkDto?,
+    override val display_limit: Int?,
+    override val display_limit_type: String?,
+    override val display_format: String?,
+    override val logo: AssetLinkDto?,
+    override val logo_text: String?,
+    override val inline_background_color: String?,
+    override val inline_background_image: AssetLinkDto?,
+    override val background_image: AssetLinkDto?,
+) : DisplaySettingsDto
 
 @JsonClass(generateAdapter = true)
 data class MediaPermissionsDto(

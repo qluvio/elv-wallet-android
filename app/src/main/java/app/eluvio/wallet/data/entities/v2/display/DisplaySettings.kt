@@ -94,3 +94,30 @@ data class SimpleDisplaySettings(
         }
     }
 }
+
+fun DisplaySettings.withOverrides(overrides: DisplaySettings?): DisplaySettings {
+    val default = this
+    overrides ?: return default
+
+    return SimpleDisplaySettings(
+        title = overrides.title?.ifEmpty { null } ?: default.title,
+        subtitle = overrides.subtitle?.ifEmpty { null } ?: default.subtitle,
+        headers = overrides.headers.ifEmpty { default.headers },
+        description = overrides.description?.ifEmpty { null } ?: default.description,
+        forcedAspectRatio = overrides.forcedAspectRatio ?: default.forcedAspectRatio,
+        thumbnailLandscapeUrl = overrides.thumbnailLandscapeUrl ?: default.thumbnailLandscapeUrl,
+        thumbnailPortraitUrl = overrides.thumbnailPortraitUrl ?: default.thumbnailPortraitUrl,
+        thumbnailSquareUrl = overrides.thumbnailSquareUrl ?: default.thumbnailSquareUrl,
+        displayLimit = overrides.displayLimit ?: default.displayLimit,
+        displayLimitType = overrides.displayLimitType?.ifEmpty { null } ?: default.displayLimitType,
+        displayFormat = overrides.displayFormat.takeIf { it != DisplayFormat.UNKNOWN }
+            ?: default.displayFormat,
+        logoUrl = overrides.logoUrl ?: default.logoUrl,
+        logoText = overrides.logoText?.ifEmpty { null } ?: default.logoText,
+        inlineBackgroundColor = overrides.inlineBackgroundColor?.ifEmpty { null }
+            ?: default.inlineBackgroundColor,
+        inlineBackgroundImageUrl = overrides.inlineBackgroundImageUrl
+            ?: default.inlineBackgroundImageUrl,
+        heroBackgroundImageUrl = overrides.heroBackgroundImageUrl ?: default.heroBackgroundImageUrl,
+    )
+}

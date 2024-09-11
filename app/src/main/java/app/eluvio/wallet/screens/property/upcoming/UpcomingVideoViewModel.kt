@@ -54,8 +54,8 @@ class UpcomingVideoViewModel @Inject constructor(
                     updateState {
                         copy(
                             title = mediaItem.name,
-                            icons = mediaItem.liveVideoInfo?.icons?.toList().orEmpty(),
-                            headers = mediaItem.headers,
+                            icons = mediaItem.liveVideoInfo?.icons.orEmpty(),
+                            headers = mediaItem.displaySettings?.headers.orEmpty(),
                             startTimeMillis = mediaItem.liveVideoInfo?.startTime?.millis
                         )
                     }

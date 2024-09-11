@@ -18,7 +18,6 @@ data class FabricConfiguration(
 
 @JsonClass(generateAdapter = true)
 data class Network(
-    @field:Json(name = "api_versions") val apiVersions: List<Int>,
     @field:Json(name = "services") val services: Services
 )
 
@@ -32,7 +31,5 @@ data class Services(
 @JsonClass(generateAdapter = true)
 data class QSpace(
     @field:Json(name = "id") val id: String,
-    @field:Json(name = "version") val version: String,
-    @field:Json(name = "type") val type: String,
     @field:Json(name = "names") val names: List<String>
 )

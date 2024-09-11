@@ -7,12 +7,12 @@ import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.FabricUrl
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
-import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
-import app.eluvio.wallet.data.entities.v2.permissions.PermissionContext
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettings
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
+import app.eluvio.wallet.data.permissions.PermissionContextResolver
 import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.screens.common.generateQrCode
@@ -35,6 +35,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PurchasePromptViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
+    permissionContextResolver: PermissionContextResolver,
     private val environmentStore: EnvironmentStore,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<PurchasePromptViewModel.State>(State(), savedStateHandle) {
@@ -52,33 +53,8 @@ class PurchasePromptViewModel @Inject constructor(
 
     private val permissionContext = savedStateHandle.navArgs<PermissionContext>()
 
-    private val property = propertyStore
-        .observeMediaProperty(permissionContext.propertyId, forceRefresh = false)
+    private val resolvedContext = permissionContextResolver.resolve(permissionContext)
         .asSharedState()
-
-    // Only available when pageId is provided. Otherwise, it's null.
-    private val pageAndProperty = permissionContext.pageId
-        ?.let { pageId ->
-            property.switchMap { property ->
-                propertyStore.observePage(property, pageId, forceRefresh = false)
-                    .map { page -> property to page }
-            }
-        }
-        ?.asSharedState()
-
-    private val sectionItem by lazy {
-        val sectionId = permissionContext.sectionId ?: return@lazy null
-        val sectionItemId = permissionContext.sectionItemId ?: return@lazy null
-        pageAndProperty?.switchMap { (property, page) ->
-            propertyStore.observeSections(property, page, forceRefresh = false)
-        }
-            ?.mapNotNull { sections ->
-                sections.firstOrNull { it.id == sectionId }
-                    ?.items
-                    ?.firstOrNull { it.id == sectionItemId }
-            }
-            ?.asSharedState()
-    }
 
     override fun onResume() {
         super.onResume()
@@ -93,13 +69,16 @@ class PurchasePromptViewModel @Inject constructor(
     }
 
     private fun updateQrCode() {
-        val permissionSettings = sectionItem?.map {
-            // Will be empty for non-media section items. For now that's fine.
-            Optional.of(it.media?.resolvedPermissions)
-        }
-            ?: pageAndProperty?.map { (_, page) -> Optional.of(page.pagePermissions) }
-            ?: property.map { Optional.of(it.propertyPermissions) }
-
+        val permissionSettings = resolvedContext
+            .map {
+                Optional.of(
+                    it.mediaItem?.resolvedPermissions
+                        ?: it.sectionItem?.resolvedPermissions
+                        ?: it.section?.resolvedPermissions
+                        ?: it.page?.pagePermissions
+                        ?: it.property.propertyPermissions
+                )
+            }
         environmentStore.observeSelectedEnvironment()
             .firstOrError(/*Assume env won't change while in this screen*/)
             .flatMapPublisher { env ->
@@ -117,30 +96,29 @@ class PurchasePromptViewModel @Inject constructor(
     }
 
     private fun updateBackgroundImage(): Completable {
-        // If no "page" is defined, default to the property's main page.
-        val pageAndProperty =
-            pageAndProperty ?: property.map { property -> property to property.mainPage!! }
-
-        return pageAndProperty
-            .mapNotNull { (property, page) ->
-                property.loginInfo?.backgroundImageUrl
-                    ?: page.backgroundImageUrl
-            }
+        return resolvedContext.mapNotNull { context ->
+            // If no "page" is defined, default to the property's main page.
+            val page = context.page ?: context.property.mainPage
+            context.property.loginInfo?.backgroundImageUrl
+                ?: page?.backgroundImageUrl
+        }
             .doOnNext { updateState { copy(bgImageUrl = it) } }
             .doOnError { Log.e("Error loading background image", it) }
             .ignoreElements()
     }
 
     private fun updateCardItem() {
-        sectionItem?.firstOrError()
-            ?.subscribeBy(
-                onSuccess = { sectionItem ->
-                    val itemPurchase = State.ItemPurchase(sectionItem.displaySettings)
-                    updateState { copy(media = sectionItem.media, itemPurchase = itemPurchase) }
+        resolvedContext
+            .subscribeBy(
+                onNext = { resolved ->
+                    val itemPurchase = resolved.sectionItem?.let {
+                        State.ItemPurchase(it.displaySettings)
+                    }
+                    updateState { copy(media = resolved.mediaItem, itemPurchase = itemPurchase) }
                 },
                 onError = { Log.e("Error loading purchase item", it) }
             )
-            ?.addTo(disposables)
+            .addTo(disposables)
     }
 
     /**
@@ -148,30 +126,43 @@ class PurchasePromptViewModel @Inject constructor(
      * then navigate to it.
      */
     private fun pollForPermissionGranted() {
-        // Depending on the context, emit a nav event for the next screen when the user gains
-        // access to the relevant resource.
-        val navEvent = sectionItem
-            ?.mapNotNull { sectionItem ->
-                // The only section items that can lead us here are ItemPurchase and Media.
-                // We currently don't handle ItemPurchase auto-forward, so we can just handle Media.
-                // However, this is brittle code, as anything we direct here in the future will
-                // probably just hang forever
-                sectionItem.media
-                    ?.takeIf { media -> media.resolvedPermissions?.authorized == true }
-                    ?.onClickDirection(permissionContext)?.asReplace()
-            }
-            ?: pageAndProperty
-                ?.filter { (_, page) -> page.pagePermissions?.authorized == true }
-                ?.map { (property, page) ->
-                    PropertyDetailDestination(property.id, page.id).asReplace()
-                }
-            ?: property
-                .filter { it.propertyPermissions?.authorized == true }
-                .map { PropertyDetailDestination(it.id).asReplace() }
+        resolvedContext
+            .mapNotNull { resolved ->
+                // Depending on the context, emit a nav event for the next screen when the user gains
+                // access to the relevant resource.
+                when {
+                    resolved.mediaItem != null -> {
+                        resolved.mediaItem.resolvedPermissions
+                            ?.takeIf { it.authorized == true }
+                            ?.let { resolved.mediaItem.onClickDirection(permissionContext) }
+                    }
 
-        navEvent.firstOrError()
-            .subscribeBy { navigationEvent ->
-                navigateTo(navigationEvent)
+                    resolved.section != null || resolved.sectionItem != null -> {
+                        // The only SectionItem type we handle auto-forward for is Media.
+                        // Known unhandled types: ItemPurchase.
+                        null
+                    }
+
+                    resolved.page != null -> {
+                        resolved.page.pagePermissions
+                            ?.takeIf { it.authorized == true }
+                            ?.let {
+                                PropertyDetailDestination(resolved.property.id, resolved.page.id)
+                            }
+                    }
+
+                    else -> {
+                        resolved.property.propertyPermissions
+                            ?.takeIf { it.authorized == true }
+                            ?.let { PropertyDetailDestination(resolved.property.id) }
+                    }
+                }
+            }
+            .firstOrError(
+                // Once permission is granted, stop observing to prevent double-navigation.
+            )
+            .subscribeBy { destination ->
+                navigateTo(destination.asReplace())
             }
             .addTo(disposables)
 

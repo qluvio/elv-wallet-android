@@ -262,7 +262,7 @@ class ContentStore @Inject constructor(
                 .doOnError { Log.e("Error fetching Media Items", it) }
                 .zipWith(apiProvider.getFabricEndpoint())
                 .map { (response, baseUrl) ->
-                    response.contents.orEmpty().map { mediaDto -> mediaDto.toEntity(baseUrl) }
+                    response.contents.orEmpty().mapNotNull { mediaDto -> mediaDto.toEntity(baseUrl) }
                 }
                 .saveTo(realm, clearTable = false)
                 .ignoreElement()

@@ -2,9 +2,10 @@ package app.eluvio.wallet.data.entities
 
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.FabricUrl
-import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
+import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.EntityWithPermissions
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
@@ -27,10 +28,10 @@ import kotlin.reflect.KClass
 /**
  * This entity can represent a v1 or v2 media object. This was probably a mistake and we should
  * have made separate classes, but it's too late now :)
- * Most v2 properties *have* [DisplaySettings], but for historical reasons,
- * [MediaEntity] *is* a [DisplaySettings]
+ * Note that for historical reasons, MediaItems *are* [DisplaySettings], but for consistency with
+ * the rest of the v2 data model, on the Entity level we translate it to a [DisplaySettingsEntity].
  */
-class MediaEntity : RealmObject, EntityWithPermissions, DisplaySettings {
+class MediaEntity : RealmObject, EntityWithPermissions {
     @PrimaryKey
     var id: String = ""
     var name: String = ""
@@ -73,38 +74,12 @@ class MediaEntity : RealmObject, EntityWithPermissions, DisplaySettings {
     var attributes: RealmList<SearchFiltersEntity.Attribute> = realmListOf()
     var tags: RealmList<String> = realmListOf()
 
-    // DisplaySettings stuff just lives here for now
-    override val title: String get() = name
-    override var subtitle: String? = null
-    override var headers: RealmList<String> = realmListOf()
+    var displaySettings: DisplaySettingsEntity? = null
 
-    // DisplaySettings stuff we haven't yet implemented on MediaEntity
-    override val description: String
-        get() = TODO("Not yet implemented")
-    override val forcedAspectRatio: Float
-        get() = TODO("Not yet implemented")
-    override val thumbnailLandscapeUrl: FabricUrl
-        get() = TODO("Not yet implemented")
-    override val thumbnailPortraitUrl: FabricUrl
-        get() = TODO("Not yet implemented")
-    override val thumbnailSquareUrl: FabricUrl
-        get() = TODO("Not yet implemented")
-    override val displayLimit: Int
-        get() = TODO("Not yet implemented")
-    override val displayLimitType: String
-        get() = TODO("Not yet implemented")
-    override val displayFormat: DisplayFormat
-        get() = TODO("Not yet implemented")
-    override val logoUrl: FabricUrl
-        get() = TODO("Not yet implemented")
-    override val logoText: String
-        get() = TODO("Not yet implemented")
-    override val inlineBackgroundColor: String
-        get() = TODO("Not yet implemented")
-    override val inlineBackgroundImageUrl: FabricUrl
-        get() = TODO("Not yet implemented")
-    override val heroBackgroundImageUrl: FabricUrl
-        get() = TODO("Not yet implemented")
+    // If display settings aren't directly available, construct them from legacy fields.
+    fun requireDisplaySettings(): DisplaySettings {
+        return displaySettings ?: defaultDisplaySettings()
+    }
 
     fun imageOrLockedImage(): String = with(requireLockedState()) {
         lockedImage?.takeIf { locked } ?: image
@@ -156,8 +131,7 @@ class MediaEntity : RealmObject, EntityWithPermissions, DisplaySettings {
         if (liveVideoInfo != other.liveVideoInfo) return false
         if (attributes != other.attributes) return false
         if (tags != other.tags) return false
-        if (subtitle != other.subtitle) return false
-        if (headers != other.headers) return false
+        if (displaySettings != other.displaySettings) return false
 
         return true
     }
@@ -181,7 +155,7 @@ class MediaEntity : RealmObject, EntityWithPermissions, DisplaySettings {
         result = 31 * result + (imageAspectRatio?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         result = 31 * result + mediaFile.hashCode()
-        result = 31 * result + playableHash.hashCode()
+        result = 31 * result + (playableHash?.hashCode() ?: 0)
         result = 31 * result + mediaLinks.hashCode()
         result = 31 * result + tvBackgroundImage.hashCode()
         result = 31 * result + gallery.hashCode()
@@ -190,11 +164,12 @@ class MediaEntity : RealmObject, EntityWithPermissions, DisplaySettings {
         result = 31 * result + (liveVideoInfo?.hashCode() ?: 0)
         result = 31 * result + attributes.hashCode()
         result = 31 * result + tags.hashCode()
+        result = 31 * result + (displaySettings?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, mediaFile='$mediaFile', playableHash=$playableHash, mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo, attributes=$attributes, tags=$tags)"
+        return "MediaEntity(id='$id', name='$name', image='$image', posterImagePath=$posterImagePath, mediaType='$mediaType', imageAspectRatio=$imageAspectRatio, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, mediaFile='$mediaFile', playableHash=$playableHash, mediaLinks=$mediaLinks, tvBackgroundImage='$tvBackgroundImage', gallery=$gallery, mediaItemsIds=$mediaItemsIds, lockedState=$lockedState, liveVideoInfo=$liveVideoInfo, attributes=$attributes, tags=$tags, displaySettings=$displaySettings)"
     }
 
     companion object {
@@ -257,5 +232,20 @@ class MediaEntity : RealmObject, EntityWithPermissions, DisplaySettings {
         @ElementsIntoSet
         fun provideEntity(): Set<KClass<out TypedRealmObject>> =
             setOf(MediaEntity::class, LockedStateEntity::class)
+    }
+}
+
+private fun MediaEntity.defaultDisplaySettings(): DisplaySettings {
+    val base = SimpleDisplaySettings(title = name)
+    // Not using FabricUrlEntity because [image] can be a fully formed URL and we
+    // don't want to arbitrarily break it up to base/path.
+    val imageUrl = object : FabricUrl {
+        override val url: String = imageOrLockedImage()
+    }
+    return when (aspectRatio()) {
+        AspectRatio.SQUARE -> base.copy(thumbnailSquareUrl = imageUrl)
+        AspectRatio.WIDE -> base.copy(thumbnailLandscapeUrl = imageUrl)
+        AspectRatio.POSTER -> base.copy(thumbnailPortraitUrl = imageUrl)
+        else -> base
     }
 }

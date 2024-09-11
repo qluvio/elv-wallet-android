@@ -1,7 +1,9 @@
 package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
+import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.permissions.PermissionResolver
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.mwv2.SearchApi
 import app.eluvio.wallet.network.converters.v2.toEntity
@@ -43,7 +45,10 @@ class PropertySearchStore @Inject constructor(
             .mapNotNull { it.firstOrNull() }
     }
 
-    fun search(propertyId: String, request: SearchRequest): Single<List<MediaPageSectionEntity>> {
+    fun search(
+        property: MediaPropertyEntity,
+        request: SearchRequest
+    ): Single<List<MediaPageSectionEntity>> {
         val sanitizedRequest = request.copy(
             // Any attribute with a tag of "All" should be omitted from the request
             attributes = request.attributes
@@ -51,7 +56,7 @@ class PropertySearchStore @Inject constructor(
         )
         return apiProvider.getApi(SearchApi::class)
             .flatMap { api ->
-                api.search(propertyId, sanitizedRequest)
+                api.search(property.id, sanitizedRequest)
             }
             .zipWith(apiProvider.getFabricEndpoint())
             .map { (response, baseUrl) ->
@@ -64,6 +69,13 @@ class PropertySearchStore @Inject constructor(
                 val mediaItems = sections.flatMap { it.items }.mapNotNull { it.media }
                 realm.saveAsync(mediaItems)
                     .toSingleDefault(sections)
+            }
+            .doOnSuccess { sections ->
+                PermissionResolver.resolvePermissions(
+                    sections,
+                    property.resolvedPermissions,
+                    property.permissionStates
+                )
             }
     }
 }
