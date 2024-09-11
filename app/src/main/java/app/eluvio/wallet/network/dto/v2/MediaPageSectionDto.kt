@@ -20,6 +20,10 @@ data class MediaPageSectionDto(
     @field:Json(name = "secondary_filter")
     val secondaryFilter: String?,
     override val permissions: PermissionsDto?,
+
+    // Section of type "container" will have this field defined (assuming ?resolve_subsections=true)
+    @field:Json(name = "sections_resolved")
+    val subSections: List<MediaPageSectionDto>?,
 ) : DtoWithPermissions
 
 @JsonClass(generateAdapter = true)

@@ -37,6 +37,8 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
         secondaryFilter = dto.secondaryFilter
 
         rawPermissions = dto.permissions?.toContentPermissionsEntity()
+
+        subSections = dto.subSections?.map { it.toEntity(baseUrl) }.toRealmListOrEmpty()
     }
 }
 

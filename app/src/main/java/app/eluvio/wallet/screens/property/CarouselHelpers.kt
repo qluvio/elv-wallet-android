@@ -39,6 +39,14 @@ fun MediaPageSectionEntity.toDynamicSections(
         )
 
         MediaPageSectionEntity.TYPE_HERO -> this.toHeroSections()
+        MediaPageSectionEntity.TYPE_CONTAINER -> {
+            // For now, just swap out container sections with their sub-sections.
+            // In the future we'll want to add proper support for containers with filtering.
+            subSections.flatMap {
+                it.toDynamicSections(parentPermissionContext, filters, viewAllThreshold)
+            }
+        }
+
         else -> emptyList()
     }
 }

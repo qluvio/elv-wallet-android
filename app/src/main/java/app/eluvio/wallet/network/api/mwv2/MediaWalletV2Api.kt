@@ -30,7 +30,7 @@ interface MediaWalletV2Api : AuthdApi {
     /**
      * Request a list of sections by their IDs.
      */
-    @POST("mw/properties/{propertyId}/sections")
+    @POST("mw/properties/{propertyId}/sections?resolve_subsections=true")
     fun getSectionsById(
         @Path("propertyId") propertyId: String,
         @Body request: List<String>
