@@ -38,9 +38,10 @@ class DisplaySettingsEntity : EmbeddedRealmObject, DisplaySettings {
     override var inlineBackgroundImageUrl: FabricUrlEntity? = null
 
     override var heroBackgroundImageUrl: FabricUrlEntity? = null
+    override var heroBackgroundVideoHash: String? = null
 
     override fun toString(): String {
-        return "DisplaySettingsEntity(title=$title, subtitle=$subtitle, description=$description, headers=$headers, forcedAspectRatio=$forcedAspectRatio, thumbnailLandscapeUrl=$thumbnailLandscapeUrl, thumbnailPortraitUrl=$thumbnailPortraitUrl, thumbnailSquareUrl=$thumbnailSquareUrl, displayLimit=$displayLimit, displayLimitType=$displayLimitType, displayFormat=$displayFormat, logoUrl=$logoUrl, logoText=$logoText, inlineBackgroundColor=$inlineBackgroundColor, inlineBackgroundImageUrl=$inlineBackgroundImageUrl, heroBackgroundImageUrl=$heroBackgroundImageUrl)"
+        return "DisplaySettingsEntity(title=$title, subtitle=$subtitle, headers=$headers, description=$description, forcedAspectRatio=$forcedAspectRatio, thumbnailLandscapeUrl=$thumbnailLandscapeUrl, thumbnailPortraitUrl=$thumbnailPortraitUrl, thumbnailSquareUrl=$thumbnailSquareUrl, displayLimit=$displayLimit, displayLimitType=$displayLimitType, _displayFormat='$_displayFormat', logoUrl=$logoUrl, logoText=$logoText, inlineBackgroundColor=$inlineBackgroundColor, inlineBackgroundImageUrl=$inlineBackgroundImageUrl, heroBackgroundImageUrl=$heroBackgroundImageUrl, heroBackgroundVideoHash=$heroBackgroundVideoHash)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -65,6 +66,7 @@ class DisplaySettingsEntity : EmbeddedRealmObject, DisplaySettings {
         if (inlineBackgroundColor != other.inlineBackgroundColor) return false
         if (inlineBackgroundImageUrl != other.inlineBackgroundImageUrl) return false
         if (heroBackgroundImageUrl != other.heroBackgroundImageUrl) return false
+        if (heroBackgroundVideoHash != other.heroBackgroundVideoHash) return false
 
         return true
     }
@@ -86,6 +88,7 @@ class DisplaySettingsEntity : EmbeddedRealmObject, DisplaySettings {
         result = 31 * result + (inlineBackgroundColor?.hashCode() ?: 0)
         result = 31 * result + (inlineBackgroundImageUrl?.hashCode() ?: 0)
         result = 31 * result + (heroBackgroundImageUrl?.hashCode() ?: 0)
+        result = 31 * result + (heroBackgroundVideoHash?.hashCode() ?: 0)
         return result
     }
 

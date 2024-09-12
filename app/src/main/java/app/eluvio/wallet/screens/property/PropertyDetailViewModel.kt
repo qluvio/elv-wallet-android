@@ -1,16 +1,19 @@
 package app.eluvio.wallet.screens.property
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
+import app.eluvio.wallet.data.VideoOptionsFetcher
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
 import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
-import app.eluvio.wallet.data.permissions.PermissionContext
+import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.showAlternatePage
 import app.eluvio.wallet.data.entities.v2.permissions.showPurchaseOptions
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.PropertySearchStore
 import app.eluvio.wallet.navigation.NavigationEvent
@@ -19,9 +22,15 @@ import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.PropertySearchDestination
 import app.eluvio.wallet.screens.destinations.PurchasePromptDestination
+import app.eluvio.wallet.screens.videoplayer.toMediaSource
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.Optional
+import app.eluvio.wallet.util.rx.asSharedState
+import app.eluvio.wallet.util.rx.combineLatest
+import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import javax.inject.Inject
@@ -30,6 +39,7 @@ import javax.inject.Inject
 class PropertyDetailViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
     private val propertySearchStore: PropertySearchStore,
+    private val videoOptionsFetcher: VideoOptionsFetcher,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<DynamicPageLayoutState>(DynamicPageLayoutState()) {
 
@@ -38,52 +48,52 @@ class PropertyDetailViewModel @Inject constructor(
 
     private val unauthorizedPageIds = mutableSetOf<String>()
 
+    private val pageLayout = propertyStore.observeMediaProperty(propertyId)
+        .switchMap { property ->
+            if (navArgs.pageId != null) {
+                // Observing a specific page will skip the property permissions check.
+                // As long as properties don't link to specific pages in other properties,
+                // this should be fine.
+                propertyStore.observePage(property, navArgs.pageId)
+                    .map { page -> property to page }
+            } else {
+                // The default case. Not passing mainPage here to make sure we check the
+                // Property permissions before we check the page permissions,
+                Flowable.just(property to null)
+            }
+        }
+        .switchMap { (property, page) ->
+            unauthorizedPageIds.clear()
+            getFirstAuthorizedPage(property, page)
+                .map { authorizedPage -> property to authorizedPage }
+        }
+        .switchMap { (property, page) ->
+            propertyStore.observeSections(property, page)
+                .map { sections -> sections.associateBy { section -> section.id } }
+                .map { sections -> page to sections }
+        }
+        .asSharedState()
+
     override fun onResume() {
         super.onResume()
 
-        val pageLayout = propertyStore.observeMediaProperty(propertyId)
-            .switchMap { property ->
-                if (navArgs.pageId != null) {
-                    // Observing a specific page will skip the property permissions check.
-                    // As long as properties don't link to specific pages in other properties,
-                    // this should be fine.
-                    propertyStore.observePage(property, navArgs.pageId)
-                        .map { page -> property to page }
-                } else {
-                    // The default case. Not passing mainPage here to make sure we check the
-                    // Property permissions before we check the page permissions,
-                    Flowable.just(property to null)
-                }
-            }
-            .switchMap { (property, page) ->
-                unauthorizedPageIds.clear()
-                getFirstAuthorizedPage(property, page)
-                    .map { authorizedPage -> property to authorizedPage }
-            }
-            .switchMap { (property, page) ->
-                propertyStore.observeSections(property, page)
-                    .map { sections -> sections.associateBy { section -> section.id } }
-                    .map { sections -> page to sections }
-            }
-        val searchFilters = propertySearchStore.getFilters(propertyId)
-            .onErrorReturnItem(SearchFiltersEntity())
+        // Always display Search button.
+        updateState { copy(searchNavigationEvent = PropertySearchDestination(propertyId).asPush()) }
 
-        Flowable.combineLatest(pageLayout, searchFilters) { (page, sections), filters ->
-            Triple(page, sections, filters)
-        }
+        updateSections()
+
+        updateBackground()
+    }
+
+    private fun updateSections() {
+        pageLayout.combineLatest(
+            propertySearchStore.getFilters(propertyId)
+                .onErrorReturnItem(SearchFiltersEntity())
+        )
             .subscribeBy(
                 onNext = { (page, sections, filters) ->
-                    // Find the first hero section and use its background as the page background.
-                    val bgImage = sections.values
-                        .firstOrNull { it.type == MediaPageSectionEntity.TYPE_HERO }
-                        ?.displaySettings?.heroBackgroundImageUrl
-                        ?: page.backgroundImageUrl
                     updateState {
-                        copy(
-                            backgroundImageUrl = bgImage?.url,
-                            searchNavigationEvent = PropertySearchDestination(propertyId).asPush(),
-                            sections = sections(page, sections, filters)
-                        )
+                        copy(sections = sections(page, sections, filters))
                     }
                 },
                 onError = { exception ->
@@ -93,7 +103,7 @@ class PropertyDetailViewModel @Inject constructor(
                             navigateTo(PurchasePromptDestination(exception.permissionContext).asReplace())
                         }
 
-                        CircularRedirectException -> {
+                        is CircularRedirectException -> {
                             Log.e("Circular redirect detected")
                             fireEvent(Events.ToastMessage("Permission error. Unable to load page."))
                             navigateTo(NavigationEvent.GoBack)
@@ -106,6 +116,52 @@ class PropertyDetailViewModel @Inject constructor(
                             navigateTo(NavigationEvent.GoBack)
                         }
                     }
+                }
+            )
+            .addTo(disposables)
+    }
+
+
+    /**
+     * Updates the state with the background image/video.
+     * If a video hash is present, waits for a [MediaSource] to be created before updating the state
+     * with a background image, so it won't flicker while video options are being fetched.
+     * Background image is still set (if available) as a fallback, for the ui to handle.
+     */
+    private fun updateBackground() {
+        pageLayout
+            .mapNotNull { (page, sections) ->
+                // Find the first hero section and use its background as the page background.
+                val heroSectionSettings = sections.values
+                    .firstOrNull { it.type == MediaPageSectionEntity.TYPE_HERO }
+                    ?.displaySettings
+
+                // Distill the display settings down to the hero background image or video so
+                // .distinctUntilChanged() will emit on changes we actually care about
+                SimpleDisplaySettings(
+                    heroBackgroundVideoHash = heroSectionSettings?.heroBackgroundVideoHash,
+                    heroBackgroundImageUrl = heroSectionSettings?.heroBackgroundImageUrl
+                        ?: page.backgroundImageUrl
+                )
+            }
+            .distinctUntilChanged()
+            .switchMapSingle { display ->
+                Maybe.fromCallable { display.heroBackgroundVideoHash?.takeIf { ENABLE_VIDEO_BG } }
+                    .flatMapSingle { hash -> videoOptionsFetcher.fetchVideoOptionsFromHash(hash) }
+                    .map { videoEntity -> Optional.of(videoEntity.toMediaSource()) }
+                    .defaultIfEmpty(Optional.empty()) // No video hash, no MediaSource
+                    .onErrorReturn {
+                        Log.e("Error fetching video options", it)
+                        Optional.empty()
+                    }
+                    .map { display.heroBackgroundImageUrl?.url to it.orDefault(null) }
+            }
+            .subscribeBy(
+                onNext = { (bgImageUrl, bgVideo) ->
+                    updateState { copy(backgroundImageUrl = bgImageUrl, backgroundVideo = bgVideo) }
+                },
+                onError = {
+                    Log.e("Error fetching video options", it)
                 }
             )
             .addTo(disposables)
@@ -147,7 +203,7 @@ class PropertyDetailViewModel @Inject constructor(
                 currentPage.id, in unauthorizedPageIds -> {
                     // We already checked this page id, or this is a self-reference, so we know
                     // we're not authorized to view it.
-                    Flowable.error(CircularRedirectException)
+                    Flowable.error(CircularRedirectException())
                 }
 
                 null -> {
@@ -195,7 +251,12 @@ class PropertyDetailViewModel @Inject constructor(
     }
 }
 
-private val CircularRedirectException = IllegalStateException("Circular redirect detected")
+private class CircularRedirectException : IllegalStateException("Circular redirect detected")
 
 private class ShowPurchaseOptionsRedirectException(val permissionContext: PermissionContext) :
     RuntimeException("Show purchase options detected")
+
+/**
+ * Video backgrounds are iffy on different devices. We'll want to be smarter about when/if we enable them.
+ */
+private const val ENABLE_VIDEO_BG = true

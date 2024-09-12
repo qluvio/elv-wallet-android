@@ -29,5 +29,6 @@ fun DisplaySettingsDto.toEntity(baseUrl: String): DisplaySettingsEntity {
         inlineBackgroundColor = dto.inline_background_color?.ifEmpty { null }
         inlineBackgroundImageUrl = dto.inline_background_image?.toUrl(baseUrl)
         heroBackgroundImageUrl = dto.background_image?.toUrl(baseUrl)
+        heroBackgroundVideoHash = dto.background_video?.hash
     }
 }

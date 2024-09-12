@@ -1,6 +1,7 @@
 package app.eluvio.wallet.network.dto.v2
 
 import app.eluvio.wallet.network.dto.AssetLinkDto
+import app.eluvio.wallet.network.dto.PlayableHashDto
 
 @Suppress("PropertyName")
 interface DisplaySettingsDto {
@@ -23,4 +24,5 @@ interface DisplaySettingsDto {
     val inline_background_image: AssetLinkDto?
 
     val background_image: AssetLinkDto?
+    val background_video: PlayableHashDto?
 }

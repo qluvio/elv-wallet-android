@@ -2,6 +2,7 @@ package app.eluvio.wallet.network.dto.v2
 
 import app.eluvio.wallet.network.dto.AssetLinkDto
 import app.eluvio.wallet.network.dto.MediaLinkDto
+import app.eluvio.wallet.network.dto.PlayableHashDto
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.Date
@@ -57,6 +58,7 @@ data class MediaItemV2Dto(
     override val inline_background_color: String?,
     override val inline_background_image: AssetLinkDto?,
     override val background_image: AssetLinkDto?,
+    override val background_video: PlayableHashDto?,
 ) : DisplaySettingsDto
 
 @JsonClass(generateAdapter = true)

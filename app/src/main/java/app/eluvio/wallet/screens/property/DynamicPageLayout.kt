@@ -45,6 +45,7 @@ import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
+import app.eluvio.wallet.screens.common.VideoPlayer
 import app.eluvio.wallet.screens.property.rows.BannerSection
 import app.eluvio.wallet.screens.property.rows.CarouselSection
 import app.eluvio.wallet.screens.property.rows.DescriptionSection
@@ -62,13 +63,24 @@ fun DynamicPageLayout(state: DynamicPageLayoutState) {
         DelayedFullscreenLoader()
         return
     }
-    if (state.backgroundImageUrl != null) {
-        AsyncImage(
-            model = state.backgroundImageUrl,
-            contentScale = ContentScale.FillWidth,
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize()
+    val bgImage = @Composable {
+        if (state.backgroundImageUrl != null) {
+            AsyncImage(
+                model = state.backgroundImageUrl,
+                contentScale = ContentScale.FillWidth,
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+    if (state.backgroundVideo != null) {
+        VideoPlayer(
+            mediaSource = state.backgroundVideo,
+            modifier = Modifier.fillMaxSize(),
+            fallback = bgImage
         )
+    } else {
+        bgImage()
     }
     val listFocusRequester = remember { FocusRequester() }
     val scrollState = rememberLazyListState()

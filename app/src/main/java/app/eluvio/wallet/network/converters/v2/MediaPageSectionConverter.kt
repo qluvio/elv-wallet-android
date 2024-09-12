@@ -25,10 +25,15 @@ fun MediaPageSectionDto.toEntity(baseUrl: String): MediaPageSectionEntity {
         displaySettings = dto.display?.toEntity(baseUrl) ?: DisplaySettingsEntity()
         if (type == MediaPageSectionEntity.TYPE_HERO) {
             items = dto.heroItems?.map { it.toEntity(baseUrl) }.toRealmListOrEmpty()
-            // Find first bg image from children and apply to self
-            items
-                .firstNotNullOfOrNull { it.displaySettings?.heroBackgroundImageUrl }
-                ?.let { displaySettings?.heroBackgroundImageUrl = it }
+            // Find some non-null bg image/video from children and apply to self
+            items.forEach { sectionItem ->
+                sectionItem.displaySettings?.heroBackgroundImageUrl?.let {
+                    displaySettings?.heroBackgroundImageUrl = it
+                }
+                sectionItem.displaySettings?.heroBackgroundVideoHash?.let {
+                    displaySettings?.heroBackgroundVideoHash = it
+                }
+            }
         } else {
             items = dto.content?.mapNotNull { it.toEntity(baseUrl) }.toRealmListOrEmpty()
         }

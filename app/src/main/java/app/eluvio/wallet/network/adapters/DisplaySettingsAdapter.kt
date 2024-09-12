@@ -1,6 +1,7 @@
 package app.eluvio.wallet.network.adapters
 
 import app.eluvio.wallet.network.dto.AssetLinkDto
+import app.eluvio.wallet.network.dto.PlayableHashDto
 import app.eluvio.wallet.network.dto.v2.DisplaySettingsDto
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonClass
@@ -43,4 +44,5 @@ data class DisplaySettingsDtoImpl(
     override val inline_background_image: AssetLinkDto?,
 
     override val background_image: AssetLinkDto?,
+    override val background_video: PlayableHashDto?,
 ) : DisplaySettingsDto

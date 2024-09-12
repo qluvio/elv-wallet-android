@@ -20,6 +20,7 @@ import app.eluvio.wallet.screens.property.DynamicPageLayoutState.CarouselItem
 @Immutable
 data class DynamicPageLayoutState(
     val backgroundImageUrl: String? = null,
+    val backgroundVideo: MediaSource? = null,
     val sections: List<Section> = emptyList(),
 
     val searchNavigationEvent: NavigationEvent? = null,

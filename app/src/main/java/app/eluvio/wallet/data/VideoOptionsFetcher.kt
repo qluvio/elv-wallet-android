@@ -58,7 +58,7 @@ class VideoOptionsFetcher @Inject constructor(
 
     // Calls an API that fetches video options for the latest available hash, instead of directly
     // going to the fabric with the hash we have.
-    private fun fetchVideoOptionsFromHash(hash: String): Single<VideoOptionsEntity> {
+    fun fetchVideoOptionsFromHash(hash: String): Single<VideoOptionsEntity> {
         return apiProvider.getApi(VideoPlayoutApi::class)
             .zipWith(apiProvider.getFabricEndpoint())
             .flatMap { (api, baseUrl) ->
