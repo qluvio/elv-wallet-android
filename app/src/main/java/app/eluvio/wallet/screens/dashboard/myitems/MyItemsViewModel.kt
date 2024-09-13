@@ -4,16 +4,14 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.app.Events
-import app.eluvio.wallet.data.entities.v2.OwnedPropertiesEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.screens.dashboard.myitems.AllMediaProvider.Media
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.rx.Optional
-import app.eluvio.wallet.util.rx.asSharedState
+import app.eluvio.wallet.util.rx.replayingshare.replayingShare
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -25,7 +23,7 @@ import javax.inject.Inject
 class MyItemsViewModel @Inject constructor(
     private val contentStore: ContentStore,
     private val propertyStore: MediaPropertyStore,
-    private val tokenStore: TokenStore,
+    tokenStore: TokenStore,
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<MyItemsViewModel.State>(State(), savedStateHandle) {
 
@@ -46,25 +44,19 @@ class MyItemsViewModel @Inject constructor(
         BehaviorProcessor.createDefault(Optional.empty<State.PropertyInfo>())
     private val query = BehaviorProcessor.createDefault("")
 
+    private val walletAddress = tokenStore.walletAddress.observe()
+        .distinctUntilChanged()
+        // Retain last value even after all subscribers have unsubscribed.
+        .replayingShare()
+
     override fun onResume() {
         super.onResume()
 
-        // Since MyItems will never go through onPause, we need to make sure to not make any API
-        // calls while logged out.
-        val loginState = tokenStore.loggedInObservable.asSharedState()
+        resetOnAccountChange()
 
-        loginState
-            .switchMap { loggedIn ->
-                if (loggedIn) {
-                    selectedProperty.distinctUntilChanged()
-                } else {
-                    // Reset state and don't emit anything to not trigger Search while logged out.
-                    updateState { State() }
-                    Flowable.never()
-                }
-            }
+        selectedProperty.distinctUntilChanged()
             .combineLatest(query.debounce(300, TimeUnit.MILLISECONDS))
-            .doOnNext { (property, query) ->
+            .doOnNext { (property, _) ->
                 updateState {
                     copy(
                         allMedia = AllMediaProvider.State(loading = true),
@@ -98,15 +90,8 @@ class MyItemsViewModel @Inject constructor(
             )
             .addTo(disposables)
 
-        loginState
-            .switchMap { loggedIn ->
-                if (loggedIn) {
-                    propertyStore.observeOwnedProperties()
-                } else {
-                    // We need to avoid making any API calls while not logged in.
-                    Flowable.just(EmptyOwnedProperties)
-                }
-            }
+        propertyStore.observeOwnedProperties()
+            .distinctUntilChanged()
             .map {
                 it.properties.map { (id, name) -> State.PropertyInfo(id = id, name = name) }
             }
@@ -114,6 +99,22 @@ class MyItemsViewModel @Inject constructor(
                 onNext = { properties -> updateState { copy(properties = properties) } },
                 onError = { Log.e("Error observing owned properties", it) }
             )
+            .addTo(disposables)
+    }
+
+    private fun resetOnAccountChange() {
+        walletAddress
+            .scan { oldAddress, newAddress ->
+                if (oldAddress != newAddress) {
+                    // Reset state to prevent data leaks between accounts.
+                    Log.e("Wallet address changed. Resetting state.")
+                    updateState { State() }
+                    selectedProperty.onNext(Optional.empty())
+                    query.onNext("")
+                }
+                newAddress
+            }
+            .subscribe()
             .addTo(disposables)
     }
 
@@ -125,9 +126,4 @@ class MyItemsViewModel @Inject constructor(
     fun onQueryChanged(query: String) {
         this.query.onNext(query)
     }
-}
-
-// Fake an empty response.
-private val EmptyOwnedProperties = object : OwnedPropertiesEntity {
-    override val properties: Map<String, String> = emptyMap()
 }
