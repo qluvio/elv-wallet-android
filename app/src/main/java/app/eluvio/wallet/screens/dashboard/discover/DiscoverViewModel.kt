@@ -13,10 +13,10 @@ import app.eluvio.wallet.screens.destinations.SignInRouterDestination
 import app.eluvio.wallet.util.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.kotlin.Flowables
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.processors.BehaviorProcessor
+import io.reactivex.rxjava3.processors.PublishProcessor
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,23 +33,22 @@ class DiscoverViewModel @Inject constructor(
         val showRetryButton: Boolean = false,
     )
 
-    private val retryTrigger = BehaviorProcessor.createDefault(Unit)
+    private val retryTrigger = PublishProcessor.create<Unit>()
 
     override fun onResume() {
         super.onResume()
 
-        Flowables.combineLatest(
-            // restart chain on manual refresh
-            retryTrigger,
-            // restart chain when login state / environment changes
-            tokenStore.loggedInObservable.distinctUntilChanged(),
-        )
+        retryTrigger
             .doOnNext {
                 Log.i("Restart triggered, resetting state.")
                 updateState {
                     copy(loading = true, properties = emptyList(), showRetryButton = false)
                 }
             }
+            // Start with a fake "retry" that doesn't affect state, just to start observing data.
+            .startWithItem(Unit)
+            // restart chain when login state / environment changes
+            .combineLatest(tokenStore.loggedInObservable.distinctUntilChanged())
             .switchMap {
                 // Restart property observing when log-in state changes
                 propertyStore.observeMediaProperties(true)
