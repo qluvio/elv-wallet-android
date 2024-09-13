@@ -61,11 +61,15 @@ fun defaultEventHandler(event: Events, toaster: Toaster) {
 fun BaseViewModel<*>.observeLifecycle(lifecycle: Lifecycle) {
     DisposableEffect(lifecycle) {
         val observer = object : DefaultLifecycleObserver {
-            override fun onResume(owner: LifecycleOwner) = onResumeTentative()
+            override fun onResume(owner: LifecycleOwner) = onResume()
             override fun onPause(owner: LifecycleOwner) = onPause()
         }
         lifecycle.addObserver(observer)
         onDispose {
+            // The composition can be disposed without the lifecycle going thru onPause.
+            // This has the potential of calling onPause twice in a row, but the ViewModel will
+            // handle it.
+            onPause()
             lifecycle.removeObserver(observer)
         }
     }
