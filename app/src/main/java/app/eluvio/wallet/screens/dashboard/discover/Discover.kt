@@ -270,6 +270,7 @@ private fun PropertyCard(
                 model = property.image,
                 contentDescription = property.name,
                 onError = { showImage = false },
+                modifier = Modifier.fillMaxSize()
             )
         } else {
             Text(
