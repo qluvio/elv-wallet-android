@@ -1,6 +1,6 @@
 [versions]
 agp = "8.3.1"
-compose-bom = "2024.06.00"
+compose-bom = "2024.09.01"
 # for personal signing keccak algo
 datastore = "1.1.1"
 hilt-android = "2.46.1"
@@ -36,13 +36,13 @@ reflections = "0.10.2"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
-androidx-compose-runtime = { module = "androidx.compose.runtime:runtime", version = "1.7.0-beta06" }
-androidx-compose-ui = { module = "androidx.compose.ui:ui", version = "1.7.0-beta06" }
-androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version = "1.7.0-beta06" }
-androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version = "1.7.0-beta06" }
+androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
-androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version = "1.7.0-beta06" }
-androidx-compose-rxjava3 = { module = "androidx.compose.runtime:runtime-rxjava3", version = "1.7.0-beta06" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-compose-rxjava3 = { module = "androidx.compose.runtime:runtime-rxjava3" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-datastore-rxjava3 = { module = "androidx.datastore:datastore-preferences-rxjava3", version.ref = "datastore" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }
