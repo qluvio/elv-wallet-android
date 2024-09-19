@@ -1,5 +1,6 @@
 package app.eluvio.wallet.data
 
+import androidx.media3.exoplayer.source.MediaSource
 import app.eluvio.wallet.data.entities.VideoOptionsEntity
 import app.eluvio.wallet.data.stores.ContentStore
 import app.eluvio.wallet.data.stores.TokenStore
@@ -7,6 +8,7 @@ import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.authd.VideoPlayoutApi
 import app.eluvio.wallet.network.api.fabric.AssetFetcherApi
 import app.eluvio.wallet.network.converters.toEntity
+import app.eluvio.wallet.screens.videoplayer.VideoOptionsConverter
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.zipWith
 import javax.inject.Inject
@@ -15,6 +17,7 @@ class VideoOptionsFetcher @Inject constructor(
     private val apiProvider: ApiProvider,
     private val contentStore: ContentStore,
     private val tokenStore: TokenStore,
+    private val videoOptionsConverter: VideoOptionsConverter,
 ) {
     fun fetchVideoOptions(mediaItemId: String, propertyId: String?): Single<VideoOptionsEntity> {
         return if (propertyId != null) {
@@ -80,6 +83,13 @@ class VideoOptionsFetcher @Inject constructor(
                         ?.toEntity(baseUrl, tokenStore.fabricToken.get())
                         ?: throw RuntimeException("No supported video formats found from $url")
                 }
+            }
+    }
+
+    fun fetchMediaSourceFromPath(fabricPath: String): Single<MediaSource> {
+        return fetchVideoOptionsFromPath(fabricPath)
+            .flatMap { videoOptions ->
+                videoOptionsConverter.makeMediaSource(videoOptions)
             }
     }
 }

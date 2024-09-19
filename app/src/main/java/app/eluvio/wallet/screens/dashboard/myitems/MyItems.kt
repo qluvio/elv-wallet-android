@@ -82,13 +82,13 @@ private fun MyItems(
             onItemClick = {
                 if (it.tokenId == null) {
                     toaster.toast("NFT Packs not supported yet")
-                } else if (it.propertyId != null) {
-                    navigator(
-                        NftDetailDestination(
-                            contractAddress = it.contractAddress,
-                            tokenId = it.tokenId,
-                        ).asPush()
-                    )
+//                } else if (it.propertyId != null) {
+//                    navigator(
+//                        NftDetailDestination(
+//                            contractAddress = it.contractAddress,
+//                            tokenId = it.tokenId,
+//                        ).asPush()
+//                    )
                 } else {
                     navigator(
                         LegacyNftDetailDestination(

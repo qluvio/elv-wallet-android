@@ -127,7 +127,7 @@ class LegacyNftDetailViewModel @Inject constructor(
      */
     private fun loadOffers(nft: NftEntity, endpoint: String) {
         val offerStates = nft.redeemableOffers
-            .filterNot { it.shouldHide }
+//            .filterNot { it.shouldHide }
             .mapNotNull { offer ->
                 // Offers we don't have redeemState for aren't confirmed to valid to show to the user
                 nft.redeemStates.firstOrNull { offer.offerId == it.offerId }
@@ -139,8 +139,8 @@ class LegacyNftDetailViewModel @Inject constructor(
                 val videoOptions: Single<Optional<MediaSource>> = if (animationPath == null) {
                     Single.just(Optional.absent())
                 } else {
-                    videoOptionsFetcher.fetchVideoOptionsFromPath(animationPath)
-                        .map { videoEntity -> Optional.of(videoEntity.toMediaSource()) }
+                    videoOptionsFetcher.fetchMediaSourceFromPath(animationPath)
+                        .map { Optional.of(it) }
                         .onErrorReturnItem(Optional.absent())
                 }
                 videoOptions.map { optional ->

@@ -3,6 +3,8 @@ package app.eluvio.wallet.screens.nftdetail.legacy
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -57,7 +59,12 @@ import app.eluvio.wallet.screens.common.DelayedFullscreenLoader
 import app.eluvio.wallet.screens.common.ImageCard
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.Overscan
+import app.eluvio.wallet.screens.common.PreloadingExoPlayer
+import app.eluvio.wallet.screens.common.ShimmerImage
+import app.eluvio.wallet.screens.common.VideoPlayer
 import app.eluvio.wallet.screens.common.WrapContentText
+import app.eluvio.wallet.screens.common.dimContent
+import app.eluvio.wallet.screens.common.rememberExoplayer
 import app.eluvio.wallet.screens.common.spacer
 import app.eluvio.wallet.screens.destinations.RedeemDialogDestination
 import app.eluvio.wallet.theme.EluvioThemePreview
@@ -255,12 +262,13 @@ private fun DescriptionText(text: AnnotatedString) {
 
 @Composable
 private fun FeaturedMediaAndOffersRow(state: LegacyNftDetailViewModel.State) {
+    val exoPlayer = rememberExoplayer()
     TvLazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
         spacer(width = 28.dp)
         items(state.featuredMedia) { item -> MediaItemCard(item, cardHeight = CARD_HEIGHT) }
         items(state.redeemableOffers) { item ->
             val navigator = LocalNavigator.current
-            OfferCard(item) {
+            OfferCard(item, exoPlayer) {
                 navigator(
                     RedeemDialogDestination(
                         item.contractAddress,
@@ -289,7 +297,11 @@ private fun MediaItemsRow(media: List<MediaEntity>) {
 }
 
 @Composable
-private fun OfferCard(item: LegacyNftDetailViewModel.State.Offer, onClick: () -> Unit) {
+private fun OfferCard(
+    item: LegacyNftDetailViewModel.State.Offer,
+    exoPlayer: PreloadingExoPlayer? = null,
+    onClick: () -> Unit
+) {
     // It's possible to layer this Text on top of the card (with explicit zIndex modifiers, see:
     // https://issuetracker.google.com/issues/291642442), but then it won't scale right when
     // the card is focused.
@@ -321,7 +333,7 @@ private fun OfferCard(item: LegacyNftDetailViewModel.State.Offer, onClick: () ->
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.6f))
+//                            .background(Color.Black.copy(alpha = 0.6f))
                     )
                 }
 
@@ -346,42 +358,55 @@ private fun OfferCard(item: LegacyNftDetailViewModel.State.Offer, onClick: () ->
             )
         }
     }
-//    if (item.animation != null) {
-//        val interactionSource = remember { MutableInteractionSource() }
-//        val focused by interactionSource.collectIsFocusedAsState()
-//        val focusedBorder =
-//            Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer))
-//        Surface(
-//            onClick = onClick,
-//            interactionSource = interactionSource,
-//            border = ClickableSurfaceDefaults.border(focusedBorder = focusedBorder),
-//            scale = LocalSurfaceScale.current,
-//            modifier = Modifier.size(150.dp)
-//        ) {
-//            VideoPlayer(
-//                mediaSource = item.animation,
-//                modifier = Modifier
-//                    .size(150.dp)
-//                    .dimContent(dim = focused)
-//            )
-//            if (focused) {
-//                offerTitle()
-//            }
-//            rewardTag()
-//        }
-//    } else {
-    ImageCard(
-        imageUrl = item.imageUrl,
-        contentDescription = item.name,
-        onClick = onClick,
-        modifier = Modifier.size(CARD_HEIGHT),
-        focusedOverlay = {
-            offerTitle()
+    if (item.animation != null) {
+        val interactionSource = remember { MutableInteractionSource() }
+        val focused by interactionSource.collectIsFocusedAsState()
+        val focusedBorder =
+            Border(BorderStroke(2.dp, MaterialTheme.colorScheme.onSecondaryContainer))
+        Surface(
+            onClick = onClick,
+            interactionSource = interactionSource,
+            border = ClickableSurfaceDefaults.border(focusedBorder = focusedBorder),
+            scale = LocalSurfaceScale.current,
+            modifier = Modifier.size(CARD_HEIGHT)
+        ) {
+            VideoPlayer(
+                mediaSource = item.animation,
+                player = exoPlayer ?: rememberExoplayer(),
+                isFocused = focused,
+                placeholder = {
+                    AsyncImage(
+                        model = item.imageUrl,
+                        contentScale = ContentScale.Crop,
+                        contentDescription = item.name,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center)
+//                            .dimContent(dim = focused)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .dimContent(dim = focused)
+            )
+            if (focused) {
+                offerTitle()
+            }
             rewardOverlay()
-        },
-        unFocusedOverlay = rewardOverlay
-    )
-//    }
+        }
+    } else {
+        ImageCard(
+            imageUrl = item.imageUrl,
+            contentDescription = item.name,
+            onClick = onClick,
+            modifier = Modifier.size(CARD_HEIGHT),
+            focusedOverlay = {
+                offerTitle()
+                rewardOverlay()
+            },
+            unFocusedOverlay = rewardOverlay
+        )
+    }
 }
 
 class BackLinkParameterProvider : PreviewParameterProvider<String?> {
