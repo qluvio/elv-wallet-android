@@ -34,9 +34,10 @@ object RetrofitModule {
         interceptors: Set<@JvmSuppressWildcards Interceptor>,
     ): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(accessTokenInterceptor)
+            .authenticator(accessTokenInterceptor)
+            .addNetworkInterceptor(accessTokenInterceptor)
             .apply {
-                interceptors.forEach { addInterceptor(it) }
+                interceptors.forEach { addNetworkInterceptor(it) }
             }
             .build()
     }

@@ -15,5 +15,8 @@ fun RxDataStore<Preferences>.edit(action: MutablePreferences.() -> Unit) {
         val prefs = it.toMutablePreferences()
         prefs.action()
         Single.just(prefs)
-    }.blockingSubscribe()
+    }
+        .ignoreElement()
+        // .blockingSubscribe() will not throw exceptions, so use blockingAwait() instead, to allow callers to recover.
+        .blockingAwait()
 }

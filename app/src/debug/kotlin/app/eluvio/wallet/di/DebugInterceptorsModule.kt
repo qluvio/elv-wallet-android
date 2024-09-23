@@ -1,7 +1,10 @@
 package app.eluvio.wallet.di
 
+import com.moczul.ok2curl.Configuration
 import com.moczul.ok2curl.CurlInterceptor
+import com.moczul.ok2curl.Header
 import com.moczul.ok2curl.logger.Logger
+import com.moczul.ok2curl.modifier.HeaderModifier
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +30,22 @@ object DebugInterceptorsModule {
     @Provides
     @IntoSet
     fun provideCurlInterceptor(): Interceptor {
+        val headerFilter = object : HeaderModifier {
+            private val allowlist = listOf("Authorization", "Accept", "Content-Type", "User-Agent")
+            override fun matches(header: Header): Boolean {
+                // Catch all headers that are not interesting
+                return header.name !in allowlist
+            }
+
+            override fun modify(header: Header): Header? {
+                // And map them to null
+                return null
+            }
+        }
         return CurlInterceptor(
+            configuration = Configuration(
+                headerModifiers = listOf(headerFilter)
+            ),
             logger = object : Logger {
                 override fun log(message: String) {
                     Timber.tag("OkHttp").w(message)

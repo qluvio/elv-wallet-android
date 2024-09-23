@@ -8,18 +8,22 @@ import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.network.api.Auth0Api
 import app.eluvio.wallet.network.api.RefreshTokenRequest
 import app.eluvio.wallet.util.logging.Log
+import app.eluvio.wallet.util.rx.unsaved
 import dagger.Lazy
-import io.reactivex.rxjava3.processors.BehaviorProcessor
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import java.net.HttpURLConnection
+import okhttp3.Route
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * This interceptor is responsible for adding the appropriate token to each request.
  * As well as trying to refresh the token if it's expired, and retrying the request if the refresh is successful.
+ *
+ * Needs to be registered as both a (Network) [Interceptor] and an [Authenticator].
  */
 @Singleton
 class AccessTokenInterceptor @Inject constructor(
@@ -27,7 +31,7 @@ class AccessTokenInterceptor @Inject constructor(
     private val auth0Api: Auth0Api,
     private val authenticationService: Lazy<AuthenticationService>,
     private val signOutHandler: SignOutHandler,
-) : Interceptor {
+) : Interceptor, Authenticator {
 
     private val userAgent = if (BuildConfig.DEBUG) {
         // Don't use "androidtv" in debug build, to bypass eligible-tenants filtering by backend.
@@ -39,107 +43,10 @@ class AccessTokenInterceptor @Inject constructor(
     /** URLs that contain these paths should not get special handling for expired tokens. */
     private val authRequestPaths = setOf("wlt/login/jwt", "wlt/sign/eth")
 
-    /**
-     * Keeps track of whether or not a token is currently being refreshed.
-     * This is to prevent multiple calls from trying to refresh at the same time.
-     */
-    private val refreshInProgress = BehaviorProcessor.createDefault(false)
-
     override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
-
-        val response = chain.proceed(request.withHeaders())
-        val isAuthRelatedRequest = authRequestPaths.any { request.url.toString().contains(it) }
-        if (isAuthRelatedRequest) {
-            log("Auth related requested, no special handling")
-            return response
-        }
-
-        return when (response.code) {
-            HttpURLConnection.HTTP_UNAUTHORIZED,
-            HttpURLConnection.HTTP_FORBIDDEN -> {
-                // If there's no new response from refreshAndRetry, then we should return the original response.
-                return refreshAndRetry(chain, response) ?: run {
-                    signOutHandler
-                        .signOut("Token expired. Please sign in again.")
-                        .blockingAwait()
-                    return@run response
-                }
-            }
-
-            else -> response
-        }
-    }
-
-    /**
-     * Potentially refreshes the token and retries the request.
-     * Returns a new response in case of successful refresh+retry, or null no refreshToken is available or refresh fails.
-     * In the case of a canceled call, the original response is returned.
-     */
-    private fun refreshAndRetry(chain: Interceptor.Chain, originalResponse: Response): Response? {
-        val request = chain.request()
-        log("Detected bad token from ${request.url}")
-        val refreshToken = tokenStore.refreshToken.get()
-        if (refreshToken == null) {
-            log("No refresh token to work with (metamask user?). Signing out.")
-            // Can't refresh token, so this is a fatal error.
-            return null
-        }
-        // Wait till refresh is done before proceeding
-        if (refreshInProgress.value == true) {
-            log("another refresh call in-flight. waiting...")
-            refreshInProgress
-                .distinctUntilChanged()
-                .takeUntil { refreshInProgress -> !refreshInProgress }
-                .blockingSubscribe()
-            log("done waiting!")
-
-            if (refreshToken != tokenStore.refreshToken.get()) {
-                // refresh token has changed since we started this request. Someone else must have refreshed it.
-                log("refresh token changed. retrying original request to ${request.url}")
-                return chain.proceed(request.withHeaders())
-            }
-        }
-
-
-        log("going to actually try to refresh token")
-        refreshInProgress.onNext(true)
-        // Clear out invalid tokens
-        tokenStore.update(
-            tokenStore.clusterToken to null,
-            tokenStore.fabricToken to null,
-        )
-        return runCatching {
-            // try to refresh
-            auth0Api.refreshToken(RefreshTokenRequest(refreshToken = refreshToken))
-                .blockingGet()
-        }
-            .mapCatching {
-                log("refresh call successful, making new fabric token")
-                tokenStore.update(
-                    tokenStore.idToken to it.idToken,
-                    tokenStore.accessToken to it.accessToken,
-                    tokenStore.refreshToken to it.refreshToken,
-                )
-
-                val newFabricToken =
-                    authenticationService.get().getFabricToken().blockingGet()
-                log("Successfully refreshed token. Retrying original request (new token=$newFabricToken)")
-                // retry original request with new tokens
-                chain.proceed(request.withHeaders())
-            }
-            .recoverCatching {
-                if (chain.call().isCanceled()) {
-                    log("Call was canceled after successful refresh. Passing original response.")
-                    originalResponse
-                } else {
-                    log("Failed to refresh token. Signing out.", it)
-                    throw it
-                }
-            }
-            .getOrNull()
-            // Finally, regardless of success/failure, unblock other calls waiting for refresh to finish.
-            .also { refreshInProgress.onNext(false) }
+        val request = chain.request().withHeaders()
+        val response = chain.proceed(request)
+        return response
     }
 
     /**
@@ -149,25 +56,104 @@ class AccessTokenInterceptor @Inject constructor(
         val builder = newBuilder()
         builder.header("User-Agent", userAgent)
         builder.header("Accept", "*/*") // needed for link/file resolution from the fabric
-        addTokenHeader(url.toString(), builder)
+        addAuthHeader(url.toString(), builder)
         return builder.build()
     }
 
     /**
      * Adds a token header appropriate for the given request URL and token availability.
      */
-    private fun addTokenHeader(requestUrl: String, builder: Request.Builder) {
+    private fun addAuthHeader(requestUrl: String, builder: Request.Builder) {
         if (requestUrl.contains("wlt/login/jwt")) {
             tokenStore.idToken.get()?.let { idToken ->
-                builder.header("Authorization", "Bearer $idToken")
+                builder.authToken(idToken)
             }
         } else if (requestUrl.contains("wlt/sign/eth")) {
             tokenStore.clusterToken.get()?.let { walletToken ->
-                builder.header("Authorization", "Bearer $walletToken")
+                builder.authToken(walletToken)
             }
         } else {
             tokenStore.fabricToken.get()?.let { fabricToken ->
-                builder.header("Authorization", "Bearer $fabricToken")
+                builder.authToken(fabricToken)
+            }
+        }
+    }
+
+    /**
+     * Potentially refreshes the token and retries the request.
+     */
+    override fun authenticate(route: Route?, response: Response): Request? {
+        // When we want to retry, we can just return the original request. No need to attach new headers.
+        // Since TokenInterceptor is registered as a Network Interceptor (rather than an Application Interceptor),
+        // it will be called before the new request is made, and set the right tokens again.
+        val retry = response.request
+        val noRetry: Request? = null
+
+        val url = response.request.url.toString()
+        val isAuthRelatedRequest = authRequestPaths.any { path -> path in url }
+        if (isAuthRelatedRequest) {
+            log("Auth related requested, no special handling for 401.")
+            return noRetry
+        }
+
+        val refreshToken = tokenStore.refreshToken.get()
+        if (refreshToken == null) {
+            log("No refresh token - unable to recover from 401. Signing out.")
+            return signOut()
+        }
+
+        if (response.responseCount > 1) {
+            log("Tried to refresh token too many times. Giving up and signing out.")
+            return signOut()
+        }
+
+        synchronized(this) {
+            // use [networkResponse.request], since [request] won't have any headers set from the Network Interceptors.
+            response.networkResponse?.request?.authToken
+                // Check if the token has changed since the original request was made.
+                ?.takeIf { originalToken -> originalToken != tokenStore.fabricToken.get() }
+                ?.let {
+                    log("Token changed since original request. Retrying with new token.")
+                    // While we were waiting on the Synchronized block, another call must have refreshed the token.
+                    return retry
+                }
+
+            val newTokens = try {
+                auth0Api.refreshToken(RefreshTokenRequest(refreshToken = refreshToken))
+                    .blockingGet()
+            } catch (e: Throwable) {
+                if (e is InterruptedException || e.cause is InterruptedException) {
+                    // There's no point in retrying, since this call was canceled.
+                    // However, we don't really know what state we are in.
+                    // Did the server get our request and burn our refresh token? Did nothing really
+                    // happen? since we don't know, we're not going to sign out, and maybe the next
+                    // request will succeed.
+                    log("Token refresh request was interrupted. Not retrying and not signing out.")
+                    return noRetry
+                } else {
+                    Log.e("Failed to refresh token. Signing out.", e)
+                    // We failed because some other reason. Assume the refresh token is burned and
+                    // there's nothing left to do but sign out.
+                    return signOut()
+                }
+            }
+
+            try {
+                tokenStore.update(
+                    tokenStore.idToken to newTokens.idToken,
+                    tokenStore.accessToken to newTokens.accessToken,
+                    tokenStore.refreshToken to newTokens.refreshToken,
+                )
+
+                val newFabricToken = authenticationService.get().getFabricToken().blockingGet()
+                log("Successfully refreshed token. Retrying original request (new token=$newFabricToken)")
+                return retry
+            } catch (e: Throwable) {
+                // Either we failed to save the new refresh token, or we failed to convert it to
+                // a fabric token. In either case, there's no point in retrying anything, but
+                // the next call might be able to recover from this.
+                log("Failed to refresh token. Not retrying.", e)
+                return noRetry
             }
         }
     }
@@ -177,8 +163,40 @@ class AccessTokenInterceptor @Inject constructor(
             Log.d(message, throwable)
         }
     }
+
+    /**
+     * Kicks off sign out and doesn't wait for it to complete.
+     * Always returns `null`. It's just a convenience so we can call `return signOut()` in a single line.
+     */
+    private fun signOut(): Request? {
+        signOutHandler
+            .signOut("Token expired. Please sign in again.")
+            .doOnSubscribe { log("Sign out started") }
+            .subscribeBy(
+                onComplete = { log("Sign out completed.") },
+                onError = { Log.e("Failed to complete sign out", it) }
+            )
+            .unsaved()
+        return null
+    }
 }
 
 // The process of refreshing a token is flaky and complicated.
 // Logs are helpful for debugging, but they're too verbose to be enabled by default.
-private const val ENABLE_EXCESSIVE_LOGGING = true
+private const val ENABLE_EXCESSIVE_LOGGING = false
+
+/**
+ * Sets the authorization header, and also saves it as a Tag, so that we can check it later.
+ */
+private fun Request.Builder.authToken(token: String): Request.Builder {
+    return this.tag(String::class.java, token)
+        .header("Authorization", "Bearer $token")
+}
+
+/**
+ * Retrieves the auth token from the tag if it was set.
+ */
+private val Request.authToken: String? get() = tag(String::class.java)
+
+private val Response.responseCount: Int
+    get() = generateSequence(this) { it.priorResponse }.count()
