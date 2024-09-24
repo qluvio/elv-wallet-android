@@ -92,9 +92,6 @@ class DiscoverViewModel @Inject constructor(
                 SignInRouterDestination(
                     property.loginProvider,
                     property.id,
-                    // In case we are logged in but the login provider is different, clear old
-                    // tokens and data before going to auth again.
-                    signOutBeforeAuthFlow = tokenStore.isLoggedIn,
                     onSignedInDirection = direction
                 ).asPush()
             )

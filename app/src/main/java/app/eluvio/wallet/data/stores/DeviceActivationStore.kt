@@ -44,7 +44,11 @@ class DeviceActivationStore @Inject constructor(
                 tokenStore.update(
                     tokenStore.idToken to response?.idToken,
                     tokenStore.accessToken to response?.accessToken,
-                    tokenStore.refreshToken to response?.refreshToken
+                    tokenStore.refreshToken to response?.refreshToken,
+
+                    // Clear out previous tokens at this stage, as we are ready to get new ones
+                    tokenStore.fabricToken to null,
+                    tokenStore.walletAddress to null,
                 )
             }
     }

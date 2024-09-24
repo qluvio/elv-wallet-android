@@ -62,6 +62,12 @@ class MetamaskActivationStore @Inject constructor(
                 tokenStore.update(
                     tokenStore.fabricToken to it.token,
                     tokenStore.walletAddress to it.address,
+
+                    // Metamask doesn't support access/refresh tokens,
+                    // so make sure to clear those out to prevent leaks from previous logins.
+                    tokenStore.accessToken to null,
+                    tokenStore.refreshToken to null,
+                    tokenStore.idToken to null,
                 )
             }
     }

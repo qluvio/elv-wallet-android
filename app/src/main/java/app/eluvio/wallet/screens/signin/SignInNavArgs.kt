@@ -10,8 +10,6 @@ import com.ramcosta.composedestinations.spec.Direction
 data class SignInNavArgs(
     val provider: LoginProviders = LoginProviders.AUTH0,
     val propertyId: String? = null,
-    // Will clear data before navigating to the appropriate auth flow
-    val signOutBeforeAuthFlow: Boolean = false,
     // Where the auth flow should navigate to once successfully signed in
     val onSignedInDirection: Direction? = null
 )
