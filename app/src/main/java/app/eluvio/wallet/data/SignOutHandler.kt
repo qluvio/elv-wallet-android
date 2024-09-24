@@ -8,22 +8,43 @@ import app.eluvio.wallet.data.stores.PlaybackStore
 import app.eluvio.wallet.data.stores.TokenStore
 import app.eluvio.wallet.util.Toaster
 import app.eluvio.wallet.util.logging.Log
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import io.realm.kotlin.Realm
 import javax.inject.Inject
 
-class SignOutHandler @Inject constructor(
+interface SignOutHandler {
+    /**
+     * Clears local cache and tokens. Optionally shows a message and restarts the app.
+     */
+    fun signOut(
+        completeMessage: String? = null,
+        restartAppOnComplete: Boolean = true
+    ): Completable
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+interface TokenStoreModule {
+    @Binds
+    fun bindSignOutHandler(impl: SignOutHandlerImpl): SignOutHandler
+}
+
+class SignOutHandlerImpl @Inject constructor(
     private val tokenStore: TokenStore,
     private val realm: Realm,
     private val playbackStore: PlaybackStore,
     @ApplicationContext private val context: Context,
     private val toaster: Toaster,
-) {
-    fun signOut(
-        completeMessage: String? = null,
-        restartAppOnComplete: Boolean = true
+) : SignOutHandler {
+    override fun signOut(
+        completeMessage: String?,
+        restartAppOnComplete: Boolean
     ): Completable {
         return Completable.fromAction {
             playbackStore.wipe()

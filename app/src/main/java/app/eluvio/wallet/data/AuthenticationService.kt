@@ -10,6 +10,10 @@ import app.eluvio.wallet.util.crypto.Base58
 import app.eluvio.wallet.util.crypto.Keccak
 import app.eluvio.wallet.util.logging.Log
 import app.eluvio.wallet.util.toHexByteArray
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import io.reactivex.rxjava3.core.Single
 import java.util.Date
 import java.util.zip.Deflater
@@ -17,17 +21,34 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.hours
 
+interface AuthenticationService {
+    /**
+     * Generate a new fabric token and store it in the [TokenStore].
+     * Assumes clusterToken and idToken are already present in the [TokenStore].
+     */
+    fun getFabricToken(): Single<String>
+    fun getFabricTokenExternal(): Single<String>
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+interface AuthServiceModule {
+    @Singleton
+    @Binds
+    fun bindAuthService(impl: AuthenticationServiceImpl): AuthenticationService
+}
+
 @Singleton
-class AuthenticationService @Inject constructor(
+class AuthenticationServiceImpl @Inject constructor(
     private val apiProvider: ApiProvider,
     private val fabricConfigStore: FabricConfigStore,
     private val tokenStore: TokenStore,
-) {
-    fun getFabricToken(): Single<String> {
+) : AuthenticationService {
+    override fun getFabricToken(): Single<String> {
         return apiProvider.getApi(AuthServicesApi::class).flatMap { api -> getFabricToken(api) }
     }
 
-    fun getFabricTokenExternal(): Single<String> {
+    override fun getFabricTokenExternal(): Single<String> {
         return apiProvider.getExternalWalletApi(AuthServicesApi::class)
             .flatMap { api -> getFabricToken(api) }
     }

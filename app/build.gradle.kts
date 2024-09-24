@@ -128,6 +128,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.junit)
     testImplementation(libs.reflections)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
 
     implementation(libs.installReferrer)
 
