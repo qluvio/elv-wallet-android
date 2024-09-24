@@ -90,7 +90,8 @@ abstract class BaseViewModel<State : Any>(
 }
 
 private fun <T : Any> Observable<T>.printDebugStateDiffs(): Observable<T> {
-    return if (BuildConfig.DEBUG) {
+    val enable = false // Disabled by default (can be very verbose)
+    return if (enable && BuildConfig.DEBUG) {
         this.scan { previousState, newState ->
             diffStates(previousState, newState)
                 ?.let { diff ->
