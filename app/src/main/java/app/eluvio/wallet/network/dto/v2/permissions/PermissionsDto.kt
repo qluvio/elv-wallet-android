@@ -30,6 +30,11 @@ data class PermissionsDto(
     val property_permissions_behavior: String?,
     val property_permissions_alternate_page_id: String?,
     val property_permissions_secondary_market_purchase_option: String?,
+
+    // Search results permission behavior
+    val search_permissions_behavior: String?,
+    val search_permissions_alternate_page_id: String?,
+    val search_permissions_secondary_market_purchase_option: String?,
 )
 
 @JsonClass(generateAdapter = true)

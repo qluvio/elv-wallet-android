@@ -1,5 +1,6 @@
 package app.eluvio.wallet.network.converters.v2.permissions
 
+import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.network.dto.v2.permissions.PermissionsDto
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
@@ -22,7 +23,7 @@ fun PermissionsDto.toContentPermissionsEntity(): PermissionSettingsEntity {
 fun PermissionsDto.toPagePermissionsEntity(): PermissionSettingsEntity {
     val dto = this
     return PermissionSettingsEntity().apply {
-        // Content permissions
+        // Page permissions
         permissionItemIds = dto.page_permissions.toRealmListOrEmpty()
         behavior = dto.page_permissions_behavior?.ifEmpty { null }
         alternatePageId = dto.page_permissions_alternate_page_id?.ifEmpty { null }
@@ -34,11 +35,23 @@ fun PermissionsDto.toPagePermissionsEntity(): PermissionSettingsEntity {
 fun PermissionsDto.toPropertyPermissionsEntity(): PermissionSettingsEntity {
     val dto = this
     return PermissionSettingsEntity().apply {
-        // Content permissions
+        // Property permissions
         permissionItemIds = dto.property_permissions.toRealmListOrEmpty()
         behavior = dto.property_permissions_behavior?.ifEmpty { null }
         alternatePageId = dto.property_permissions_alternate_page_id?.ifEmpty { null }
         secondaryMarketPurchaseOption =
             dto.property_permissions_secondary_market_purchase_option?.ifEmpty { null }
+    }
+}
+
+fun PermissionsDto.toSearchPermissionsEntity() : PermissionSettingsEntity{
+    val dto = this
+    return PermissionSettingsEntity().apply {
+        // Search permissions behavior only
+        // Default to HIDE when not defined.
+        behavior = dto.search_permissions_behavior?.ifEmpty { null } ?: PermissionBehavior.HIDE.value
+        alternatePageId = dto.search_permissions_alternate_page_id?.ifEmpty { null }
+        secondaryMarketPurchaseOption =
+            dto.search_permissions_secondary_market_purchase_option?.ifEmpty { null }
     }
 }

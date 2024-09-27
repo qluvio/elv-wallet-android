@@ -8,6 +8,7 @@ import app.eluvio.wallet.network.converters.v2.permissions.toContentPermissionsE
 import app.eluvio.wallet.network.converters.v2.permissions.toPagePermissionsEntity
 import app.eluvio.wallet.network.converters.v2.permissions.toPermissionStateEntities
 import app.eluvio.wallet.network.converters.v2.permissions.toPropertyPermissionsEntity
+import app.eluvio.wallet.network.converters.v2.permissions.toSearchPermissionsEntity
 import app.eluvio.wallet.network.dto.v2.LoginInfoDto
 import app.eluvio.wallet.network.dto.v2.MediaPageDto
 import app.eluvio.wallet.network.dto.v2.MediaPropertyDto
@@ -28,6 +29,7 @@ fun MediaPropertyDto.toEntity(baseUrl: String): MediaPropertyEntity? {
         permissionStates = dto.toPermissionStateEntities()
         rawPermissions = dto.permissions?.toContentPermissionsEntity()
         propertyPermissions = dto.permissions?.toPropertyPermissionsEntity()
+        searchPermissions = dto.permissions?.toSearchPermissionsEntity()
     }
 }
 

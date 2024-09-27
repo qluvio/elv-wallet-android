@@ -55,6 +55,9 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
     // technically still in the same property, but we show it anyway.
     var propertyPermissions: PermissionSettingsEntity? = null
 
+    // Permissions settings that apply for search results.
+    var searchPermissions: PermissionSettingsEntity? = null
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -71,6 +74,7 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         if (permissionStates != other.permissionStates) return false
         if (rawPermissions != other.rawPermissions) return false
         if (propertyPermissions != other.propertyPermissions) return false
+        if (searchPermissions != other.searchPermissions) return false
 
         return true
     }
@@ -86,11 +90,12 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + permissionStates.hashCode()
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
         result = 31 * result + (propertyPermissions?.hashCode() ?: 0)
+        result = 31 * result + (searchPermissions?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "MediaPropertyEntity(id='$id', name='$name', headerLogoUrl='$headerLogoUrl', image='$image', bgImageUrl=$bgImageUrl, mainPage=$mainPage, loginInfo=$loginInfo, permissionStates=$permissionStates, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, propertyPermissions=$propertyPermissions)"
+        return "MediaPropertyEntity(id='$id', name='$name', headerLogoUrl='$headerLogoUrl', image='$image', bgImageUrl=$bgImageUrl, mainPage=$mainPage, loginInfo=$loginInfo, permissionStates=$permissionStates, resolvedPermissions=$resolvedPermissions, rawPermissions=$rawPermissions, propertyPermissions=$propertyPermissions, searchPermissions=$searchPermissions)"
     }
 
     // Index can't be saved as part of the PropertyEntity object because it will get overridden

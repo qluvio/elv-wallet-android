@@ -160,8 +160,8 @@ private fun PermissionSettings.calcAuthorized(permissionStates: Map<String, Perm
 
 /**
  * Tries to delegate to [primary] first, and falls back to [fallback] if [primary] is not defined.
- * While it's only used once and doesn't save us much code, the real use of this class is to make
- * sure we get a complication error any time [PermissionSettings] is updated, so we don't forget to
+ * While it's only used once and doesn't save us much code, the real benefit of this class is to make
+ * sure we get a compilation error any time [PermissionSettings] is updated, so we don't forget to
  * include the new field in the permission resolution logic.
  */
 private class CompositePermissions(

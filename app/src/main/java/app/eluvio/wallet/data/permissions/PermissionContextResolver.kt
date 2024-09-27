@@ -25,7 +25,7 @@ class PermissionContextResolver @Inject constructor(
             .switchMap { observeSection(sectionId, context = it) }
             .map { resolved ->
                 val sectionItem = resolved.section?.items?.firstOrNull { it.id == sectionItemId }
-                resolved.copy(sectionItem = sectionItem /*mediaItem = mediaItem*/)
+                resolved.copy(sectionItem = sectionItem)
             }
             .switchMap { observeMediaItem(mediaItemId, context = it) }
     }

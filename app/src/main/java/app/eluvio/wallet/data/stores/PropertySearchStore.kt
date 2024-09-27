@@ -73,7 +73,7 @@ class PropertySearchStore @Inject constructor(
             .doOnSuccess { sections ->
                 PermissionResolver.resolvePermissions(
                     sections,
-                    property.resolvedPermissions,
+                    property.searchPermissions,
                     property.permissionStates
                 )
             }
