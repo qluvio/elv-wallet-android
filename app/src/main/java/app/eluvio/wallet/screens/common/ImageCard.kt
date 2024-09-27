@@ -39,6 +39,7 @@ fun ImageCard(
     modifier: Modifier = Modifier,
     focusedOverlay: @Composable (BoxScope.() -> Unit)? = null,
     unFocusedOverlay: @Composable (BoxScope.() -> Unit)? = null,
+    dimOnFocus: Boolean = true,
     shape: Shape = MaterialTheme.shapes.medium,
     onClick: () -> Unit,
 ) {
@@ -63,7 +64,7 @@ fun ImageCard(
             contentDescription = contentDescription,
             modifier = modifier
                 .align(Alignment.Center)
-                .dimContent(dim = isFocused)
+                .dimContent(dim = dimOnFocus && isFocused)
         )
         if (isFocused) {
             focusedOverlay?.invoke(parentScope)

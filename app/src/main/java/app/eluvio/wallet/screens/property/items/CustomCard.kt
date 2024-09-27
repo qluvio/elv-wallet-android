@@ -32,13 +32,16 @@ fun CustomCard(item: CarouselItem.CustomCard, cardHeight: Dp, modifier: Modifier
             .height(cardHeight)
             .aspectRatio(item.aspectRatio),
         focusedOverlay = {
-            CustomCardOverlay(text = item.title)
+            if (item.imageUrl == null) {
+                CustomCardOverlay(text = item.title)
+            }
         },
         unFocusedOverlay = {
             if (item.imageUrl == null) {
                 CustomCardOverlay(text = item.title)
             }
-        }
+        },
+        dimOnFocus = false
     )
 }
 
