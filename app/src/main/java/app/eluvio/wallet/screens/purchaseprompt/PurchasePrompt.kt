@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -168,12 +169,37 @@ private fun MediaPurchaseCard(media: MediaEntity, qrImage: Bitmap?) {
                     .focusProperties { canFocus = false }
             )
             Spacer(Modifier.height(14.dp))
+
+            val display = media.displaySettings
+            display?.headers?.takeIf { it.isNotEmpty() }
+                ?.let { headers ->
+                    Text(
+                        text = headers.joinToString(separator = "   "),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.label_24,
+                        color = Color(0xFFA5A6A8),
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                }
+            val title = display?.title?.ifEmpty { null } ?: media.name
             Text(
-                media.name,
-                style = MaterialTheme.typography.carousel_48,
+                text = title,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.carousel_48,
             )
+            display?.subtitle?.takeIf { it.isNotEmpty() }
+                ?.let { subtitle ->
+                    Text(
+                        text = subtitle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.label_24,
+                        color = Color(0xFF818590),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
         }
         qrImage?.let {
             Image(
@@ -184,7 +210,6 @@ private fun MediaPurchaseCard(media: MediaEntity, qrImage: Bitmap?) {
             )
         }
     }
-
 }
 
 @Composable
