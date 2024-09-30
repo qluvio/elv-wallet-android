@@ -8,7 +8,6 @@ import app.eluvio.wallet.screens.destinations.ExternalMediaQrDialogDestination
 import app.eluvio.wallet.screens.destinations.ImageGalleryDestination
 import app.eluvio.wallet.screens.destinations.LockedMediaDialogDestination
 import app.eluvio.wallet.screens.destinations.MediaGridDestination
-import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
 import app.eluvio.wallet.screens.destinations.PurchasePromptDestination
 import app.eluvio.wallet.screens.destinations.UpcomingVideoDestination
 import app.eluvio.wallet.screens.destinations.VideoPlayerActivityDestination
@@ -37,14 +36,8 @@ private fun clickWithPermissionContext(
     permissionContext: PermissionContext
 ): Direction? {
     return when {
-        media.showAlternatePage -> {
-            PropertyDetailDestination(
-                propertyId = permissionContext.propertyId,
-                pageId = media.resolvedPermissions?.alternatePageId!!
-            )
-        }
-
-        media.showPurchaseOptions -> {
+        // We never want to show alt page on click for TV clients. Treat it the same as show_purchase_options.
+        media.showPurchaseOptions || media.showAlternatePage -> {
             PurchasePromptDestination(permissionContext)
         }
 

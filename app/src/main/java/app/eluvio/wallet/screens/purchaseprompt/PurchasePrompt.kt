@@ -160,6 +160,7 @@ private fun MediaPurchaseCard(media: MediaEntity, qrImage: Bitmap?) {
         Column(modifier = Modifier.width(IntrinsicSize.Min)) {
             MediaItemCard(
                 media,
+                enablePurchaseOptionsOverlay = false,
                 cardHeight = cardHeight,
                 onMediaItemClick = { _, _ -> /*No-Op*/ },
                 modifier = Modifier

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,15 +41,17 @@ import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
 import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.display.withOverrides
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionBehavior
-import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.entities.v2.permissions.VolatilePermissionSettings
+import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.theme.EluvioThemePreview
+import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.button_24
 import app.eluvio.wallet.theme.disabledItemAlpha
+import app.eluvio.wallet.util.compose.Black
 import app.eluvio.wallet.util.compose.requestInitialFocus
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmInstant
@@ -64,40 +67,70 @@ fun MediaItemCard(
     onMediaItemClick: MediaClickHandler = defaultMediaItemClickHandler(LocalNavigator.current),
     cardHeight: Dp = 150.dp,
     shape: Shape = MaterialTheme.shapes.medium,
+    enablePurchaseOptionsOverlay: Boolean = true
 ) {
     val displaySettings = media.requireDisplaySettings().withOverrides(displayOverrides)
     val (imageUrl, aspectRatio) = displaySettings.thumbnailUrlAndRatio ?: return
     if (media.isDisabled) {
         DisabledCard(imageUrl, media, shape, cardHeight, aspectRatio, modifier)
     } else {
-        val liveVideoInfo = media.liveVideoInfo
+        val showPurchaseOptions = enablePurchaseOptionsOverlay && (media.showPurchaseOptions || media.showAlternatePage)
         ImageCard(
             imageUrl = imageUrl,
             contentDescription = media.nameOrLockedName(),
             shape = shape,
+            dimOnFocus = !showPurchaseOptions,
             focusedOverlay = {
-                MetadataTexts(displaySettings)
+                if (showPurchaseOptions) {
+                    PurchaseOptionsOverlay()
+                } else {
+                    MetadataTexts(displaySettings)
+                }
             },
             unFocusedOverlay = {
-                if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
-                    if (liveVideoInfo != null) {
-                        LiveVideoUnFocusedOverlay(liveVideoInfo)
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .align(Alignment.Center)
-                                .alpha(0.75f)
-                        )
+                if (showPurchaseOptions) {
+                    PurchaseOptionsOverlay()
+                } else
+                    if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
+                        val liveVideoInfo = media.liveVideoInfo
+                        if (liveVideoInfo != null) {
+                            LiveVideoUnFocusedOverlay(liveVideoInfo)
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .align(Alignment.Center)
+                                    .alpha(0.75f)
+                            )
+                        }
                     }
-                }
             },
             onClick = { onMediaItemClick(media, permissionContext) },
             modifier = modifier
                 .height(cardHeight)
                 .aspectRatio(aspectRatio, matchHeightConstraintsFirst = true)
+        )
+    }
+}
+
+@Composable
+private fun PurchaseOptionsOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black(alpha = 0.8f))
+    ) {
+        println("stav: line height is ${MaterialTheme.typography.body_32.lineHeight}")
+        Text(
+            text = "View purchase options",
+            style = MaterialTheme.typography.body_32,
+            lineHeight = 24.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(32.dp)
+                .align(Alignment.Center)
         )
     }
 }
