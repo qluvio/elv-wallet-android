@@ -3,7 +3,7 @@ package app.eluvio.wallet.screens.property
 import androidx.compose.ui.text.AnnotatedString
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.PropertySearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.SectionItemEntity
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
@@ -24,7 +24,7 @@ private const val VIEW_ALL_THRESHOLD = 5
  */
 fun MediaPageSectionEntity.toDynamicSections(
     parentPermissionContext: PermissionContext,
-    filters: SearchFiltersEntity? = null,
+    filters: PropertySearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
 ): List<DynamicPageLayoutState.Section> {
     return when (type) {
@@ -53,16 +53,15 @@ fun MediaPageSectionEntity.toDynamicSections(
 
 private fun MediaPageSectionEntity.toCarouselSection(
     parentPermissionContext: PermissionContext,
-    filters: SearchFiltersEntity? = null,
+    filters: PropertySearchFiltersEntity? = null,
     viewAllThreshold: Int = VIEW_ALL_THRESHOLD,
 ): DynamicPageLayoutState.Section.Carousel {
     val permissionContext = parentPermissionContext.copy(sectionId = id)
     val items = items.toCarouselItems(permissionContext, displaySettings)
     val displayLimit = displaySettings?.displayLimit?.takeIf { it > 0 } ?: items.size
     val showViewAll = items.size > displayLimit || items.size > viewAllThreshold
-    val filterAttribute = primaryFilter?.let { primaryFilter ->
-        filters?.attributes?.firstOrNull { it.id == primaryFilter }
-    }
+    val filterAttribute = filters?.attributes?.get(primaryFilter)
+
     return DynamicPageLayoutState.Section.Carousel(
         permissionContext,
         displaySettings = displaySettings,

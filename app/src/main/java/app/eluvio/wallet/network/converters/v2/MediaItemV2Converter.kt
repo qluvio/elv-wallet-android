@@ -4,7 +4,7 @@ import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.entities.GalleryItemEntity
 import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.SearchFilterAttribute
 import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.network.converters.toPathMap
@@ -48,10 +48,10 @@ fun MediaItemV2Dto.toEntity(baseUrl: String): MediaEntity? {
         mediaItemsIds = (dto.media ?: dto.mediaLists).toRealmListOrEmpty()
 
         attributes = dto.attributes?.map { (key, value) ->
-            SearchFiltersEntity.Attribute().apply {
+            SearchFilterAttribute().apply {
                 id = key
                 values =
-                    value.map { SearchFiltersEntity.AttributeValue.from(it) }.toRealmListOrEmpty()
+                    value.map { SearchFilterAttribute.Value.from(it) }.toRealmListOrEmpty()
             }
         }.toRealmListOrEmpty()
         tags = dto.tags.toRealmListOrEmpty()

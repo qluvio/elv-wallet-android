@@ -3,7 +3,7 @@ package app.eluvio.wallet.network.api.mwv2
 import app.eluvio.wallet.network.api.authd.AuthdApi
 import app.eluvio.wallet.network.dto.PagedContent
 import app.eluvio.wallet.network.dto.v2.MediaPageSectionDto
-import app.eluvio.wallet.network.dto.v2.SearchFiltersDto
+import app.eluvio.wallet.network.dto.v2.GetFiltersResponse
 import app.eluvio.wallet.network.dto.v2.SearchRequest
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.Body
@@ -14,7 +14,7 @@ import retrofit2.http.Query
 
 interface SearchApi : AuthdApi {
     @GET("mw/properties/{propertyId}/filters")
-    fun getSearchFilters(@Path("propertyId") propertyId: String): Single<SearchFiltersDto>
+    fun getSearchFilters(@Path("propertyId") propertyId: String): Single<GetFiltersResponse>
 
     @POST("mw/properties/{propertyId}/search")
     fun search(

@@ -9,7 +9,8 @@ import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.FabricUrl
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.PropertySearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.SearchFilterAttribute
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.data.stores.MediaPropertyStore
@@ -58,13 +59,13 @@ class PropertySearchViewModel @Inject constructor(
          * All instances represent a non-empty selection of at least Primary filter and value.
          */
         data class SelectedFilters(
-            val primaryFilterAttribute: SearchFiltersEntity.Attribute,
+            val primaryFilterAttribute: SearchFilterAttribute,
             val primaryFilterValue: String,
             /**
              * The secondary filter matching the selected primary filter value.
              * The existence of this field doesn't mean that a secondary filter is selected yet.
              */
-            val secondaryFilterAttribute: SearchFiltersEntity.Attribute?,
+            val secondaryFilterAttribute: SearchFilterAttribute?,
             /**
              * When this field is non-null, the secondary filter is actually selected.
              */
@@ -85,7 +86,7 @@ class PropertySearchViewModel @Inject constructor(
     /**
      * Once filters are fetched, hold onto them so we can look up attributes/values by ID.
      */
-    private var searchFilters: SearchFiltersEntity? = null
+    private var searchFilters: PropertySearchFiltersEntity? = null
 
     override fun onResume() {
         super.onResume()
@@ -164,11 +165,10 @@ class PropertySearchViewModel @Inject constructor(
         }
     }
 
-    fun onPrimaryFilterSelected(primaryFilterValue: SearchFiltersEntity.AttributeValue?) {
+    fun onPrimaryFilterSelected(primaryFilterValue: SearchFilterAttribute.Value?) {
         val selectedFilter = primaryFilterValue?.let {
             val primaryFilterAttribute = searchFilters?.primaryFilter ?: return@let null
-            val nextFilter = searchFilters?.attributes
-                ?.firstOrNull { it.id == primaryFilterValue.nextFilterAttribute }
+            val nextFilter = searchFilters?.attributes?.get(primaryFilterValue.nextFilterAttribute)
             State.SelectedFilters(
                 primaryFilterAttribute = primaryFilterAttribute,
                 primaryFilterValue = primaryFilterValue.value,
@@ -209,7 +209,7 @@ class PropertySearchViewModel @Inject constructor(
             }
     }
 
-    private fun observeSearchTriggers(searchFilters: SearchFiltersEntity) {
+    private fun observeSearchTriggers(searchFilters: PropertySearchFiltersEntity) {
         val queryChanged = query
             .switchMapSingle { (query, immediate) ->
                 if (immediate) {
@@ -285,7 +285,7 @@ class PropertySearchViewModel @Inject constructor(
         )
     }
 
-    private fun SearchFiltersEntity.Attribute.toCustomCardsSection(): DynamicPageLayoutState.Section {
+    private fun SearchFilterAttribute.toCustomCardsSection(): DynamicPageLayoutState.Section {
         val propertyContext = permissionContext
         return DynamicPageLayoutState.Section.Carousel(
             permissionContext = propertyContext.copy(sectionId = "PRIMARY_FILTERS"),

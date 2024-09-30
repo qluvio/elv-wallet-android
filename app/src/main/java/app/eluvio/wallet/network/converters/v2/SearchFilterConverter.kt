@@ -1,46 +1,73 @@
 package app.eluvio.wallet.network.converters.v2
 
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity.Attribute
+import app.eluvio.wallet.data.entities.v2.PropertySearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.SearchFilterAttribute
 import app.eluvio.wallet.network.dto.v2.FilterOptionsDto
+import app.eluvio.wallet.network.dto.v2.GetFiltersResponse
 import app.eluvio.wallet.network.dto.v2.SearchFilterAttributeDto
 import app.eluvio.wallet.network.dto.v2.SearchFiltersDto
 import app.eluvio.wallet.util.realm.toRealmListOrEmpty
-import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.ext.toRealmDictionary
 
-fun SearchFiltersDto.toEntity(propId: String, baseUrl: String): SearchFiltersEntity {
+fun GetFiltersResponse.toEntity(propId: String, baseUrl: String): PropertySearchFiltersEntity {
     val dto = this
-    return SearchFiltersEntity().apply {
+    return PropertySearchFiltersEntity().apply {
         propertyId = propId
 
         tags = dto.tags.toRealmListOrEmpty()
 
         val attributeMap = dto.attributes.orEmpty()
             .mapValues { (_, attr) -> attr.toEntity() }
-        attributes = attributeMap.values.toRealmList()
+        attributes = attributeMap.toRealmDictionary()
 
-        secondaryFilter = attributeMap[dto.secondaryFilter]
-        primaryFilter = attributeMap[dto.primaryFilter]
-            ?.copy()
-            ?.applyFilterOptions(dto.filterOptions, secondaryFilter, baseUrl)
+        primaryFilter = primarySearchAttributeEntity(
+            dto.primaryFilter,
+            dto.secondaryFilter,
+            dto.filterOptions,
+            attributeMap,
+            baseUrl
+        )
     }
 }
 
-private fun Attribute.applyFilterOptions(
+fun SearchFiltersDto.toEntity(tagsAndAttributes: PropertySearchFiltersEntity, baseUrl: String): SearchFilterAttribute? {
+    return primarySearchAttributeEntity(
+        primaryFilter,
+        secondaryFilter,
+        filterOptions,
+        tagsAndAttributes.attributes,
+        baseUrl
+    )
+}
+
+private fun primarySearchAttributeEntity(
+    primaryFilter: String?,
+    secondaryFilter: String?,
     filterOptions: List<FilterOptionsDto>?,
-    globalSecondaryFilter: Attribute?,
+    attributeMap: Map<String, SearchFilterAttribute?>,
+    baseUrl: String
+): SearchFilterAttribute? {
+    val secondaryFilterFallback = attributeMap[secondaryFilter]
+    return attributeMap[primaryFilter]
+        ?.copy()
+        ?.applyFilterOptions(filterOptions, secondaryFilterFallback, baseUrl)
+}
+
+private fun SearchFilterAttribute.applyFilterOptions(
+    filterOptions: List<FilterOptionsDto>?,
+    secondaryFilterFallback: SearchFilterAttribute?,
     baseUrl: String
 ) = apply {
     if (filterOptions.isNullOrEmpty()) {
         // Update nextFilter to global secondary filter
-        values.forEach { it.nextFilterAttribute = globalSecondaryFilter?.id }
+        values.forEach { it.nextFilterAttribute = secondaryFilterFallback?.id }
     } else {
         // Nuke any existing tags. If they don't exist in the filter options, they're don't matter.
         values = filterOptions.map { option ->
-            SearchFiltersEntity.AttributeValue().apply {
+            SearchFilterAttribute.Value().apply {
                 // Server sends empty string as an "all" filter options
                 value = option.primaryFilterValue.takeIf { it.isNotEmpty() }
-                    ?: SearchFiltersEntity.AttributeValue.ALL
+                    ?: SearchFilterAttribute.Value.ALL
                 nextFilterAttribute = option.secondaryFilterAttribute?.takeIf { it.isNotEmpty() }
                 imageUrl = option.image?.toUrl(baseUrl)
             }
@@ -48,13 +75,13 @@ private fun Attribute.applyFilterOptions(
     }
 }
 
-private fun SearchFilterAttributeDto.toEntity(): Attribute {
+private fun SearchFilterAttributeDto.toEntity(): SearchFilterAttribute {
     val dto = this
-    return Attribute().apply {
+    return SearchFilterAttribute().apply {
         id = dto.id
         title = dto.title ?: ""
         values = dto.values
-            ?.map { SearchFiltersEntity.AttributeValue.from(it) }
+            ?.map { SearchFilterAttribute.Value.from(it) }
             .toRealmListOrEmpty()
     }
 }

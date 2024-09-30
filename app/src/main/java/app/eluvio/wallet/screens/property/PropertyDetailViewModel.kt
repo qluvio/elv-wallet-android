@@ -8,7 +8,7 @@ import app.eluvio.wallet.data.VideoOptionsFetcher
 import app.eluvio.wallet.data.entities.v2.MediaPageEntity
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.PropertySearchFiltersEntity
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettingsEntity
 import app.eluvio.wallet.data.entities.v2.permissions.showAlternatePage
@@ -88,7 +88,7 @@ class PropertyDetailViewModel @Inject constructor(
     private fun updateSections() {
         pageLayout.combineLatest(
             propertySearchStore.getFilters(propertyId)
-                .onErrorReturnItem(SearchFiltersEntity())
+                .onErrorReturnItem(PropertySearchFiltersEntity())
         )
             .subscribeBy(
                 onNext = { (page, sections, filters) ->
@@ -231,7 +231,7 @@ class PropertyDetailViewModel @Inject constructor(
     private fun sections(
         page: MediaPageEntity,
         sections: Map<String, MediaPageSectionEntity>,
-        filters: SearchFiltersEntity
+        filters: PropertySearchFiltersEntity
     ): List<DynamicPageLayoutState.Section> {
         val pagePermissionContext = PermissionContext(
             propertyId = propertyId,

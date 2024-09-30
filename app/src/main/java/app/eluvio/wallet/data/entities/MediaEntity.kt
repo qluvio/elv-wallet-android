@@ -2,7 +2,7 @@ package app.eluvio.wallet.data.entities
 
 import app.eluvio.wallet.data.AspectRatio
 import app.eluvio.wallet.data.FabricUrl
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.SearchFilterAttribute
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
@@ -71,7 +71,7 @@ class MediaEntity : RealmObject, EntityWithPermissions {
     var liveVideoInfo: LiveVideoInfoEntity? = null
 
     // Search API
-    var attributes: RealmList<SearchFiltersEntity.Attribute> = realmListOf()
+    var attributes: RealmList<SearchFilterAttribute> = realmListOf()
     var tags: RealmList<String> = realmListOf()
 
     var displaySettings: DisplaySettingsEntity? = null

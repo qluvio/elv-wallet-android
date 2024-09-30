@@ -2,7 +2,8 @@ package app.eluvio.wallet.data.stores
 
 import app.eluvio.wallet.data.entities.v2.MediaPageSectionEntity
 import app.eluvio.wallet.data.entities.v2.MediaPropertyEntity
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.PropertySearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.SearchFilterAttribute
 import app.eluvio.wallet.data.permissions.PermissionResolver
 import app.eluvio.wallet.di.ApiProvider
 import app.eluvio.wallet.network.api.mwv2.SearchApi
@@ -24,10 +25,10 @@ class PropertySearchStore @Inject constructor(
     private val realm: Realm,
 ) {
 
-    fun getFilters(propertyId: String): Flowable<SearchFiltersEntity> {
+    fun getFilters(propertyId: String): Flowable<PropertySearchFiltersEntity> {
         return observeRealmAndFetch(
-            realmQuery = realm.query<SearchFiltersEntity>(
-                "${SearchFiltersEntity::propertyId.name} == $0",
+            realmQuery = realm.query<PropertySearchFiltersEntity>(
+                "${PropertySearchFiltersEntity::propertyId.name} == $0",
                 propertyId
             ).asFlowable(),
             fetchOperation = { _, isFirstState ->
@@ -52,7 +53,7 @@ class PropertySearchStore @Inject constructor(
         val sanitizedRequest = request.copy(
             // Any attribute with a tag of "All" should be omitted from the request
             attributes = request.attributes
-                ?.filterNot { (_, tags) -> tags.contains(SearchFiltersEntity.AttributeValue.ALL) }
+                ?.filterNot { (_, tags) -> tags.contains(SearchFilterAttribute.Value.ALL) }
         )
         return apiProvider.getApi(SearchApi::class)
             .flatMap { api ->

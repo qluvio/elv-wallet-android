@@ -48,7 +48,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.ClickableSurfaceDefaults
 import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.v2.DisplayFormat
-import app.eluvio.wallet.data.entities.v2.SearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.PropertySearchFiltersEntity
+import app.eluvio.wallet.data.entities.v2.SearchFilterAttribute
 import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
@@ -100,7 +101,7 @@ private fun PropertySearch(
     state: PropertySearchViewModel.State,
     query: String,
     onQueryChanged: (String) -> Unit,
-    onPrimaryFilterSelected: (SearchFiltersEntity.AttributeValue?) -> Unit,
+    onPrimaryFilterSelected: (SearchFilterAttribute.Value?) -> Unit,
     onSecondaryFilterClick: (String?) -> Unit,
     onSearchClicked: () -> Unit,
 ) {
