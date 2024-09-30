@@ -143,7 +143,7 @@ fun CarouselSection(
                 } else if (!hasTitleRow && item.viewAllNavigationEvent != null) {
                     ViewAllButton(
                         item.viewAllNavigationEvent,
-                        modifier = Modifier.padding(start = Overscan.horizontalPadding)
+                        modifier = Modifier.padding(start = startPadding)
                     )
                 }
 
