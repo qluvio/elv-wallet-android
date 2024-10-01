@@ -2,6 +2,7 @@ package app.eluvio.wallet.screens.common
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,33 +32,47 @@ fun BoxScope.MetadataTexts(
             .align(Alignment.BottomStart)
             .padding(23.dp)
     ) {
-        if (headers.isNotEmpty()) {
-            Text(
-                text = headers.joinToString(separator = "   ", transform = { it.uppercase() }),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 8.sp),
-                color = Color(0xFFA5A6A8),
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-        }
-        title?.takeIf { it.isNotEmpty() }?.let { title ->
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 12.sp),
-            )
-        }
-        subtitle?.takeIf { it.isNotEmpty() }?.let { subtitle ->
-            Text(
-                text = subtitle.uppercase(),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
-                color = Color(0xFF818590),
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
+        MetadataTexts(headers, title, subtitle)
+    }
+}
+
+@Composable
+fun ColumnScope.MetadataTexts(displaySettings: DisplaySettings?) = displaySettings?.run {
+    MetadataTexts(headers, title, subtitle)
+}
+
+@Composable
+fun ColumnScope.MetadataTexts(
+    headers: List<String>,
+    title: String?,
+    subtitle: String?
+) {
+    if (headers.isNotEmpty()) {
+        Text(
+            text = headers.joinToString(separator = "   ", transform = { it.uppercase() }),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.label_24.copy(fontSize = 8.sp),
+            color = Color(0xFFA5A6A8),
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+    }
+    title?.takeIf { it.isNotEmpty() }?.let { title ->
+        Text(
+            text = title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.label_24.copy(fontSize = 12.sp),
+        )
+    }
+    subtitle?.takeIf { it.isNotEmpty() }?.let { subtitle ->
+        Text(
+            text = subtitle.uppercase(),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
+            color = Color(0xFF818590),
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }

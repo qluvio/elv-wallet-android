@@ -48,7 +48,6 @@ import app.eluvio.wallet.navigation.Navigator
 import app.eluvio.wallet.navigation.asPush
 import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.theme.EluvioThemePreview
-import app.eluvio.wallet.theme.body_32
 import app.eluvio.wallet.theme.button_24
 import app.eluvio.wallet.theme.disabledItemAlpha
 import app.eluvio.wallet.util.compose.Black
@@ -79,57 +78,48 @@ fun MediaItemCard(
             imageUrl = imageUrl,
             contentDescription = media.nameOrLockedName(),
             shape = shape,
-            dimOnFocus = !showPurchaseOptions,
             focusedOverlay = {
-                if (showPurchaseOptions) {
-                    PurchaseOptionsOverlay()
-                } else {
+                val padding = if (aspectRatio == AspectRatio.WIDE) 18.dp else 12.dp
+                Column(Modifier.padding(padding)) {
+                    if (showPurchaseOptions) {
+                        Text(
+                            text = "View purchase options".uppercase(),
+                            style = MaterialTheme.typography.button_24,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
                     MetadataTexts(displaySettings)
                 }
             },
             unFocusedOverlay = {
-                if (showPurchaseOptions) {
-                    PurchaseOptionsOverlay()
-                } else
-                    if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
-                        val liveVideoInfo = media.liveVideoInfo
-                        if (liveVideoInfo != null) {
-                            LiveVideoUnFocusedOverlay(liveVideoInfo)
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .align(Alignment.Center)
-                                    .alpha(0.75f)
-                            )
-                        }
+                if (media.mediaType == MediaEntity.MEDIA_TYPE_VIDEO) {
+                    val liveVideoInfo = media.liveVideoInfo
+                    if (liveVideoInfo != null) {
+                        LiveVideoUnFocusedOverlay(liveVideoInfo)
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .align(Alignment.Center)
+                                .alpha(0.75f)
+                        )
                     }
+                }
+                if (showPurchaseOptions) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black(alpha = 0.8f))
+                    )
+                }
             },
             onClick = { onMediaItemClick(media, permissionContext) },
             modifier = modifier
                 .height(cardHeight)
                 .aspectRatio(aspectRatio, matchHeightConstraintsFirst = true)
-        )
-    }
-}
-
-@Composable
-private fun PurchaseOptionsOverlay() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black(alpha = 0.8f))
-    ) {
-        Text(
-            text = "View purchase options",
-            style = MaterialTheme.typography.body_32,
-            lineHeight = 24.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(32.dp)
-                .align(Alignment.Center)
         )
     }
 }
