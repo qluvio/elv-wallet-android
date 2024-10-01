@@ -3,6 +3,7 @@ package app.eluvio.wallet.screens.purchaseprompt
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -31,11 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.eluvio.wallet.R
-import app.eluvio.wallet.data.AspectRatio
-import app.eluvio.wallet.data.entities.LiveVideoInfoEntity
 import app.eluvio.wallet.data.entities.MediaEntity
-import app.eluvio.wallet.data.entities.v2.display.DisplaySettingsEntity
-import app.eluvio.wallet.data.entities.v2.display.SimpleDisplaySettings
 import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.permissions.PermissionContext
 import app.eluvio.wallet.navigation.MainGraph
@@ -51,8 +49,6 @@ import app.eluvio.wallet.util.compose.RealisticDevices
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
-import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.RealmInstant
 
 @MainGraph
 @Destination(navArgsDelegate = PermissionContext::class)
@@ -85,16 +81,19 @@ private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
             modifier = Modifier.padding(bottom = 18.dp)
         )
 
-        when {
-            state.media != null -> MediaPurchaseCard(state.media, state.qrImage)
-            state.itemPurchase != null -> ItemPurchaseCard(state.itemPurchase, state.qrImage)
-            state.qrImage != null -> {
-                Image(
-                    bitmap = state.qrImage.asImageBitmap(), contentDescription = "QR Code",
-                    modifier = Modifier
-                        .height(250.dp)
-                        .aspectRatio(1f)
-                )
+        Box(Modifier.heightIn(min = 250.dp)) {
+            when {
+                // Disabled for now, but you know how UX be.
+                // state.media != null -> MediaPurchaseCard(state.media, state.qrImage)
+                // state.itemPurchase != null -> ItemPurchaseCard(state.itemPurchase, state.qrImage)
+                state.qrImage != null -> {
+                    Image(
+                        bitmap = state.qrImage.asImageBitmap(), contentDescription = "QR Code",
+                        modifier = Modifier
+                            .height(250.dp)
+                            .aspectRatio(1f)
+                    )
+                }
             }
         }
     }
@@ -212,45 +211,45 @@ private fun MediaPurchaseCard(media: MediaEntity, qrImage: Bitmap?) {
     }
 }
 
-@Composable
-@Preview(device = RealisticDevices.TV_720p)
-private fun MediaEntityPurchasePromptPreview() = EluvioThemePreview {
-    PurchasePrompt(
-        PurchasePromptViewModel.State(
-            media = MediaEntity().apply {
-                id = "id"
-                name = "NFT Media Item"
-                displaySettings = DisplaySettingsEntity().apply {
-                    title = name
-                    subtitle = "The Grand Arena"
-                    headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
-                }
-                mediaType = MediaEntity.MEDIA_TYPE_VIDEO
-                imageAspectRatio = AspectRatio.WIDE
-                liveVideoInfo = LiveVideoInfoEntity().apply {
-                    startTime = RealmInstant.MIN
-                }
-            },
-            qrImage = generateQrCodeBlocking("http://eluv.io")
-        )
-    )
-}
-
-@Composable
-@Preview(device = RealisticDevices.TV_720p)
-private fun ItemPurchasePromptPreview() = EluvioThemePreview {
-    PurchasePrompt(
-        PurchasePromptViewModel.State(
-            itemPurchase = PurchasePromptViewModel.State.ItemPurchase(
-                SimpleDisplaySettings(
-                    title = "Item Purchase",
-                    subtitle = "Subtitle",
-                )
-            ),
-            qrImage = generateQrCodeBlocking("http://eluv.io")
-        )
-    )
-}
+//@Composable
+//@Preview(device = RealisticDevices.TV_720p)
+//private fun MediaEntityPurchasePromptPreview() = EluvioThemePreview {
+//    PurchasePrompt(
+//        PurchasePromptViewModel.State(
+//            media = MediaEntity().apply {
+//                id = "id"
+//                name = "NFT Media Item"
+//                displaySettings = DisplaySettingsEntity().apply {
+//                    title = name
+//                    subtitle = "The Grand Arena"
+//                    headers = realmListOf("8pm Central", "Stage D", "Lorem Ipsum", "Dolor Sit Amet")
+//                }
+//                mediaType = MediaEntity.MEDIA_TYPE_VIDEO
+//                imageAspectRatio = AspectRatio.WIDE
+//                liveVideoInfo = LiveVideoInfoEntity().apply {
+//                    startTime = RealmInstant.MIN
+//                }
+//            },
+//            qrImage = generateQrCodeBlocking("http://eluv.io")
+//        )
+//    )
+//}
+//
+//@Composable
+//@Preview(device = RealisticDevices.TV_720p)
+//private fun ItemPurchasePromptPreview() = EluvioThemePreview {
+//    PurchasePrompt(
+//        PurchasePromptViewModel.State(
+//            itemPurchase = PurchasePromptViewModel.State.ItemPurchase(
+//                SimpleDisplaySettings(
+//                    title = "Item Purchase",
+//                    subtitle = "Subtitle",
+//                )
+//            ),
+//            qrImage = generateQrCodeBlocking("http://eluv.io")
+//        )
+//    )
+//}
 
 @Composable
 @Preview(device = RealisticDevices.TV_720p)
