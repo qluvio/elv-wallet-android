@@ -31,7 +31,7 @@ class PermissionSettingsEntity : PermissionSettings, EmbeddedRealmObject {
     // We just pass it as-is when launching purchase options
     override var secondaryMarketPurchaseOption: String? = null
 
-    // Only applies to resolve permissions
+    // Only applies to resolved permissions
     @field:Ignore
     override var authorized: Boolean? = null
 

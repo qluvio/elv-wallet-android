@@ -122,7 +122,6 @@ private fun PurchaseOptionsOverlay() {
             .fillMaxSize()
             .background(Color.Black(alpha = 0.8f))
     ) {
-        println("stav: line height is ${MaterialTheme.typography.body_32.lineHeight}")
         Text(
             text = "View purchase options",
             style = MaterialTheme.typography.body_32,

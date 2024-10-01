@@ -33,7 +33,7 @@ fun BoxScope.MetadataTexts(
     ) {
         if (headers.isNotEmpty()) {
             Text(
-                text = headers.joinToString(separator = "   "),
+                text = headers.joinToString(separator = "   ", transform = { it.uppercase() }),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.label_24.copy(fontSize = 8.sp),
@@ -51,7 +51,7 @@ fun BoxScope.MetadataTexts(
         }
         subtitle?.takeIf { it.isNotEmpty() }?.let { subtitle ->
             Text(
-                text = subtitle,
+                text = subtitle.uppercase(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.label_24.copy(fontSize = 10.sp),
