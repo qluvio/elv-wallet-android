@@ -8,7 +8,6 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
-import io.realm.kotlin.types.annotations.Ignore
 import org.junit.Test
 import org.reflections.Reflections
 import org.reflections.util.ClasspathHelper
@@ -75,32 +74,6 @@ class EntityEqualityTest {
         }
     }
 
-    @Test
-    fun `verify @Ignore fields are not included in equals() implementation`() {
-        /**
-         * [@Ignore] Fields that are considered in equals(), but shouldn't.
-         */
-        val badFields = mutableMapOf<Class<*>, List<Field>>()
-
-        allEntityClasses.forEach { entityClass ->
-            entityClass.badIgnoredFields
-                .takeIf { it.isNotEmpty() }
-                ?.let { badFields[entityClass] = it }
-        }
-
-        assert(badFields.isEmpty()) {
-            buildString {
-                appendLine(">>> @Ignore fields that are included in equals implementation<<<")
-                badFields.forEach { (kls, fields) ->
-                    appendLine(kls)
-                    appendLine(
-                        fields.joinToString("") { "\t${it.type.simpleName} ${it.name}\n" }
-                    )
-                }
-            }
-        }
-    }
-
     /**
      * Returns all entities we want to consider.
      */
@@ -132,12 +105,6 @@ class EntityEqualityTest {
      */
     private val <T : TypedRealmObject> Class<T>.missedFields: List<Field>
         get() = comparableFields.filterNot { field -> isFieldInEquals(field) }
-
-    /**
-     * Returns every @Ignore [Field], which breaks equality checks after mutating.
-     */
-    private val <T : TypedRealmObject> Class<T>.badIgnoredFields: List<Field>
-        get() = ignoredFields.filter { field -> isFieldInEquals(field) }
 
     /**
      * Checks if mutating [field] breaks equality checks between 2 instances.
@@ -217,16 +184,7 @@ class EntityEqualityTest {
                 .filterNot {
                     Modifier.isStatic(it.modifiers) ||
                             Modifier.isFinal(it.modifiers) ||
-                            it.name in excludedFields ||
-                            it.isAnnotationPresent(Ignore::class.java)
+                            it.name in excludedFields
                 }
         }
-
-    /**
-     * Only @Ignore fields.
-     * Including static/final fields is too much of a hassle, but also even if they are included,
-     * they won't break equality checks.
-     */
-    private val Class<*>.ignoredFields: List<Field>
-        get() = declaredFields.filter { it.isAnnotationPresent(Ignore::class.java) }
 }

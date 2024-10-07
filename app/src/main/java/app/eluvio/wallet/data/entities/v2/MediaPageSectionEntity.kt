@@ -66,6 +66,7 @@ class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
         if (secondaryFilter != other.secondaryFilter) return false
         if (subSections != other.subSections) return false
         if (rawPermissions != other.rawPermissions) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
 
         return true
     }
@@ -79,6 +80,7 @@ class MediaPageSectionEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (secondaryFilter?.hashCode() ?: 0)
         result = 31 * result + subSections.hashCode()
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         return result
     }
 

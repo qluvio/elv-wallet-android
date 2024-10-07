@@ -46,7 +46,8 @@ class PurchasePromptViewModel @Inject constructor(
         val media: MediaEntity? = null,
         val itemPurchase: ItemPurchase? = null,
         val qrImage: Bitmap? = null,
-        val bgImageUrl: FabricUrl? = null
+        val bgImageUrl: FabricUrl? = null,
+        val complete: Boolean = false,
     ) {
         @Immutable
         data class ItemPurchase(val displaySettings: DisplaySettings?)
@@ -147,10 +148,16 @@ class PurchasePromptViewModel @Inject constructor(
                 // Depending on the context, emit a nav event for the next screen when the user gains
                 // access to the relevant resource.
                 when {
+                    // Note: This is really the only case we are officially supporting for now.
+                    // Non-media sources are technically possible, but not expected in practice.
                     resolved.mediaItem != null -> {
                         resolved.mediaItem.resolvedPermissions
                             ?.takeIf { it.authorized == true }
-                            ?.let { resolved.mediaItem.onClickDirection(permissionContext) }
+                            ?.let {
+                                // Side effect to display "Success" state.
+                                updateState { copy(complete = true) }
+                                resolved.mediaItem.onClickDirection(permissionContext)
+                            }
                     }
 
                     resolved.section != null || resolved.sectionItem != null -> {
@@ -178,7 +185,8 @@ class PurchasePromptViewModel @Inject constructor(
                 // Once permission is granted, stop observing to prevent double-navigation.
             )
             .subscribeBy { destination ->
-                navigateTo(destination.asReplace())
+                // No auto-navigate for now.
+                // navigateTo(destination.asReplace())
             }
             .addTo(disposables)
 

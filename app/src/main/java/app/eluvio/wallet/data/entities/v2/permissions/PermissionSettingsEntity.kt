@@ -49,6 +49,7 @@ class PermissionSettingsEntity : PermissionSettings, EmbeddedRealmObject {
         if (behavior != other.behavior) return false
         if (alternatePageId != other.alternatePageId) return false
         if (secondaryMarketPurchaseOption != other.secondaryMarketPurchaseOption) return false
+        if (authorized != other.authorized) return false
 
         return true
     }
@@ -58,6 +59,7 @@ class PermissionSettingsEntity : PermissionSettings, EmbeddedRealmObject {
         result = 31 * result + (behavior?.hashCode() ?: 0)
         result = 31 * result + (alternatePageId?.hashCode() ?: 0)
         result = 31 * result + (secondaryMarketPurchaseOption?.hashCode() ?: 0)
+        result = 31 * result + (authorized?.hashCode() ?: 0)
         return result
     }
 

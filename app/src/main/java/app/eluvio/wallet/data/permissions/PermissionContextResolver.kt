@@ -28,6 +28,7 @@ class PermissionContextResolver @Inject constructor(
                 resolved.copy(sectionItem = sectionItem)
             }
             .switchMap { observeMediaItem(mediaItemId, context = it) }
+            .distinctUntilChanged()
     }
 
     private fun observeMediaItem(

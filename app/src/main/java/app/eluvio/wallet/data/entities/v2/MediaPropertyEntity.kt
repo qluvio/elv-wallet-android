@@ -73,6 +73,7 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         if (loginInfo != other.loginInfo) return false
         if (permissionStates != other.permissionStates) return false
         if (rawPermissions != other.rawPermissions) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
         if (propertyPermissions != other.propertyPermissions) return false
         if (searchPermissions != other.searchPermissions) return false
 
@@ -89,6 +90,7 @@ class MediaPropertyEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (loginInfo?.hashCode() ?: 0)
         result = 31 * result + permissionStates.hashCode()
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (propertyPermissions?.hashCode() ?: 0)
         result = 31 * result + (searchPermissions?.hashCode() ?: 0)
         return result

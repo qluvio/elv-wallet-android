@@ -63,6 +63,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         if (useMediaDisplaySettings != other.useMediaDisplaySettings) return false
         if (displaySettings != other.displaySettings) return false
         if (rawPermissions != other.rawPermissions) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
 
         return true
     }
@@ -77,6 +78,7 @@ class SectionItemEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + useMediaDisplaySettings.hashCode()
         result = 31 * result + (displaySettings?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         return result
     }
 

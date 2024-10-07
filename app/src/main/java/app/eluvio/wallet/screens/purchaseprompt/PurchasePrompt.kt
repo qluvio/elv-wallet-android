@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -36,9 +37,12 @@ import app.eluvio.wallet.R
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.display.thumbnailUrlAndRatio
 import app.eluvio.wallet.data.permissions.PermissionContext
+import app.eluvio.wallet.navigation.LocalNavigator
 import app.eluvio.wallet.navigation.MainGraph
+import app.eluvio.wallet.navigation.NavigationEvent
 import app.eluvio.wallet.screens.common.MediaItemCard
 import app.eluvio.wallet.screens.common.ShimmerImage
+import app.eluvio.wallet.screens.common.TvButton
 import app.eluvio.wallet.screens.common.generateQrCodeBlocking
 import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
@@ -46,6 +50,7 @@ import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.theme.label_24
 import app.eluvio.wallet.theme.title_62
 import app.eluvio.wallet.util.compose.RealisticDevices
+import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.subscribeToState
 import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
@@ -75,24 +80,42 @@ private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            text = "Sign In On Browser to Purchase",
-            style = MaterialTheme.typography.title_62,
-            modifier = Modifier.padding(bottom = 18.dp)
-        )
-
-        Box(Modifier.heightIn(min = 250.dp)) {
-            when {
-                // Disabled for now, but you know how UX be.
-                // state.media != null -> MediaPurchaseCard(state.media, state.qrImage)
-                // state.itemPurchase != null -> ItemPurchaseCard(state.itemPurchase, state.qrImage)
-                state.qrImage != null -> {
-                    Image(
-                        bitmap = state.qrImage.asImageBitmap(), contentDescription = "QR Code",
-                        modifier = Modifier
-                            .height(250.dp)
-                            .aspectRatio(1f)
-                    )
+        if (state.complete) {
+            Text(
+                text = "Success",
+                style = MaterialTheme.typography.title_62,
+                modifier = Modifier.padding(bottom = 18.dp)
+            )
+            Text(
+                text = "Return to the property to enjoy your media.",
+                style = MaterialTheme.typography.label_24.copy(fontSize = 14.sp),
+                modifier = Modifier.padding(bottom = 18.dp)
+            )
+            val navigator = LocalNavigator.current
+            TvButton(
+                text = "Continue to Property",
+                onClick = { navigator(NavigationEvent.GoBack) },
+                modifier = Modifier.requestInitialFocus()
+            )
+        } else {
+            Text(
+                text = "Sign In On Browser to Purchase",
+                style = MaterialTheme.typography.title_62,
+                modifier = Modifier.padding(bottom = 18.dp)
+            )
+            Box(Modifier.heightIn(min = 250.dp)) {
+                when {
+                    // Disabled for now, but you know how UX be.
+                    // state.media != null -> MediaPurchaseCard(state.media, state.qrImage)
+                    // state.itemPurchase != null -> ItemPurchaseCard(state.itemPurchase, state.qrImage)
+                    state.qrImage != null -> {
+                        Image(
+                            bitmap = state.qrImage.asImageBitmap(), contentDescription = "QR Code",
+                            modifier = Modifier
+                                .height(250.dp)
+                                .aspectRatio(1f)
+                        )
+                    }
                 }
             }
         }
@@ -257,6 +280,16 @@ private fun PagePurchasePromptPreview() = EluvioThemePreview {
     PurchasePrompt(
         PurchasePromptViewModel.State(
             qrImage = generateQrCodeBlocking("http://eluv.io")
+        )
+    )
+}
+
+@Composable
+@Preview(device = RealisticDevices.TV_720p)
+private fun PurchaseCompletePreview() = EluvioThemePreview {
+    PurchasePrompt(
+        PurchasePromptViewModel.State(
+            complete = true
         )
     )
 }

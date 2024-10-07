@@ -121,6 +121,7 @@ class MediaEntity : RealmObject, EntityWithPermissions {
         if (mediaType != other.mediaType) return false
         if (imageAspectRatio != other.imageAspectRatio) return false
         if (rawPermissions != other.rawPermissions) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
         if (mediaFile != other.mediaFile) return false
         if (playableHash != other.playableHash) return false
         if (mediaLinks != other.mediaLinks) return false
@@ -154,6 +155,7 @@ class MediaEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + mediaType.hashCode()
         result = 31 * result + (imageAspectRatio?.hashCode() ?: 0)
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + mediaFile.hashCode()
         result = 31 * result + (playableHash?.hashCode() ?: 0)
         result = 31 * result + mediaLinks.hashCode()

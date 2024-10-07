@@ -142,6 +142,7 @@ class MediaPropertyStore @Inject constructor(
                     property.permissionStates
                 )
             }
+            .distinctUntilChanged()
     }
 
     fun observeMediaProperty(
@@ -168,6 +169,7 @@ class MediaPropertyStore @Inject constructor(
                     property.permissionStates
                 )
             }
+            .distinctUntilChanged()
     }
 
     /**
@@ -204,12 +206,13 @@ class MediaPropertyStore @Inject constructor(
                     )
                 }
             }
+            .distinctUntilChanged()
     }
 
     private fun fetchMediaProperty(propertyId: String): Completable {
         return apiProvider.getApi(MediaWalletV2Api::class)
             .flatMap { api -> api.getProperty(propertyId) }
-            .doOnError { Log.e("Error fetching property: $it") }
+            .doOnError { Log.e("Error fetching property", it) }
             .zipWith(apiProvider.getFabricEndpoint())
             .mapNotNull { (response, baseUrl) -> response.toEntity(baseUrl) }
             .saveTo(realm)

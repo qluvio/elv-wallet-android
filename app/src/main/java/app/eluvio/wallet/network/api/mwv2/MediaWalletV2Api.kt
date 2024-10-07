@@ -45,6 +45,6 @@ interface MediaWalletV2Api : AuthdApi {
         @Body request: List<String>
     ): Single<PagedContent<MediaItemV2Dto>>
 
-    @GET("mw/properties/{propertyId}/permissions")
+    @GET("mw/properties/{propertyId}/permissions?no_cache=true")
     fun getPermissionStates(@Path("propertyId") propertyId: String): Single<GetPermissionResponse>
 }

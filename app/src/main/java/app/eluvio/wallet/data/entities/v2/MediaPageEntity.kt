@@ -81,6 +81,7 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
         if (descriptionRichText != other.descriptionRichText) return false
         if (sectionIds != other.sectionIds) return false
         if (rawPermissions != other.rawPermissions) return false
+        if (resolvedPermissions != other.resolvedPermissions) return false
         if (pagePermissions != other.pagePermissions) return false
 
         return true
@@ -96,6 +97,7 @@ class MediaPageEntity : RealmObject, EntityWithPermissions {
         result = 31 * result + (descriptionRichText?.hashCode() ?: 0)
         result = 31 * result + sectionIds.hashCode()
         result = 31 * result + (rawPermissions?.hashCode() ?: 0)
+        result = 31 * result + (resolvedPermissions?.hashCode() ?: 0)
         result = 31 * result + (pagePermissions?.hashCode() ?: 0)
         return result
     }

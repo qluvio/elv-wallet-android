@@ -243,7 +243,7 @@ class PropertyDetailViewModel @Inject constructor(
             .mapNotNull { sections[it] }
             .filterNot { section ->
                 section.isHidden
-                    .also { if (it) Log.v("Hiding unauthorized section $section") }
+                    .also { if (it) Log.v("Hiding unauthorized section ${section.id}") }
             }
             .flatMap { section ->
                 section.toDynamicSections(pagePermissionContext, filters)
