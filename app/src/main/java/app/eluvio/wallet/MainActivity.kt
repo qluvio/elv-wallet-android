@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
                         DestinationsNavHost(
                             navGraph = NavGraphs.root,
                             navController = navController,
+                            modifier = Modifier.fillMaxSize()
                         )
                         if (BuildConfig.DEBUG) {
                             // Print nav backstack for debugging
