@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import app.eluvio.wallet.app.BaseViewModel
 import app.eluvio.wallet.data.FabricUrl
+import app.eluvio.wallet.data.UrlShortener
 import app.eluvio.wallet.data.entities.MediaEntity
 import app.eluvio.wallet.data.entities.v2.display.DisplaySettings
 import app.eluvio.wallet.data.entities.v2.permissions.PermissionSettings
@@ -36,6 +37,7 @@ class PurchasePromptViewModel @Inject constructor(
     private val propertyStore: MediaPropertyStore,
     permissionContextResolver: PermissionContextResolver,
     private val environmentStore: EnvironmentStore,
+    private val urlShortener: UrlShortener,
     savedStateHandle: SavedStateHandle
 ) : BaseViewModel<PurchasePromptViewModel.State>(State(), savedStateHandle) {
 
@@ -78,14 +80,27 @@ class PurchasePromptViewModel @Inject constructor(
                         ?: it.property.propertyPermissions
                 )
             }
+            .distinctUntilChanged()
+
         environmentStore.observeSelectedEnvironment()
             .firstOrError(/*Assume env won't change while in this screen*/)
             .flatMapPublisher { env ->
-                permissionSettings.flatMapSingle { permissionSettings ->
-                    generateQrCode(
+                permissionSettings
+                    .map { permissionSettings ->
                         buildPurchaseUrl(permissionContext, env, permissionSettings.orDefault(null))
-                    )
-                }
+                    }
+            }
+            // Make sure to not re-generate the QR code if the URL hasn't changed.
+            .distinctUntilChanged()
+            .switchMapSingle { fullUrl ->
+                // Try to shorten
+                urlShortener.shorten(fullUrl)
+                    // Fall back to full URL if shortening fails
+                    .onErrorReturnItem(fullUrl)
+            }
+            .switchMapSingle { url ->
+                // Generate QR for whatever URL we have
+                generateQrCode(url)
             }
             .subscribeBy(
                 onNext = { updateState { copy(qrImage = it) } },
