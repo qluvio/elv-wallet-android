@@ -25,9 +25,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,7 +50,9 @@ import app.eluvio.wallet.theme.EluvioThemePreview
 import app.eluvio.wallet.theme.carousel_36
 import app.eluvio.wallet.theme.carousel_48
 import app.eluvio.wallet.theme.label_24
+import app.eluvio.wallet.theme.label_40
 import app.eluvio.wallet.theme.title_62
+import app.eluvio.wallet.util.compose.BooleanParameterProvider
 import app.eluvio.wallet.util.compose.RealisticDevices
 import app.eluvio.wallet.util.compose.requestInitialFocus
 import app.eluvio.wallet.util.subscribeToState
@@ -80,30 +84,37 @@ private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
+        val title: String
+        val subtitle: String
+        val subtitleStyle: TextStyle
+        val buttonText: String
         if (state.complete) {
-            Text(
-                text = "Success",
-                style = MaterialTheme.typography.title_62,
-                modifier = Modifier.padding(bottom = 18.dp)
-            )
-            Text(
-                text = "Return to the property to enjoy your media.",
-                style = MaterialTheme.typography.label_24.copy(fontSize = 14.sp),
-                modifier = Modifier.padding(bottom = 18.dp)
-            )
-            val navigator = LocalNavigator.current
-            TvButton(
-                text = "Continue to Property",
-                onClick = { navigator(NavigationEvent.GoBack) },
-                modifier = Modifier.requestInitialFocus()
-            )
+            title = "Success"
+            subtitle = "Return to the property to enjoy your media."
+            subtitleStyle = MaterialTheme.typography.label_24.copy(fontSize = 14.sp)
+            buttonText = "Continue to Property"
         } else {
-            Text(
-                text = "Sign In On Browser to Purchase",
-                style = MaterialTheme.typography.title_62,
-                modifier = Modifier.padding(bottom = 18.dp)
-            )
-            Box(Modifier.heightIn(min = 250.dp)) {
+            title = "Sign In On Browser to Purchase"
+            subtitle = state.purchaseUrl ?: ""
+            subtitleStyle = MaterialTheme.typography.label_40.copy(fontSize = 26.sp)
+            buttonText = "Back"
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.title_62,
+            modifier = Modifier.padding(bottom = 18.dp)
+        )
+        Text(
+            text = subtitle,
+            style = subtitleStyle,
+            modifier = Modifier.padding(bottom = 18.dp)
+        )
+        if (!state.complete) {
+            Box(
+                Modifier
+                    .padding(bottom = 27.dp)
+                    .heightIn(min = 250.dp)
+            ) {
                 when {
                     // Disabled for now, but you know how UX be.
                     // state.media != null -> MediaPurchaseCard(state.media, state.qrImage)
@@ -119,6 +130,12 @@ private fun PurchasePrompt(state: PurchasePromptViewModel.State) {
                 }
             }
         }
+        val navigator = LocalNavigator.current
+        TvButton(
+            text = buttonText,
+            onClick = { navigator(NavigationEvent.GoBack) },
+            modifier = Modifier.requestInitialFocus()
+        )
     }
 }
 
@@ -276,20 +293,14 @@ private fun MediaPurchaseCard(media: MediaEntity, qrImage: Bitmap?) {
 
 @Composable
 @Preview(device = RealisticDevices.TV_720p)
-private fun PagePurchasePromptPreview() = EluvioThemePreview {
-    PurchasePrompt(
-        PurchasePromptViewModel.State(
-            qrImage = generateQrCodeBlocking("http://eluv.io")
+private fun PagePurchasePromptPreview(@PreviewParameter(BooleanParameterProvider::class) complete: Boolean) =
+    EluvioThemePreview {
+        val url = "https://elv.lv/blep"
+        PurchasePrompt(
+            PurchasePromptViewModel.State(
+                purchaseUrl = url,
+                qrImage = generateQrCodeBlocking(url),
+                complete = complete
+            )
         )
-    )
-}
-
-@Composable
-@Preview(device = RealisticDevices.TV_720p)
-private fun PurchaseCompletePreview() = EluvioThemePreview {
-    PurchasePrompt(
-        PurchasePromptViewModel.State(
-            complete = true
-        )
-    )
-}
+    }

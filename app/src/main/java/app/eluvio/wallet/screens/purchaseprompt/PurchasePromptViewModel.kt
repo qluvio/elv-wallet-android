@@ -14,7 +14,6 @@ import app.eluvio.wallet.data.permissions.PermissionContextResolver
 import app.eluvio.wallet.data.stores.Environment
 import app.eluvio.wallet.data.stores.EnvironmentStore
 import app.eluvio.wallet.data.stores.MediaPropertyStore
-import app.eluvio.wallet.navigation.asReplace
 import app.eluvio.wallet.navigation.onClickDirection
 import app.eluvio.wallet.screens.common.generateQrCode
 import app.eluvio.wallet.screens.destinations.PropertyDetailDestination
@@ -25,6 +24,7 @@ import app.eluvio.wallet.util.rx.Optional
 import app.eluvio.wallet.util.rx.asSharedState
 import app.eluvio.wallet.util.rx.mapNotNull
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.json.JSONArray
@@ -45,6 +45,7 @@ class PurchasePromptViewModel @Inject constructor(
     data class State(
         val media: MediaEntity? = null,
         val itemPurchase: ItemPurchase? = null,
+        val purchaseUrl: String? = null,
         val qrImage: Bitmap? = null,
         val bgImageUrl: FabricUrl? = null,
         val complete: Boolean = false,
@@ -102,9 +103,10 @@ class PurchasePromptViewModel @Inject constructor(
             .switchMapSingle { url ->
                 // Generate QR for whatever URL we have
                 generateQrCode(url)
+                    .map { it to url }
             }
             .subscribeBy(
-                onNext = { updateState { copy(qrImage = it) } },
+                onNext = { (qr, url) -> updateState { copy(purchaseUrl = url, qrImage = qr) } },
                 onError = { Log.e("Error generating QR code", it) }
             )
             .addTo(disposables)
